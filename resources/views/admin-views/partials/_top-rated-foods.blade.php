@@ -22,7 +22,7 @@
 <!-- Body -->
 <div class="card-body">
     <div class="rated--products">
-        @forelse($top_rated_foods as $key=>$item)
+        @foreach($top_rated_foods as $key=>$item)
             <a href="{{route('admin.item.view',[$item['id']])}}">
                 <div class="rated-media d-flex align-items-center">
                     <img
@@ -34,9 +34,9 @@
                         'product/'
                     ) }}"
 
-
+                   
                     class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/100x100/2.png')}}" alt="{{Str::limit($item->name??translate('messages.Item deleted!'),20,'...')}}">
-                    <span class="line--limit-1 w-0 flex-grow-1" title="{{ $item?->name }}">
+                    <span class="line--limit-1 w-0 flex-grow-1">
                         {{Str::limit($item->name??translate('messages.Item deleted!'),20,'...')}}
                     </span>
                     <div>
@@ -44,9 +44,7 @@
                     </div>
                 </div>
             </a>
-            @empty
-
-            @endforelse
+        @endforeach
     </div>
 </div>
 <!-- End Body -->

@@ -1,9 +1,5 @@
 <!DOCTYPE html>
-<?php
 
-$country=\App\Models\BusinessSetting::where('key','country')->first();
-$countryCode= strtolower($country?$country->value:'auto');
-?>
 <html dir="{{ session()->get('site_direction') }}" lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{session()->get('site_direction') === 'rtl'?'active':'' }}">
 <head>
     <meta charset="utf-8">
@@ -28,9 +24,6 @@ $countryCode= strtolower($country?$country->value:'auto');
     <link rel="stylesheet" href="{{asset('public/assets/admin/css/bootstrap-tour-standalone.min.css')}}">
     <link rel="stylesheet" href="{{asset('public/assets/admin/css/emogi-area.css')}}">
     <link rel="stylesheet" href="{{asset('public/assets/admin/css/style.css')}}">
-
-    <link rel="stylesheet" href="{{asset('public/assets/admin/intltelinput/css/intlTelInput.css')}}">
-
     @stack('css_or_js')
 
     <script src="{{asset('public/assets/admin/vendor/hs-navbar-vertical-aside/hs-navbar-vertical-aside-mini-cache.js')}}"></script>
@@ -640,51 +633,6 @@ $countryCode= strtolower($country?$country->value:'auto');
                 }
             })
         }
-</script>
-        <script src="{{asset('public/assets/admin/intltelinput/js/intlTelInput.min.js')}}"></script>
-
-        <script>
-
-    //     const input = document.querySelector('input[type="tel"]');
-    // const iti = window.intlTelInput(input, {
-    //     utilsScript: "",
-    //     initialCountry: "{{$countryCode}}",
-    //     autoInsertDialCode: true,
-    //     autoPlaceholder: 'polite',
-    //     // formatOnDisplay: true,
-    //     // placeholderNumberType: "MOBILE",
-    //     // separateDialCode: true,
-    //     // showSelectedDialCode: true,
-    //     // allowDropdown : true,
-    //     // hiddenInput: "phone"
-    // });
-
-    const inputs = document.querySelectorAll('input[type="tel"]');
-
-    inputs.forEach(input => {
-        window.intlTelInput(input, {
-            initialCountry: "{{$countryCode}}",
-            utilsScript: "{{ asset('public/assets/admin/intltelinput/js/utils.js') }}",
-            autoInsertDialCode: true,
-            nationalMode: false,
-            formatOnDisplay: false,
-        });
-    });
-
-
-  function keepNumbersAndPlus(inputString) {
-    let regex = /[0-9+]/g;
-    let filteredString = inputString.match(regex);
-    let result = filteredString ? filteredString.join('') : '';
-    return result;
-}
-
-$(document).on('keyup', 'input[type="tel"]', function () {
-        let input = $(this).val();
-        $(this).val(keepNumbersAndPlus(input));
-        });
-
-
 </script>
 
 <script>

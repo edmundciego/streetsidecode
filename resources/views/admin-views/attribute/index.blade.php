@@ -45,11 +45,7 @@
                                         <div class="form-group">
                                             <label class="input-label"
                                                 for="default_title">{{ translate('messages.name') }}
-                                                ({{translate('messages.default')}}) <span class="form-label-secondary text-danger"
-                                                data-toggle="tooltip" data-placement="right"
-                                                data-original-title="{{ translate('messages.Required.')}}"> *
-                                                </span>
-
+                                                ({{translate('messages.default')}})
                                             </label>
                                             <input type="text" name="name[]" id="default_title"
                                                 class="form-control" placeholder="{{ translate('messages.ex_:_new_attribute') }}"
@@ -108,11 +104,6 @@
                                 </div>
                                 <!-- End Search -->
                             </form>
-                            @if(request()->get('search'))
-                            <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
-                            @endif
-
-
                             <!-- Unfold -->
                             <div class="hs-unfold mr-2">
                                 <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
@@ -172,7 +163,7 @@
                                         </span>
                                     </td>
                                     <td class="text-center">
-                                        <span title="{{ $attribute['name'] }}" class="font-size-sm text-body mr-3">
+                                        <span class="font-size-sm text-body mr-3">
                                             {{Str::limit($attribute['name'],20,'...')}}
                                         </span>
                                     </td>
@@ -191,21 +182,21 @@
                             @endforeach
                             </tbody>
                         </table>
+                        @if(count($attributes) !== 0)
+                        <hr>
+                        @endif
+                        <div class="page-area">
+                            {!! $attributes->links() !!}
+                        </div>
+                        @if(count($attributes) === 0)
+                        <div class="empty--data">
+                            <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
+                            <h5>
+                                {{translate('no_data_found')}}
+                            </h5>
+                        </div>
+                        @endif
                     </div>
-                    @if(count($attributes) !== 0)
-                    <hr>
-                    @endif
-                    <div class="page-area">
-                        {!! $attributes->links() !!}
-                    </div>
-                    @if(count($attributes) === 0)
-                    <div class="empty--data">
-                        <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
-                        <h5>
-                            {{translate('no_data_found')}}
-                        </h5>
-                    </div>
-                    @endif
                 </div>
             </div>
             <!-- End Table -->

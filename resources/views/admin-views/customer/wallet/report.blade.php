@@ -1,19 +1,18 @@
-@php use App\CentralLogics\Helpers; @endphp
 @extends('layouts.admin.app')
 
 @section('title',translate('messages.customer_wallet_report'))
 
+@push('css_or_js')
+
+@endpush
+
 @section('content')
-    @php
-        $from = session('from_date');
-        $to = session('to_date');
-    @endphp
     <div class="content container-fluid">
         <!-- Page Header -->
         <div class="page-header">
             <h1 class="page-header-title mr-3">
                 <span class="page-header-icon">
-                    <img src="{{asset('/public/assets/admin/img/icons/wallet.png')}}" class="w--26" alt="">
+                    <img src="{{asset('/public/assets/admin/img/wallet.png')}}" class="w--26" alt="">
                 </span>
                 <span>
                      {{translate('messages.customer_wallet_report')}}
@@ -23,252 +22,123 @@
         <!-- End Page Header -->
 
         <div class="card">
-            <div class="card-body">
-                <h4 class="card-title mb-4">
+            <div class="card-header">
+                <h4 class="card-title">
+                    <span class="card-header-icon">
+                        <i class="tio-filter-outlined"></i>
+                    </span>
                     <span>{{translate('messages.filter_options')}}</span>
                 </h4>
-
-                <form action="{{route('admin.users.customer.wallet.set-date')}}" method="post">
-                    @csrf
-                    <div class="row justify-content-end align-items-end g-3">
-                        <div class="col-lg-4">
-                            <label class="text-dark text-capitalize"
-                                   for="add-fund-type">{{translate('messages.add_fund_type')}}</label>
+            </div>
+            <div class="card-body">
+                <form action="{{route('admin.users.customer.wallet.report')}}" method="get">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <input type="date" name="from" id="from_date" value="{{request()->get('from')}}" class="form-control" title="{{translate('messages.from_date')}}">
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="date" name="to" id="to_date" value="{{request()->get('to')}}" class="form-control" title="{{translate('messages.to_date')}}">
+                        </div>
+                        <div class="col-sm-6">
                             @php
-                                $transaction_status=request()->get('transaction_type');
+                            $transaction_status=request()->get('transaction_type');
                             @endphp
-                            <select name="transaction_type" id="add-fund-type" data-url="{{ url()->full() }}"
-                                    data-filter="transaction_type" class="form-control set-filter js-select2-custom"
-                                    title="{{translate('messages.select_transaction_type')}}">
-                                <option value="all">{{translate('messages.All_transactions')}}</option>
-                                <option
-                                    value="add_fund_by_admin" {{isset($transaction_status) && $transaction_status=='add_fund_by_admin'?'selected':''}} >{{translate('messages.add_fund_by_admin')}}</option>
-                                <option
-                                    value="add_fund" {{isset($transaction_status) && $transaction_status=='add_fund'?'selected':''}}>{{translate('messages.add_fund_by_customer')}}</option>
-                                <option
-                                    value="order_refund" {{isset($transaction_status) && $transaction_status=='order_refund'?'selected':''}}>{{translate('messages.refund_order')}}</option>
-                                <option
-                                    value="loyalty_point" {{isset($transaction_status) && $transaction_status=='loyalty_point'?'selected':''}}>{{translate('messages.customer_loyalty_point')}}</option>
-                                <option
-                                    value="order_place" {{isset($transaction_status) && $transaction_status=='order_place'?'selected':''}}>{{translate('messages.order_place')}}</option>
+                            <select name="transaction_type" id="" class="form-control" title="{{translate('messages.select_transaction_type')}}">
+                                <option value="">{{translate('messages.all')}}</option>
+                                <option value="add_fund_by_admin" {{isset($transaction_status) && $transaction_status=='add_fund_by_admin'?'selected':''}} >{{translate('messages.add_fund_by_admin')}}</option>
+                                <!-- <option value="add_fund" {{isset($transaction_status) && $transaction_status=='add_fund'?'selected':''}}>{{translate('messages.add_fund_by_customer')}}</option> -->
+                                <option value="order_refund" {{isset($transaction_status) && $transaction_status=='order_refund'?'selected':''}}>{{translate('messages.refund_order')}}</option>
+                                <option value="loyalty_point" {{isset($transaction_status) && $transaction_status=='loyalty_point'?'selected':''}}>{{translate('messages.customer_loyalty_point')}}</option>
+                                <option value="order_place" {{isset($transaction_status) && $transaction_status=='order_place'?'selected':''}}>{{translate('messages.order_place')}}</option>
                             </select>
                         </div>
-                        <div class="col-lg-4">
-                            <label class="text-dark text-capitalize"
-                                   for="customer">{{translate('messages.customer')}}</label>
-                            <select id='customer' name="customer_id" data-url="{{ url()->full() }}"
-                                    data-filter="customer_id"
-                                    data-placeholder="{{translate('messages.select_customer')}}"
-                                    class="js-data-example-ajax form-control set-filter"
-                                    title="{{translate('messages.select_customer')}}">
+                        <div class="col-sm-6">
+                            <select id='customer' name="customer_id" data-placeholder="{{translate('messages.select_customer')}}" class="js-data-example-ajax form-control" title="{{translate('messages.select_customer')}}">
                                 @if (request()->get('customer_id') && $customer_info = \App\Models\User::find(request()->get('customer_id')))
-                                    <option value="{{$customer_info->id}}"
-                                            selected>{{$customer_info->f_name.' '.$customer_info->l_name}}
-                                        ({{$customer_info->phone}})
-                                    </option>
+                                    <option value="{{$customer_info->id}}" selected>{{$customer_info->f_name.' '.$customer_info->l_name}}({{$customer_info->phone}})</option>
                                 @endif
                             </select>
                         </div>
-                        <div class="col-lg-4">
-                            <label class="text-dark text-capitalize"
-                                   for="filter">{{translate('messages.duration')}}</label>
-                            <select class="form-control set-filter js-select2-custom" name="filter"
-                                    data-url="{{ url()->full() }}" data-filter="filter">
-                                <option
-                                    value="all_time" {{ isset($filter) && $filter == 'all_time' ? 'selected' : '' }}>
-                                    {{ translate('messages.All Time') }}</option>
-                                <option
-                                    value="this_year" {{ isset($filter) && $filter == 'this_year' ? 'selected' : '' }}>
-                                    {{ translate('messages.This Year') }}</option>
-                                <option value="previous_year"
-                                    {{ isset($filter) && $filter == 'previous_year' ? 'selected' : '' }}>
-                                    {{ translate('messages.Previous Year') }}</option>
-                                <option value="this_month"
-                                    {{ isset($filter) && $filter == 'this_month' ? 'selected' : '' }}>
-                                    {{ translate('messages.This Month') }}</option>
-                                <option
-                                    value="this_week" {{ isset($filter) && $filter == 'this_week' ? 'selected' : '' }}>
-                                    {{ translate('messages.This Week') }}</option>
-                                <option value="custom" {{ isset($filter) && $filter == 'custom' ? 'selected' : '' }}>
-                                    {{ translate('messages.Custom') }}</option>
-                            </select>
-                        </div>
-                        @if (isset($filter) && $filter == 'custom')
-                            <div class="col-lg-4">
-
-                                <input type="date" name="from" id="from_date" class="form-control"
-                                       placeholder="{{ translate('Start Date') }}"
-                                       {{ session()->has('from_date') ? 'value=' . session('from_date') : '' }} required>
-
-                            </div>
-                            <div class="col-lg-4">
-
-                                <input type="date" name="to" id="to_date" class="form-control"
-                                       placeholder="{{ translate('End Date') }}"
-                                       {{ session()->has('to_date') ? 'value=' . session('to_date') : '' }} required>
-
-                            </div>
-                        @endif
-                        <div class="col-lg-4">
+                        <div class="col-12">
                             <div class="btn--container justify-content-end">
-                                <button type="reset" class="btn btn--reset location-reload-to-base"
-                                        data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
-                                <button type="submit" class="btn btn--primary">{{translate('messages.filter')}}</button>
+                                <button type="reset" class="btn btn--reset">{{translate('messages.reset')}}</button>
+                                <button type="submit" class="btn btn--primary"><i class="tio-filter-list mr-1"></i>{{translate('messages.filter')}}</button>
                             </div>
                         </div>
                     </div>
                 </form>
             </div>
+
         </div>
-
         <div class="card mt-3">
+            <div class="card-header">
+                <h4 class="card-title">
+                    <span class="card-header-icon">
+                        <i class="tio-document-text-outlined"></i>
+                    </span>
+                    <span>{{translate('messages.summary')}}</span>
+                </h4>
+            </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-lg-8">
-                        <div class="row g-3 h-100">
-                            @php
-                                $credit = $data[0]->total_credit;
-                                $debit = $data[0]->total_debit;
-                                $add_fund_total = $data[0]->add_fund_total;
-                                $order_refund_total = $data[0]->order_refund_total;
-                                $loyalty_point_total = $data[0]->loyalty_point_total;
-                                $order_place_total = $data[0]->total_debit;
-                                $balance = $credit - $debit;
-                            @endphp
-
-                                <!--Debit earned-->
-                            <div class="col-6">
-                                <div
-                                    class="color-card flex-column align-items-center justify-content-center color-6 h-100">
-                                    <div class="img-box">
-                                        <img class="resturant-icon w--30"
-                                             src="{{asset('public/assets/admin/img/customer-loyality/1.png')}}"
-                                             alt="dashboard">
-                                    </div>
-                                    <div class="d-flex flex-column align-items-center">
-                                        <h2 class="title"> {{Helpers::format_currency($debit)}} </h2>
-                                        <div class="subtitle">{{translate('messages.debit')}}</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!--Debit earned End-->
-
-                            <!--credit earned-->
-                            <div class="col-6">
-                                <div
-                                    class="color-card flex-column align-items-center justify-content-center color-4 h-100">
-                                    <div class="img-box">
-                                        <img class="resturant-icon w--30"
-                                             src="{{asset('public/assets/admin/img/customer-loyality/2.png')}}"
-                                             alt="dashboard">
-                                    </div>
-                                    <div class="d-flex flex-column align-items-center">
-                                        <h2 class="title"> {{Helpers::format_currency($credit)}} </h2>
-                                        <div class="subtitle">{{translate('messages.credit')}}</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!--credit earned end-->
-
-                            <!--balance earned-->
-{{--                            <div class="col-sm-4">--}}
-{{--                                <div--}}
-{{--                                    class="color-card flex-column align-items-center justify-content-center color-2 h-100">--}}
-{{--                                    <div class="img-box">--}}
-{{--                                        <img class="resturant-icon w--30"--}}
-{{--                                             src="{{asset('public/assets/admin/img/customer-loyality/3.png')}}"--}}
-{{--                                             alt="dashboard">--}}
-{{--                                    </div>--}}
-{{--                                    <div class="d-flex flex-column align-items-center">--}}
-{{--                                        <h2 class="title">{{Helpers::format_currency($balance)}} </h2>--}}
-{{--                                        <div class="subtitle">{{translate('messages.balance')}}</div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-                            <!--balance earned end-->
+                <div class="row g-3">
+                    @php
+                        $credit = $data[0]->total_credit;
+                        $debit = $data[0]->total_debit;
+                        $balance = $credit - $debit;
+                    @endphp
+                    <!--Debit earned-->
+                    <div class="col-sm-4">
+                        <div class="resturant-card dashboard--card card--bg-1">
+                            <h4 class="title">{{translate('messages.debit')}}</h4>
+                            <span class="subtitle">
+                                {{\App\CentralLogics\Helpers::format_currency($debit)}}
+                            </span>
+                            <img class="resturant-icon" src="{{asset('public/assets/admin/img/customer-loyality/1.png')}}" alt="dashboard">
                         </div>
                     </div>
-                    <div class="col-lg-4">
-                        <div class="card">
-                            <div class="card-body" id="fund-statistics-board">
-                                <h5 class="text-center text-capitalize">{{translate('messages.fund_statistics')}}</h5>
-                                <div class="position-relative pie-chart">
-                                    <div id="doughnut-pie"></div>
-                                    <!-- Total Orders -->
-                                    <div class="total--orders">
-                                        <h4 class="text-uppercase mb-1">{{Helpers::number_format_short($add_fund_total+$order_refund_total+$loyalty_point_total+$order_place_total)}}</h4>
-                                        <span class="text-capitalize">{{translate('messages.total')}}</span>
-                                    </div>
-                                    <!-- Total Orders -->
-                                </div>
-                                <div class="d-flex flex-wrap justify-content-center mt-4">
-                                    <div class="chart--label">
-                                        <span class="indicator chart-bg-1"></span>
-                                        <span class="info">
-                                            {{translate('messages.Fund added by Admin')}} ({{Helpers::format_currency($add_fund_total)}})
-                                        </span>
-                                    </div>
-                                    <div class="chart--label">
-                                        <span class="indicator chart-bg-3"></span>
-                                        <span class="info">
-                                            {{translate('messages.Order Refund')}} ({{Helpers::format_currency($order_refund_total)}})
-                                        </span>
-                                    </div>
-                                    <div class="chart--label">
-                                        <span class="indicator chart-bg-1"></span>
-                                        <span class="info">
-                                            {{translate('messages.Loyalty Point')}} ({{Helpers::format_currency($loyalty_point_total)}})
-                                        </span>
-                                    </div>
-                                    <div class="chart--label">
-                                        <span class="indicator chart-bg-3"></span>
-                                        <span class="info">
-                                            {{translate('messages.Order place')}} ({{Helpers::format_currency($order_place_total)}})
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                    <!--Debit earned End-->
+                    <!--credit earned-->
+                    <div class="col-sm-4">
+                        <div class="resturant-card dashboard--card card--bg-2">
+                            <h4 class="title">{{translate('messages.credit')}}</h4>
+                            <span class="subtitle">
+                                {{\App\CentralLogics\Helpers::format_currency($credit)}}
+                            </span>
+                            <img class="resturant-icon" src="{{asset('public/assets/admin/img/customer-loyality/2.png')}}" alt="dashboard">
                         </div>
                     </div>
+                    <!--credit earned end-->
+                    <!--balance earned-->
+                    <div class="col-sm-4">
+                        <div class="resturant-card dashboard--card card--bg-3">
+                            <h4 class="title">{{translate('messages.balance')}}</h4>
+                            <span class="subtitle">
+                                {{\App\CentralLogics\Helpers::format_currency($balance)}}
+                            </span>
+                            <img class="resturant-icon" src="{{asset('public/assets/admin/img/customer-loyality/3.png')}}" alt="dashboard">
+                        </div>
+                    </div>
+                    <!--balance earned end-->
                 </div>
             </div>
+
         </div>
 
+        <!-- End Stats -->
         <!-- Card -->
         <div class="card mt-3">
             <!-- Header -->
-            <div class="card-header flex-wrap gap-3 border-0">
-                <div class="search--button-wrapper">
-                    <h5 class="card-title">
-                        <span class="card-header-icon">
-                            <i class="tio-dollar-outlined"></i>
-                        </span>
-                        {{translate('transactions')}} &nbsp;
-                        <span class="badge badge-soft-secondary"> {{ $transactions->total() }}</span>
-                    </h5>
-
-                    <div class="min--260">
-                        <form action="{{ route('admin.users.customer.wallet.report') }}" method="get"
-                              class="search-form theme-style">
-                            <div class="input-group input--group">
-                                <input type="search" name="search" class="form-control"
-                                       placeholder="{{translate('ex_: search_by_customer_name')}}"
-                                       aria-label="{{translate('messages.search')}}" value="{{request()?->search}}">
-                                <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
-                            </div>
-                        </form>
-
-                    </div>
-                    @if(request()->get('search'))
-                        <button type="reset" class="btn btn--primary ml-2 location-reload-to-base"
-                                data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
-                    @endif
-                </div>
+            <div class="card-header border-0">
+                <h4 class="card-title">
+                    <span class="card-header-icon">
+                        <i class="tio-dollar-outlined"></i>
+                    </span>
+                    <span>{{translate('messages.transactions')}}</span>
+                </h4>
                 <!-- Unfold -->
-                <div class="hs-unfold">
-                    <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40"
-                       href="javascript:;"
-                       data-hs-unfold-options='{
+                <div class="hs-unfold mr-2">
+                    <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
+                        data-hs-unfold-options='{
                                 "target": "#usersExportDropdown",
                                 "type": "css-animation"
                             }'>
@@ -276,22 +146,26 @@
                     </a>
 
                     <div id="usersExportDropdown"
-                         class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
+                        class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
                         <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
-                        <a id="export-excel" class="dropdown-item"
-                           href="{{route('admin.users.customer.wallet.export', ['type'=>'excel',request()->getQueryString()])}}">
+                        <a id="export-excel" class="dropdown-item" href="{{route('admin.users.customer.wallet.export', ['type'=>'excel',request()->getQueryString()])}}">
                             <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                 src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
-                                 alt="Image Description">
+                                src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
+                                alt="Image Description">
                             {{ translate('messages.excel') }}
                         </a>
-                        <a id="export-csv" class="dropdown-item"
-                           href="{{route('admin.users.customer.wallet.export', ['type'=>'csv',request()->getQueryString()])}}">
+                        <a id="export-csv" class="dropdown-item" href="{{route('admin.users.customer.wallet.export', ['type'=>'csv',request()->getQueryString()])}}">
                             <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                 src="{{ asset('public/assets/admin') }}/svg/components/placeholder-csv-format.svg"
-                                 alt="Image Description">
+                                src="{{ asset('public/assets/admin') }}/svg/components/placeholder-csv-format.svg"
+                                alt="Image Description">
                             .{{ translate('messages.csv') }}
                         </a>
+                        {{-- <a id="export-pdf" class="dropdown-item" href="javascript:;">
+                            <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                src="{{ asset('public/assets/admin') }}/svg/components/pdf.svg"
+                                alt="Image Description">
+                            {{ translate('messages.pdf') }}
+                        </a> --}}
                     </div>
                 </div>
                 <!-- End Unfold -->
@@ -302,34 +176,32 @@
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table id="datatable"
-                           class="table table-thead-bordered table-align-middle card-table table-nowrap">
+                        class="table table-thead-bordered table-align-middle card-table table-nowrap">
                         <thead class="thead-light">
-                        <tr>
-                            <th class="border-0">{{translate('sl')}}</th>
-                            <th class="border-0">{{translate('messages.transaction_id')}}</th>
-                            <th class="border-0">{{translate('messages.customer_info')}}</th>
-                            <th class="border-0">{{translate('messages.credit')}}</th>
-                            <th class="border-0">{{translate('messages.debit')}}</th>
-                            <th class="border-0">{{translate('messages.bonus')}}</th>
-                            <th class="border-0">{{translate('messages.balance')}}</th>
-                            <th class="border-0">{{translate('messages.transaction_type')}}</th>
-                            <th class="border-0">{{translate('messages.reference')}}</th>
-                            <!-- <th>{{translate('messages.admin_bonus')}}</th> -->
-                            <th class="border-0">{{translate('messages.created_at')}}</th>
-                        </tr>
+                            <tr>
+                                <th class="border-0">{{translate('sl')}}</th>
+                                <th class="border-0">{{translate('messages.transaction_id')}}</th>
+                                <th class="border-0">{{translate('messages.customer')}}</th>
+                                <th class="border-0">{{translate('messages.credit')}}</th>
+                                <th class="border-0">{{translate('messages.debit')}}</th>
+                                <th class="border-0">{{translate('messages.bonus')}}</th>
+                                <th class="border-0">{{translate('messages.balance')}}</th>
+                                <th class="border-0">{{translate('messages.transaction_type')}}</th>
+                                <th class="border-0">{{translate('messages.reference')}}</th>
+                                <!-- <th>{{translate('messages.admin_bonus')}}</th> -->
+                                <th class="border-0">{{translate('messages.created_at')}}</th>
+                            </tr>
                         </thead>
                         <tbody>
                         @foreach($transactions as $k=>$wt)
                             <tr scope="row">
-                                <td>{{$k+$transactions->firstItem()}}</td>
+                                <td >{{$k+$transactions->firstItem()}}</td>
                                 <td>{{$wt->transaction_id}}</td>
-                                <td title="{{$wt?->user?->f_name.' '.$wt?->user?->l_name}}"><a class="text-dark"
-                                                                                               href="{{route('admin.users.customer.view',['user_id'=>$wt->user_id])}}">{{Str::limit($wt->user?$wt->user->f_name.' '.$wt->user->l_name:translate('messages.not_found'),20,'...')}}</a>
-                                </td>
-                                <td>{{Helpers::format_currency($wt->credit)}}</td>
-                                <td>{{Helpers::format_currency($wt->debit)}}</td>
-                                <td>{{Helpers::format_currency($wt->admin_bonus)}}</td>
-                                <td>{{Helpers::format_currency($wt->balance)}}</td>
+                                <td><a href="{{route('admin.users.customer.view',['user_id'=>$wt->user_id])}}">{{Str::limit($wt->user?$wt->user->f_name.' '.$wt->user->l_name:translate('messages.not_found'),20,'...')}}</a></td>
+                                <td>{{$wt->credit}}</td>
+                                <td>{{$wt->debit}}</td>
+                                <td>{{$wt->admin_bonus}}</td>
+                                <td>{{$wt->balance}}</td>
                                 <td>
                                     <span class="badge badge-soft-{{$wt->transaction_type=='order_refund'
                                         ?'danger'
@@ -341,12 +213,11 @@
                                         {{ translate('messages.'.$wt->transaction_type)}}
                                     </span>
                                 </td>
-                                <td class="text-capitalize"> {{  $wt->reference? str_replace('_' , ' ',$wt->reference) : translate('messages.N/A') }}</td>
-
+                                <td>{{$wt->reference}}</td>
+                                <!-- <td>{{$wt->admin_bonus}}</td> -->
                                 <td>
-                                    <span class="d-block">{{Helpers::date_format($wt['created_at'])}}</span>
-                                    <span
-                                        class="d-block">{{Helpers::time_format($wt['created_at'])}}</span>
+                                    <span class="d-block">{{date('d-m-Y',strtotime($wt['created_at']))}}</span>
+                                    <span class="d-block">{{date(config('timeformat'),strtotime($wt['created_at']))}}</span>
                                 </td>
                             </tr>
                         @endforeach
@@ -356,18 +227,18 @@
             </div>
             <!-- End Body -->
             @if(count($transactions) !== 0)
-                <hr>
+            <hr>
             @endif
             <div class="page-area">
                 {!! $transactions->withQueryString()->links() !!}
             </div>
             @if(count($transactions) === 0)
-                <div class="empty--data">
-                    <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
-                    <h5>
-                        {{translate('no_data_found')}}
-                    </h5>
-                </div>
+            <div class="empty--data">
+                <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
+                <h5>
+                    {{translate('no_data_found')}}
+                </h5>
+            </div>
             @endif
         </div>
         <!-- End Card -->
@@ -375,57 +246,11 @@
 @endsection
 
 @push('script')
-    <!-- Apex Charts -->
-    <script src="{{asset('/public/assets/admin/js/apex-charts/apexcharts.js')}}"></script>
-    <!-- Apex Charts -->
-@endpush
 
-@push('script')
-    <script>
-        "use strict";
-        let options;
-        let chart;
-        options = {
-            series: [{{$add_fund_total}}, {{$order_refund_total}}, {{$loyalty_point_total}}, {{$order_place_total}}],
-            chart: {
-                width: 180,
-                type: 'donut',
-            },
-            labels: [
-                '{{ translate('Admin Add Fund') }}',
-                '{{ translate('Order Refund') }}',
-                '{{ translate('Loyalty Point') }}',
-                '{{ translate('Order place') }}'
-            ],
-            dataLabels: {
-                enabled: false,
-                style: {
-                    colors: ['#0F4A4A', '#3F6E6E', '#6F9292', '#9FB7B7']
-                }
-            },
-            // responsive: [{
-            //     breakpoint: 1650,
-            //     options: {
-            //         chart: {
-            //             width: 250
-            //         },
-            //     }
-            // }],
-            colors: ['rgba(0, 0, 0, 0.90)'],
-            fill: {
-                colors: ['#0F4A4A', '#3F6E6E', '#6F9292', '#9FB7B7']
-            },
-            legend: {
-                show: false
-            },
-        };
-
-        chart = new ApexCharts(document.querySelector("#doughnut-pie"), options);
-        chart.render();
-    </script>
 @endpush
 
 @push('script_2')
+
     <script src="{{asset('public/assets/admin')}}/vendor/chart.js/dist/Chart.min.js"></script>
     <script
         src="{{asset('public/assets/admin')}}/vendor/chartjs-chart-matrix/dist/chartjs-chart-matrix.min.js"></script>
@@ -439,13 +264,13 @@
                     data: function (params) {
                         return {
                             q: params.term, // search term
-                            all: true,
+                            all:true,
                             page: params.page
                         };
                     },
                     processResults: function (data) {
                         return {
-                            results: data
+                        results: data
                         };
                     },
                     __port: function (params, success, failure) {

@@ -110,7 +110,7 @@ class CategoryController extends BaseController
         $category = $this->categoryRepo->update(id: $id, data: $this->categoryService->getUpdateData(request: $request, object: $mainCategory));
         $this->translationRepo->updateByModel(request: $request, model: $category, modelPath: 'App\Models\Category', attribute: 'name');
         Toastr::success(translate('messages.category_updated_successfully'));
-        return redirect()->route('admin.category.add',['position' => $mainCategory->position]);
+        return back();
     }
 
     public function delete(Request $request): RedirectResponse

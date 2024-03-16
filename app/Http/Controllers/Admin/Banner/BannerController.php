@@ -40,7 +40,6 @@ class BannerController extends BaseController
         $banners = $this->bannerRepo->getListWhere(
             filters: ['module_id'=>Config::get('module.current_module_id'), 'created_by'=>'admin'],
             relations: ['module'],
-            searchValue: request()->search,
             dataLimit: config('default_pagination')
         );
         $language = getWebConfig('language');

@@ -1093,12 +1093,10 @@
                                 @if ($proof)
 
                                 @foreach ($proof as $key => $photo)
-                                            <div class="spartan_item_wrapper min-w-176px max-w-176px">
+                                            <div class="spartan_item_wrapper min-w-100px max-w-100px">
                                                 <img class="img--square"
                                                     src="{{ asset("storage/app/public/order/$photo") }}"
                                                     alt="order image">
-
-                                                <div class="pen spartan_remove_row"><i class="tio-edit"></i></div>
                                                 <a href="{{ route('vendor.order.remove-proof-image', ['id' => $order['id'], 'name' => $photo]) }}"
                                                     class="spartan_remove_row"><i class="tio-add-to-trash"></i></a>
                                             </div>
@@ -1298,12 +1296,12 @@
             $("#coba").spartanMultiImagePicker({
                 fieldName: 'order_proof[]',
                 maxCount: 6-{{ ($order->order_proof && is_array($order->order_proof))?count(json_decode($order->order_proof)):0 }},
-                rowHeight: '176px !important',
-                groupClassName: 'spartan_item_wrapper min-w-176px max-w-176px',
+                rowHeight: '100px !important',
+                groupClassName: 'spartan_item_wrapper min-w-100px max-w-100px',
                 maxFileSize: '',
                 placeholderImage: {
-                    image: "{{ asset('public/assets/admin/img/upload-img.png') }}",
-                    width: '176px'
+                    image: "{{ asset('public/assets/admin/img/upload.png') }}",
+                    width: '100px'
                 },
                 dropFileLabel: "Drop Here",
                 onAddRow: function(index, file) {

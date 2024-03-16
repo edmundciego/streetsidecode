@@ -30,33 +30,31 @@
             if (Config::get('module.current_module_type') == 'pharmacy'){
                 $pharmacy =1;
             }
-            @endphp
+        @endphp
         <!-- End Page Header -->
         <div class="card mb-3">
             <!-- Header -->
             <div class="card-header py-2 border-0">
                 <h1>{{ translate('search_data') }}</h1>
             </div>
-
-            <div class="row mr-1 ml-2 mb-2">
+            <div class="row mr-1 ml-2 mb-5">
                 <div class="col-sm-6 col-md-3">
                     <div class="select-item">
                         <select name="store_id" id="store" data-url="{{url()->full()}}" data-placeholder="{{translate('messages.select_store')}}" class="js-data-example-ajax form-control store-filter" required title="Select Store" oninvalid="this.setCustomValidity('{{translate('messages.please_select_store')}}')">
                             @if($store)
-                            <option value="{{$store->id}}" selected>{{$store->name}}</option>
+                                <option value="{{$store->id}}" selected>{{$store->name}}</option>
                             @else
-                            <option value="all" selected>{{translate('messages.all_stores')}}</option>
+                                <option value="all" selected>{{translate('messages.all_stores')}}</option>
                             @endif
                         </select>
                     </div>
                 </div>
-
                 <div class="col-sm-6 col-md-3">
                     @if(!isset(auth('admin')->user()->zone_id))
                         <div class="select-item">
                             <select name="zone_id" class="form-control js-select2-custom set-filter"
                                     data-url="{{url()->full()}}" data-filter="zone_id">
-                                <option value="all" {{!request('zone_id')?'selected':''}}>{{ translate('messages.All_Zones') }}</option>
+                                <option value="" {{!request('zone_id')?'selected':''}}>{{ translate('messages.All_Zones') }}</option>
                                 @foreach(\App\Models\Zone::orderBy('name')->get(['id','name']) as $z)
                                     <option
                                             value="{{$z['id']}}" {{request()?->zone_id == $z['id']?'selected':''}}>
@@ -85,11 +83,7 @@
                 <div class="col-sm-6 col-md-3">
                     <div class="select-item">
                         <select name="sub_category_id" class="form-control js-select2-custom set-filter" data-placeholder="{{ translate('messages.select_sub_category') }}" id="sub-categories" data-url="{{url()->full()}}" data-filter="sub_category_id">
-                            @if (count($sub_categories) == 0 && $category )
-                            <option selected>{{translate('messages.No_Subcategory')}}</option>
-                            @else
                             <option value="all" selected>{{translate('messages.all_sub_category')}}</option>
-                           @endif
                             @foreach($sub_categories as $z)
                                 <option
                                         value="{{$z['id']}}" {{ request()?->sub_category_id == $z['id']?'selected':''}}>
@@ -102,39 +96,6 @@
 
 
             </div>
-            <form  class="search-form" method="get" >
-            <div class="row mr-1 ml-2 mb-5">
-
-                <div class="col-sm-6 col-md-3">
-                    <div class="select-item">
-                        <select name="filter" class="form-control js-select2-custom set-filter"
-                        data-url="{{url()->full()}}" data-filter="filter">
-                            <option {{ !isset($filter)? 'selected' : '' }} >{{ translate('messages.All_Types') }}</option>
-                            <option value="pending" {{ isset($filter) && $filter == 'pending' ? 'selected' : '' }} >{{ translate('messages.pending') }}</option>
-                            <option value="rejected" {{ isset($filter) && $filter == 'rejected' ? 'selected' : '' }} >{{ translate('messages.rejected') }}</option>
-                            <option value="custom" {{ isset($filter) && $filter == 'custom' ? 'selected' : '' }} >{{ translate('messages.Custom_Date') }}</option>
-                        </select>
-                    </div>
-                </div>
-                @if (isset($filter) && $filter == 'custom')
-                <div class="col-sm-6 col-md-3">
-                    <input type="date" name="from" id="from_date" class="form-control"
-                        placeholder="{{ translate('Start Date') }}"
-                    value="{{ request()?->from ?? ''}}" required>
-                </div>
-                <div class="col-sm-6 col-md-3">
-                    <input type="date" name="to" id="to_date" class="form-control"
-                    placeholder="{{ translate('End Date') }}"
-                        value="{{ request()?->to ?? ''}}"  required>
-                    </div>
-                <div class="col-sm-6 col-md-3 ml-auto">
-                    <button type="submit"
-                        class="btn btn-primary btn-block h--45px">{{ translate('Filter') }}</button>
-                    </div>
-                    @endif
-
-                </div>
-            </form>
 
         </div>
         <!-- Card -->
@@ -151,9 +112,6 @@
                         </div>
                         <!-- End Search -->
                     </form>
-                    @if(request()->get('search'))
-                    <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
-                    @endif
                     <!-- Unfold -->
                     <div class="hs-unfold mr-2">
                         <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
@@ -230,7 +188,7 @@
                             <td>
                                 <a class="media align-items-center" href="{{route('admin.item.requested_item_view',['id'=> $item['id']])}}">
                                     <img class="avatar avatar-lg mr-3 onerror-image"
-
+                                    
                                     src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
                                         $item['image'] ?? '',
                                         asset('storage/app/public/product').'/'.$item['image'] ?? '',
@@ -404,7 +362,6 @@
                 data: function (params) {
                     return {
                         q: params.term, // search term
-                        all:true,
                         module_id:{{Config::get('module.current_module_id')}},
                         page: params.page
                     };
@@ -495,21 +452,5 @@
                     allowOutsideClick: () => !Swal.isLoading()
                 })
         })
-
-        $('#from_date,#to_date').change(function() {
-    let fr = $('#from_date').val();
-    let to = $('#to_date').val();
-    if (fr != '' && to != '') {
-        if (fr > to) {
-            $('#from_date').val('');
-            $('#to_date').val('');
-            toastr.error('Invalid date range!', Error, {
-                CloseButton: true,
-                ProgressBar: true
-            });
-        }
-    }
-
-})
     </script>
 @endpush

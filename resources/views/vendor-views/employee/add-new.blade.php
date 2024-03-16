@@ -65,7 +65,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="card h-100">
-                                <div class="card-body d-flex flex-column upload-img-3">
+                                <div class="card-body d-flex flex-column">
                                     <h5 class="form-label text-center mb-3">
                                         {{ translate('messages.employee_image') }}
                                         <span class="text-danger">{{ translate('messages.Ratio (1:1)') }}</span>
@@ -182,9 +182,5 @@
         $('#reset_btn').click(function() {
             $('#viewer').attr('src', '{{ asset('public/assets/admin/img/160x160/img1.jpg') }}');
         })
-        $("#customFileUpload").change(function () {
-    readURL(this, 'viewer');
-});
-
     </script>
 @endpush

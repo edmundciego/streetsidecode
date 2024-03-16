@@ -166,9 +166,6 @@
                     @endforeach
                     </tbody>
                 </table>
-
-            </div>
-            <!-- End Table -->
                 @if(count($stores) !== 0)
                 <hr>
                 @endif
@@ -183,6 +180,9 @@
                     </h5>
                 </div>
                 @endif
+
+            </div>
+            <!-- End Table -->
         </div>
         <!-- End Card -->
     </div>

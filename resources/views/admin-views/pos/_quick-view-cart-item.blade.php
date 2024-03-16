@@ -11,10 +11,6 @@
             <span
                 class="badge badge-{{ $product->veg ? 'success' : 'danger' }} position-absolute">{{ $product->veg ? translate('messages.veg') : translate('messages.non_veg') }}</span>
         @endif
-        @if (isset($stock) && $stock == 0)
-        <span class="badge badge-danger position-absolute">{{ translate('messages.Out_of_Stock') }}</span>
-        @endif
-
         <!-- Product gallery-->
         <div class="d-flex align-items-center justify-content-center active">
             <img class="img-responsive initial--30 onerror-image"
@@ -23,7 +19,7 @@
                 asset('storage/app/public/product').'/'.$product['image'] ?? '',
                 asset('public/assets/admin/img/160x160/img2.jpg'),
                 'product/'
-            ) }}"
+            ) }}" 
                 data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
                 data-zoom="{{ asset('storage/app/public/product') }}/{{ $product['image'] }}" alt="Product image"
                 width="">
@@ -138,16 +134,14 @@
                     @endif
                 @else
                     @foreach (json_decode($product->choice_options) as $choice)
-
-
                         <div class="h3 p-0 pt-2">{{ $choice->title }}
                         </div>
 
                         <div class="d-flex justify-content-left flex-wrap">
                             @foreach ($choice->options as $option)
-                                <input class="btn-check item-stock-view-update" type="radio" id="{{ $choice->name }}-{{ $option }}"
+                                <input class="btn-check" type="radio" id="{{ $choice->name }}-{{ $option }}"
                                     name="{{ $choice->name }}" value="{{ $option }}"
-                                    {{ isset($selected_item) && array_key_exists($choice->name, $selected_item) && ltrim($option)  == $selected_item[$choice?->name] ? 'checked' : (trim($option) == $cart_item[$choice->name]  && !isset($selected_item) ? 'checked' : '') }}
+                                    {{ trim($option) == $cart_item[$choice->name] ? 'checked' : '' }}
                                     autocomplete="off">
                                 <label class="btn btn-sm check-label mx-1 choice-input  text-break"
                                     for="{{ $choice->name }}-{{ $option }}">{{ Str::limit($option, 20, '...') }}</label>
@@ -155,7 +149,7 @@
                         </div>
                     @endforeach
                 @endif
-                @if (isset($stock) && $stock !== 0 || !isset($stock) )
+
                 <!-- Quantity + Add to cart -->
                 <div class="d-flex justify-content-between">
                     <div class="product-description-label mt-2 text-dark h3">{{ translate('messages.quantity') }}:
@@ -163,22 +157,24 @@
                     <div class="product-quantity d-flex align-items-center">
                         <div class="input-group input-group--style-2 pr-3 initial--19">
                             <span class="input-group-btn">
-                                <button class="btn btn-number text-dark p--10 decrease-button-cart" type="button" data-type="minus">
+                                <button class="btn btn-number text-dark p--10" type="button" data-type="minus"
+                                    data-field="quantity"
+                                    {{ $cart_item['quantity'] <= 1 ? 'disabled="disabled"' : '' }}>
                                     <i class="tio-remove  font-weight-bold"></i>
                                 </button>
                             </span>
-                            <input type="number" name="quantity" readonly
-                                class="form-control  text-center cart-qty-field" placeholder="1"
-                                value="{{ $cart_item['quantity'] }}" min="1" max="{{   (isset($stock) && $stock > 0) ?   ($product?->maximum_cart_quantity ?  min($stock, $product?->maximum_cart_quantity) : $stock)   :  $product?->maximum_cart_quantity ??  '9999999999' }}">
+                            <input type="text" name="quantity"
+                                class="form-control input-number text-center cart-qty-field" placeholder="1"
+                                value="{{ $cart_item['quantity'] }}" min="1" max="{{ $product->maximum_cart_quantity?? '9999999999' }}">
                             <span class="input-group-btn">
-                                <button class="btn btn-number text-dark p--10 increase-button-cart" type="button" data-type="plus" >
+                                <button class="btn btn-number text-dark p--10" type="button" data-type="plus"
+                                    data-field="quantity">
                                     <i class="tio-add  font-weight-bold"></i>
                                 </button>
                             </span>
                         </div>
                     </div>
                 </div>
-                @endif
                 @php($add_ons = json_decode($product->add_ons))
 
                 @if (count($add_ons) > 0 && $add_ons[0])
@@ -220,8 +216,6 @@
                         @endforeach
                     </div>
                 @endif
-
-                @if (isset($stock) && $stock !== 0 || !isset($stock) )
                 <div class="row no-gutters d-none mt-2 text-dark" id="chosen_price_div">
                     <div class="col-2">
                         <div class="product-description-label">{{ translate('messages.Total Price') }}:</div>
@@ -236,18 +230,9 @@
                 <div class="d-flex justify-content-center mt-2">
                     <button class="btn btn--primary h--45px add-To-Cart" type="button">
                         <i class="tio-shopping-cart"></i>
-                        {{ translate('messages.Update_To_Cart') }}
+                        {{ translate('messages.update') }}
                     </button>
                 </div>
-                @else
-                <div class="d-flex justify-content-center mt-2">
-                    <button class="btn btn-secondary h--45px" type="button">
-                        <i class="tio-shopping-cart"></i>
-                        {{ translate('messages.Stock_Out') }}
-                    </button>
-                </div>
-
-                @endif
             </form>
         </div>
     </div>
@@ -255,6 +240,7 @@
 <script src="{{asset('public/assets/admin')}}/js/view-pages/common.js"></script>
 <script type="text/javascript">
     "use strict";
+    cartQuantityInitialize();
     getVariantPrice();
     $('#add-to-cart-form input').on('change', function() {
         getVariantPrice();

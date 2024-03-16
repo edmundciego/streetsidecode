@@ -16,15 +16,32 @@
                 </span>
                 <span>{{$deliveryMan['f_name'].' '.$deliveryMan['l_name']}}</span>
             </h1>
-            <div class="">
-                @include('admin-views.delivery-man.partials._tab_menu')
+            <div class="row">
+                <div class="js-nav-scroller hs-nav-scroller-horizontal mt-2">
+                    <!-- Nav -->
+                    <ul class="nav nav-tabs nav--tabs border-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'info'])}}"  aria-disabled="true">{{translate('messages.info')}}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'transaction'])}}"  aria-disabled="true">{{translate('messages.transaction')}}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'conversation'])}}"  aria-disabled="true">{{translate('messages.conversations')}}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'disbursement'])}}"  aria-disabled="true">{{translate('messages.disbursements')}}</a>
+                        </li>
+                    </ul>
+                    <!-- End Nav -->
+                </div>
             </div>
         </div>
         <!-- End Page Header -->
 
         <!-- Card -->
         <div class="card mb-3 mb-lg-5 mt-2">
-            <div class="card-header flex-wrap py-2 border-0 gap-2">
+            <div class="card-header py-2 border-0 gap-2">
                 <div class="search--button-wrapper">
                     <h4 class="card-title">{{ translate('messages.order_transactions')}}</h4>
                     <div class="min--260">
@@ -79,16 +96,13 @@
                         ->when($date, function($query)use($date){
                             return $query->whereDate('created_at', $date);
                         })->paginate(25))
-
                         @foreach($digital_transaction as $k=>$dt)
-
                             <tr>
                                 <td scope="row">{{$k+$digital_transaction->firstItem()}}</td>
                                 <td><a href="{{route((isset($dt->order) && $dt->order->order_type=='parcel')?'admin.parcel.order.details':'admin.order.details',[$dt->order_id,'module_id'=>$dt->order->module_id])}}">{{$dt->order_id}}</a></td>
-                               <td>{{ \App\CentralLogics\Helpers::format_currency($dt->original_delivery_charge) }}</td>
-                               <td>{{ \App\CentralLogics\Helpers::format_currency($dt->dm_tips) }}</td>
-                                <td> {{\App\CentralLogics\Helpers::date_format($dt->created_at )   }}</td>
-
+                                <td>{{$dt->original_delivery_charge}}</td>
+                                <td>{{$dt->dm_tips}}</td>
+                                <td>{{$dt->created_at->format('Y-m-d')}}</td>
                             </tr>
                         @endforeach
                         </tbody>

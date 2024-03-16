@@ -1,4 +1,3 @@
-@php use App\CentralLogics\Helpers; @endphp
 @extends('layouts.admin.app')
 @section('title', translate('Subscribed Emails'))
 @push('css_or_js')
@@ -13,7 +12,7 @@
                     <img src="{{asset('public/assets/admin/img/email.png')}}" class="w--26" alt="">
                 </span>
                 <span>{{ translate('messages.subscribed_mail_list') }}
-                        <span class="badge badge-soft-dark ml-2" id="count">{{$subscribedCustomers->count() }}</span>
+                        <span class="badge badge-soft-dark ml-2" id="count">{{ \App\Models\Newsletter::count() }}</span>
                 </span>
             </h1>
         </div>
@@ -23,58 +22,54 @@
             <!-- Header -->
             <div class="card-header border-0 py-2">
                 <div class="search--button-wrapper justify-content-end">
-                    <form class="search-form">
+                    <form action="javascript:" id="search-form" class="search-form">
                         <div class="input-group input--group">
-                            <input type="search" name="search" class="form-control"
-                                   placeholder="{{translate('ex_: search_email')}}"
-                                   aria-label="{{translate('messages.search')}}" value="{{request()?->search}}">
+                            <input id="datatableSearch_" type="search" name="search" class="form-control"
+                                value="{{ request()->get('search') }}" placeholder="{{ translate('messages.ex_:_search_email') }}"
+                                aria-label="Search" required>
                             <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
+                            @if (request()->get('search'))
+                                <button type="reset" class="btn btn-info mx-1 redirect-url"
+                                data-url="{{ route('admin.users.customer.subscribed') }}" > {{ translate('messages.reset') }}</button>
+                            @endif
                         </div>
                     </form>
-                    @if(request()->get('search'))
-                        <button type="reset" class="btn btn--primary ml-2 location-reload-to-base"
-                                data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
-                    @endif
-
-                    <!-- Unfold -->
-                    <div class="hs-unfold mr-2">
-                        <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40"
-                           href="javascript:"
-                           data-hs-unfold-options='{
+                                        <!-- Unfold -->
+                                        <div class="hs-unfold mr-2">
+                                            <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
+                                                data-hs-unfold-options='{
                                                         "target": "#usersExportDropdown",
                                                         "type": "css-animation"
                                                     }'>
-                            <i class="tio-download-to mr-1"></i> {{ translate('messages.export') }}
-                        </a>
+                                                <i class="tio-download-to mr-1"></i> {{ translate('messages.export') }}
+                                            </a>
 
-                        <div id="usersExportDropdown"
-                             class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
-                            <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
-                            <a id="export-excel" class="dropdown-item"
-                               href="{{route('admin.users.customer.subscriber-export', ['type'=>'excel',request()->getQueryString()])}}">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                     src="{{ asset('public/assets/admin/svg/components/excel.svg') }}"
-                                     alt="Image Description">
-                                {{ translate('messages.excel') }}
-                            </a>
-                            <a id="export-csv" class="dropdown-item"
-                               href="{{route('admin.users.customer.subscriber-export', ['type'=>'csv',request()->getQueryString()])}}">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                     src="{{ asset('public/assets/admin/svg/components/placeholder-csv-format.svg') }}"
-                                     alt="Image Description">
-                                .{{ translate('messages.csv') }}
-                            </a>
-                        </div>
-                    </div>
-                    <!-- End Unfold -->
+                                            <div id="usersExportDropdown"
+                                                class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
+                                                <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
+                                                <a id="export-excel" class="dropdown-item" href="{{route('admin.users.customer.subscriber-export', ['type'=>'excel'])}}">
+                                                    <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                                        src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
+                                                        alt="Image Description">
+                                                    {{ translate('messages.excel') }}
+                                                </a>
+                                                <a id="export-csv" class="dropdown-item" href="{{route('admin.users.customer.subscriber-export', ['type'=>'csv'])}}">
+                                                    <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                                        src="{{ asset('public/assets/admin') }}/svg/components/placeholder-csv-format.svg"
+                                                        alt="Image Description">
+                                                    .{{ translate('messages.csv') }}
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <!-- End Unfold -->
+
                 </div>
             </div>
             <!-- End Header -->
             <!-- Table -->
             <div class="table-responsive datatable-custom">
                 <table id="datatable"
-                       class="table table-hover table-borderless table-thead-bordered table-nowrap table-align-middle card-table generalData"
-                       data-hs-datatables-options='{
+                    class="table table-hover table-borderless table-thead-bordered table-nowrap table-align-middle card-table generalData" data-hs-datatables-options='{
                                                              "columnDefs": [{
                                                                 "targets": [0],
                                                                 "orderable": false
@@ -91,53 +86,49 @@
                                                              "paging":false
                                                            }'>
                     <thead class="thead-light">
-                    <tr>
-                        <th class="border-0">
-                            {{ translate('sl') }}
-                        </th>
-                        <th class="border-0">{{ translate('messages.email') }}</th>
-                        <th class="border-0">{{ translate('messages.created_at') }}</th>
-                    </tr>
+                        <tr>
+                            <th class="border-0">
+                                {{ translate('sl') }}
+                            </th>
+                            <th class="border-0">{{ translate('messages.email') }}</th>
+                            <th class="border-0">{{ translate('messages.created_at') }}</th>
+                        </tr>
                     </thead>
                     <tbody id="set-rows">
-                    @if (count($subscribedCustomers))
-                        @foreach ($subscribedCustomers as $key => $customer)
-                            <tr>
-                                <td>{{$key+$subscribedCustomers->firstItem()}}</td>
-                                <td>
-                                    {{ $customer->email }}
-                                </td>
-                                <td>  {{  Helpers::date_format($customer->created_at)}} </td>
-                            </tr>
-                        @endforeach
-                    @endif
+                        @if (count($subscribedCustomers))
+                            @foreach ($subscribedCustomers as $key => $customer)
+                                <tr>
+                                    <td>
+                                        {{ ++$key }}
+                                    </td>
+                                    <td>
+                                        {{ $customer->email }}
+                                    </td>
+                                    <td>{{ date('Y-m-d', strtotime($customer->created_at)) }}</td>
+                                </tr>
+                            @endforeach
+                        @endif
                     </tbody>
 
                 </table>
+                @if(count($subscribedCustomers) === 0)
+                    <div class="empty--data">
+                        <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
+                        <h5>
+                            {{translate('no_data_found')}}
+                        </h5>
+                    </div>
+                @endif
             </div>
-            @if(count($subscribedCustomers) !== 0)
-                <hr>
-            @endif
-            <div class="page-area">
-                {!! $subscribedCustomers->withQueryString()->links() !!}
-            </div>
-            @if(count($subscribedCustomers) === 0)
-                <div class="empty--data">
-                    <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
-                    <h5>
-                        {{translate('no_data_found')}}
-                    </h5>
-                </div>
-            @endif
-
+            <!-- End Table -->
         </div>
-
+        <!-- End Card -->
     </div>
 @endsection
 @push('script_2')
     <script type="text/javascript">
         "use strict";
-        $('#search-form').on('submit', function () {
+        $('#search-form').on('submit', function() {
             let formData = new FormData(this);
             $.ajaxSetup({
                 headers: {
@@ -150,15 +141,15 @@
                 cache: false,
                 contentType: false,
                 processData: false,
-                beforeSend: function () {
+                beforeSend: function() {
                     $('#loading').show();
                 },
-                success: function (data) {
+                success: function(data) {
                     $('#set-rows').html(data.view);
                     $('.card-footer').hide();
                     $('#count').html(data.count);
                 },
-                complete: function () {
+                complete: function() {
                     $('#loading').hide();
                 },
             });

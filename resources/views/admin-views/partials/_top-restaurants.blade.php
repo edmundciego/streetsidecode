@@ -25,7 +25,7 @@
                     asset('storage/app/public/store').'/'.$item['logo'] ?? '',
                     asset('public/assets/admin/img/100x100/1.png'),
                     'store/'
-                ) }}" title="{{ $item?->name }}" >
+                ) }}"  >
                 <h5 class="info m-0">
                     {{translate('order : ')}} {{$item['order_count']}}
                 </h5>

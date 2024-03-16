@@ -553,7 +553,6 @@ class ProductLogic
                 'AvailableTimeStarts'=>$item->available_time_starts,
                 'AvailableTimeEnds'=>$item->available_time_ends,
                 'Variations'=>$module_type == 'food'?$item->food_variations:$item->variations,
-                'ChoiceOptions'=>$item?->choice_options,
                 'AddOns'=>$item->add_ons,
                 'Attributes'=>$item->attributes,
                 'StoreId'=>$item->store_id,

@@ -12,7 +12,7 @@
             <div class="d-flex flex-wrap justify-content-between">
                 <h1 class="page-header-title text-break">
                     <span class="page-header-icon">
-                        <img src="{{ asset('public/assets/admin/img/p_gal.png') }}" class="w--22" alt="">
+                        <img src="{{ asset('public/assets/admin/img/temp_pro.png') }}" class="w--22" alt="">
                     </span>
                     <span>{{ translate('Product_Details') }}</span>
                 </h1>
@@ -24,63 +24,61 @@
         <div class="card mb-3">
             <!-- Body -->
             <div class="card-body">
-                <div class="d-flex flex-wrap gap-4">
+                <div class="row flex-wrap">
                     <div>
-                        <div class="d-flex flex-wrap align-items-center food--media position-relative mr-4 mt-4">
-                            <img class="avatar avatar-xxl avatar-4by3 onerror-image aspect-ratio-1 h-unset"
+                        <div class="d-flex flex-wrap align-items-center food--media position-relative mr-4">
+                            <img class="avatar avatar-xxl avatar-4by3 onerror-image"
                             src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
                                 $product['image'] ?? '',
                                 asset('storage/app/public/product').'/'.$product['image'] ?? '',
                                 asset('public/assets/admin/img/160x160/img2.jpg'),
                                 'product/'
-                            ) }}"
+                            ) }}" 
                                 data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
                                 alt="Image Description">
                                 @if ($product['is_rejected'] == 1 )
 
                                 <div class="reject-info"> {{ translate('Your_Item_Has_Been_Rejected') }}</div>
                                 @endif
-
-                                <div class="review-info"> {{ translate('This item is under review') }}</div>
                         </div>
                     </div>
                     <div class="w-70 flex-grow">
-                        <div class="d-flex justify-content-end">
-                            <div class="d-flex flex-wrap gap-2 align-items-start">
-                                <a href="{{ route('admin.item.edit', [$product['id'],'temp_product' => true]) }}" class="btn btn-sm btn-- btn-outline-primary">
-                                    <i class="tio-redo font-weight-bold "></i>  {{ translate('messages.Edit_&_Approve') }}
-                                </a>
-                                @if($product->is_rejected == 0)
-                                <a data-toggle="tooltip" data-placement="top"
-                                data-original-title="{{ translate('messages.Reject') }}" data-url="{{ route('admin.item.deny', ['id'=> $product['id']]) }}" data-message="{{ translate('you_want_to_deny_this_product') }}"
-                                    href="javascript:" class="btn btn-sm btn--danger cancelled_status">
-                                    {{ translate('messages.Reject') }}
-                                </a>
-                                @endif
-                                <a data-toggle="tooltip" data-placement="top"
-                                data-original-title="{{ translate('messages.approve') }}"
-                                    data-url="{{route('admin.item.approved',[ 'id'=> $product['id']])}}" data-message="{{translate('messages.you_want_to_approve_this_product')}}"
-                                    href="javascript:" class="btn btn-sm btn--primary request_alert">
-                                    {{ translate('messages.approve') }} <i class="tio-checkmark-circle-outlined font-weight-bold pr-1"></i>
-                                </a>
-                            </div>
-                        </div>
                         @php($language = \App\Models\BusinessSetting::where('key', 'language')->first()?->value ?? null)
                         @php($defaultLang = str_replace('_', '-', app()->getLocale()))
+                        <div class="d-flex flex-wrap gap-2 justify-content-between">
                             @if ($language)
-                            <ul class="nav nav-tabs mb-3 pt-3">
+                            <ul class="nav nav-tabs border-0 mb-3">
                                 <li class="nav-item">
                                     <a class="nav-link lang_link active" href="#"
                                         id="default-link">{{ translate('messages.default') }}</a>
                                 </li>
                                 @foreach (json_decode($language) as $lang)
-                                <li class="nav-item">
-                                    <a class="nav-link lang_link" href="#"
-                                    id="{{ $lang }}-link">{{ \App\CentralLogics\Helpers::get_language_name($lang) . '(' . strtoupper($lang) . ')' }}</a>
-                                </li>
-                                @endforeach
-                            </ul>
-                            @endif
+                                    <li class="nav-item">
+                                        <a class="nav-link lang_link" href="#"
+                                        id="{{ $lang }}-link">{{ \App\CentralLogics\Helpers::get_language_name($lang) . '(' . strtoupper($lang) . ')' }}</a>
+                                    </li>
+                                    @endforeach
+                                </ul>
+                                @endif
+                                <div class="d-flex flex-wrap gap-2 align-items-start">
+                                    <a href="{{ route('admin.item.edit', [$product['id'],'temp_product' => true]) }}" class="btn btn--sm btn-outline-primary">
+                                        {{ translate('messages.edit_info') }}
+                                    </a>
+                                    @if($product->is_rejected == 0)
+                                    <a data-toggle="tooltip" data-placement="top"
+                                    data-original-title="{{ translate('messages.Reject') }}" data-url="{{ route('admin.item.deny', ['id'=> $product['id']]) }}" data-message="{{ translate('you_want_to_deny_this_product') }}"
+                                        href="javascript:" class="btn btn-sm btn--danger cancelled_status">
+                                        {{ translate('messages.Reject') }}
+                                    </a>
+                                    @endif
+                                    <a data-toggle="tooltip" data-placement="top"
+                                    data-original-title="{{ translate('messages.approve') }}"
+                                     data-url="{{route('admin.item.approved',[ 'id'=> $product['id']])}}" data-message="{{translate('messages.you_want_to_approve_this_product')}}"
+                                        href="javascript:" class="btn btn-sm btn--primary request_alert">
+                                        {{ translate('messages.approve') }}
+                                    </a>
+                                </div>
+                            </div>
 
                         <div class="lang_form" id="default-form">
                             <h2 class="mt-3">{{ $product?->getRawOriginal('name') }} </h2>
@@ -144,92 +142,79 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="px-4 max-w--220px product-gallery-info">
+                            <td class="px-4 max-w--220px">
                                 <span class="d-block mb-1">
-                                    <span>{{ translate('messages.Store') }}</span>
-                                    <span>:</span>
+                                    <span>{{ translate('messages.Store') }} : </span>
                                     <strong>{{ $product?->store?->name }}</strong>
                                 </span>
                                 <span class="d-block mb-1">
-                                    <span>{{ translate('messages.Category') }}</span>
-                                    <span>:</span>
+                                    <span>{{ translate('messages.Category') }} : </span>
                                     <strong>{{ Str::limit(($product?->category?->parent ? $product?->category?->parent?->name : $product?->category?->name )  ?? translate('messages.uncategorize')
                                         , 20, '...') }}</strong>
                                 </span>
                                 <span class="d-block mb-1">
-                                    <span>{{ translate('messages.Sub_Category') }}</span>
-                                    <span>:</span>
+                                    <span>{{ translate('messages.Sub_Category') }} : </span>
                                     <strong>{{ Str::limit(($product?->category?->name )  ?? translate('messages.uncategorize')
                                         , 20, '...') }}</strong>
                                 </span>
                                 @if ($product->module->module_type == 'grocery')
                                 <span class="d-block mb-1">
-                                    <span>{{ translate('messages.Is_Organic') }}</span>
-                                    <span>:</span>
+                                    <span>{{ translate('messages.Is_Organic') }} : </span>
                                     <strong> {{  $product->organic == 1 ?  translate('messages.yes') : translate('messages.no') }}</strong>
                                 </span>
                                 @endif
                                 @if ($product->module->module_type == 'food')
                                 <span class="d-block mb-1">
-                                    <span>{{ translate('messages.Item_type') }}</span>
-                                    <span>:</span>
+                                    <span>{{ translate('messages.Item_type') }} : </span>
                                     <strong> {{  $product->veg == 1 ?  translate('messages.veg') : translate('messages.non_veg') }}</strong>
                                 </span>
                                 @else
                                 <span class="d-block mb-1">
-                                    <span>{{ translate('messages.Total_stock') }}</span>
-                                    <span>:</span>
+                                    <span>{{ translate('messages.Total_stock') }} : </span>
                                     <strong> {{  $product->stock  }}</strong>
                                 </span>
 
                                     @if ($product?->unit)
                                     <span class="d-block mb-1">
-                                        <span>{{ translate('messages.Unit') }}</span>
-                                        <span>:</span>
+                                        <span>{{ translate('messages.Unit') }} : </span>
                                         <strong> {{ $product?->unit?->unit  }}</strong>
                                     </span>
                                     @endif
                                 @endif
                                 @if (config('module.' . $product->module->module_type)['item_available_time'])
                                 <span class="d-block mb-1">
-                                    <span>{{ translate('messages.available_time_starts') }}</span>
-                                    <span>:</span>
+                                    {{ translate('messages.available_time_starts') }} :
                                     <strong>{{ date(config('timeformat'), strtotime($product['available_time_starts'])) }}</strong>
                                 </span>
                                 <span class="d-block mb-1">
-                                    <span>{{ translate('messages.available_time_ends') }}</span>
-                                    <span>:</span>
+                                    {{ translate('messages.available_time_ends') }} :
                                     <strong>{{ date(config('timeformat'), strtotime($product['available_time_ends'])) }}</strong>
                                 </span>
                             @endif
                             </td>
-                            <td class="px-4 product-gallery-info">
+                            <td class="px-4">
                                 <span class="d-block mb-1">
-                                    <span>{{ translate('messages.Unit_Price') }}</span>
-                                    <span>:</span>
+                                    <span>{{ translate('messages.Unit_Price') }} : </span>
                                     <strong>{{ \App\CentralLogics\Helpers::format_currency($product['price']) }}</strong>
                                 </span>
                                 <span class="d-block mb-1">
-                                    <span>{{ translate('messages.discounted_amount') }}</span>
-                                    <span>:</span>
+                                    <span>{{ translate('messages.discounted_amount') }} :</span>
                                     <strong>{{ \App\CentralLogics\Helpers::format_currency(\App\CentralLogics\Helpers::discount_calculate($product, $product['price'])) }}</strong>
                                 </span>
                                 <span class="d-block mb-1">
-                                    <span>{{ translate('messages.discount') }}</span>
-                                    <span>:</span>
+                                    <span>{{ translate('messages.discount') }} :</span>
                                     <strong> {{ $product->discount_type == 'percent' ? $product->discount .'%' :  \App\CentralLogics\Helpers::format_currency($product['discount']) }} </strong>
                                 </span>
 
                                 @php($tax_included = \App\Models\BusinessSetting::where('key', 'tax_included')->first()?->value)
 
                                 <span class="d-block mb-1">
-                                    <span>{{ translate('messages.tax') }}</span>
-                                    <span>:</span>
+                                    <span>{{ translate('messages.tax') }} :</span>
                                     <strong> {{ $product?->store?->tax .'%' }}  ({{  $tax_included == 1 ? translate('included') :  translate('excluded')}})</strong>
                                 </span>
 
                             </td>
-                            <td class="px-4 product-gallery-info">
+                            <td class="px-4">
                                 @if ($product->module->module_type == 'food')
                                     @if ($product->food_variations && is_array(json_decode($product['food_variations'], true)))
                                         @foreach (json_decode($product->food_variations, true) as $variation)
@@ -276,22 +261,20 @@
                                 @if ($product->variations && is_array(json_decode($product['variations'], true)))
                                     @foreach (json_decode($product['variations'], true) as $variation)
                                         <span class="d-block mb-1 text-capitalize">
-                                            <span>{{ $variation['type'] }}</span>
-                                            <span>:</span>
-                                            <strong>{{ \App\CentralLogics\Helpers::format_currency($variation['price']) }}</strong>
+                                            {{ $variation['type'] }} :
+                                            {{ \App\CentralLogics\Helpers::format_currency($variation['price']) }}
                                         </span>
                                     @endforeach
                                 @endif
                         </td>
                         @endif
                         @if ($product->module->module_type == 'food')
-                            <td class="px-4 product-gallery-info">
+                            <td class="px-4">
                                 {{-- @if (config('module.' . $product->module->module_type)['add_on']) --}}
                                     @foreach (\App\Models\AddOn::whereIn('id', json_decode($product['add_ons'], true))->get() as $addon)
                                         <span class="d-block mb-1 text-capitalize">
-                                            <span>{{ $addon['name'] }}</span>
-                                            <span>:</span>
-                                            <strong>{{ \App\CentralLogics\Helpers::format_currency($addon['price']) }}</strong>
+                                            {{ $addon['name'] }} :
+                                            {{ \App\CentralLogics\Helpers::format_currency($addon['price']) }}
                                         </span>
                                     @endforeach
                                 {{-- @endif --}}

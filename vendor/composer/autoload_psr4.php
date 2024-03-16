@@ -100,7 +100,7 @@ return array(
     'MatanYadaev\\EloquentSpatial\\' => array($vendorDir . '/matanyadaev/laravel-eloquent-spatial/src'),
     'Madnest\\Madzipper\\' => array($vendorDir . '/madnest/madzipper/src/Madnest/Madzipper'),
     'Maatwebsite\\Excel\\' => array($vendorDir . '/maatwebsite/excel/src'),
-    'League\\Uri\\' => array($vendorDir . '/league/uri-interfaces', $vendorDir . '/league/uri'),
+    'League\\Uri\\' => array($vendorDir . '/league/uri', $vendorDir . '/league/uri-interfaces'),
     'League\\OAuth2\\Server\\' => array($vendorDir . '/league/oauth2-server/src'),
     'League\\MimeTypeDetection\\' => array($vendorDir . '/league/mime-type-detection/src'),
     'League\\Flysystem\\Local\\' => array($vendorDir . '/league/flysystem-local'),

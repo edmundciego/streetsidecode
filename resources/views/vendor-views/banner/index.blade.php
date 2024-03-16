@@ -168,7 +168,6 @@
                             @endforeach
                             </tbody>
                         </table>
-
                         @if(count($banners) !== 0)
                         <hr>
                         @endif
@@ -183,6 +182,7 @@
                             </h5>
                         </div>
                         @endif
+
                     </div>
                 </div>
             </div>

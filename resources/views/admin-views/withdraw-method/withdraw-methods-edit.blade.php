@@ -12,6 +12,7 @@
         <div class="mb-3">
             <div class="page-title-wrap d-flex justify-content-between flex-wrap align-items-center gap-3 mb-3">
                 <h2 class="page-title">
+                    {{-- <img width="20" src="{{asset('/public/assets/back-end/img/withdraw-icon.png')}}" alt=""> --}}
                     {{ translate('messages.Withdrawal_Methods')}}
                 </h2>
 
@@ -41,18 +42,71 @@
                                 <input type="text" class="form-control " name="method_name" id="method_name"
                                        placeholder="Select method name"
                                        value="{{$withdrawal_method['method_name']}}" required>
+
                             </div>
                         </div>
 
-                        @if($withdrawal_method['method_fields'])
-                            @foreach($withdrawal_method['method_fields'] as $key=>$field)
+                        @if($withdrawal_method['method_fields'][0])
+                            @php($field = $withdrawal_method['method_fields'][0])
+                            <div class="card card-body mt-3">
+                                <div class="row gy-4 align-items-center">
+                                    <div class="col-md-3 col-12">
+                                        {{-- <div class=""> --}}
+                                            <label>{{ translate('messages.Input_Field_Type')}} <span
+                                            class="input-label-secondary text-danger">*</span></label>
+                                            <select class="form-control js-select js-select2-custom" name="field_type[]" required>
+                                                <option value="string" {{$field=='string'?'selected':''}}>{{ translate('messages.Text')}}</option>
+                                                <option value="number" {{$field=='number'?'selected':''}}>{{ translate('messages.Number')}}</option>
+                                                <option value="date" {{$field=='date'?'selected':''}}>{{ translate('messages.Date')}}</option>
+                                                <option value="email" {{$field=='email'?'selected':''}}>{{ translate('messages.Email')}}</option>
+                                                <option value="phone" {{$field=='phone'?'selected':''}}>{{ translate('messages.Phone')}}</option>
+                                            </select>
+                                        {{-- </div> --}}
+                                    </div>
+                                    <div class="col-md-3 col-12">
+                                        <label>{{ translate('messages.field_name')}} <span
+                                            class="input-label-secondary text-danger">*</span></label>
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" name="field_name[]"
+                                                   placeholder="{{ translate('messages.Ex:_Bank')}}"
+                                                   value="{{Str::title(str_replace('_', " ", $field['input_name'])) ??''}}"
+                                                   required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-12">
+                                        <div class="form-floating">
+                                            <label>{{ translate('messages.placeholder_text')}} <span
+                                            class="input-label-secondary text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="placeholder_text[]"
+                                                   placeholder="{{ translate('messages.Ex:_John')}}"
+                                                   value="{{$field['placeholder']??''}}"
+                                                   required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="1"
+                                            name="is_required[0]" id="flexCheckDefault"
+                                            {{$field['is_required'] ? 'checked' : ''}}>
+                                            <label class="form-check-label" for="flexCheckDefault">
+                                                {{ translate('messages.Is_required_?')}}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
 
+                        <!-- HERE CUSTOM FIELDS WILL BE ADDED -->
+                        <div id="custom-field-section">
+                            @foreach($withdrawal_method['method_fields'] as $key=>$field)
+                                @if($key>0)
                                     <div class="card card-body mt-3" id="field-row--{{$key}}">
                                         <div class="row gy-4 align-items-center">
                                             <div class="col-md-3 col-12">
                                                 <div class="form-floating">
                                                     <label>{{ translate('messages.Input_Field_Type')}} <span
-                                                            class="input-label-secondary text-danger">*</span></label>
+                                            class="input-label-secondary text-danger">*</span></label>
                                                     <select class="form-control" name="field_type[]" required>
                                                         <option value="string" {{$field['input_type']=='string'?'selected':''}}>{{ translate('messages.Text')}}</option>
                                                         <option value="number" {{$field['input_type']=='number'?'selected':''}}>{{ translate('messages.Number')}}</option>
@@ -65,7 +119,7 @@
                                             <div class="col-md-3 col-12">
                                                 <div class="form-floating">
                                                     <label>{{ translate('messages.field_name')}} <span
-                                                            class="input-label-secondary text-danger">*</span></label>
+                                            class="input-label-secondary text-danger">*</span></label>
                                                     <input type="text" class="form-control" name="field_name[]"
                                                            placeholder="{{ translate('messages.Ex:_Bank')}}"
                                                            value="{{  Str::title(str_replace('_', " ", $field['input_name']))  ?? ''}}"
@@ -75,7 +129,7 @@
                                             <div class="col-md-3 col-12">
                                                 <div class="form-floating">
                                                     <label>{{ translate('messages.placeholder_text')}} <span
-                                                            class="input-label-secondary text-danger">*</span></label>
+                                            class="input-label-secondary text-danger">*</span></label>
                                                     <input type="text" class="form-control" name="placeholder_text[]"
                                                            placeholder="{{ translate('messages.Ex:_John')}}"
                                                            value="{{$field['placeholder'] ?? ''}}"
@@ -94,6 +148,8 @@
                                                 </div>
                                             </div>
 
+
+
                                             <div class="col-md-1 ">
                                                 <span class="btn btn-danger remove-field" data-id="{{$key}}">
                                                     <i class="tio-delete"></i>
@@ -101,13 +157,8 @@
                                             </div>
                                         </div>
                                     </div>
-
+                                @endif
                             @endforeach
-                        @endif
-
-                        <!-- HERE CUSTOM FIELDS WILL BE ADDED -->
-                        <div id="custom-field-section">
-
                         </div>
 
                         <button class="btn btn--primary mt-3" id="add-more-field">

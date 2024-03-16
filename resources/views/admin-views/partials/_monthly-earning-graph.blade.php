@@ -38,19 +38,19 @@
                 "data": {
                   "labels": ["Jan","Feb","Mar","April","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
                   "datasets": [{
-                    "data": [{{data_get($total_sell, 1, '0')}},{{data_get($total_sell, 2, '0')}},{{data_get($total_sell, 3, '0')}},{{data_get($total_sell, 4, '0')}},{{data_get($total_sell, 5, '0')}},{{data_get($total_sell, 6, '0')}},{{data_get($total_sell, 7, '0')}},{{data_get($total_sell, 8, '0')}},{{data_get($total_sell, 9, '0')}},{{data_get($total_sell, 10, '0')}},{{data_get($total_sell, 11, '0')}},{{data_get($total_sell, 12, '0')}}],
+                    "data": [{{$total_sell[1]}},{{$total_sell[2]}},{{$total_sell[3]}},{{$total_sell[4]}},{{$total_sell[5]}},{{$total_sell[6]}},{{$total_sell[7]}},{{$total_sell[8]}},{{$total_sell[9]}},{{$total_sell[10]}},{{$total_sell[11]}},{{$total_sell[12]}}],
                     "backgroundColor": "#00AA96",
                     "hoverBackgroundColor": "#00AA96",
                     "borderColor": "#00AA96"
                   },
                   {
-                    "data": [{{data_get($commission,1,'0')}},{{data_get($commission,2,'0')}},{{data_get($commission,3,'0')}},{{data_get($commission,4,'0')}},{{data_get($commission,5,'0')}},{{data_get($commission,6,'0')}},{{data_get($commission,7,'0')}},{{data_get($commission,8,'0')}},{{data_get($commission,9,'0')}},{{data_get($commission,10,'0')}},{{data_get($commission,11,'0')}},{{data_get($commission,12,'0')}}],
+                    "data": [{{$commission[1]}},{{$commission[2]}},{{$commission[3]}},{{$commission[4]}},{{$commission[5]}},{{$commission[6]}},{{$commission[7]}},{{$commission[8]}},{{$commission[9]}},{{$commission[10]}},{{$commission[11]}},{{$commission[12]}}],
                     "backgroundColor": "#b9e0e0",
                     "hoverBackgroundColor": "#b9e0e0",
                     "borderColor": "#b9e0e0"
                   },
                   {
-                    "data": [{{data_get($delivery_commission,1,'0')}},{{data_get($delivery_commission,2,'0')}},{{data_get($delivery_commission,3,'0')}},{{data_get($delivery_commission,4,'0')}},{{data_get($delivery_commission,5,'0')}},{{data_get($delivery_commission,6,'0')}},{{data_get($delivery_commission,7,'0')}},{{data_get($delivery_commission,8,'0')}},{{data_get($delivery_commission,9,'0')}},{{data_get($delivery_commission,10,'0')}},{{data_get($delivery_commission,11,'0')}},{{data_get($delivery_commission,12,'0')}}],
+                    "data": [{{$delivery_commission[1]}},{{$delivery_commission[2]}},{{$delivery_commission[3]}},{{$delivery_commission[4]}},{{$delivery_commission[5]}},{{$delivery_commission[6]}},{{$delivery_commission[7]}},{{$delivery_commission[8]}},{{$delivery_commission[9]}},{{$delivery_commission[10]}},{{$delivery_commission[11]}},{{$delivery_commission[12]}}],
                     "backgroundColor": "#005555",
                     "hoverBackgroundColor": "#005555",
                     "borderColor": "#005555"

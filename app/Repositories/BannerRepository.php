@@ -38,16 +38,7 @@ class BannerRepository implements BannerRepositoryInterface
 
     public function getListWhere(string $searchValue = null, array $filters = [], array $relations = [], int|string $dataLimit = DEFAULT_DATA_LIMIT, int $offset = null): Collection|LengthAwarePaginator
     {
-        $key = explode(' ', $searchValue);
-        return $this->banner->with($relations)->where($filters)
-        ->when(isset($key) , function($q) use($key){
-            $q->where(function ($q) use ($key) {
-                foreach ($key as $value) {
-                    $q->orWhere('title', 'like', "%{$value}%");
-                }
-            });
-        })
-        ->latest()->paginate($dataLimit);
+        return $this->banner->with($relations)->where($filters)->latest()->paginate($dataLimit);
     }
 
     public function update(string $id, array $data): bool|string|object

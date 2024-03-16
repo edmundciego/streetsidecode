@@ -108,7 +108,7 @@
                                                 </span>
                                                 <span class="form-label-secondary text-danger d-flex"
                                                     data-toggle="tooltip" data-placement="right"
-                                                    data-original-title="{{ translate('messages.If_you_enable_this,_any_store_can_duplicate_product_and_create_a_new_product_by_use_this.')}}"><img
+                                                    data-original-title="{{ translate('messages.If_enabled,can_create_duplicate_products.')}}"><img
                                                         src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
                                                         alt="{{ translate('messages.Product_Gallery') }}"> *
                                                 </span>
@@ -144,7 +144,7 @@
                                                 </span>
                                                 <span class="form-label-secondary text-danger d-flex"
                                                     data-toggle="tooltip" data-placement="right"
-                                                    data-original-title="{{ translate('messages.If_you_enable_this_Stores_can_access_all_products_of_other_stores.')}}"><img
+                                                    data-original-title="{{ translate('messages.If_enabled,can_create_duplicate_products.')}}"><img
                                                         src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
                                                         alt="{{ translate('messages.access_all_products') }}"> *
                                                 </span>
@@ -207,23 +207,23 @@
                             </div>
                             @php($product_approval_datas = \App\Models\BusinessSetting::where('key', 'product_approval_datas')->first()?->value ?? '')
                             @php($product_approval_datas =json_decode($product_approval_datas , true))
-                            <div class="mt-4  mb-4 access_product_approval">
+                            <div class="mt-4  mb-4 access_product_approval {{  $product_approval == 1 ? ' ' : 'd-none'}}">
                                 <label class="mb-2 input-label text-capitalize d-flex alig-items-center" for=""> {{ translate('Need_Approval_When') }}</label>
                                 <div class="justify-content-between border form-control">
                                     <div class="form-check form-check-inline mx-4  ">
-                                        <input class="mx-2 form-check-input" type="checkbox" {{  data_get($product_approval_datas,'Add_new_product',null) == 1 ? 'checked' :'' }} id="inlineCheckbox1" value="1" name="Add_new_product" {{  $product_approval == 1 ? ' ' : 'disabled'}}>
+                                        <input class="mx-2 form-check-input" type="checkbox" {{  data_get($product_approval_datas,'Add_new_product',null) == 1 ? 'checked' :'' }} id="inlineCheckbox1" value="1" name="Add_new_product">
                                         <label class=" form-check-label" for="inlineCheckbox1">{{ translate('Add_new_product') }}</label>
                                     </div>
                                     <div class="form-check form-check-inline mx-4  ">
-                                        <input class="mx-2 form-check-input" type="checkbox"  {{  data_get($product_approval_datas,'Update_product_price',null) == 1 ? 'checked' :'' }} id="inlineCheckbox2" value="1" name="Update_product_price" {{  $product_approval == 1 ? ' ' : 'disabled'}}>
+                                        <input class="mx-2 form-check-input" type="checkbox"  {{  data_get($product_approval_datas,'Update_product_price',null) == 1 ? 'checked' :'' }} id="inlineCheckbox2" value="1" name="Update_product_price">
                                         <label class=" form-check-label" for="inlineCheckbox2">{{ translate('Update_product_price') }}</label>
                                     </div>
                                     <div class="form-check form-check-inline mx-4  ">
-                                        <input class="mx-2 form-check-input" type="checkbox" {{  data_get($product_approval_datas,'Update_product_variation',null) == 1 ? 'checked' :'' }}  id="inlineCheckbox3" value="1" name="Update_product_variation" {{  $product_approval == 1 ? ' ' : 'disabled'}}>
+                                        <input class="mx-2 form-check-input" type="checkbox" {{  data_get($product_approval_datas,'Update_product_variation',null) == 1 ? 'checked' :'' }}  id="inlineCheckbox3" value="1" name="Update_product_variation">
                                         <label class=" form-check-label" for="inlineCheckbox3">{{ translate('Update_product_variation') }}</label>
                                     </div>
                                     <div class="form-check form-check-inline mx-4  ">
-                                        <input class="mx-2 form-check-input" type="checkbox"  {{  data_get($product_approval_datas,'Update_anything_in_product_details',null) == 1 ? 'checked' :'' }} id="inlineCheckbox4" value="1" name="Update_anything_in_product_details" {{  $product_approval == 1 ? ' ' : 'disabled'}}>
+                                        <input class="mx-2 form-check-input" type="checkbox"  {{  data_get($product_approval_datas,'Update_anything_in_product_details',null) == 1 ? 'checked' :'' }} id="inlineCheckbox4" value="1" name="Update_anything_in_product_details">
                                         <label class=" form-check-label" for="inlineCheckbox4">{{ translate('Update_anything_in_product_details') }}</label>
                                     </div>
                                 </div>

@@ -227,7 +227,7 @@ class ConfigServiceProvider extends ServiceProvider
             else{
                 Config::set('toggle_veg_non_veg', false);
             }
-
+      
         } catch (\Exception $ex) {
 
         }

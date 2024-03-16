@@ -58,67 +58,58 @@
                         </select>
                     </div>
                 </div>
-                <div class="row g-4" id="order_stats">
-                        <div class="col-lg-3">
-                            <a class="__card-1 bg-E6F6EE h-100" href="{{route('admin.parcel.orders',['all'])}}">
-                                <img src="{{asset('/public/assets/admin/img/report/new/total.png')}}" class="icon" alt="report/new">
-                                <h3 class="title text-success">{{$data['total_orders']}}</h3>
-                                <h6 class="subtitle font-regular">{{ translate('total_orders') }}</h6>
-                            </a>
-                        </div>
-                        <div class="col-lg-9">
-                            <div class="row g-2" >
-                                <div class="col-sm-6">
-                                    <!-- Card -->
-                                    <a class="resturant-card dashboard--card __dashboard-card card--bg-1" href="{{route('admin.parcel.orders',['searching_for_deliverymen'])}}">
-                                    <span class="meter">
-                                            <span style="height:{{$data['total_orders']>0?($data['searching_for_dm']*100)/$data['total_orders']:0}}%"></span>
-                                    </span>
-                                    <h4 class="title">{{$data['searching_for_dm']}}</h4>
-                                    <span class="subtitle font-regular">{{translate('unassigned_orders')}}</span>
-                                    <img src="{{asset('/public/assets/admin/img/dashboard/1.png')}}" alt="img" class="resturant-icon top-50px">
-                                    </a>
-                                    <!-- End Card -->
-                                </div>
-                                <div class="col-sm-6">
-                                    <!-- Card -->
-                                    <a class="resturant-card dashboard--card __dashboard-card card--bg-2" href="{{route('admin.parcel.orders',['item_on_the_way'])}}">
-                                    <span class="meter">
-                                            <span style="height:{{$data['total_orders']>0?($data['picked_up']*100)/$data['total_orders']:0}}%"></span>
-                                    </span>
-                                    <h4 class="title">{{$data['picked_up']}}</h4>
-                                    <span class="subtitle font-regular">{{translate('out_for_delivery')}}</span>
-                                    <img src="{{asset('/public/assets/admin/img/dashboard/4.png')}}" alt="img" class="resturant-icon top-50px">
-                                    </a>
-                                    <!-- End Card -->
-                                </div>
-                                <div class="col-sm-6">
-                                    <!-- Card -->
-                                    <a class="resturant-card dashboard--card __dashboard-card bg-F1E8FA" href="{{route('admin.parcel.orders',['delivered'])}}">
-                                    <span class="meter">
-                                            <span style="height:{{$data['total_orders']>0?($data['delivered']*100)/$data['total_orders']:0}}%"></span>
-                                    </span>
-                                    <h4 class="title text-success">{{$data['delivered']}}</h4>
-                                    <span class="subtitle font-regular">{{translate('delivered')}}</span>
-                                    <img src="{{asset('/public/assets/admin/img/dashboard/2.png')}}" alt="img" class="resturant-icon top-50px">
-                                    </a>
-                                    <!-- End Card -->
-                                </div>
-                                <div class="col-sm-6">
-                                    <!-- Card -->
-                                    <a class="resturant-card dashboard--card __dashboard-card card--bg-4" href="{{route('admin.parcel.orders',['failed'])}}">
-                                    <span class="meter">
-                                            <span style="height:{{$data['total_orders']>0?($data['refund_requested']*100)/$data['total_orders']:0}}%"></span>
-                                    </span>
-                                    <h4 class="title">{{$data['refund_requested']}}</h4>
-                                    <span class="subtitle font-regular">{{translate('Failed Orders')}}</span>
-                                    <img src="{{asset('/public/assets/admin/img/dashboard/5.png')}}" alt="img" class="resturant-icon top-50px">
-                                    </a>
-                                    <!-- End Card -->
-                                </div>
-                            </div>
-                        </div>
+                <div class="row g-2" id="order_stats">
+                    <div class="col-sm-6 col-lg-3">
+                        <!-- Card -->
+                        <a class="resturant-card dashboard--card __dashboard-card card--bg-1" href="{{route('admin.parcel.list',['searching_for_deliverymen'])}}">
+                        <span class="meter">
+                                <span style="height:{{$data['total_orders']>0?($data['searching_for_dm']*100)/$data['total_orders']:0}}%"></span>
+                        </span>
+                        <h4 class="title">{{$data['searching_for_dm']}}</h4>
+                        <span class="subtitle">{{translate('unassigned_orders')}}</span>
+                        <img src="{{asset('/public/assets/admin/img/dashboard/1.png')}}" alt="img" class="resturant-icon">
+                        </a>
+                        <!-- End Card -->
                     </div>
+
+                    <div class="col-sm-6 col-lg-3">
+                        <!-- Card -->
+                        <a class="resturant-card dashboard--card __dashboard-card card--bg-2" href="{{route('admin.parcel.orders',['item_on_the_way'])}}">
+                        <span class="meter">
+                                <span style="height:{{$data['total_orders']>0?($data['picked_up']*100)/$data['total_orders']:0}}%"></span>
+                        </span>
+                        <h4 class="title">{{$data['picked_up']}}</h4>
+                        <span class="subtitle">{{translate('out_for_delivery')}}</span>
+                        <img src="{{asset('/public/assets/admin/img/dashboard/4.png')}}" alt="img" class="resturant-icon">
+                        </a>
+                        <!-- End Card -->
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <!-- Card -->
+                        <a class="resturant-card dashboard--card __dashboard-card card--bg-3" href="{{route('admin.parcel.orders',['delivered'])}}">
+                        <span class="meter">
+                                <span style="height:{{$data['total_orders']>0?($data['delivered']*100)/$data['total_orders']:0}}%"></span>
+                        </span>
+                        <h4 class="title">{{$data['delivered']}}</h4>
+                        <span class="subtitle">{{translate('delivered')}}</span>
+                        <img src="{{asset('/public/assets/admin/img/dashboard/2.png')}}" alt="img" class="resturant-icon">
+                        </a>
+                        <!-- End Card -->
+                    </div>
+
+                    <div class="col-sm-6 col-lg-3">
+                        <!-- Card -->
+                        <a class="resturant-card dashboard--card __dashboard-card card--bg-4" href="{{route('admin.parcel.orders',['failed'])}}">
+                        <span class="meter">
+                                <span style="height:{{$data['total_orders']>0?($data['refund_requested']*100)/$data['total_orders']:0}}%"></span>
+                        </span>
+                        <h4 class="title">{{$data['refund_requested']}}</h4>
+                        <span class="subtitle">{{translate('Failed Orders')}}</span>
+                        <img src="{{asset('/public/assets/admin/img/dashboard/5.png')}}" alt="img" class="resturant-icon">
+                        </a>
+                        <!-- End Card -->
+                    </div>
+                </div>
             </div>
         </div>
         <!-- End Stats -->
@@ -315,13 +306,13 @@
     options = {
           series: [{
           name: '{{ translate('Gross Sale') }}',
-          data: [{{data_get($total_sell, 1, '0')}},{{data_get($total_sell, 2, '0')}},{{data_get($total_sell, 3, '0')}},{{data_get($total_sell, 4, '0')}},{{data_get($total_sell, 5, '0')}},{{data_get($total_sell, 6, '0')}},{{data_get($total_sell, 7, '0')}},{{data_get($total_sell, 8, '0')}},{{data_get($total_sell, 9, '0')}},{{data_get($total_sell, 10, '0')}},{{data_get($total_sell, 11, '0')}},{{data_get($total_sell, 12, '0')}}]
+          data: [{{$total_sell[1]}},{{$total_sell[2]}},{{$total_sell[3]}},{{$total_sell[4]}},{{$total_sell[5]}},{{$total_sell[6]}},{{$total_sell[7]}},{{$total_sell[8]}},{{$total_sell[9]}},{{$total_sell[10]}},{{$total_sell[11]}},{{$total_sell[12]}}]
         },{
           name: '{{ translate('Admin Comission') }}',
-          data: [{{data_get($commission,1,'0')}},{{data_get($commission,2,'0')}},{{data_get($commission,3,'0')}},{{data_get($commission,4,'0')}},{{data_get($commission,5,'0')}},{{data_get($commission,6,'0')}},{{data_get($commission,7,'0')}},{{data_get($commission,8,'0')}},{{data_get($commission,9,'0')}},{{data_get($commission,10,'0')}},{{data_get($commission,11,'0')}},{{data_get($commission,12,'0')}}]
+          data: [{{$commission[1]}},{{$commission[2]}},{{$commission[3]}},{{$commission[4]}},{{$commission[5]}},{{$commission[6]}},{{$commission[7]}},{{$commission[8]}},{{$commission[9]}},{{$commission[10]}},{{$commission[11]}},{{$commission[12]}}]
         },{
           name: '{{ translate('Delivery Comission') }}',
-          data: [{{data_get($delivery_commission,1,'0')}},{{data_get($delivery_commission,2,'0')}},{{data_get($delivery_commission,3,'0')}},{{data_get($delivery_commission,4,'0')}},{{data_get($delivery_commission,5,'0')}},{{data_get($delivery_commission,6,'0')}},{{data_get($delivery_commission,7,'0')}},{{data_get($delivery_commission,8,'0')}},{{data_get($delivery_commission,9,'0')}},{{data_get($delivery_commission,10,'0')}},{{data_get($delivery_commission,11,'0')}},{{data_get($delivery_commission,12,'0')}}],
+          data: [{{$delivery_commission[1]}},{{$delivery_commission[2]}},{{$delivery_commission[3]}},{{$delivery_commission[4]}},{{$delivery_commission[5]}},{{$delivery_commission[6]}},{{$delivery_commission[7]}},{{$delivery_commission[8]}},{{$delivery_commission[9]}},{{$delivery_commission[10]}},{{$delivery_commission[11]}},{{$delivery_commission[12]}}]
         }],
           chart: {
           height: 350,
@@ -413,7 +404,7 @@
             $.post({
                 url: '{{route('admin.dashboard-stats.zone')}}',
                 data: {
-                    zone_id: zone_id,
+                    zone_id: zone_id
                 },
                 beforeSend: function () {
                     $('#loading').show()
@@ -422,15 +413,13 @@
                     insert_param('zone_id', zone_id);
                     $('#order_stats').html(data.order_stats);
                     $('#user-overview-board').html(data.user_overview);
-                    // $('#monthly-earning-graph').html(data.monthly_graph);
+                    $('#monthly-earning-graph').html(data.monthly_graph);
                     $('#popular-restaurants-view').html(data.popular_restaurants);
                     $('#top-deliveryman-view').html(data.top_deliveryman);
                     $('#top-rated-foods-view').html(data.top_rated_foods);
                     $('#top-restaurants-view').html(data.top_restaurants);
                     $('#top-selling-foods-view').html(data.top_selling_foods);
-                    $('#top-customer-view').html(data.top_customers);
                     $('#stat_zone').html(data.stat_zone);
-                    commission_overview_stats_update($('.commission_overview_stats_update').val());
                 },
                 complete: function () {
                     $('#loading').hide()

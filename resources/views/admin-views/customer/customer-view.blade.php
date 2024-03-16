@@ -12,14 +12,15 @@
         <div class="d-print-none pb-3">
             <div class="row align-items-center">
                 <div class="col-sm mb-2 mb-sm-0">
-                    <h1 class="page-header-title mb-1">{{translate('messages.customer_id')}} #{{$customer['id']}}</h1>
-                    <span class="fs-12">
+                    <h1 class="page-header-title mb-0">{{translate('messages.customer_id')}} #{{$customer['id']}}</h1>
+                    <span>
+                        <i class="tio-date-range"></i>
                         {{translate('messages.joined_at')}} : {{date('d M Y '.config('timeformat'),strtotime($customer['created_at']))}}
                     </span>
 
                 </div>
 
-                {{-- <div class="col-sm-auto">
+                <div class="col-sm-auto">
                     <a class="btn btn-icon btn-sm btn-soft-secondary rounded-circle mr-1"
                        href="{{route('admin.users.customer.view',[$customer['id']-1])}}"
                        data-toggle="tooltip" data-placement="top" title="{{ translate('Previous_customer') }}">
@@ -30,87 +31,26 @@
                        data-placement="top" title="{{ translate('Next_customer') }}">
                         <i class="tio-arrow-forward"></i>
                     </a>
-                </div> --}}
+                </div>
             </div>
         </div>
         <!-- End Page Header -->
-
-        {{-- Create Coupon Card --}}
-        <div class="card mb-3">
-            <div class="card-body">
-                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                    <div class="d-flex gap-2 align-items-center">
-                        <img src="{{asset('public/assets/admin/img/icons/coupon-icon.png')}}" width="16" height="16" alt="">
-                        <p class="mb-0">{{ translate('If you want to make a customized COUPON for this customer, click the Create Coupon button and influence them buy more from your store.') }}</p>
-                    </div>
-
-                    <a href="{{ route('admin.coupon.add-new',['customer' => $customer['id']]) }}" class="btn btn-warning text-white font-semibold">
-                        <i class="tio-add"></i>
-                        {{translate('messages.create_coupon')}}
-                    </a>
+        <div class="row mb-2 g-2">
+            <!-- Collected Cash Card Example -->
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                <div class="resturant-card card--bg-1">
+                    <img class="resturant-icon" src="{{asset('public/assets/admin/img/customer-loyality/1.png')}}" alt="public">
+                    <div class="title text-capitalize">{{$customer->wallet_balance??0}}</div>
+                    <div class="subtitle">{{translate('messages.wallet_balance')}}</div>
                 </div>
             </div>
-        </div>
 
-        <div class="row mb-3 g-2">
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex flex-wrap gap-3">
-                            <div class="color-card flex-column align-items-center justify-content-center color-2 flex-grow-1">
-                                <div class="img-box">
-                                    <img class="resturant-icon w--30" src="{{asset('/public/assets/admin/img/icons/order-icon-1.png')}}" alt="">
-                                </div>
-                                <div class="d-flex flex-column align-items-center">
-                                    <h2 class="title"> {{ $orders->total() }} </h2>
-                                    <div class="subtitle">
-                                        {{ translate('total_order') }}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="color-card flex-column align-items-center justify-content-center color-5 flex-grow-1">
-                                <div class="img-box">
-                                    <img class="resturant-icon w--30" src="{{asset('/public/assets/admin/img/icons/order-icon-2.png')}}" alt="">
-                                </div>
-                                <div class="d-flex flex-column align-items-center">
-                                    <h2 class="title"> {{ \App\CentralLogics\Helpers::format_currency($total_order_amount[0]->total_order_amount) }} </h2>
-                                    <div class="subtitle">
-                                        {{ translate('total_order_amount') }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex flex-wrap gap-3">
-                            <div class="color-card flex-column align-items-center justify-content-center color-7 flex-grow-1">
-                                <div class="img-box">
-                                    <img class="resturant-icon w--30" src="{{asset('/public/assets/admin/img/icons/order-icon-3.png')}}" alt="transactions">
-                                </div>
-                                <div class="d-flex flex-column align-items-center">
-                                    <h2 class="title"> {{$customer->wallet_balance??0}} </h2>
-                                    <div class="subtitle">
-                                        {{translate('messages.wallet_balance')}}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="color-card flex-column align-items-center justify-content-center color-4 flex-grow-1">
-                                <div class="img-box">
-                                    <img class="resturant-icon w--30" src="{{asset('/public/assets/admin/img/icons/order-icon-4.png')}}" alt="transactions">
-                                </div>
-                                <div class="d-flex flex-column align-items-center">
-                                    <h2 class="title"> {{$customer->loyalty_point??0}} </h2>
-                                    <div class="subtitle">
-                                        {{translate('messages.loyalty_point')}}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Pending Requests Card Example -->
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                <div class="resturant-card card--bg-2">
+                    <img class="resturant-icon" src="{{asset('public/assets/admin/img/customer-loyality/2.png')}}" alt="public">
+                    <div class="title text-capitalize">{{$customer->loyalty_point??0}}</div>
+                    <div class="subtitle    ">{{translate('messages.loyalty_point_balance')}}</div>
                 </div>
             </div>
         </div>
@@ -118,26 +58,17 @@
         <div class="row" id="printableArea">
             <div class="col-lg-8 mb-3 mb-lg-0">
                 <div class="card">
-                    <div class="card-header border-0 py-2 d-flex flex-wrap gap-2">
+                    <div class="card-header border-0 py-2 d-flex gap-2">
                         <div class="search--button-wrapper">
-                            <h5 class="card-title d-flex gap-2 align-items-center">
-                                {{translate('order_list')}}
-                                <span class="badge badge-soft-secondary">{{ $orders->total() }}</span>
-                            </h5>
-
+                            <h5 class="card-title"> {{translate('order_list')}} <span class="badge badge-soft-secondary">{{ $orders->total() }}</span></h5>
                             <div class="min--260">
-                                <form class="search-form theme-style">
-                                    <div class="input-group input--group">
-                                        <input  type="search" name="search" class="form-control"
-                                        placeholder="{{translate('ex_: search_by_order_id')}}" aria-label="{{translate('messages.search')}}" value="{{request()?->search}}" >
-                                        <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
-                                    </div>
-                                </form>
-
+                                <div class="input--group input-group">
+                                    <input type="text" id="column1_search" class="form-control form-control-sm" placeholder="{{translate('ex_:_search_ID')}}">
+                                    <button type="button" class="btn btn--secondary">
+                                        <i class="tio-search"></i>
+                                    </button>
+                                </div>
                             </div>
-                            @if(request()->get('search'))
-                                 <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
-                                 @endif
                         </div>
                     <!-- Unfold -->
                     <div class="hs-unfold mr-2">
@@ -164,11 +95,16 @@
                                     alt="Image Description">
                                 .{{ translate('messages.csv') }}
                             </a>
+                            {{-- <a id="export-pdf" class="dropdown-item" href="javascript:;">
+                                <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                    src="{{ asset('public/assets/admin') }}/svg/components/pdf.svg"
+                                    alt="Image Description">
+                                {{ translate('messages.pdf') }}
+                            </a> --}}
                         </div>
                     </div>
                     <!-- End Unfold -->
                     </div>
-
                     <!-- Table -->
                     <div class="table-responsive datatable-custom">
                         <table id="columnSearchDatatable"
@@ -179,149 +115,68 @@
                                  "paging":false
                                }'>
                             <thead class="thead-light">
-                                <tr>
-                                    <th class="border-0 pl-4">{{translate('SL')}}</th>
-                                    <th class="border-0">{{translate('messages.order_ID')}}</th>
-                                    <th class="border-0">{{translate('messages.store')}}</th>
-                                    <th class="border-0 ">{{translate('messages.status')}}</th>
-                                    <th class="border-0 text-center ">{{translate('messages.total_Items')}}</th>
-                                    <th class="border-0 ">{{translate('messages.total_amount')}}</th>
-                                    <th class="border-0 ">{{translate('messages.order_date')}}</th>
-                                    <th class="border-0 text-center">{{translate('messages.action')}}</th>
-                                </tr>
+                            <tr>
+                                <th class="border-0 pl-4">{{translate('sl')}}</th>
+                                <th class="border-0 text-center">{{translate('messages.order_id')}}</th>
+                                <th class="border-0 text-center">{{translate('messages.total_amount')}}</th>
+                                <th class="border-0 text-center">{{translate('messages.action')}}</th>
+                            </tr>
                             </thead>
 
                             <tbody>
-                                @foreach($orders as $key=>$order)
-                                    <tr>
-                                        <td>
-                                            <div class="pl-2">
-                                                {{$key+$orders->firstItem()}}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <a class="text-dark" href="{{route((isset($order) && $order->order_type=='parcel')?'admin.parcel.order.details':'admin.order.details',['id'=>$order['id'],'module_id'=>$order['module_id']])}}">{{$order['id']}}</a>
-                                        </td>
-                                        <th>
-                                            @if ($order->store)
-                                            <div><a  class="text--title" href="{{route('admin.store.view', $order->store_id)}}" alt="view store">{{Str::limit($order->store?$order->store->name:translate('messages.store deleted!'),20,'...')}}</a></div>
-                                            @else
-                                                <div>{{Str::limit(translate('messages.not_found'),20,'...')}}</div>
-                                            @endif
-                                        </th>
-                                        <td class="text-capitalize ">
-                                            @if($order['order_status']=='pending')
-                                                <span class="badge badge-soft-info">
-                                      {{translate('messages.pending')}}
-                                    </span>
-                                            @elseif($order['order_status']=='confirmed')
-                                                <span class="badge badge-soft-info">
-                                      {{translate('messages.confirmed')}}
-                                    </span>
-                                            @elseif($order['order_status']=='processing')
-                                                <span class="badge badge-soft-warning">
-                                      {{translate('messages.processing')}}
-                                    </span>
-                                            @elseif($order['order_status']=='picked_up')
-                                                <span class="badge badge-soft-warning">
-                                      {{translate('messages.out_for_delivery')}}
-                                    </span>
-                                            @elseif($order['order_status']=='delivered')
-                                                <span class="badge badge-soft-success">
-                                      {{translate('messages.delivered')}}
-                                    </span>
-                                            @elseif($order['order_status']=='failed')
-                                                <span class="badge badge-soft-danger">
-                                      {{translate('messages.payment_failed')}}
-                                    </span>
-                                            @elseif($order['order_status']=='handover')
-                                                <span class="badge badge-soft-danger">
-                                      {{translate('messages.handover')}}
-                                    </span>
-                                            @elseif($order['order_status']=='canceled')
-                                                <span class="badge badge-soft-danger">
-                                      {{translate('messages.canceled')}}
-                                    </span>
-                                            @elseif($order['order_status']=='accepted')
-                                                <span class="badge badge-soft-danger">
-                                      {{translate('messages.accepted')}}
-                                    </span>
-                                            @elseif($order['order_status']=='refund_requested')
-                                                <span class="badge badge-soft-danger">
-                                      {{translate('messages.refund_requested')}}
-                                    </span>
-                                            @else
-                                                <span class="badge badge-soft-danger">
-                                      {{str_replace('_',' ',$order['order_status'])}}
-                                    </span>
-                                            @endif
-
-                                        </td>
-                                        <td>
-                                            <div class="text-center mw--85px mx-auto">
-                                                {{ $order?->details_count != 0  ?  $order?->details_count: translate('messages.N/A') }}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                {{\App\CentralLogics\Helpers::format_currency($order['order_amount'])}}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                <div>
-                                                    {{ \App\CentralLogics\Helpers::date_format($order->created_at) }}
-                                                </div>
-                                                <div class="d-block text-uppercase">
-                                                    {{ \App\CentralLogics\Helpers::time_format($order->created_at) }}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="btn--container justify-content-center">
-                                                <a class="btn action-btn btn--warning btn-outline-warning" href="{{route((isset($order) && $order->order_type=='parcel')?'admin.parcel.order.details':'admin.order.details',['id'=>$order['id']])}}" title="{{translate('messages.view')}} "><i class="tio-visible"></i></a>
-                                                {{-- <a class="btn action-btn btn--primary btn-outline-primary" target="_blank" href="{{route('admin.order.generate-invoice',[$order['id']])}}" title="{{translate('messages.invoice')}}">
-                                                    <i class="tio-print"></i>
-                                                </a> --}}
-                                                <a class="btn action-btn btn--primary btn-outline-primary" target="_blank" href="{{route('admin.order.generate-invoice',[$order['id']])}}" title="{{translate('messages.download')}}">
-                                                    <i class="tio-download-to"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
+                            @foreach($orders as $key=>$order)
+                                <tr>
+                                    <td>
+                                        <div class="pl-2">
+                                            {{$key+$orders->firstItem()}}
+                                        </div>
+                                    </td>
+                                    <td class="table-column-pl-0 text-center">
+                                        <a href="{{route((isset($order) && $order->order_type=='parcel')?'admin.parcel.order.details':'admin.order.details',['id'=>$order['id'],'module_id'=>$order['module_id']])}}">{{$order['id']}}</a>
+                                    </td>
+                                    <td>
+                                        <div class="text-right mw--85px mx-auto">
+                                            {{\App\CentralLogics\Helpers::format_currency($order['order_amount'])}}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn--container justify-content-center">
+                                            <a class="btn action-btn btn--warning btn-outline-warning" href="{{route((isset($order) && $order->order_type=='parcel')?'admin.parcel.order.details':'admin.order.details',['id'=>$order['id']])}}" title="{{translate('messages.view')}} "><i class="tio-visible"></i></a>
+                                            <a class="btn action-btn btn--primary btn-outline-primary" target="_blank" href="{{route('admin.order.generate-invoice',[$order['id']])}}" title="{{translate('messages.invoice')}}"><i class="tio-print"></i> </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
                             </tbody>
                         </table>
+                        @if(count($orders) !== 0)
+                        <hr>
+                        @endif
+                        <div class="page-area">
+                            {!! $orders->links() !!}
+                        </div>
+                        @if(count($orders) === 0)
+                        <div class="empty--data">
+                            <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
+                            <h5>
+                                {{translate('no_data_found')}}
+                            </h5>
+                        </div>
+                        @endif
                     </div>
-                    @if(count($orders) !== 0)
-                    <hr>
-                    @endif
-                    <div class="page-area">
-                        {!! $orders->links() !!}
-                    </div>
-                    @if(count($orders) === 0)
-                    <div class="empty--data">
-                        <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
-                        <h5>
-                            {{translate('no_data_found')}}
-                        </h5>
-                    </div>
-                    @endif
                 </div>
             </div>
 
             <div class="col-lg-4">
+                <!-- Card -->
                 <div class="card">
                     <!-- Header -->
                     <div class="card-header">
-                        <h4 class="card-title d-flex flex-wrap align-items-center gap-2">
-                            <div class="d-flex align-items-center gap-1">
-                                <span class="card-header-icon">
-                                    <i class="tio-user"></i>
-                                </span>
-                                <span class=""> {{ translate('customer_information') }}</span>
-                            </div>
-                            <span class="badge badge-soft-info">{{ translate('total_order') }}: {{ $orders->total() }}</span>
+                        <h4 class="card-title">
+                            <span class="card-header-icon">
+                                <i class="tio-user"></i>
+                            </span>
+                            <span>{{$customer['f_name'].' '.$customer['l_name']}}</span>
                         </h4>
                     </div>
                     <!-- End Header -->
@@ -329,44 +184,33 @@
                     <!-- Body -->
                     @if($customer)
                         <div class="card-body">
-                            <div class="media gap-3 flex-wrap">
-                                <div class="avatar avatar-circle avatar-70">
-                                    <img class="avatar-img onerror-image" width="70" height="70" data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}" src="{{\App\CentralLogics\Helpers::onerror_image_helper($customer->image, asset('storage/app/public/profile/').'/'.$customer->image, asset('public/assets/admin/img/160x160/img1.jpg'), 'profile/') }}"
+                            <div class="customer--information-single media align-items-center" href="javascript:">
+                                <div class="avatar avatar-circle">
+                                    <img class="avatar-img onerror-image" data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}" src="{{\App\CentralLogics\Helpers::onerror_image_helper($customer->image, asset('storage/app/public/profile/').'/'.$customer->image, asset('public/assets/admin/img/160x160/img1.jpg'), 'profile/') }}"
                                     alt="Image Description">
                                 </div>
                                 <div class="media-body">
-                                    <div class="key-value-list d-flex flex-column gap-2 text-dark" style="--min-width: 60px">
-                                        <div class="key-val-list-item d-flex gap-3">
-                                            <div>{{ translate('name') }}</div>:
-                                            <div class="font-semibold">{{$customer['f_name'].' '.$customer['l_name']}}</div>
-                                        </div>
-                                        <div class="key-val-list-item d-flex gap-3">
-                                            <div>{{ translate('contact') }}</div>:
-                                            <a href="tel:{{ $customer['phone'] }}" class="text-dark font-semibold">{{$customer['phone']}}</a>
-                                        </div>
-                                        <div class="key-val-list-item d-flex gap-3">
-                                            <div>{{ translate('email') }}</div>:
-                                            <a href="mailto:{{ $customer['email'] }}" class="text-dark font-semibold">{{$customer['email']}}</a>
-                                        </div>
-                                        @foreach($customer->addresses as $address)
-                                            <div class="key-val-list-item d-flex gap-3">
-                                                <div>{{ translate('address') }}</div>:
-                                                <a href="https://www.google.com/maps/search/?api=1&query={{ data_get($address,'latitude',0)}},{{ data_get($address,'longitude',0)}}" target="_blank">{{ $address['address'] }}</a>
-                                            </div>
-                                        @endforeach
-                                    </div>
-
-                                    {{-- <ul class="list-unstyled m-0">
+                                    <ul class="list-unstyled m-0">
+                                        <li class="pb-1 d-flex align-items-center">
+                                            <i class="tio-email mr-2"></i>
+                                            <span>{{$customer['email']}}</span>
+                                        </li>
+                                        <li class="pb-1 d-flex align-items-center">
+                                            <i class="tio-call-talking-quiet mr-2"></i>
+                                            <span>{{$customer['phone']}}</span>
+                                        </li>
                                         <li class="pb-1 d-flex align-items-center">
                                             <i class="tio-shopping-basket-outlined mr-2"></i>
-                                            <span>{{$customer->order_count}} {{translate('messages.Completed_orders')}}</span>
+                                            <span>{{$customer->order_count}} {{translate('messages.orders')}}</span>
                                         </li>
-                                    </ul> --}}
+                                    </ul>
                                 </div>
                             </div>
 
+                            <hr>
 
-                            {{-- @foreach($customer->addresses as $address)
+
+                            @foreach($customer->addresses as $address)
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h5>{{translate('messages.addresses')}}</h5>
                                 </div>
@@ -389,7 +233,7 @@
                                     </li>
                                 </ul>
                                 <hr>
-                            @endforeach --}}
+                            @endforeach
 
                         </div>
                 @endif

@@ -2,6 +2,10 @@
 
 @section('title',translate('messages.flash_sales'))
 
+@push('css_or_js')
+
+@endpush
+
 @section('content')
     <div class="content container-fluid">
         <!-- Page Header -->
@@ -84,14 +88,14 @@
                                                     <label class="form-label">{{ translate('admin') }}(%)</label>
                                                 <input type="number"  min=".01" step="0.001" max="100" name="admin_discount_percentage"
                                                         value=""
-                                                        class="form-control" id="adminDiscount"
+                                                        class="form-control"
                                                         placeholder="{{ translate('Ex_:_50') }}" required>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <label class="form-label">{{ translate('messages.store_owner') }}(%)</label>
                                                 <input type="number"  min=".01" step="0.001" max="100" name="vendor_discount_percentage"
                                                         value=""
-                                                        class="form-control" id="storeDiscount"
+                                                        class="form-control"
                                                         placeholder="{{ translate('Ex_:_50') }}" required>
                                                 </div>
                                             </div>
@@ -145,10 +149,6 @@
                                 </div>
                                 <!-- End Search -->
                             </form>
-                            @if(request()->get('search'))
-                            <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
-                            @endif
-
                         </div>
                     </div>
                     <!-- Table -->
@@ -176,12 +176,12 @@
                             @foreach($flash_sales as $key=>$flash_sale)
                                 <tr>
                                     <td class="text-center">
-                                        <span  class="mr-3">
+                                        <span class="mr-3">
                                             {{$key+$flash_sales->firstItem()}}
                                         </span>
                                     </td>
                                     <td class="text-center">
-                                        <span title="{{$flash_sale['title']}}" class="font-size-sm text-body mr-3">
+                                        <span class="font-size-sm text-body mr-3">
                                             {{Str::limit($flash_sale['title'],20,'...')}}
                                         </span>
                                     </td>
@@ -230,21 +230,21 @@
                             @endforeach
                             </tbody>
                         </table>
+                        @if(count($flash_sales) !== 0)
+                        <hr>
+                        @endif
+                        <div class="page-area">
+                            {!! $flash_sales->links() !!}
+                        </div>
+                        @if(count($flash_sales) === 0)
+                        <div class="empty--data">
+                            <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
+                            <h5>
+                                {{translate('no_data_found')}}
+                            </h5>
+                        </div>
+                        @endif
                     </div>
-                    @if(count($flash_sales) !== 0)
-                    <hr>
-                    @endif
-                    <div class="page-area">
-                        {!! $flash_sales->links() !!}
-                    </div>
-                    @if(count($flash_sales) === 0)
-                    <div class="empty--data">
-                        <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
-                        <h5>
-                            {{translate('no_data_found')}}
-                        </h5>
-                    </div>
-                    @endif
                 </div>
             </div>
             <!-- End Table -->

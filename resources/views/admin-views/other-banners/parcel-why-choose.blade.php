@@ -50,10 +50,10 @@
                                     <div class="row lang_form default-form">
                                         <div class="col-12">
                                             <div class="form-group">
-                                                <label class="form-label">{{translate('Title')}} ({{ translate('messages.default') }})<span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('Write_the_title_within_80_characters') }}">
+                                                <label class="form-label">{{translate('Title')}} ({{ translate('messages.default') }})<span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('Write_the_title_within_100_characters') }}">
                                                             <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
                                                         </span></label>
-                                                <input type="text"  maxlength="80" name="title[]" class="form-control" placeholder="{{translate('messages.title_here...')}}">
+                                                <input type="text"  maxlength="100" name="title[]" class="form-control" placeholder="{{translate('messages.title_here...')}}">
                                             </div>
                                         </div>
                                         <div class="col-12">
@@ -61,7 +61,7 @@
                                                 <label class="form-label">{{translate('messages.Short_Description')}} ({{ translate('messages.default') }})<span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('Write_the_short_description_within_100_characters') }}">
                                                             <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
                                                         </span></label>
-                                                <textarea type="text"  maxlength="100" name="short_description[]" class="form-control" rows="3" {{translate('messages.short_description_here...')}}> </textarea>
+                                                <input type="text"  maxlength="100" name="short_description[]" class="form-control" placeholder="{{translate('messages.short_description_here...')}}">
                                             </div>
                                         </div>
                                     </div>
@@ -71,10 +71,10 @@
 
                                         <div class="col-12">
                                             <div class="form-group">
-                                                <label class="form-label">{{translate('Title')}} ({{strtoupper($lang)}})<span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('Write_the_title_within_80_characters') }}">
+                                                <label class="form-label">{{translate('Title')}} ({{strtoupper($lang)}})<span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('Write_the_title_within_100_characters') }}">
                                                     <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
                                                 </span></label>
-                                                <input type="text"  maxlength="80" name="title[]" class="form-control" placeholder="{{translate('messages.title_here...')}}">
+                                                <input type="text"  maxlength="100" name="title[]" class="form-control" placeholder="{{translate('messages.title_here...')}}">
                                             </div>
                                         </div>
                                         <div class="col-12">
@@ -82,7 +82,7 @@
                                                 <label class="form-label">{{translate('messages.Short_Description')}} ({{strtoupper($lang)}})<span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('Write_the_short_description_within_100_characters') }}">
                                                     <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
                                                 </span></label>
-                                                <textarea type="text"  maxlength="100" name="short_description[]" class="form-control" rows="3" {{translate('messages.short_description_here...')}}> </textarea>
+                                                <input type="text"  maxlength="100" name="short_description[]" class="form-control" placeholder="{{translate('messages.short_description_here...')}}">
                                             </div>
                                         </div>
                                     </div>
@@ -93,10 +93,10 @@
 
                                 @else
                                 <div class="col-sm-6">
-                                    <label class="form-label">{{translate('Title')}}<span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('Write_the_title_within_80_characters') }}">
+                                    <label class="form-label">{{translate('Title')}}<span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('Write_the_title_within_100_characters') }}">
                                                 <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
                                             </span></label>
-                                    <input type="text"  maxlength="80" name="title[]" class="form-control" placeholder="{{translate('messages.title_here...')}}">
+                                    <input type="text"  maxlength="100" name="title[]" class="form-control" placeholder="{{translate('messages.title_here...')}}">
                                 </div>
                                     <input type="hidden" name="lang[]" value="default">
                                 @endif
@@ -147,13 +147,13 @@
                                     <tr>
                                         <td>{{ $key+1 }}</td>
                                         <td>
-                                            <div class="text--title" title="{{$banner->title}}">
-                                                {{ strlen($banner->title) > 30 ? substr($banner->title, 0, 30).'...' : $banner->title }}
+                                            <div class="text--title">
+                                            {{ $banner->title }}
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="text--title" title="{{$banner->short_description}}">
-                                                {{ strlen($banner->short_description) > 40 ? substr($banner->short_description, 0, 40).'...' : $banner->short_description }}
+                                            <div class="text--title">
+                                            {{ $banner->short_description }}
                                             </div>
                                         </td>
                                         <td>

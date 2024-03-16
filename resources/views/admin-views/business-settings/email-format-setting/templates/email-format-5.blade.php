@@ -8,7 +8,7 @@ $company_name = App\Models\BusinessSetting::where('key', 'business_name')->first
 
             src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
                 data_get($data, 'icon' , null),
-                asset('storage/app/public/email_template').'/'.data_get($data, 'icon' , null),
+                asset('storage/app/public/email_template').'/'.data_get($data, 'icon' , null) ,
                 asset('/public/assets/admin/img/blank3.png'),
                 'email_template/'
             ) }}"

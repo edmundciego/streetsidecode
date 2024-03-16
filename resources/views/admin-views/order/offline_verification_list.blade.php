@@ -67,11 +67,6 @@
                         </div>
                         <!-- End Search -->
                     </form>
-                    @if(request()->get('search'))
-                    <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
-                    @endif
-
-
                     <!-- Datatable Info -->
                     <div id="datatableCounterInfo" class="mr-2 mb-2 mb-sm-0 initial-hidden">
                         <div class="d-flex align-items-center">

@@ -60,7 +60,7 @@
                                         <div class="col-12">
                                             <div class="form-group mb-0">
                                                 <label class="input-label" for="exampleFormControlInput1">{{translate('messages.description')}}</label>
-                                                <textarea name="description" class="form-control" maxlength="1000" required></textarea>
+                                                <textarea name="description" class="form-control" required></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -110,10 +110,6 @@
                                 </div>
                                 <!-- End Search -->
                             </form>
-                            @if(request()->get('search'))
-                            <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
-                            @endif
-
 
                             <!-- Unfold -->
                             <div class="hs-unfold mr-2">
@@ -176,11 +172,11 @@
                                 <tr>
                                     <td>{{$key+$notifications->firstItem()}}</td>
                                     <td>
-                                    <span title="{{ $notification['title'] }}" class="d-block font-size-sm text-body">
+                                    <span class="d-block font-size-sm text-body">
                                         {{substr($notification['title'],0,25)}} {{strlen($notification['title'])>25?'...':''}}
                                     </span>
                                     </td>
-                                    <td title="{{ $notification['description'] }}">
+                                    <td>
                                         {{substr($notification['description'],0,25)}} {{strlen($notification['description'])>25?'...':''}}
                                     </td>
                                     <td>
@@ -228,21 +224,21 @@
                             @endforeach
                             </tbody>
                         </table>
+                        @if(count($notifications) !== 0)
+                        <hr>
+                        @endif
+                        <div class="page-area">
+                            {!! $notifications->links() !!}
+                        </div>
+                        @if(count($notifications) === 0)
+                        <div class="empty--data">
+                            <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
+                            <h5>
+                                {{translate('no_data_found')}}
+                            </h5>
+                        </div>
+                        @endif
                     </div>
-                    @if(count($notifications) !== 0)
-                    <hr>
-                    @endif
-                    <div class="page-area">
-                        {!! $notifications->links() !!}
-                    </div>
-                    @if(count($notifications) === 0)
-                    <div class="empty--data">
-                        <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
-                        <h5>
-                            {{translate('no_data_found')}}
-                        </h5>
-                    </div>
-                    @endif
                 </div>
             </div>
             <!-- End Table -->

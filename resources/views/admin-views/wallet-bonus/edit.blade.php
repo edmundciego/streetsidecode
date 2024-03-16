@@ -41,19 +41,13 @@
                                             <div class="row">
                                                 <div class="col-6">
                                                     <div class="form-group">
-                                                        <label class="input-label" for="default_title">{{translate('messages.Bonus_Title')}} ({{translate('messages.default')}}) <span class="form-label-secondary text-danger"
-                                                            data-toggle="tooltip" data-placement="right"
-                                                            data-original-title="{{ translate('messages.Required.')}}"> *
-                                                            </span></label>
+                                                        <label class="input-label" for="default_title">{{translate('messages.Bonus_Title')}} ({{translate('messages.default')}})</label>
                                                         <input type="text" name="title[]" id="default_title" class="form-control" placeholder="{{translate('messages.title')}}" value="{{$bonus?->getRawOriginal('title')}}"  >
                                                     </div>
                                                 </div>
                                                 <div class="col-6">
                                                     <div class="form-group">
-                                                        <label class="input-label" for="default_description">{{translate('messages.Short_Description')}} ({{translate('messages.default')}}) <span class="form-label-secondary text-danger"
-                                                            data-toggle="tooltip" data-placement="right"
-                                                            data-original-title="{{ translate('messages.Required.')}}"> *
-                                                            </span></label>
+                                                        <label class="input-label" for="default_description">{{translate('messages.Short_Description')}} ({{translate('messages.default')}})</label>
                                                         <input type="text" name="description[]" id="default_description" class="form-control" placeholder="{{translate('messages.description')}}" value="{{$bonus?->getRawOriginal('description')}}"  >
                                                     </div>
                                                 </div>
@@ -105,12 +99,9 @@
                         </div>
                         <div class="col-md-4 col-lg-4 col-sm-6">
                             <div class="form-group m-0">
-                                <label class="input-label" for="bonus_type">{{translate('messages.Bonus_Type')}} <span class="form-label-secondary text-danger"
-                                    data-toggle="tooltip" data-placement="right"
-                                    data-original-title="{{ translate('messages.Required.')}}"> *
-                                    </span></label>
+                                <label class="input-label" for="bonus_type">{{translate('messages.Bonus_Type')}}</label>
                                 <select name="bonus_type" id="bonus_type" class="form-control">
-                                    <option value="amount" {{$bonus['bonus_type']=='amount'?'selected':''}}>{{translate('messages.amount')}} ({{ \App\CentralLogics\Helpers::currency_symbol() }})
+                                    <option value="amount" {{$bonus['bonus_type']=='amount'?'selected':''}}>{{translate('messages.amount')}}
                                     </option>
                                     <option value="percentage" {{$bonus['bonus_type']=='percentage'?'selected':''}}>
                                         {{translate('messages.percentage')}} (%)
@@ -131,12 +122,9 @@
                                     data-original-title="{{ translate('Set_the_bonus_amount/percentage_a_customer_will_receive_after_adding_money_to_his_wallet.') }}">
                                     <i class="tio-info-outined"></i>
                                 </span>
-                                <span class="form-label-secondary text-danger"
-                                data-toggle="tooltip" data-placement="right"
-                                data-original-title="{{ translate('messages.Required.')}}"> *
-                                </span>
+
                                 </label>
-                                <input type="number" id="bonus_amount" min="1" max="{{ $bonus['bonus_type'] == 'percentage'? '100' : '999999999999.99' }}" step="0.01" value="{{$bonus['bonus_amount']}}"
+                                <input type="number" id="bonus_amount" min="1" max="999999999999.99" step="0.01" value="{{$bonus['bonus_amount']}}"
                                        name="bonus_amount" class="form-control" required>
                             </div>
                         </div>
@@ -149,10 +137,6 @@
                                             data-placement="right"
                                             data-original-title="{{ translate('Set_the_minimum_add_money_amount_for_a_customer_to_be_eligible_for_the_bonus.') }}">
                                             <i class="tio-info-outined"></i>
-                                        </span>
-                                        <span class="form-label-secondary text-danger"
-                                        data-toggle="tooltip" data-placement="right"
-                                        data-original-title="{{ translate('messages.Required.')}}"> *
                                         </span>
                                 </label>
                                 <input type="number" id="minimum_add_amount" min="1" max="999999999999.99" step="0.01" value="{{$bonus['minimum_add_amount']}}"
@@ -176,10 +160,7 @@
                         </div>
                         <div class="col-md-4 col-lg-4 col-sm-6">
                             <div class="form-group m-0">
-                                <label class="input-label" for="date_from">{{translate('messages.start_date')}} <span class="form-label-secondary text-danger"
-                                                        data-toggle="tooltip" data-placement="right"
-                                                        data-original-title="{{ translate('messages.Required.')}}"> *
-                                                        </span></label>
+                                <label class="input-label" for="date_from">{{translate('messages.start_date')}}</label>
                                 <input type="date" name="start_date" class="form-control" id="date_from" placeholder="{{translate('messages.select_date')}}" max="{{date("Y-m-d",strtotime($bonus["end_date"]))}}" value="{{date('Y-m-d',strtotime($bonus['start_date']))}}"                     data-hs-flatpickr-options='{
                                     "dateFormat": "Y-m-d"
                                   }'>
@@ -187,10 +168,7 @@
                         </div>
                         <div class="col-md-4 col-lg-4 col-sm-6">
                             <div class="form-group m-0">
-                                <label class="input-label" for="date_to">{{translate('messages.expire_date')}} <span class="form-label-secondary text-danger"
-                                                        data-toggle="tooltip" data-placement="right"
-                                                        data-original-title="{{ translate('messages.Required.')}}"> *
-                                                        </span></label>
+                                <label class="input-label" for="date_to">{{translate('messages.expire_date')}}</label>
                                 <input type="date" name="end_date" class="form-control" placeholder="{{translate('messages.select_date')}}" min="{{date("Y-m-d",strtotime($bonus["start_date"]))}}" id="date_to" value="{{date('Y-m-d',strtotime($bonus['end_date']))}}"
                                        data-hs-flatpickr-options='{
                                      "dateFormat": "Y-m-d"

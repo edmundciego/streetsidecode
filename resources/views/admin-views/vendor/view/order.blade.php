@@ -18,35 +18,35 @@
                 <div class="col-md-12">
                     <div class="resturant-card-navbar">
 
-                        <div class="order-info-item filter-on-click" data-type='all_orders' data-filter="filter" data-url="{{route('admin.store.view', ['store'=>$store->id, 'tab'=> 'order'])}}">
+                        <div class="order-info-item redirect-url" data-url="{{route('admin.order.list',['all'])}}?vendor[]={{$store->id}}">
                             <div class="order-info-icon">
                                 <img src="{{asset('public/assets/admin/img/navbar/all.png')}}" alt="public">
                             </div>
                             <h6 class="card-subtitle">{{translate('messages.all')}}<span class="amount text--primary">{{\App\Models\Order::where('store_id', $store->id)->StoreOrder()->count()}}</span></h6>
                         </div>
                         <span class="order-info-seperator"></span>
-                        <div class="order-info-item filter-on-click"  data-filter="filter"  data-type="scheduled_orders" data-url="{{route('admin.store.view', ['store'=>$store->id, 'tab'=> 'order'])}}"  >
+                        <div class="order-info-item redirect-url" data-url="{{route('admin.order.list',['scheduled'])}}?vendor[]={{$store->id}}">
                             <div class="order-info-icon">
                                 <img src="{{asset('public/assets/admin/img/navbar/schedule.png')}}" alt="public">
                             </div>
                             <h6 class="card-subtitle">{{translate('messages.scheduled')}}<span class="amount text--warning">{{\App\Models\Order::Scheduled()->where('store_id', $store->id)->StoreOrder()->count()}}</span></h6>
                         </div>
                         <span class="order-info-seperator"></span>
-                        <div class="order-info-item filter-on-click"   data-filter="filter"  data-type="pending_orders" data-url="{{route('admin.store.view', ['store'=>$store->id, 'tab'=> 'order'])}}" >
+                        <div class="order-info-item redirect-url" data-url="{{route('admin.order.list',['pending'])}}?vendor[]={{$store->id}}">
                             <div class="order-info-icon">
                                 <img src="{{asset('public/assets/admin/img/navbar/pending.png')}}" alt="public">
                             </div>
                             <h6 class="card-subtitle">{{translate('messages.pending')}}<span class="amount text--info">{{\App\Models\Order::where(['order_status'=>'pending','store_id'=>$store->id])->StoreOrder()->OrderScheduledIn(30)->count()}}</span></h6>
                         </div>
                         <span class="order-info-seperator"></span>
-                        <div class="order-info-item filter-on-click"  data-filter="filter"  data-type="delivered_orders" data-url="{{route('admin.store.view', ['store'=>$store->id, 'tab'=> 'order'])}}" >
+                        <div class="order-info-item redirect-url" data-url="{{route('admin.order.list',['delivered'])}}?vendor[]={{$store->id}}">
                             <div class="order-info-icon">
                                 <img src="{{asset('public/assets/admin/img/navbar/delivered.png')}}" alt="public">
                             </div>
                             <h6 class="card-subtitle">{{translate('messages.delivered')}}<span class="amount text--success">{{\App\Models\Order::where(['order_status'=>'delivered', 'store_id'=>$store->id])->StoreOrder()->count()}}</span></h6>
                         </div>
                         <span class="order-info-seperator"></span>
-                        <div class="order-info-item filter-on-click"  data-filter="filter"  data-type="canceled_orders" data-url="{{route('admin.store.view', ['store'=>$store->id, 'tab'=> 'order'])}}" >
+                        <div class="order-info-item redirect-url" data-url="{{route('admin.order.list',['canceled'])}}?vendor[]={{$store->id}}">
                             <div class="order-info-icon">
                                 <img src="{{asset('public/assets/admin/img/navbar/cancel.png')}}" alt="public">
                             </div>
@@ -72,9 +72,6 @@
                                 </div>
                                 <!-- End Search -->
                             </form>
-                            @if(request()->get('search'))
-                            <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
-                            @endif
                             <!-- Unfold -->
                             <div class="hs-unfold mr-2">
                                 <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
@@ -155,11 +152,10 @@
                                             </td>
                                             <td>
                                                 <div>
-                                                    {{ \App\CentralLogics\Helpers::date_format($order['created_at']) }}
+                                                    {{date('d M Y',strtotime($order['created_at']))}}
                                                 </div>
                                                 <div class="d-block text-uppercase">
-                                                    {{ \App\CentralLogics\Helpers::time_format($order['created_at']) }}
-
+                                                    {{date(config('timeformat'),strtotime($order['created_at']))}}
                                                 </div>
                                             </td>
                                             <td>
@@ -170,13 +166,11 @@
 
                                                 @elseif($order->customer)
                                                 <div>
-                                                    <a title="{{$order->customer['f_name'].' '.$order->customer['l_name']}}" class="text-body text-capitalize"
+                                                    <a class="text-body text-capitalize"
                                                     href="{{route('admin.customer.view',[$order['user_id']])}}">
                                                         <div>
                                                             {{$order->customer['f_name'].' '.$order->customer['l_name']}}
                                                         </div>
-                                                    </a>
-                                                    <a href="tel:{{$order->customer['phone']}}">
                                                         <div>
                                                             {{$order->customer['phone']}}
                                                         </div>
@@ -243,7 +237,7 @@
                             <hr>
                             @endif
                             <div class="page-area">
-                                {!! $orders->withQueryString()->links() !!}
+                                {!! $orders->links() !!}
                             </div>
                             @if(count($orders) === 0)
                             <div class="empty--data">
@@ -336,15 +330,5 @@
             });
         });
         });
-
-        $(".filter-on-click").on("click", function () {
-    const type = $(this).data('type');
-    const url = $(this).data('url');
-    const filter_by = $(this).data('filter');
-    let nurl = new URL(url);
-    nurl.searchParams.delete('page');
-    nurl.searchParams.set(filter_by, type);
-    location.href = nurl;
-});
     </script>
 @endpush

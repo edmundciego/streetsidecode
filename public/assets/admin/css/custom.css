@@ -144,15 +144,16 @@ ol.breadcrumb {
     padding: 1px;
 }
 
+
 /* view inline css */
 #dm-conversation-list {
     overflow-y: scroll;
-    height: 600px;
+    height: 600px
 }
 
 #conversation-list {
     overflow-y: scroll;
-    height: 600px;
+    height: 600px
 }
 
 .select2-container--open {
@@ -162,8 +163,8 @@ ol.breadcrumb {
     z-index: 99999999999999;
 }
 
-.w-100-p {
-    width: 100%;
+.w-100-p{
+    width:100%;
 }
 
 div.scroll-down {

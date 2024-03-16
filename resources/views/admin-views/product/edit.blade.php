@@ -22,7 +22,7 @@
                     {{ request()->product_gellary  == 1 ?  translate('Add_item') : translate('item_update') }}
                 </span>
             </h1>
-            <div class="d-flex align-items-end flex-wrap">
+            <div class="d-flex align-items-end">
                 @if(Config::get('module.current_module_type') == 'food')
                 <div class="text--primary-2 py-1 d-flex flex-wrap align-items-center foodModalShow" type="button" >
                     <strong class="mr-2">{{translate('See_how_it_works!')}}</strong>
@@ -79,10 +79,7 @@
                                 <div class="lang_form" id="default-form">
                                     <div class="form-group">
                                         <label class="input-label" for="default_name">{{ translate('messages.name') }}
-                                            ({{ translate('messages.default') }})  <span class="form-label-secondary text-danger"
-                                            data-toggle="tooltip" data-placement="right"
-                                            data-original-title="{{ translate('messages.Required.')}}"> *
-                                            </span></label>
+                                            ({{ translate('messages.default') }})</label>
                                         <input type="text" name="name[]" id="default_name" class="form-control"
                                             placeholder="{{ translate('messages.new_food') }}"
                                             value="{{ $product?->getRawOriginal('name') }}" required
@@ -92,10 +89,7 @@
                                     <div class="form-group pt-2 mb-0">
                                         <label class="input-label"
                                             for="exampleFormControlInput1">{{ translate('messages.short_description') }}
-                                            ({{ translate('messages.default') }})  <span class="form-label-secondary text-danger"
-                                            data-toggle="tooltip" data-placement="right"
-                                            data-original-title="{{ translate('messages.Required.')}}"> *
-                                            </span></label>
+                                            ({{ translate('messages.default') }})</label>
                                         <textarea type="text" name="description[]" class="form-control ckeditor min--height-200">{!! $product?->getRawOriginal('description') !!}</textarea>
                                     </div>
                                 </div>
@@ -160,23 +154,22 @@
                                 <div class="flex-grow-1 mx-auto">
                                     <label class="text-dark d-block">
                                         {{ translate('messages.item_image') }}
-                                        <small >( {{ translate('messages.ratio') }} 1:1 )</small>
+                                        <small class="text-danger">* ( {{ translate('messages.ratio') }} 1:1 )</small>
                                     </label>
                                     <div class="d-flex flex-wrap __gap-12px __new-coba" id="coba">
 
                                         <input type="hidden" id="removedImageKeysInput" name="removedImageKeys" value="">
                                         @foreach($product->images as $key => $photo)
-                                            <div id="product_images_{{ $key }}" class="spartan_item_wrapper min-w-176px max-w-176px">
+                                            <div id="product_images_{{ $key }}" class="spartan_item_wrapper min-w-100px max-w-100px">
                                                 <img class="img--square onerror-image"
                                                 src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
                                                     $photo ?? '',
                                                     asset('storage/app/public/product').'/'.$photo ?? '',
-                                                    asset('public/assets/admin/img/upload-img.png'),
+                                                    asset('public/assets/admin/img/upload.png'),
                                                     'product/'
                                                 ) }}"
-                                                    data-onerror-image="{{ asset('public/assets/admin/img/upload-img.png') }}"
+                                                    data-onerror-image="{{ asset('public/assets/admin/img/upload.png') }}"
                                                     alt="Product image">
-                                                    <div class="pen spartan_remove_row"><i class="tio-edit"></i></div>
                                                     @if (request()->product_gellary  == 1)
                                                         <a href="#" data-key={{ $key }} data-photo="{{ $photo }}"
                                                         class="spartan_remove_row function_remove_img"><i class="tio-add-to-trash"></i></a>
@@ -193,23 +186,19 @@
                                         {{ translate('messages.item_thumbnail') }}
                                         <small class="text-danger">* ( {{ translate('messages.ratio') }} 1:1 )</small>
                                     </label>
-                                    <label class="d-inline-block m-0 position-relative">
-                                        <img class="img--176 border onerror-image" id="viewer"
+                                    <label class="d-inline-block m-0">
+                                        <img class="img--100 onerror-image" id="viewer"
                                         src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
                                             $product['image'] ?? '',
                                             asset('storage/app/public/product').'/'.$product['image'] ?? '',
-                                            asset('public/assets/admin/img/upload-img.png'),
+                                            asset('public/assets/admin/img/upload.png'),
                                             'product/'
                                         ) }}"
-                                            data-onerror-image="{{ asset('public/assets/admin/img/upload-img.png') }}"
+                                            data-onerror-image="{{ asset('public/assets/admin/img/upload.png') }}"
                                             alt="thumbnail" />
-                                        <div class="icon-file-group">
-                                            <div class="icon-file">
-                                                <input type="file" name="image" id="customFileEg1" class="custom-file-input read-url"
-                                                    accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" >
-                                                    <i class="tio-edit"></i>
-                                            </div>
-                                        </div>
+                                        <input type="file" name="image" id="customFileEg1"
+                                            class="custom-file-input d-none"
+                                            accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
                                     </label>
                                 </div>
                             </div>
@@ -230,10 +219,7 @@
                             <div class="row g-2">
                                 <div class="col-sm-6 col-lg-3">
                                     <div class="form-group mb-0">
-                                        <label class="input-label" for="store_id">{{ translate('messages.store') }}  <span class="form-label-secondary text-danger"
-                                            data-toggle="tooltip" data-placement="right"
-                                            data-original-title="{{ translate('messages.Required.')}}"> *
-                                            </span><span
+                                        <label class="input-label" for="store_id">{{ translate('messages.store') }}<span
                                                 class="input-label-secondary"></span></label>
                                         <select name="store_id"
                                             data-placeholder="{{ translate('messages.select_store') }}"
@@ -252,10 +238,8 @@
                                 <div class="col-sm-6 col-lg-3">
                                     <div class="form-group mb-0">
                                         <label class="input-label"
-                                            for="category_id">{{ translate('messages.category') }} <span class="form-label-secondary text-danger"
-                                            data-toggle="tooltip" data-placement="right"
-                                            data-original-title="{{ translate('messages.Required.')}}"> *
-                                            </span></label>
+                                            for="category_id">{{ translate('messages.category') }}<span
+                                                class="input-label-secondary">*</span></label>
                                         <select name="category_id" class="js-data-example-ajax form-control"
                                             id="category_id">
                                             @if ($category)
@@ -426,8 +410,8 @@
                     <div class="card shadow--card-2 border-0">
                         <div class="card-header">
                             <h5 class="card-title">
-                                <span class="card-header-icon"><i class="tio-label-outlined"></i></span>
-                                <span>{{ translate('Price Information') }}</span>
+                                <span class="card-header-icon"><i class="tio-dollar-outlined"></i></span>
+                                <span>{{ translate('amount') }}</span>
                             </h5>
                         </div>
                         <div class="card-body">
@@ -435,10 +419,7 @@
                                 <div class="col-sm-4 col-6">
                                     <div class="form-group mb-0">
                                         <label class="input-label"
-                                            for="exampleFormControlInput1">{{ translate('messages.price') }}  <span class="form-label-secondary text-danger"
-                                            data-toggle="tooltip" data-placement="right"
-                                            data-original-title="{{ translate('messages.Required.')}}"> *
-                                            </span></label>
+                                            for="exampleFormControlInput1">{{ translate('messages.price') }}</label>
                                         <input type="number" value="{{ $product->price }}" min="0"
                                             max="999999999999.99" name="price" class="form-control" step="0.01"
                                             placeholder="{{ translate('messages.Ex:') }} 100" required>
@@ -447,23 +428,20 @@
                                 <div class="col-sm-4 col-6">
                                     <div class="form-group mb-0">
                                         <label class="input-label"
-                                            for="exampleFormControlInput1">{{ translate('messages.discount_type') }} <span class="form-label-secondary text-danger"
-                                            data-toggle="tooltip" data-placement="right"
-                                            data-original-title="{{ translate('messages.Required.')}}"> *
-                                            </span><span
+                                            for="exampleFormControlInput1">{{ translate('messages.discount_type') }}<span
                                                 class="input-label-secondary text--title" data-toggle="tooltip"
                                                 data-placement="right"
                                                 data-original-title="{{ translate('Admin_shares_the_same_percentage/amount_on_discount_as_he_takes_commissions_from_stores.') }}">
                                                 <i class="tio-info-outined"></i>
                                             </span></label>
-                                        <select name="discount_type" id="discount_type" class="form-control js-select2-custom">
+                                        <select name="discount_type" class="form-control js-select2-custom">
                                             <option value="percent"
                                                 {{ $product['discount_type'] == 'percent' ? 'selected' : '' }}>
-                                                {{ translate('messages.percent') }} (%)
+                                                {{ translate('messages.percent') }}
                                             </option>
                                             <option value="amount"
                                                 {{ $product['discount_type'] == 'amount' ? 'selected' : '' }}>
-                                                {{ translate('messages.amount') }} ({{ \App\CentralLogics\Helpers::currency_symbol() }})
+                                                {{ translate('messages.amount') }}
                                             </option>
                                         </select>
                                     </div>
@@ -471,12 +449,7 @@
                                 <div class="col-sm-4 col-6">
                                     <div class="form-group mb-0">
                                         <label class="input-label"
-                                            for="exampleFormControlInput1">{{ translate('messages.discount') }}
-                                        <span id=symble>  {{  $product['discount_type'] == 'amount' ? ( \App\CentralLogics\Helpers::currency_symbol()) : '(%)' }}</span>
-                                            <span class="form-label-secondary text-danger"
-                                            data-toggle="tooltip" data-placement="right"
-                                            data-original-title="{{ translate('messages.Required.')}}"> *
-                                            </span></label>
+                                            for="exampleFormControlInput1">{{ translate('messages.discount') }}</label>
                                         <input type="number" min="0" value="{{ $product['discount'] }}"
                                             max="100000" name="discount" class="form-control"
                                             placeholder="{{ translate('messages.Ex:') }} 100">
@@ -644,6 +617,7 @@
         </div>
     </div>
 </div>
+
 @endsection
 
 
@@ -654,22 +628,17 @@
     "use strict";
      let removedImageKeys = [];
     let element = "";
-
-
-    $(document).on('click','.function_remove_img' ,function(){
-    let key = $(this).data('key');
+     $('.function_remove_img').on('change', function () {
+         let key = $(this).data('key');
          let photo = $(this).data('photo');
          function_remove_img(key,photo);
-    });
-
+     })
         function function_remove_img(key,photo) {
         $('#product_images_' + key).addClass('d-none');
         removedImageKeys.push(photo);
         $('#removedImageKeysInput').val(removedImageKeys.join(','));
         console.log('Removed Image Keys:', removedImageKeys);
     }
-
-
     function show_min_max(data) {
         console.log(data);
         $('#min_max1_' + data).removeAttr("readonly");
@@ -691,16 +660,6 @@
      $(document).on('change', '.show_min_max', function () {
          let data = $(this).data('count');
          show_min_max(data);
-     });
-
-     $(document).on('change', '#discount_type', function () {
-         let data =  document.getElementById("discount_type");
-         if(data.value === 'amount'){
-             $('#symble').text("({{ \App\CentralLogics\Helpers::currency_symbol() }})");
-            }
-            else{
-             $('#symble').text("(%)");
-         }
      });
 
      $(document).on('change', '.hide_min_max', function () {
@@ -1286,11 +1245,11 @@
             fieldName: 'item_images[]',
             maxCount: 6,
             // rowHeight: '100px !important',
-            groupClassName: 'spartan_item_wrapper min-w-176px max-w-176px',
+            groupClassName: 'spartan_item_wrapper min-w-100px max-w-100px',
             maxFileSize: '',
             placeholderImage: {
-                image: "{{ asset('public/assets/admin/img/upload-img.png') }}",
-                width: '176px'
+                image: "{{ asset('public/assets/admin/img/upload.png') }}",
+                width: '100px'
             },
             dropFileLabel: "Drop Here",
             onAddRow: function(index, file) {
@@ -1334,11 +1293,11 @@
         $("#coba").empty().spartanMultiImagePicker({
             fieldName: 'item_images[]',
             maxCount: 6,
-            rowHeight: '176px !important',
-            groupClassName: 'spartan_item_wrapper min-w-176px max-w-176px',
+            rowHeight: '100px !important',
+            groupClassName: 'spartan_item_wrapper min-w-100px max-w-100px',
             maxFileSize: '',
             placeholderImage: {
-                image: "{{ asset('public/assets/admin/img/upload-img.png') }}",
+                image: "{{ asset('public/assets/admin/img/upload.png') }}",
                 width: '100%'
             },
             dropFileLabel: "Drop Here",

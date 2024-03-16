@@ -2,7 +2,9 @@
 
 @section('title',translate('messages.add_store_name'))
 
-
+@push('css_or_js')
+    <link rel="stylesheet" href="{{asset('/public/assets/admin/css/intlTelInput.css')}}"/>
+@endpush
 
 @section('content')
     <div class="content container-fluid">
@@ -112,47 +114,37 @@
                         </div>
                         <div class="card-body">
                             <div class="d-flex flex-wrap flex-sm-nowrap __gap-12px">
-                                <div class="__custom-upload-img mr-lg-5">
+                                <label class="__custom-upload-img mr-lg-5">
                                     @php($logo = \App\Models\BusinessSetting::where('key', 'logo')->first())
                                     @php($logo = $logo->value ?? '')
                                     <label class="form-label">
                                         {{ translate('logo') }} <span class="text--primary">({{ translate('1:1') }})</span>
                                     </label>
-                                    <label class="text-center position-relative">
-                                        <img class="img--110 min-height-170px min-width-170px onerror-image image--border" id="viewer"
+                                    <div class="text-center">
+                                        <img class="img--110 min-height-170px min-width-170px onerror-image" id="viewer"
                                         data-onerror-image="{{ asset('public/assets/admin/img/upload.png') }}"
                                             src="{{ asset('public/assets/admin/img/upload-img.png') }}"
                                             alt="logo image" />
-                                        <div class="icon-file-group">
-                                            <div class="icon-file">
-                                                <i class="tio-edit"></i>
-                                                <input type="file" name="logo" id="customFileEg1" class="custom-file-input"
-                                                    accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" >
-                                            </div>
-                                        </div>
-                                    </label>
-                                </div>
+                                    </div>
+                                    <input type="file" name="logo" id="customFileEg1" class="custom-file-input"
+                                        accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" required>
+                                </label>
 
-                                <div class="__custom-upload-img">
+                                <label class="__custom-upload-img">
                                     @php($icon = \App\Models\BusinessSetting::where('key', 'icon')->first())
                                     @php($icon = $icon->value ?? '')
                                     <label class="form-label">
                                         {{ translate('Store Cover') }}  <span class="text--primary">({{ translate('2:1') }})</span>
                                     </label>
-                                    <label class="text-center position-relative">
-                                        <img class="img--vertical min-height-170px min-width-170px onerror-image image--border" id="coverImageViewer"
+                                    <div class="text-center">
+                                        <img class="img--vertical min-height-170px min-width-170px onerror-image" id="coverImageViewer"
                                         data-onerror-image="{{ asset('public/assets/admin/img/upload-img.png') }}"
                                             src="{{ asset('public/assets/admin/img/upload-img.png') }}"
                                             alt="Fav icon" />
-                                        <div class="icon-file-group">
-                                            <div class="icon-file">
-                                                <i class="tio-edit"></i>
-                                                <input type="file" name="cover_photo" id="coverImageUpload"  class="custom-file-input"
-                                                    accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
-                                            </div>
-                                        </div>
-                                    </label>
-                                </div>
+                                    </div>
+                                    <input type="file" name="cover_photo" id="coverImageUpload"  class="custom-file-input"
+                                        accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -285,7 +277,7 @@
                                 <div class="col-md-4 col-sm-6">
                                     <div class="form-group mb-0">
                                         <label class="input-label" for="phone">{{translate('messages.phone')}}</label>
-                                        <input type="tel" id="phone" name="phone" class="form-control"
+                                        <input type="text" id="phone" name="phone" class="form-control"
                                         placeholder="{{ translate('messages.Ex:') }} 017********"
                                         required>
                                     </div>
@@ -374,7 +366,8 @@
 @endsection
 
 @push('script_2')
-
+    <script src="{{asset('public/assets/admin/js/intlTelInputCdn.min.js')}}"></script>
+    <script src="{{asset('public/assets/admin/js/intlTelInputCdn-jquery.min.js')}}"></script>
     <script src="{{asset('public/assets/admin/js/spartan-multi-image-picker.js')}}"></script>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key={{\App\Models\BusinessSetting::where('key', 'map_api_key')->first()->value}}&libraries=places&callback=initMap&v=3.45.8"></script>
@@ -412,6 +405,18 @@
 
     $("#coverImageUpload").change(function () {
         readURL(this, 'coverImageViewer');
+    });
+    @php($country=\App\Models\BusinessSetting::where('key','country')->first())
+    let phone = $("#phone").intlTelInput({
+        utilsScript: "{{asset('public/assets/admin/js/intlTelInputCdn-utils.min.js')}}",
+        autoHideDialCode: true,
+        autoPlaceholder: "ON",
+        dropdownContainer: document.body,
+        formatOnDisplay: true,
+        hiddenInput: "phone",
+        initialCountry: "{{$country?$country->value:auto}}",
+        placeholderNumberType: "MOBILE",
+        separateDialCode: true
     });
 
     $(function () {

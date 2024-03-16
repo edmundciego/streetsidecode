@@ -24,68 +24,60 @@
             <div class="card-body">
                 <form action="{{route('admin.category.store')}}" method="post">
                 @csrf
-                    <div class="row">
-                    @if($language)
-                        @php($defaultLang = $language[0])
-                        <div class="col-sm-12">
-                            <ul class="nav nav-tabs mb-4">
-                                <li class="nav-item">
-                                    <a class="nav-link lang_link active"
+                @if($language)
+                    @php($defaultLang = $language[0])
+                    <ul class="nav nav-tabs mb-4">
+                        <li class="nav-item">
+                            <a class="nav-link lang_link active"
+                            href="#"
+                            id="default-link">{{translate('messages.default')}}</a>
+                        </li>
+                        @foreach ($language as $lang)
+                            <li class="nav-item">
+                                <a class="nav-link lang_link"
                                     href="#"
-                                    id="default-link">{{translate('messages.default')}}</a>
-                                </li>
-                                @foreach ($language as $lang)
-                                    <li class="nav-item">
-                                        <a class="nav-link lang_link"
-                                            href="#"
-                                            id="{{ $lang }}-link">{{ \App\CentralLogics\Helpers::get_language_name($lang) . '(' . strtoupper($lang) . ')' }}</a>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
-                        <div class="form-group lang_form col-sm-6" id="default-form">
-                            <label class="input-label" for="exampleFormControlInput1">{{translate('messages.name')}} ({{ translate('messages.default') }}) <span class="form-label-secondary text-danger"
-                                data-toggle="tooltip" data-placement="right"
-                                data-original-title="{{ translate('messages.Required.')}}"> *
-                                </span>
-                            </label>
+                                    id="{{ $lang }}-link">{{ \App\CentralLogics\Helpers::get_language_name($lang) . '(' . strtoupper($lang) . ')' }}</a>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <div class="form-group lang_form" id="default-form">
+                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.name')}} ({{ translate('messages.default') }})</label>
+                        <input type="text" name="name[]" class="form-control" placeholder="{{translate('messages.new_sub_category')}}" maxlength="191"  >
+                    </div>
+                    <input type="hidden" name="lang[]" value="default">
+                    @foreach($language as $lang)
+                        <div class="form-group d-none lang_form" id="{{$lang}}-form">
+                            <label class="input-label" for="exampleFormControlInput1">{{translate('messages.name')}} ({{strtoupper($lang)}})</label>
                             <input type="text" name="name[]" class="form-control" placeholder="{{translate('messages.new_sub_category')}}" maxlength="191"  >
                         </div>
-                        <input type="hidden" name="lang[]" value="default">
-                        @foreach($language as $lang)
-                            <div class="form-group d-none lang_form col-sm-6" id="{{$lang}}-form">
-                                <label class="input-label" for="exampleFormControlInput1">{{translate('messages.name')}} ({{strtoupper($lang)}})</label>
-                                <input type="text" name="name[]" class="form-control" placeholder="{{translate('messages.new_sub_category')}}" maxlength="191"  >
-                            </div>
-                            <input type="hidden" name="lang[]" value="{{$lang}}">
-                        @endforeach
-                    @else
-                        <div class="form-group col-sm-6">
-                            <label class="input-label" for="exampleFormControlInput1">{{translate('messages.name')}}</label>
-                            <input type="text" name="name" class="form-control" placeholder="{{translate('messages.new_sub_category')}}" value="{{old('name')}}" maxlength="191">
-                        </div>
-                        <input type="hidden" name="lang[]" value="default">
-                    @endif
-                        <div class="form-group col-sm-6">
-                            <label class="input-label"
-                                for="exampleFormControlSelect1">{{translate('messages.main_category')}}
-                                <span class="input-label-secondary">*</span></label>
-                            <select id="exampleFormControlSelect1" name="parent_id" class="form-control js-select2-custom" required>
-                                <option value="" selected disabled>{{translate('Select Main Category')}}</option>
-                                @foreach($mainCategories as $category)
-                                    <option value="{{$category['id']}}" >{{$category['name']}} ({{Str::limit($category->module->module_name, 15, '...')}})</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <input name="position" value="1" hidden>
-
-                        <div class="col-sm-12">
-                            <div class="btn--container justify-content-end">
-                                <button type="reset" id="reset_btn" class="btn btn--reset">{{translate('messages.reset')}}</button>
-                                <button type="submit" class="btn btn--primary">{{translate('messages.add')}}</button>
-                            </div>
-                        </div>
+                        <input type="hidden" name="lang[]" value="{{$lang}}">
+                    @endforeach
+                @else
+                    <div class="form-group">
+                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.name')}}</label>
+                        <input type="text" name="name" class="form-control" placeholder="{{translate('messages.new_sub_category')}}" value="{{old('name')}}" maxlength="191">
                     </div>
+                    <input type="hidden" name="lang[]" value="default">
+                @endif
+                    <div class="form-group">
+                        <label class="input-label"
+                            for="exampleFormControlSelect1">{{translate('messages.main_category')}}
+                            <span class="input-label-secondary">*</span></label>
+                        <select id="exampleFormControlSelect1" name="parent_id" class="form-control js-select2-custom" required>
+                            <option value="" selected disabled>{{translate('Select Main Category')}}</option>
+                            @foreach($mainCategories as $category)
+                                <option value="{{$category['id']}}" >{{$category['name']}} ({{Str::limit($category->module->module_name, 15, '...')}})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <input name="position" value="1" hidden>
+
+
+                    <div class="btn--container justify-content-end mt-3">
+                        <button type="reset" id="reset_btn" class="btn btn--reset">{{translate('messages.reset')}}</button>
+                        <button type="submit" class="btn btn--primary">{{translate('messages.add')}}</button>
+                    </div>
+
                 </form>
             </div>
         </div>
@@ -104,38 +96,6 @@
                         </div>
                         <!-- End Search -->
                     </form>
-                    @if(request()->get('search'))
-                    <button type="reset" class="btn btn--primary ml-2 location-reload-to-category" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
-                    @endif
-                    <!-- Unfold -->
-                    <div class="hs-unfold mr-2">
-                        <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
-                            data-hs-unfold-options='{
-                                    "target": "#usersExportDropdown",
-                                    "type": "css-animation"
-                                }'>
-                            <i class="tio-download-to mr-1"></i> {{ translate('messages.export') }}
-                        </a>
-
-                        <div id="usersExportDropdown"
-                            class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
-
-                            <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
-                            <a id="export-excel" class="dropdown-item" href="">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                    src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
-                                    alt="Image Description">
-                                {{ translate('messages.excel') }}
-                            </a>
-                            <a id="export-csv" class="dropdown-item" href="">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                    src="{{ asset('public/assets/admin') }}/svg/components/placeholder-csv-format.svg"
-                                    alt="Image Description">
-                                .{{ translate('messages.csv') }}
-                            </a>
-
-                        </div>
-                    </div>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -241,17 +201,4 @@
 
 @push('script_2')
     <script src="{{asset('public/assets/admin')}}/js/view-pages/sub-category-index.js"></script>
-    <script>
-        "use strict";
-            $('.location-reload-to-category').on('click', function() {
-                const url = $(this).data('url');
-                let nurl = new URL(url);
-                nurl.searchParams.delete('search');
-                location.href = nurl;
-            });
-
-            $('#reset_btn').click(function(){
-            $('#exampleFormControlSelect1').val(null).trigger('change');
-            })
-            </script>
 @endpush

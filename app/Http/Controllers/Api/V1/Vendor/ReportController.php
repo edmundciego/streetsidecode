@@ -32,7 +32,7 @@ class ReportController extends Controller
         $to = $request->to;
         $store_id = $request->vendor->stores[0]->id;
 
-        $expense = Expense::where('created_by','vendor')->where('store_id',$store_id)->where('amount', '>' ,0)
+        $expense = Expense::where('created_by','vendor')->where('store_id',$store_id)
             ->when(isset($from) &&  isset($to) ,function($query) use($from,$to){
                 $query->whereBetween('created_at', [$from.' 00:00:00', $to.' 23:59:29']);
             })->when(isset($key), function($query) use($key) {

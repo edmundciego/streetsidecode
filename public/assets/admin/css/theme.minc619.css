@@ -3678,7 +3678,7 @@ a:hover .text-hover-primary {
 }
 
 .z-index-2 {
-    z-index: 2 !important;
+    z-index: 2;
 }
 
 .z-index-99 {
@@ -6010,24 +6010,23 @@ a:hover .text-hover-primary {
     position: relative;
 }
 .conv-reply-1 {
-    border-radius: 5px 5px 0px 0px;
-    background-color: rgba(51, 66, 87, 0.05);
-    padding: 10px 20px;
+    background: rgba(133, 148, 159, 0.1);
+    border-radius: 5.14528px;
+    padding: 20px;
     width: calc(100% - 20px);
     max-width: 505px;
 }
+.conv-reply-2 * {
+    color: #fff !important;
+}
 .conv-reply-2 {
-    border-radius: 5px 5px 0px 0px;
-    background-color: rgba(0, 159, 170, 0.05);
-    padding: 10px 20px;
+    color: #fff !important;
+    background: #334257;
+    border-radius: 5.14528px;
+    padding: 20px;
     width: calc(100% - 20px);
     max-width: 505px;
     margin-inline-start: auto;
-}
-
-.conv-reply-1 *,
-.conv-reply-2 * {
-    font-weight: 400;
 }
 
 .conv-reply-1 *:last-child,
@@ -6055,8 +6054,7 @@ a:hover .text-hover-primary {
 }
 
 div.scroll-down {
-    max-height: 455px !important;
-    min-height: 60dvh !important;
+    max-height: 395px !important;
 }
 .quill-custom_ .file-upload-btn,
 .quill-custom_ .attc--img {

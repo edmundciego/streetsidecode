@@ -28,16 +28,6 @@ class DeliveryMan extends Authenticatable
         'auth_token',
     ];
 
-
-    public function total_canceled_orders()
-    {
-        return $this->hasMany(Order::class)->where('order_status','canceled');
-    }
-    public function total_ongoing_orders()
-    {
-        return $this->hasMany(Order::class)->whereIn('order_status',['handover','picked_up']);
-    }
-
     public function userinfo()
     {
         return $this->hasOne(UserInfo::class,'deliveryman_id', 'id');
@@ -100,7 +90,7 @@ class DeliveryMan extends Authenticatable
 
     public function last_location()
     {
-        return $this->hasOne(DeliveryHistory::class, 'delivery_man_id')->latestOfMany();
+        return $this->hasOne(DeliveryHistory::class, 'delivery_man_id')->latest();
     }
 
     public function zone()

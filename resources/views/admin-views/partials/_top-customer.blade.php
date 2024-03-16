@@ -11,7 +11,7 @@
 <div class="card-body">
     <div class="top--selling">
 
-            @forelse($top_customers as $key=>$item)
+            @foreach($top_customers as $key=>$item)
             <a class="grid--card" href="{{route('admin.users.customer.view',[$item['id']])}}">
                 <img class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
                 src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
@@ -30,9 +30,7 @@
                     <span class="badge badge-soft">{{ translate('Orders') }} : {{$item['order_count']}}</span>
                 </div>
             </a>
-            @empty
-       
-            @endforelse
+            @endforeach
 
     </div>
 </div>

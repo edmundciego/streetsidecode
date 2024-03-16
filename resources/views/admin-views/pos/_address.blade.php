@@ -5,11 +5,11 @@
 @endphp
 <ul>
     <li>
-        <span class="text-dark">{{ translate('Name') }}</span>
+        <span>{{ translate('Name') }}</span>
         <strong>{{ $address['contact_person_name'] }}</strong>
     </li>
     <li>
-        <span class="text-dark">{{ translate('contact') }}</span>
+        <span>{{ translate('contact') }}</span>
         <strong>{{ $address['contact_person_number'] }}</strong>
     </li>
 </ul>

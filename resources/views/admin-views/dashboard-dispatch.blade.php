@@ -14,17 +14,12 @@
                 <div class="d-flex align-items-center">
                     <img src="{{asset('/public/assets/admin/img/new-img/users.svg')}}" alt="img">
                     <div class="w-0 flex-grow pl-3">
-                        <h1 class="page-header-title mb-1">{{translate('Dispatch Overview')}}</h1>
-                        <p class="page-header-text text-dark m-0">
-                            {{translate('Monitor your')}}
-                            <span class="font-semibold">{{translate('Dispatch Management')}}</span>
-                            {{translate('statistics by zone')}}
-                        </p>
+                        <h1 class="page-header-title mb-0">{{translate('Dispatch Overview')}}</h1>
+                        <p class="page-header-text m-0">{{translate('Hello, here you can manage your dispatch orders.')}}</p>
                     </div>
                 </div>
             </div>
         </div>
-
         <div class="row g-1">
             <div class="col-lg-8">
                 <div class="row gap__10 __customer-statistics-card-wrap-2">
@@ -34,24 +29,16 @@
                                 <img src="{{asset('public/assets/admin/img/new-img/deliveryman/active.svg')}}" alt="new-img">
                                 <h4>{{$active_deliveryman}}</h4>
                             </div>
-                            <h4 class="subtitle text-capitalize mt-2">{{translate('messages.active_delivery_man')}}</h4>
+                            <h4 class="subtitle text-capitalize">{{translate('messages.active_delivery_man')}}</h4>
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <div class="__customer-statistics-card h-100 d-flex gap-3" style="--clr:#FF5A54">
-                            <div>
-                                <img width="48" height="48" src="{{asset('public/assets/admin/img/new-img/deliveryman/newly.svg')}}" alt="new-img">
+                        <div class="__customer-statistics-card h-100" style="--clr:#006AB4">
+                            <div class="title">
+                                <img src="{{asset('public/assets/admin/img/new-img/deliveryman/newly.svg')}}" alt="new-img">
+                                <h4>{{$unavailable_deliveryman}}</h4>
                             </div>
-                            <div class="d-flex justify-content-around gap-3 flex-grow-1">
-                                <div>
-                                    <h4 class="title">{{ $inactive_deliveryman }}</h4>
-                                    <h4 class="subtitle text-capitalize">{{translate('messages.in_Active')}}</h4>
-                                </div>
-                                <div>
-                                    <h4 class="title">{{ $suspend_deliveryman }}</h4>
-                                    <h4 class="subtitle text-capitalize">{{ translate('suspended')}}</h4>
-                                </div>
-                            </div>
+                            <h4 class="subtitle text-capitalize">{{translate('Available to assign more order')}}</h4>
                         </div>
                     </div>
                     <div class="col-sm-6">
@@ -60,16 +47,16 @@
                                 <img src="{{asset('public/assets/admin/img/new-img/deliveryman/active.svg')}}" alt="new-img">
                                 <h4>{{ $unavailable_deliveryman }}</h4>
                             </div>
-                            <h4 class="subtitle text-capitalize mt-2">{{ translate('Fully Booked Delivery Man')}}</h4>
+                            <h4 class="subtitle text-capitalize">{{ translate('Fully Booked Delivery Man')}}</h4>
                         </div>
                     </div>
                     <div class="col-sm-6">
                         <div class="__customer-statistics-card h-100" style="--clr:#FF5A54">
                             <div class="title">
                                 <img src="{{asset('public/assets/admin/img/new-img/deliveryman/in-active.svg')}}" alt="new-img">
-                                <h4>{{$available_deliveryman}}</h4>
+                                <h4>{{$inactive_deliveryman}}</h4>
                             </div>
-                            <h4 class="subtitle text-capitalize mt-2">{{translate('Available to assign more order')}}</h4>
+                            <h4 class="subtitle text-capitalize">{{translate('messages.inactive_deliveryman')}}</h4>
                         </div>
                     </div>
                 </div>
@@ -85,7 +72,7 @@
                                         alt="dashboard" class="oder--card-icon">
                                         <span>{{translate('messages.unassigned_orders')}}</span>
                                     </h6>
-                                    <span class="card-title text-00A3FF">
+                                    <span class="card-title text-3F8CE8 ">
                                         {{$data['searching_for_dm']}}
                                     </span>
                                 </div>
@@ -122,7 +109,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-lg-12">
                 <div class="__map-wrapper-2 mt-3">
                     <div class="map-pop-deliveryman">
@@ -132,7 +118,7 @@
                                 <i class="tio-search"></i>
                                 <input type="text" name="search" class="form-control" placeholder="{{translate('Search Delivery Man ...')}}">
                             </div>
-                            <a href="{{ route('admin.users.delivery-man.list') }}" class="link font-semibold">{{ translate('View All Delivery Men') }}</a>
+                            <a href="{{ route('admin.users.delivery-man.list') }}" class="link">{{ translate('View All Delivery Men') }}</a>
                         </form>
                     </div>
                     <div class="map-warper map-wrapper-2 rounded">
@@ -187,60 +173,51 @@
         }
 
         function initialize() {
-            @php($default_location = \App\Models\BusinessSetting::where('key', 'default_location')->first())
-            @php($default_location = $default_location->value ? json_decode($default_location->value, true) : 0)
-            var myLatlng = {
-                lat: {{ $default_location ? $default_location['lat'] : '23.757989' }},
-                lng: {{ $default_location ? $default_location['lng'] : '90.360587' }}
-            };
-            var dmbounds = new google.maps.LatLngBounds(null);
-            var myOptions = {
+            @php($default_location=\App\Models\BusinessSetting::where('key','default_location')->first())
+            @php($default_location=$default_location->value?json_decode($default_location->value, true):0)
+            let myLatlng = { lat: {{$default_location?$default_location['lat']:'23.757989'}}, lng: {{$default_location?$default_location['lng']:'90.360587'}} };
+            let dmbounds = new google.maps.LatLngBounds(null);
+            let myOptions = {
                 zoom: 13,
                 center: myLatlng,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             }
-            var deliveryMan = <?php echo json_encode($deliveryMen); ?>;
+            let deliveryMan = <?php echo json_encode($deliveryMen); ?>;
             map = new google.maps.Map(document.getElementById("map-canvas"), myOptions);
 
-            var infowindow = new google.maps.InfoWindow();
+            let infowindow = new google.maps.InfoWindow();
 
             map.fitBounds(dmbounds);
-            deliveryMan.forEach(dm => {
-                if (dm.lat) {
-                    const point = new google.maps.LatLng(dm.lat, dm.lng);
+            for (let i = 0; i < deliveryMan.length; i++) {
+                if (deliveryMan[i].lat) {
+                    let contentString = "<div style='float:left'><img style='max-height:40px;wide:auto;' src='{{ asset('storage/app/public/delivery-man') }}/"+deliveryMan[i].image+"'></div><div style='float:right; padding: 10px;'><b>"+deliveryMan[i].name+"</b><br/> "+deliveryMan[i].location+"</div>";
+                    let point = new google.maps.LatLng(deliveryMan[i].lat, deliveryMan[i].lng);
                     dmbounds.extend(point);
                     map.fitBounds(dmbounds);
-
-                    const marker = new google.maps.Marker({
+                    let marker = new google.maps.Marker({
                         position: point,
                         map: map,
-                        title: dm.image,
-                        icon: "{{ asset('public/assets/admin/img/delivery_boy_active.png') }}"
+                        title: deliveryMan[i].image,
+                        icon: "{{ asset('public/assets/admin/img/delivery_boy_map.png') }}"
                     });
-
-                    dmMarkers[dm.id] = marker;
-
-                    google.maps.event.addListener(marker, 'click', function() {
-                        infowindow.setContent(`
-                <div style='float:left'>
-                    <img style='max-height:40px;wide:auto;' onerror="this.src='{{ asset('public/assets/admin/img/160x160/img1.jpg') }}'"  src='{{ asset('storage/app/public/delivery-man') }}/${dm.image}'>
-                </div>
-                <div style='float:right; padding: 10px;'>
-                    <b>${dm.name}</b><br/>
-                    ${dm.location}<br/>
-                    Assigned Order: ${dm.assigned_order_count}
-                </div>`);
-                        infowindow.open(map, marker);
-                    });
+                    dmMarkers[deliveryMan[i].id] = marker;
+                    google.maps.event.addListener(marker, 'click', (function(marker, i) {
+                        return function() {
+                            infowindow.setContent(
+                                "<div style='float:left'><img style='max-height:40px;wide:auto;' src='{{ asset('storage/app/public/delivery-man') }}/" +
+                                deliveryMan[i].image +
+                                "'></div><div style='float:right; padding: 10px;'><b>" + deliveryMan[i]
+                                .name + "</b><br/> " + deliveryMan[i].location + "</b><br/> " + 'Assigned Order: ' + deliveryMan[i].assigned_order_count + "</div>"
+                                );
+                            infowindow.open(map, marker);
+                        }
+                    })(marker, i));
                 }
-            });
 
+            };
         }
 
         $('#search-form').on('submit', function (e) {
-            initialize();
-            var deliveryMan = <?php echo json_encode($deliveryMen); ?>;
-            var infowindow = new google.maps.InfoWindow();
             let formData = new FormData(this);
             $.ajaxSetup({
                 headers: {
@@ -248,52 +225,22 @@
                 }
             });
             $.post({
-                url: '{{ route('admin.users.delivery-man.active-search') }}',
+                url: '{{route('admin.users.delivery-man.active-search')}}',
                 data: formData,
                 cache: false,
                 contentType: false,
                 processData: false,
-                success: function(data) {
-                    let itemCount = 0;
-                    if (data.dm) {
-                        deliveryMan.forEach(item => {
-
-                            const isDMActive = data.dm.some(ddm => ddm.id === item.id);
-                            if (isDMActive) {
-                                itemCount++
-                            }
-                            const icon = isDMActive ?
-                                "{{ asset('public/assets/admin/img/delivery_boy_active.png') }}" :
-                                "{{ asset('public/assets/admin/img/delivery_boy_map_inactive.png') }}";
-
-                            const marker = new google.maps.Marker({
-                                position: dmMarkers[item.id].getPosition(),
-                                map: map,
-                                icon: icon,
-                            });
-                            map.panTo(dmMarkers[item.id].getPosition());
-                            map.setZoom(20);
-                            let dmViewContent = `
-                <div style='float:left'>
-                    <img style='max-height:40px;wide:auto;' onerror="this.src='{{ asset('public/assets/admin/img/160x160/img1.jpg') }}'"  src='{{ asset('storage/app/public/delivery-man') }}/${item.image}'>
-                </div>
-                <div style='float:right; padding: 10px;'>
-                    <b>${item.name}</b><br/>
-                    ${item.location}<br/>
-                    Assigned Order: ${item.assigned_order_count}
-                </div>`
-
-                            if (isDMActive && itemCount == 1) {
-                                infowindow.setContent(dmViewContent);
-                                infowindow.open(map, marker);
-                            } else {
-                                google.maps.event.addListener(marker, 'click', function() {
-                                    infowindow.setContent(dmViewContent);
-                                    infowindow.open(map, marker);
-                                });
-                            }
-                        });
-                    } else {
+                success: function (data) {
+                        console.log(data);
+                    if(data.dm){
+                        let id = data.dm.id;
+                        map.panTo(dmMarkers[id].getPosition());
+                        map.setZoom(20);
+                        dmMarkers[id].setAnimation(google.maps.Animation.BOUNCE);
+                        window.setTimeout(() => {
+                            dmMarkers[id].setAnimation(null);
+                        }, 3);
+                    }else{
                         toastr.error('Delivery Man not found', {
                             CloseButton: true,
                             ProgressBar: true

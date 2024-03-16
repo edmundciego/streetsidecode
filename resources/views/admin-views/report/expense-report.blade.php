@@ -17,17 +17,16 @@
                     {{ translate('messages.expense_report') }}
                 </span>
             </h1>
+            <div class="__page-header-txt">
+                {{ translate('This report will show all the orders in which the admin discount has been used. The admin discount are: Free delivery over, store discount, Coupon discount & item discounts(partial according to order commission).') }}
+            </div>
+
         </div>
         <!-- End Page Header -->
 
-        <div class="light-card mb-3 d-flex gap-3 rounded align-items-center p-3 fs-12">
-            <img width="18" src="{{ asset('public/assets/admin/img/icons/intel.png') }}" alt="">
-            {{ translate('This report will show all the orders in which the admin discount has been used. The admin discount are: Free delivery over, store discount, Coupon discount & item discounts(partial according to order commission).') }}
-        </div>
-
         <div class="card mb-20">
             <div class="card-body">
-                <h4 class="mb-3">{{ translate('Filter Data') }}</h4>
+                <h4 class="">{{ translate('Search Data') }}</h4>
                 <form action="{{ route('admin.transactions.report.set-date') }}" method="post">
                     @csrf
                     <div class="row g-3">
@@ -78,22 +77,6 @@
                             </select>
                         </div>
                         <div class="col-sm-6 col-md-3">
-                            <select class="form-control set-filter" data-url="{{ url()->full() }}" data-filter="type" name="type">
-                                <option value="all" {{ isset($type) && $type == 'all' ? 'selected' : '' }}>
-                                    {{ translate('messages.All Type') }}</option>
-                                <option value="add_fund_bonus" {{ isset($type) && $type == 'add_fund_bonus' ? 'selected' : '' }}>
-                                    {{ translate('messages.add_fund_bonus') }}</option>
-                                <option value="free_delivery" {{ isset($type) && $type == 'free_delivery' ? 'selected' : '' }}>
-                                    {{ translate('messages.free_delivery') }}</option>
-                                <option value="coupon_discount" {{ isset($type) && $type == 'coupon_discount' ? 'selected' : '' }}>
-                                    {{ translate('messages.coupon_discount') }}</option>
-                                <option value="discount_on_product" {{ isset($type) && $type == 'discount_on_product' ? 'selected' : '' }}>
-                                    {{ translate('messages.discount_on_product') }}</option>
-                                <option value="flash_sale_discount" {{ isset($type) && $type == 'flash_sale_discount' ? 'selected' : '' }}>
-                                    {{ translate('messages.flash_sale_discount') }}</option>
-                            </select>
-                        </div>
-                        <div class="col-sm-6 col-md-3">
                             <select class="form-control set-filter" data-url="{{ url()->full() }}" data-filter="filter" name="filter">
                                 <option value="all_time" {{ isset($filter) && $filter == 'all_time' ? 'selected' : '' }}>
                                     {{ translate('messages.All Time') }}</option>
@@ -128,9 +111,8 @@
                             </div>
                         @endif
                         <div class="col-sm-6 col-md-3 ml-auto">
-                            <div class="d-flex justify-content-end">
-                                <button type="submit" class="btn btn--primary h--45px min-w-100px">{{ translate('Filter') }}</button>
-                            </div>
+                            <button type="submit"
+                                class="btn btn-primary btn-block h--45px">{{ translate('Filter') }}</button>
                         </div>
                     </div>
                 </form>
@@ -147,11 +129,11 @@
             <!-- Header -->
             <div class="card-header border-0 py-2">
                 <div class="search--button-wrapper">
-                    <h3 class="card-title d-flex align-items-center gap-2">
-                        {{ translate('messages.expense_lists') }}
-                        <span class="badge badge-soft-secondary" id="countItems">{{ $expense->total() }}</span>
+                    <h3 class="card-title">
+                        {{ translate('messages.expense_lists') }} <span
+                            class="badge badge-soft-secondary" id="countItems">{{ $expense->total() }}</span>
                     </h3>
-                    <form class="search-form theme-style">
+                    <form class="search-form">
                         <!-- Search -->
                         <div class="input--group input-group input-group-merge input-group-flush">
                             <input name="search" type="search" value="{{ request()?->search ?? null}}" class="form-control" placeholder="{{ translate('Search by Order ID') }}">
@@ -159,10 +141,6 @@
                         </div>
                         <!-- End Search -->
                     </form>
-
-                    @if(request()->get('search'))
-                        <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
-                    @endif
                     <!-- Static Export Button -->
                     <div class="hs-unfold ml-3">
                         <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle btn export-btn font--sm"
@@ -179,13 +157,13 @@
                             class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right hs-unfold-content-initialized hs-unfold-css-animation animated hs-unfold-reverse-y hs-unfold-hidden">
 
                             <span class="dropdown-header">{{ translate('download_options') }}</span>
-                            <a id="export-excel" class="dropdown-item" href="{{route('admin.transactions.report.expense-export', ['export_type'=>'excel',request()->getQueryString()])}}">
+                            <a id="export-excel" class="dropdown-item" href="{{route('admin.transactions.report.expense-export', ['type'=>'excel',request()->getQueryString()])}}">
                                 <img class="avatar avatar-xss avatar-4by3 mr-2"
                                     src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
                                     alt="Image Description">
                                 {{ translate('messages.excel') }}
                             </a>
-                            <a id="export-csv" class="dropdown-item" href="{{route('admin.transactions.report.expense-export', ['export_type'=>'csv',request()->getQueryString()])}}">
+                            <a id="export-csv" class="dropdown-item" href="{{route('admin.transactions.report.expense-export', ['type'=>'csv',request()->getQueryString()])}}">
                                 <img class="avatar avatar-xss avatar-4by3 mr-2"
                                     src="{{ asset('public/assets/admin') }}/svg/components/placeholder-csv-format.svg"
                                     alt="Image Description">
@@ -224,10 +202,9 @@
                                     @if ($exp->order)
 
                                     <div>
-                                        <a class="text-dark" href="{{ route('admin.order.details', ['id' => $exp->order->id,'module_id'=>$exp->order->module_id]) }}">{{ $exp['order_id'] }}</a>
+                                        <a
+                                            href="{{ route('admin.order.details', ['id' => $exp->order->id,'module_id'=>$exp->order->module_id]) }}">{{ $exp['order_id'] }}</a>
                                     </div>
-                                    @else
-                                    <label class="badge badge-primary">{{translate('messages.Other_Expenses')}}</label>
                                     @endif
                                 </td>
                                 <td>

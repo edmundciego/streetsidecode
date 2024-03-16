@@ -47,13 +47,7 @@ class DeliveryManUpdateRequest extends FormRequest
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|unique:delivery_men,phone,'.$this->id,
             'vehicle_id' => 'required',
             'earning' => 'required',
-            'password' => ['nullable', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised(),
-                function ($attribute, $value, $fail) {
-                    if (strpos($value, ' ') !== false) {
-                        $fail('The :attribute cannot contain white spaces.');
-                    }
-                },
-            ],
+            'password' => ['nullable', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
         ];
     }
 
@@ -63,13 +57,13 @@ class DeliveryManUpdateRequest extends FormRequest
             'f_name.required' => translate('messages.first_name_is_required'),
             'vehicle_id.required' => translate('messages.select_a_vehicle'),
             'earning.required' => translate('messages.select_dm_type'),
+            'password.required' => translate('The password is required'),
             'password.min_length' => translate('The password must be at least :min characters long'),
-            'password.mixed' => translate('The password must contain both uppercase and lowercase letters'),
+            'password.mixed_case' => translate('The password must contain both uppercase and lowercase letters'),
             'password.letters' => translate('The password must contain letters'),
             'password.numbers' => translate('The password must contain numbers'),
             'password.symbols' => translate('The password must contain symbols'),
             'password.uncompromised' => translate('The password is compromised. Please choose a different one'),
-            'password.custom' => translate('The password cannot contain white spaces.'),
         ];
     }
 }

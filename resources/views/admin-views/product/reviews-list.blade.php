@@ -15,7 +15,7 @@
                     <img src="{{asset('public/assets/admin/img/items.png')}}" class="w--22" alt="">
                 </span>
                 <span>
-                    {{translate('messages.item_reviews')}}
+                    {{translate('messages.item_reviews')}} <span class="badge badge-soft-dark ml-2" id="itemCount">{{$reviews->total()}}</span>
                 </span>
             </h1>
         </div>
@@ -24,22 +24,15 @@
         <div class="card">
             <!-- Header -->
             <div class="card-header border-0 py-2">
-                <h5 class="card-title">
-                    {{translate('messages.Review_list')}}<span class="badge badge-soft-dark ml-2" id="itemCount">{{$reviews->total()}}</span></h5>
                 <div class="search--button-wrapper justify-content-end">
                     <form  class="search-form">
                         <!-- Search -->
                         <div class="input-group input--group">
-                            <input id="datatableSearch" name="search" value="{{ request()?->search ?? null }}" type="search" class="form-control min-height-45" placeholder="{{translate('ex_:_search_item_Name,_customer_Name,_Rating')}}" aria-label="{{translate('messages.search_here')}}">
+                            <input id="datatableSearch" name="search" value="{{ request()?->search ?? null }}" type="search" class="form-control min-height-45" placeholder="{{translate('ex_:_search_item_name')}}" aria-label="{{translate('messages.search_here')}}">
                             <button type="submit" class="btn btn--secondary min-height-45"><i class="tio-search"></i></button>
                         </div>
                         <!-- End Search -->
                     </form>
-
-                    @if(request()->get('search'))
-                    <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
-                    @endif
-
                     <div class="hs-unfold mr-2">
                         <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
                             data-hs-unfold-options='{
@@ -106,7 +99,7 @@
                                             asset('storage/app/public/product').'/'.$review->item['image'] ?? '',
                                             asset('public/assets/admin/img/160x160/img2.jpg'),
                                             'product/'
-                                        ) }}"
+                                        ) }}" 
                                         data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}" alt="{{$review->item->name}} image">
                                         <div class="media-body">
                                             <h5 class="text-hover-primary mb-0">{{Str::limit($review->item['name'],20,'...')}}</h5>
@@ -153,7 +146,6 @@
                     @endforeach
                     </tbody>
                 </table>
-            </div>
                 @if(count($reviews) !== 0)
                 <hr>
                 @endif
@@ -168,6 +160,7 @@
                     </h5>
                 </div>
                 @endif
+            </div>
             <!-- End Table -->
         </div>
         <!-- End Card -->

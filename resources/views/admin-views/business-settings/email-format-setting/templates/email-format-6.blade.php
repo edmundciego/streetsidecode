@@ -7,10 +7,10 @@ $company_name = App\Models\BusinessSetting::where('key', 'business_name')->first
             <td class="main-table-td">
                 <div class="text-center">
                 <img class="mail-img-2 onerror-image" data-onerror-image="{{ asset('/public/assets/admin/img/blank3.png') }}"
-
+               
                 src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                    data_get($data, 'icon' , null),
-                    asset('storage/app/public/email_template').'/'.data_get($data, 'icon' , null),
+                    $data['icon'] ,
+                    asset('storage/app/public/email_template').'/'.$data['icon'] ,
                     asset('/public/assets/admin/img/blank3.png'),
                     'email_template/'
                 ) }}"

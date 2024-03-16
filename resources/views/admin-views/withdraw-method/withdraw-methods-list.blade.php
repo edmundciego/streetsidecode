@@ -12,9 +12,10 @@
         <div class="mb-3">
             <div class="page-title-wrap d-flex justify-content-between flex-wrap align-items-center gap-3 mb-3">
                 <h2 class="h1 mb-0 text-capitalize d-flex align-items-center gap-2">
-                    <img width="20" src="{{asset('/public/assets/admin/img/icons/withdraw.png')}}" alt="">
-                    {{ translate('messages.withdraw_method_list')}}
+                    {{-- <img width="20" src="{{asset('/public/assets/back-end/img/withdraw-icon.png')}}" alt=""> --}}
+                    {{ translate('messages.wallet_method_list')}}
                 </h2>
+                <a href="{{route('admin.transactions.withdraw-method.create')}}" class="btn btn--primary">+ {{ translate('messages.Add_method')}}</a>
             </div>
         </div>
         <!-- End Page Title -->
@@ -22,22 +23,23 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="px-3 pt-3 pb-1">
-                        <div class="search--button-wrapper row gy-1 align-items-center justify-content-between">
-                            <form class="search-form theme-style">
-                                <div class="input-group input--group">
-                                    <input id="datatableSearch" name="search" type="search" value="{{ request()?->search ?? null}}" class="form-control h--40px" placeholder="{{translate('ex_:_search_store_name')}}" aria-label="{{translate('messages.search_here')}}">
-                                    <button type="submit" class="btn btn--secondary h--40px"><i class="tio-search"></i></button>
-                                    @if(request()->get('search'))
-                                    <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
-                                    @endif
-                                </div>
-                            </form>
+                    <div class="p-3">
+                        <div class="row gy-1 align-items-center justify-content-between">
                             <div class="col-auto">
-                                <a href="{{route('admin.transactions.withdraw-method.create')}}" class="btn btn--primary">
-                                    <i class="tio-add"></i>
-                                    {{ translate('messages.add_new_method')}}
-                                </a>
+                                <h5>
+                                {{  translate('messages.methods')}}
+                                    <span class="badge badge-soft-dark radius-50 fz-12 ml-1"> {{ $withdrawal_methods->total() }}</span>
+                                </h5>
+                            </div>
+                            <div class="col-auto">
+                                <form  class="search-form">
+                                    <!-- Search -->
+                                    <div class="input-group input--group">
+                                        <input id="datatableSearch" name="search" type="search" value="{{ $search }}"class="form-control h--40px" placeholder="{{ translate('messages.Search_Method_Name')}}" aria-label="{{translate('messages.search_here')}}">
+                                        <button type="submit" class="btn btn--secondary h--40px"><i class="tio-search"></i></button>
+                                    </div>
+                                    <!-- End Search -->
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -47,7 +49,7 @@
                                 class="table table-hover table-borderless table-thead-bordered table-nowrap table-align-middle card-table w-100">
                             <thead class="thead-light thead-50 text-capitalize">
                             <tr>
-                                <th>{{ translate('messages.SL')}}</th>
+                                <th>{{ translate('messages.sl')}}</th>
                                 <th>{{ translate('messages.method_name')}}</th>
                                 <th>{{  translate('messages.method_fields') }}</th>
                                 <th>{{ translate('messages.active_status')}}</th>
@@ -60,22 +62,21 @@
                                 <tr>
                                     <td>{{$withdrawal_methods->firstitem()+$key}}</td>
                                     <td>{{$withdrawal_method['method_name']}}</td>
+
+
                                     <td>
-                                        <div class="max-text-2-line" style="--line-count: 4">
-                                            @foreach($withdrawal_method['method_fields'] as $key=>$method_field)
-                                                <b>{{ translate('messages.Name')}}:</b> {{ translate($method_field['input_name'])}} <br/>
-                                                <b>{{ translate('messages.Type')}}:</b> {{ translate($method_field['input_type']) }} <br/>
-                                                <b>{{ translate('messages.Placeholder')}}:</b> {{ $method_field['placeholder'] }} <br/>
+                                        @foreach($withdrawal_method['method_fields'] as $key=>$method_field)
+                                            <span class="badge badge-secondary opacity-75 fz-12 border border-white">
+                                                <b>{{ translate('messages.Name')}}:</b> {{ translate($method_field['input_name'])}} |
+                                                <b>{{ translate('messages.Type')}}:</b> {{ translate($method_field['input_type']) }} |
+                                                <b>{{ translate('messages.Placeholder')}}:</b> {{ $method_field['placeholder'] }} |
                                                 {{ $method_field['is_required'] ? translate('messages.Required') :  translate('messages.Optional') }}
-                                                <br/>
-                                                @break
-                                            @endforeach
-                                        </div>
-                                        <a href="#" data-id="{{ $withdrawal_method->id }}" class="font-semibold d-flex gap-2 align-items-center text-capitalize mt-1 withdraw-info-show" >
-                                            {{ translate('messages.see_all')}}
-                                            <i class="tio-arrow-forward"></i>
-                                        </a>
+                                            </span><br/>
+                                        @endforeach
                                     </td>
+
+
+
                                     <td>
                                         <label class="toggle-switch toggle-switch-sm">
                                             <input class="toggle-switch-input status featured-status"
@@ -142,24 +143,6 @@
 
         </div>
     </div>
-{{-- {{ dd(1) }} --}}
-
-
-    <!-- Withdraw Method List Modal -->
-    <div class="modal fade" id="withdrawMethodList" tabindex="-1" role="dialog" aria-labelledby="withdrawMethodListLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-             <div id="data-view"> </div>
-            </div>
-        </div>
-    </div>
-
-
 @endsection
 
 
@@ -172,7 +155,9 @@
 
           $.ajaxSetup({
               headers: {
+                //   'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+
               }
           });
           $.ajax({
@@ -204,6 +189,8 @@
           $.ajaxSetup({
               headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+
+                //   'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
               }
           });
           $.ajax({
@@ -217,35 +204,5 @@
               }
           });
       })
-
-
-      function fetch_data(id) {
-            $.ajax({
-                url: "{{ route('admin.transactions.withdraw-method.getMethodInfo') }}" + '?id=' + id,
-                type: "get",
-
-                beforeSend: function () {
-                    $('#data-view').empty();
-                    $('#loading').show()
-                },
-                success: function(data) {
-                    $("#withdrawMethodList").modal("show");
-                    $("#data-view").append(data.view);
-                },
-                complete: function () {
-                    $('#loading').hide()
-                }
-            })
-        }
-
-
-
-        $(document).on('click', '.withdraw-info-show', function () {
-            let id = $(this).data('id');
-            fetch_data(id)
-
-        })
-
-
   </script>
 @endpush

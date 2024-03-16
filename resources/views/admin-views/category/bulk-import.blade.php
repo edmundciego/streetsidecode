@@ -14,154 +14,78 @@
                 </span>
             </h1>
         </div>
+        <!-- Content Row -->
         <div class="card">
             <div class="card-body">
-                <div class="export-steps-2">
-                    <div class="row g-4">
-                        <div class="col-sm-6 col-lg-4">
-                            <div class="export-steps-item-2 h-100">
-                                <div class="top">
-                                    <div>
-                                        <h3 class="fs-20">{{translate('Step_1')}}</h3>
-                                        <div>
-                                            {{translate('Download_Excel_File')}}
-                                        </div>
-                                    </div>
-                                    <img src="{{asset('/public/assets/admin/img/bulk-import-1.png')}}" alt="">
-                                </div>
-                                <h4>{{ translate('Instruction') }}</h4>
-                                <ul class="m-0 pl-4">
-                                    <li>
-                                        {{ translate('Download_the_format_file_and_fill_it_with_proper_data.') }}
-                                    </li>
-                                    <li>
-                                        {{ translate('You_can_download_the_example_file_to_understand_how_the_data_must_be_filled.') }}
-                                    </li>
-                                    <li>
-                                        {{ translate('Have_to_upload_excel_file.') }}
-                                    </li>
-
-                                </ul>
-                            </div>
+                <div class="export-steps style-2">
+                    <div class="export-steps-item">
+                        <div class="inner">
+                            <h5>{{translate('STEP 1')}}</h5>
+                            <p>
+                                {{translate('Download Excel File')}}
+                            </p>
                         </div>
-                        <div class="col-sm-6 col-lg-4">
-                            <div class="export-steps-item-2 h-100">
-                                <div class="top">
-                                    <div>
-                                        <h3 class="fs-20">{{translate('Step_2')}}</h3>
-                                        <div>
-                                            {{translate('Match_Spread_sheet_data_according_to_instruction')}}
-                                        </div>
-                                    </div>
-                                    <img src="{{asset('/public/assets/admin/img/bulk-import-2.png')}}" alt="">
-                                </div>
-                                <h4>{{ translate('Instruction') }}</h4>
-                                <ul class="m-0 pl-4">
-                                    <li>
-                                        {{ translate('Fill_up_the_data_according_to_the_format') }}
-                                    </li>
-                                    <li>
-                                        {{ translate('For_parent_category_"position"_will_0_and_for_sub_category_it_will_be_1')}}
-                                    </li>
-                                    <li>
-                                        {{ translate('By_default_status_will_be_1,_please_input_the_right_ids') }}
-                                    </li>
-                                    <li>
-                                        {{ translate('For_a_category_parent_id_will_be_empty,_for_sub_category_it_will_be_the_category_id') }}
-                                    </li>
-                                    <li>
-                                        {{ translate('For_a_sub_category_module_id_will_it`s_parents_module_id') }}
-                                    </li>
-                                </ul>
-                            </div>
+                    </div>
+                    <div class="export-steps-item">
+                        <div class="inner">
+                            <h5>{{translate('STEP 2')}}</h5>
+                            <p>
+                                {{translate('Match Spread sheet data according to instruction')}}
+                            </p>
                         </div>
-                        <div class="col-sm-6 col-lg-4">
-                            <div class="export-steps-item-2 h-100">
-                                <div class="top">
-                                    <div>
-                                        <h3 class="fs-20">{{translate('Step_3')}}</h3>
-                                        <div>
-                                            {{translate('Validate_data_and_complete_import')}}
-                                        </div>
-                                    </div>
-                                    <img src="{{asset('/public/assets/admin/img/bulk-import-3.png')}}" alt="">
-                                </div>
-                                  <h4>{{ translate('Instruction') }}</h4>
-                                <ul class="m-0 pl-4">
-                                    <li>
-                                        {{ translate('In_the_Excel_file_upload_section,_first_select_the_upload_option.') }}
-                                     </li>
-                                     <li>
-                                        {{ translate('Upload_your_file_in_.xls,_.xlsx_format.') }}
-                                     </li>
-                                     <li>
-                                        {{ translate('Finally_click_the_upload_button.') }}
-                                     </li>
-                                     <li>
-                                        {{ translate('You_can_upload_your_category_images_in_category_folder_from_gallery_and_copy_image`s_path.') }}
-                                     </li>
-
-                                </ul>
-                            </div>
+                    </div>
+                    <div class="export-steps-item">
+                        <div class="inner">
+                            <h5>{{translate('STEP 3')}}</h5>
+                            <p>
+                                {{translate('Validate data and complete import')}}
+                            </p>
                         </div>
                     </div>
                 </div>
+                <div class="pt-1 mb-0 pb-4 bg-white">
+                    <h3>{{ translate('messages.Instructions') }} : </h3>
+                    <p> {{ translate('1. Download the format file and fill it with proper data.') }}</p>
+
+                    <p>{{ translate('2. You can download the example file to understand how the data must be filled.') }}</p>
+
+                    <p>{{ translate('3. Once you have downloaded and filled the format file, upload it in the form below and submit.') }}</p>
+
+                    <p> {{ translate('4. After uploading categories you need to edit them and set category`s images.') }}</p>
+
+                    <p> {{ translate('5. For parent category "position" will 0 and for sub category it will be 1.') }}</p>
+
+                    <p> {{ translate('6. By default status will be 1, please input the right ids.') }}</p>
+                    <p> {{ translate('7. For a category parent_id will be empty, for sub category it will be the category id.') }}</p>
+
+                    <p> {{ translate('8. For a sub category module id will it`s parents module id.') }}</p>
+                </div>
                 <div class="text-center pb-4">
-                    <h3 class="mb-3 export--template-title font-regular">{{translate('download_spreadsheet_template')}}</h3>
+                    <h3 class="mb-3 export--template-title">{{ translate('Download Spreadsheet Template') }}</h3>
                     <div class="btn--container justify-content-center export--template-btns">
-
-                        <a href="{{asset('public/assets/categories_bulk_format.xlsx')}}" download="" class="btn btn--primary btn-outline-primary">{{ translate('Template with Existing Data') }}</a>
-                        <a href="{{asset('public/assets/categories_bulk_without_data_format.xlsx')}}" download="" class="btn btn--primary">{{ translate('Template without Data') }}</a>
-
+                        <a href="{{asset('public/assets/categories_bulk_format.xlsx')}}" download="" class="btn btn-dark">{{ translate('Template with Existing Data') }}</a>
+                        <a href="{{asset('public/assets/categories_bulk_without_data_format.xlsx')}}" download="" class="btn btn-dark">{{ translate('Template without Data') }}</a>
                     </div>
                 </div>
             </div>
+
         </div>
-
-
         <form class="product-form" id="import_form" action="{{route('admin.category.bulk-import')}}" method="POST"
                 enctype="multipart/form-data">
             @csrf
-                <input type="hidden" name="button" id="btn_value">
-                <div class="card mt-2 rest-part">
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-sm-6">
-                                <h5 class="text-capitalize mb-3">{{ translate('Select_Data_Upload_type') }}</h5>
-                                <div class="module-radio-group border rounded">
-                                    <label class="form-check form--check">
-                                        <input class="form-check-input "   value="import" type="radio" name="upload_type" checked>
-                                        <span class="form-check-label py-20">
-                                            {{ translate('Upload_New_Data') }}
-                                        </span>
-                                    </label>
-                                    <label class="form-check form--check">
-                                        <input class="form-check-input " value="update" type="radio" name="upload_type">
-                                        <span class="form-check-label py-20">
-                                            {{ translate('Update_Existing_Data') }}
-                                        </span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <h5 class="text-capitalize mb-3">{{ translate('Import_Category_file') }}</h5>
-                                <div class="uploadDnD">
-                                    <div class="form-group inputDnD input_image input_image_edit position-relative">
-                                        <div class="upload-text">
-                                            <div>
-                                                <img src="{{asset('/public/assets/admin/img/bulk-import-3.png')}}" alt="">
-                                            </div>
-                                            <div class="filename">{{translate('Must_be_Excel_files_using_our_Excel_template_above')}}</div>
-                                        </div>
-                                        <input type="file" name="products_file" class="form-control-file text--primary font-weight-bold action-upload-section-dot-area" id="products_file">
-                                    </div>
-                                </div>
-
-                            </div>
+            <input type="hidden" name="button" id="btn_value">
+            <div class="card mt-3">
+                <div class="card-body">
+                    <div class="mt-2 rest-part">
+                        <h4 class="mb-3">{{translate('messages.import_categories_file')}}</h4>
+                        <div class="custom-file custom--file">
+                            <input type="file" name="products_file" class="form-control" id="products_file">
+                            <label class="custom-file-label" for="products_file">{{ translate('messages.Choose File') }}</label>
                         </div>
                         <div class="btn--container justify-content-end mt-3">
                             <button id="reset_btn" type="reset" class="btn btn--reset">{{translate('messages.reset')}}</button>
-                            <button type="button" class="btn btn--primary update_or_import">{{translate('messages.Upload')}}</button>
+                            <button type="submit" name="button" value="update" class="btn btn--warning submit_btn">{{translate('messages.update')}}</button>
+                            <button type="submit" name="button" value="import" class="btn btn--primary submit_btn">{{translate('messages.Import')}}</button>
                         </div>
                     </div>
                 </div>
@@ -173,10 +97,7 @@
     <script src="{{asset('public/assets/admin')}}/js/view-pages/category-import-export.js"></script>
 <script>
     "use strict";
-    $('#reset_btn').click(function(){
-    $('#products_file').val('');
-    $('.filename').text('{{translate('Must_be_Excel_files_using_our_Excel_template_above')}}');
-})
+
     function myFunction(data) {
     Swal.fire({
     title: '{{ translate('Are you sure?') }}' ,
@@ -198,28 +119,9 @@
         // }
     })
 }
-$(".action-upload-section-dot-area").on("change", function () {
-        if (this.files && this.files[0]) {
-            let reader = new FileReader();
-            reader.onload = () => {
-                let imgName = this.files[0].name;
-                $(this).closest(".uploadDnD").find('.filename').text(imgName);
-            };
-            reader.readAsDataURL(this.files[0]);
-        }
-    });
 
-
-$(document).on("click", ".update_or_import", function(e){
-    e.preventDefault();
-    let upload_type = $('input[name="upload_type"]:checked').val();
-    myFunction(upload_type)
-});
-
-
-
-    $('.update_or_import').on('click', function (){
-        let buttonValue = $('input[name="upload_type"]:checked').val();
+    $('.submit_btn').on('click', function (){
+        let buttonValue = $(this).val();
         changeFormAction(buttonValue);
     })
 

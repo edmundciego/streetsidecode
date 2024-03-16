@@ -28,7 +28,6 @@ use App\Models\NotificationMessage;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use MatanYadaev\EloquentSpatial\Objects\Point;
 use Laravelpkg\Laravelchk\Http\Controllers\LaravelchkController;
@@ -923,42 +922,41 @@ class Helpers
 
     public static function currency_code()
     {
-        if (!config('currency') ){
-            $currency = BusinessSetting::where(['key' => 'currency'])->first()?->value;
-            Config::set('currency', $currency );
+        if(!request()->is('/api*') && !session()->has('currency_code')){
+            $currency = BusinessSetting::where(['key' => 'currency'])->first()->value;
+            session()->put('currency_code',$currency);
+        }else{
+            $currency = BusinessSetting::where(['key' => 'currency'])->first()->value;
         }
-        else{
-            $currency = config('currency');
+
+        if(!request()->is('/api*')){
+            $currency = session()->get('currency_code');
         }
 
         return $currency;
     }
 
 
+
     public static function currency_symbol()
     {
-        if (!config('currency_symbol') ){
-            $currency_symbol = Currency::where(['currency_code' => Helpers::currency_code()])->first()?->currency_symbol;
-            Config::set('currency_symbol', $currency_symbol );
+        if(!session()->has('currency_symbol')){
+            $currency_symbol = Currency::where(['currency_code' => Helpers::currency_code()])->first()->currency_symbol;
+            session()->put('currency_symbol',$currency_symbol);
         }
-        else{
-            $currency_symbol =config('currency_symbol');
-        }
-        return $currency_symbol ;
+        $currency_symbol = session()->get('currency_symbol');
+        return $currency_symbol;
     }
 
 
 
     public static function format_currency($value)
     {
-        if (!config('currency_symbol_position') ){
-            $currency_symbol_position = BusinessSetting::where(['key' => 'currency_symbol_position'])->first()?->value;
-            Config::set('currency_symbol_position', $currency_symbol_position );
+        if(!session()->has('currency_symbol_position')){
+            $currency_symbol_position = BusinessSetting::where(['key' => 'currency_symbol_position'])->first()->value;
+            session()->put('currency_symbol_position',$currency_symbol_position);
         }
-        else{
-            $currency_symbol_position =config('currency_symbol_position');
-        }
-
+        $currency_symbol_position = session()->get('currency_symbol_position');
         return $currency_symbol_position == 'right' ? number_format($value, config('round_up_to_digit')) . ' ' . self::currency_symbol() : self::currency_symbol() . ' ' . number_format($value, config('round_up_to_digit'));
     }
 

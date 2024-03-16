@@ -116,9 +116,7 @@
                                             <label class="form-check form--check mr-2 mr-md-4">
                                                 <input class="form-check-input" type="radio" value="video" name="banner_type" {{ $banner_type ? ($banner_type->value == 'video' ? 'checked' : '') : '' }}>
                                                 <span class="form-check-label">
-                                                    {{translate('YouTube_Video_URL')}} <span class="input-label-secondary"
-                                                    data-toggle="tooltip" data-placement="right" data-original-title="{{translate('Go_to_YouTube,_click_share_option_then_get_a_popup_of_share._Select_embed_&_get_a_embed_video_then_copy_the_generated_code_for_the_embedded_link')}}"><img src="{{asset('public/assets/admin/img/info-circle.svg')}}"
-                                                        alt="public/img"></span>
+                                                    {{translate('YouTube_Video_URL')}}
                                                 </span>
                                             </label>
                                             <label class="form-check form--check mr-2 mr-md-4">
@@ -184,7 +182,7 @@
                                                             <div class="uploadDnD">
                                                                 <div class="form-group inputDnD">
                                                                     <input type="file" name="banner_video_content" class="form-control-file text--primary font-weight-bold read-url"
-                                                                    id="inputFile" accept=".mp4 ,.webm" data-title="{{ translate('Browse_file"') }}">
+                                                                    id="inputFile" accept=".mp4" data-title="{{ translate('Browse_file"') }}">
                                                                 </div>
                                                             </div>
 
@@ -217,7 +215,7 @@
                                                         <div class="col-6">
                                                             <h4 class="mb-3  ml-4 text-capitalize d-flex align-items-center">{{translate('Video')}}</h4>
                                                             @php($extention =explode('.', $banner_video_content?->value))
-                                                            <video width="320" height="140" id="video-preview" controls>
+                                                            <video width="320" height="140" controls>
                                                                 <source src="{{asset('storage/app/public/promotional_banner/video')}}/{{$banner_video_content?->value}}" type="video/{{ data_get($extention,1,'mp4') }}">
                                                             </video>
                                                         </div>
@@ -492,32 +490,4 @@
 @endsection
 @push('script_2')
     <script src="{{asset('public/assets/admin/js/view-pages/other-banners.js')}}"></script>
-    <script>
-        "use strict";
-        const input = document.getElementById('inputFile');
-        const video = document.getElementById('video-preview');
-        const videoSource = document.createElement('source');
-
-        input.addEventListener('change', function() {
-            const files = this.files || [];
-
-            if (!files.length) return;
-
-            const reader = new FileReader()
-            video.innerHTML = ""
-            input.setAttribute('data-title', files[0].name);
-            reader.onload = function (e) {
-                videoSource.setAttribute('src', e.target.result);
-                video.appendChild(videoSource);
-                video.load();
-                video.play();
-            };
-
-            reader.onprogress = function (e) {
-                console.log('progress: ', Math.round((e.loaded * 100) / e.total));
-            };
-
-            reader.readAsDataURL(files[0]);
-        });
-    </script>
 @endpush

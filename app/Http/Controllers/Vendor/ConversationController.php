@@ -158,7 +158,6 @@ class ConversationController extends Controller
                 $receiver->image = $dm->image;
                 $receiver->save();
             }
-            $user = DeliveryMan::find($user_id);
         }
 
 

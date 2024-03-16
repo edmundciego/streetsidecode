@@ -37,16 +37,7 @@ class CustomRoleRepository implements CustomRoleRepositoryInterface
 
     public function getListWhere(string $searchValue = null, array $filters = [], array $relations = [], int|string $dataLimit = DEFAULT_DATA_LIMIT, int $offset = null): Collection|LengthAwarePaginator
     {
-        $key = explode(' ', $searchValue);
-        return $this->role->whereNotIn('id',[1])
-            ->when(isset($searchValue), function($query) use($key) {
-            $query->where(function ($q) use ($key) {
-                foreach ($key as $value) {
-                    $q->orWhere('name', 'like', "%{$value}%");
-                }
-            });
-        })
-        ->latest()->paginate($dataLimit);
+        return $this->role->whereNotIn('id',[1])->latest()->paginate($dataLimit);
     }
 
     public function update(string $id, array $data): bool|string|object

@@ -39,7 +39,7 @@
                                class="form-control" required>
                     </td>
                     @if ($stock)
-                        <td><input type="number" name="stock_{{ $str }}" value="1" min="0"
+                        <td><input type="number" name="stock_{{ $str }}" value="1" min="0" step="0.01"
                                class="form-control" required></td>
                     @endif
 

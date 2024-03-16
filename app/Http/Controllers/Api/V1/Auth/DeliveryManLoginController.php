@@ -37,7 +37,7 @@ class DeliveryManLoginController extends Controller
             {
                 return response()->json([
                     'errors' => [
-                        ['code' => 'auth-003', 'message' => translate('messages.Your_account_is_not_approved_yet.')]
+                        ['code' => 'auth-003', 'message' => translate('messages.your_application_is_not_approved_yet')]
                     ]
                 ], 401);
             }
@@ -65,7 +65,7 @@ class DeliveryManLoginController extends Controller
             return response()->json(['token' => $token, 'topic'=> isset($topic)?$topic:'No_topic_found'], 200);
         } else {
             $errors = [];
-            array_push($errors, ['code' => 'auth-001', 'message' => translate('Incorrect_credential,_please_try_again')]);
+            array_push($errors, ['code' => 'auth-001', 'message' => 'Unauthorized.']);
             return response()->json([
                 'errors' => $errors
             ], 401);
@@ -89,14 +89,6 @@ class DeliveryManLoginController extends Controller
             'zone_id.required' => translate('messages.select_a_zone'),
             'earning.required' => translate('messages.select_dm_type'),
             'vehicle_id.required' => translate('messages.select_a_vehicle'),
-            'password.required' => translate('The password is required'),
-            'password.min_length' => translate('The password must be at least :min characters long'),
-            'password.mixed' => translate('The password must contain both uppercase and lowercase letters'),
-            'password.letters' => translate('The password must contain letters'),
-            'password.numbers' => translate('The password must contain numbers'),
-            'password.symbols' => translate('The password must contain symbols'),
-            'password.uncompromised' => translate('The password is compromised. Please choose a different one'),
-
         ]);
 
         if ($validator->fails()) {
@@ -136,7 +128,7 @@ class DeliveryManLoginController extends Controller
         $dm->zone_id = $request->zone_id;
         $dm->earning = $request->earning;
         $dm->password = bcrypt($request->password);
-
+        
         $dm->save();
         try{
             $admin= Admin::where('role_id', 1)->first();

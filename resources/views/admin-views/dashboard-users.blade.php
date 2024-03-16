@@ -39,9 +39,8 @@
 
         <div class="row g-2 pb-4 mb-0">
             <div class="col-sm-6 col-lg-4">
-                <a href="{{ route('admin.users.customer.list',['zone_id' => $params['zone_id'] ?? null]) }}">
-                    <div class="__user-dashboard-card">
-                        <div class="__user-dashboard-card-thumbs">
+                <div class="__user-dashboard-card">
+                    <div class="__user-dashboard-card-thumbs">
                         @php($total_customers = $blocked_customers + $active_customers)
                         <div class="more-icon">
                             +{{$total_customers >= 4 ? $total_customers - 2 : $total_customers}}
@@ -54,14 +53,11 @@
                     <h3 class="title">{{$total_customers}}</h3>
                     <h5 class="subtitle text-capitalize">{{translate('messages.total_customer')}}</h5>
                 </div>
-                    </a>
             </div>
             <div class="col-sm-6 col-lg-4">
-                <a href="{{ route('admin.users.delivery-man.list',['zone_id' => $params['zone_id'] ?? null]) }}">
                 <div class="__user-dashboard-card" style="--theme-clr:#006AB4">
-
                     <div class="__user-dashboard-card-thumbs">
-                        @php($total_deliveryman = $inactive_deliveryman + $active_deliveryman + $blocked_deliveryman )
+                        @php($total_deliveryman = $inactive_deliveryman + $active_deliveryman)
                         <div class="more-icon">
                             +{{$total_deliveryman >= 4 ? $total_deliveryman - 2 :  $total_deliveryman}}
                         </div>
@@ -74,10 +70,8 @@
                     <h3 class="title">{{$total_deliveryman}}</h3>
                     <h5 class="subtitle text-capitalize">{{translate('messages.total_delivery_man')}}</h5>
                 </div>
-            </a>
             </div>
             <div class="col-sm-6 col-lg-4">
-                <a href="{{ route('admin.users.employee.list',['zone_id' => $params['zone_id'] ?? null]) }}">
                 <div class="__user-dashboard-card" style="--theme-clr:#FFA800">
                     <div class="__user-dashboard-card-thumbs">
                         @php($total_employees = $employees->count())
@@ -95,7 +89,6 @@
                     <h3 class="title">{{$total_employees}}</h3>
                     <h5 class="subtitle text-capitalize">{{translate('messages.total_employee')}}</h5>
                 </div>
-            </a>
             </div>
         </div>
 
@@ -107,7 +100,6 @@
                     <div class="col-md-4">
                         <div class="row gap__10">
                             <div class="col-md-12 col-sm-6">
-                                <a href="{{ route('admin.users.customer.list',['zone_id' => $params['zone_id'] ?? null, 'filter'  => 'active']) }}">
                                 <div class="__customer-statistics-card">
                                     <div class="title">
                                         <img src="{{asset('/public/assets/admin/img/new-img/customer/active.svg')}}" alt="new-img">
@@ -115,10 +107,8 @@
                                     </div>
                                     <h4 class="subtitle text-capitalize">{{translate('messages.active_customer')}}</h4>
                                 </div>
-                            </a>
                             </div>
                             <div class="col-md-12 col-sm-6">
-                                <a href="{{ route('admin.users.customer.list',['zone_id' => $params['zone_id'] ?? null, 'filter'  => 'new']) }}">
                                 <div class="__customer-statistics-card" style="--clr:#006AB4">
                                     <div class="title">
                                         <img src="{{asset('/public/assets/admin/img/new-img/customer/newly.svg')}}" alt="new-img">
@@ -126,10 +116,8 @@
                                     </div>
                                     <h4 class="subtitle text-capitalize">{{translate('messages.newly_joined')}}</h4>
                                 </div>
-                            </a>
                             </div>
                             <div class="col-md-12 col-sm-6">
-                                <a href="{{ route('admin.users.customer.list',['zone_id' => $params['zone_id'] ?? null , 'filter'  => 'blocked']) }}">
                                 <div class="__customer-statistics-card" style="--clr:#FF5A54">
                                     <div class="title">
                                         <img src="{{asset('/public/assets/admin/img/new-img/customer/blocked.svg')}}" alt="new-img">
@@ -137,7 +125,6 @@
                                     </div>
                                     <h4 class="subtitle text-capitalize">{{translate('messages.blocked_customer')}}</h4>
                                 </div>
-                            </a>
                             </div>
                         </div>
                     </div>
@@ -175,8 +162,7 @@
                         </div>
                     </div>
                     <ul class="__customer-review">
-                        <li title="{{ translate('positive_review_given_total').' '.$positive_reviews. ' '.translate('messages.customers')  }} ({{ translate('Scale: 4-5') }}) ">
-
+                        <li>
                             <span class="tag">{{ translate('Positive') }}</span>
                             @php($positive_parcent = $positive_reviews > 0 ? round($positive_reviews / $reviews * 100) : 0)
                             <span class="review">
@@ -213,8 +199,7 @@
                             </span>
                             <span class="ratio">{{$positive_parcent}}%</span>
                         </li>
-                        <li title="{{ translate('good_review_given_total').' '.$good_reviews. ' '.translate('messages.customers') }} ({{ translate('Scale: 3') }})">
-
+                        <li>
                             <span class="tag">{{ translate('Good') }}</span>
                             @php($good_parcent = $good_reviews > 0 ? round($good_reviews / $reviews * 100) : 0)
                                 <span class="review">
@@ -251,7 +236,7 @@
                                 </span>
                             <span class="ratio">{{$good_parcent}}%</span>
                         </li>
-                        <li title="{{ translate('neutral_review_given_total').' '.$neutral_reviews. ' '.translate('messages.customers') }} ({{ translate('Scale: 2') }})">
+                        <li>
                             <span class="tag">{{ translate('Neutral') }}</span>
                             @php($neutral_parcent = $neutral_reviews > 0 ? round($neutral_reviews / $reviews * 100) : 0)
                             <span class="review">
@@ -288,7 +273,7 @@
                             </span>
                             <span class="ratio">{{$neutral_parcent}}%</span>
                         </li>
-                        <li title="{{ translate('negative_review_given_total').' '.$negative_reviews. ' '.translate('messages.customers') }} ({{ translate('Scale: 1') }})">
+                        <li>
                             <span class="tag">{{ translate('Negetive') }}</span>
                             @php($negative_percent = $negative_reviews > 0 ? round($negative_reviews / $reviews * 100) : 0)
                             <span class="review">
@@ -333,8 +318,7 @@
         <div class="row g-2">
             <div class="col-lg-8">
                 <div class="row gap__10">
-                    <div class="col-md-3 col-sm-6">
-                          <a href="{{ route('admin.users.delivery-man.list',['zone_id' => $params['zone_id'] ?? null , 'filter' => 'active']) }}">
+                    <div class="col-md-4 col-sm-6">
                         <div class="__customer-statistics-card h-100">
                             <div class="title">
                                 <img src="{{asset('/public/assets/admin/img/new-img/deliveryman/active.svg')}}" alt="new-img">
@@ -342,10 +326,8 @@
                             </div>
                             <h4 class="subtitle text-capitalize">{{translate('messages.active_delivery_man')}}</h4>
                         </div>
-                    </a>
                     </div>
-                    <div class="col-md-3 col-sm-6">
-                          <a href="{{ route('admin.users.delivery-man.list',['zone_id' => $params['zone_id'] ?? null , 'filter' => 'new']) }}">
+                    <div class="col-md-4 col-sm-6">
                         <div class="__customer-statistics-card h-100" style="--clr:#006AB4">
                             <div class="title">
                                 <img src="{{asset('/public/assets/admin/img/new-img/deliveryman/newly.svg')}}" alt="new-img">
@@ -353,10 +335,8 @@
                             </div>
                             <h4 class="subtitle text-capitalize">{{translate('messages.newly_joined_delivery_man')}}</h4>
                         </div>
-                    </a>
                     </div>
-                    <div class="col-md-3 col-sm-6">
-                          <a href="{{ route('admin.users.delivery-man.list',['zone_id' => $params['zone_id'] ?? null , 'filter' => 'inactive']) }}">
+                    <div class="col-md-4 col-sm-6">
                         <div class="__customer-statistics-card h-100" style="--clr:#FF5A54">
                             <div class="title">
                                 <img src="{{asset('/public/assets/admin/img/new-img/deliveryman/in-active.svg')}}" alt="new-img">
@@ -364,18 +344,6 @@
                             </div>
                             <h4 class="subtitle text-capitalize">{{translate('messages.inactive_deliveryman')}}</h4>
                         </div>
-                    </a>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                          <a href="{{ route('admin.users.delivery-man.list',['zone_id' => $params['zone_id'] ?? null , 'filter' => 'blocked']) }}">
-                        <div class="__customer-statistics-card h-100" style="--clr:#FF5A54">
-                            <div class="title">
-                                <img src="{{asset('/public/assets/admin/img/new-img/customer/blocked.svg')}}" alt="new-img">
-                                <h4>{{$blocked_deliveryman}}</h4>
-                            </div>
-                            <h4 class="subtitle text-capitalize">{{translate('messages.Blocked_deliveryman')}}</h4>
-                        </div>
-                    </a>
                     </div>
                 </div>
                 <div class="__map-wrapper-2 mt-3">
@@ -462,60 +430,50 @@
         }
 
         function initialize() {
-            @php($default_location = \App\Models\BusinessSetting::where('key', 'default_location')->first())
-            @php($default_location = $default_location->value ? json_decode($default_location->value, true) : 0)
-            var myLatlng = {
-                lat: {{ $default_location ? $default_location['lat'] : '23.757989' }},
-                lng: {{ $default_location ? $default_location['lng'] : '90.360587' }}
-            };
-            var dmbounds = new google.maps.LatLngBounds(null);
-            var myOptions = {
+            @php($default_location=\App\Models\BusinessSetting::where('key','default_location')->first())
+            @php($default_location=$default_location->value?json_decode($default_location->value, true):0)
+            let myLatlng = { lat: {{$default_location?$default_location['lat']:'23.757989'}}, lng: {{$default_location?$default_location['lng']:'90.360587'}} };
+            let dmbounds = new google.maps.LatLngBounds(null);
+            let myOptions = {
                 zoom: 13,
                 center: myLatlng,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             }
-            var deliveryMan = <?php echo json_encode($deliveryMen); ?>;
+            let deliveryMan = <?php echo json_encode($deliveryMen); ?>;
             map = new google.maps.Map(document.getElementById("map-canvas"), myOptions);
 
-            var infowindow = new google.maps.InfoWindow();
+            let infowindow = new google.maps.InfoWindow();
 
             map.fitBounds(dmbounds);
-            deliveryMan.forEach(dm => {
-                if (dm.lat) {
-                    const point = new google.maps.LatLng(dm.lat, dm.lng);
+            for (let i = 0; i < deliveryMan.length; i++) {
+                if (deliveryMan[i].lat) {
+                    let contentString = "<div style='float:left'><img style='max-height:40px;wide:auto;' src='{{ asset('storage/app/public/delivery-man') }}/"+deliveryMan[i].image+"'></div><div style='float:right; padding: 10px;'><b>"+deliveryMan[i].name+"</b><br/> "+deliveryMan[i].location+"</div>";
+                    let point = new google.maps.LatLng(deliveryMan[i].lat, deliveryMan[i].lng);
                     dmbounds.extend(point);
                     map.fitBounds(dmbounds);
-
-                    const marker = new google.maps.Marker({
+                    let marker = new google.maps.Marker({
                         position: point,
                         map: map,
-                        title: dm.image,
-                        icon: "{{ asset('public/assets/admin/img/delivery_boy_active.png') }}"
+                        title: deliveryMan[i].image,
+                        icon: "{{ asset('public/assets/admin/img/delivery_boy_map.png') }}"
                     });
-
-                    dmMarkers[dm.id] = marker;
-
-                    google.maps.event.addListener(marker, 'click', function() {
-                        infowindow.setContent(`
-                <div style='float:left'>
-                    <img style='max-height:40px;wide:auto;' onerror="this.src='{{ asset('public/assets/admin/img/160x160/img1.jpg') }}'"  src='{{ asset('storage/app/public/delivery-man') }}/${dm.image}'>
-                </div>
-                <div style='float:right; padding: 10px;'>
-                    <b>${dm.name}</b><br/>
-                    ${dm.location}<br/>
-                    Assigned Order: ${dm.assigned_order_count}
-                </div>`);
-                        infowindow.open(map, marker);
-                    });
+                    dmMarkers[deliveryMan[i].id] = marker;
+                    google.maps.event.addListener(marker, 'click', (function(marker, i) {
+                        return function() {
+                            infowindow.setContent(
+                                "<div style='float:left'><img style='max-height:40px;wide:auto;' src='{{ asset('storage/app/public/delivery-man') }}/" +
+                                deliveryMan[i].image +
+                                "'></div><div style='float:right; padding: 10px;'><b>" + deliveryMan[i]
+                                .name + "</b><br/> " + deliveryMan[i].location + "</b><br/> " + 'Assigned Order: ' + deliveryMan[i].assigned_order_count + "</div>"
+                                );
+                            infowindow.open(map, marker);
+                        }
+                    })(marker, i));
                 }
-            });
 
+            };
         }
-
         $('#search-form').on('submit', function (e) {
-            initialize();
-            var deliveryMan = <?php echo json_encode($deliveryMen); ?>;
-            var infowindow = new google.maps.InfoWindow();
             let formData = new FormData(this);
             $.ajaxSetup({
                 headers: {
@@ -523,52 +481,21 @@
                 }
             });
             $.post({
-                url: '{{ route('admin.users.delivery-man.active-search') }}',
+                url: '{{route('admin.users.delivery-man.active-search')}}',
                 data: formData,
                 cache: false,
                 contentType: false,
                 processData: false,
-                success: function(data) {
-                    let itemCount = 0;
-                    if (data.dm) {
-                        deliveryMan.forEach(item => {
-
-                            const isDMActive = data.dm.some(ddm => ddm.id === item.id);
-                            if (isDMActive) {
-                                itemCount++
-                            }
-                            const icon = isDMActive ?
-                                "{{ asset('public/assets/admin/img/delivery_boy_active.png') }}" :
-                                "{{ asset('public/assets/admin/img/delivery_boy_map_inactive.png') }}";
-
-                            const marker = new google.maps.Marker({
-                                position: dmMarkers[item.id].getPosition(),
-                                map: map,
-                                icon: icon,
-                            });
-                            map.panTo(dmMarkers[item.id].getPosition());
-                            map.setZoom(20);
-                            let dmViewContent = `
-                <div style='float:left'>
-                    <img style='max-height:40px;wide:auto;' onerror="this.src='{{ asset('public/assets/admin/img/160x160/img1.jpg') }}'"  src='{{ asset('storage/app/public/delivery-man') }}/${item.image}'>
-                </div>
-                <div style='float:right; padding: 10px;'>
-                    <b>${item.name}</b><br/>
-                    ${item.location}<br/>
-                    Assigned Order: ${item.assigned_order_count}
-                </div>`
-
-                            if (isDMActive && itemCount == 1) {
-                                infowindow.setContent(dmViewContent);
-                                infowindow.open(map, marker);
-                            } else {
-                                google.maps.event.addListener(marker, 'click', function() {
-                                    infowindow.setContent(dmViewContent);
-                                    infowindow.open(map, marker);
-                                });
-                            }
-                        });
-                    } else {
+                success: function (data) {
+                    if(data.dm){
+                        let id = data.dm.id;
+                        map.panTo(dmMarkers[id].getPosition());
+                        map.setZoom(20);
+                        dmMarkers[id].setAnimation(google.maps.Animation.BOUNCE);
+                        window.setTimeout(() => {
+                            dmMarkers[id].setAnimation(null);
+                        }, 3);
+                    }else{
                         toastr.error('Delivery Man not found', {
                             CloseButton: true,
                             ProgressBar: true
@@ -576,6 +503,32 @@
                     }
                 },
             });
+        });
+
+        function set_all_zones()
+        {
+            $.get({
+                url: '{{route('admin.zone.zoneCoordinates')}}',
+                dataType: 'json',
+                success: function (data) {
+                    for(let i=0; i<data.length;i++)
+                    {
+                        polygons.push(new google.maps.Polygon({
+                            paths: data[i],
+                            strokeColor: "#FF0000",
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2,
+                            fillColor: "#FF0000",
+                            fillOpacity: 0.1,
+                        }));
+                        polygons[i].setMap(map);
+                    }
+
+                },
+            });
+        }
+        $(document).on('ready', function(){
+            // set_all_zones();
         });
 
 
@@ -627,6 +580,8 @@
 
         let chart = new ApexCharts(document.querySelector("#customer-growth-chart"), options);
         chart.render();
+
+
 
 
     </script>

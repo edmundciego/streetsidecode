@@ -302,11 +302,9 @@ class StoreLogic
     public static function search_stores($name, $zone_id, $category_id= null,$limit = 10, $offset = 1, $type = 'all',$longitude=0,$latitude=0)
     {
         $key = explode(' ', $name);
-        $paginator = Store::withOpen($longitude??0,$latitude??0)
-        ->whereHas('zone.modules', function($query){
+        $paginator = Store::withOpen($longitude??0,$latitude??0)->whereHas('zone.modules', function($query){
             $query->where('modules.id', config('module.current_module_data')['id']);
-        })
-        ->withCount(['items','campaigns'])->with(['discount'=>function($q){
+        })->withCount(['items','campaigns'])->with(['discount'=>function($q){
             return $q->validate();
         }])->weekday()->where(function ($q) use ($key) {
             foreach ($key as $value) {

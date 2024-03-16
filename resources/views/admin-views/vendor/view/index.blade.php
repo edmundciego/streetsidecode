@@ -109,25 +109,17 @@
                                 <h5 class="name">{{$store->name}}</h5>
                             </li>
                             <li>
-
                                 <i class="tio-city nav-icon"></i>
-                                <span>{{translate('messages.address')}}</span> <span>:</span> &nbsp; <span>
-
-                                <a href="https://www.google.com/maps/search/?api=1&query={{ data_get($store,'latitude',0)}},{{ data_get($store,'longitude',0)}}" target="_blank">{{$store->address}}</a></span>
-
+                                <span>{{translate('messages.address')}}</span> <span>:</span> <span>{{$store->address}}</span>
                             </li>
 
                             <li>
                                 <i class="tio-call-talking nav-icon"></i>
-                                <span>{{translate('messages.email')}}</span> <span>:</span> &nbsp; <a href="mailto:{{$store->email}}"><span>{{$store->email}}</span></a>
+                                <span>{{translate('messages.email')}}</span> <span>:</span> <span>{{$store->email}}</span>
                             </li>
                             <li>
                                 <i class="tio-email nav-icon"></i>
-                                <span>{{translate('messages.phone')}}</span> <span>:</span> &nbsp; <a href="tel:{{$store->phone}}"><span>{{$store->phone}}</span></a>
-                            </li>
-                            <li>
-                                <i class="tio-map nav-icon"></i>
-                                <span>{{translate('messages.Zone')}}</span> <span>:</span> &nbsp; <span>{{$store?->zone?->name ?? translate('zone_deleted')}}</span>
+                                <span>{{translate('messages.phone')}}</span> <span>:</span> <span>{{$store->phone}}</span>
                             </li>
                         </ul>
                     </div>
@@ -172,17 +164,53 @@
                             </li>
                             <li>
                                 <i class="tio-call-talking nav-icon"></i>
-                                <span class="pl-1"><a href="mailto:{{$store->vendor->email}}">{{$store->vendor->email}}</a> </span>
+                                <span class="pl-1">{{$store->vendor->email}}</span>
                             </li>
                             <li>
                                 <i class="tio-email nav-icon"></i>
-                                <span class="pl-1"> <a href="tel:{{$store->vendor->phone}}"> {{$store->vendor->phone}} </a></span>
+                                <span class="pl-1">{{$store->vendor->phone}}</span>
                             </li>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
+        @if($store->vendor->status)
+{{--        <div class="col-lg-6">--}}
+{{--            <div class="card h-100">--}}
+{{--                <div class="card-header">--}}
+{{--                    <h5 class="card-title m-0 d-flex align-items-center">--}}
+{{--                        <span class="card-header-icon mr-2">--}}
+{{--                            <i class="tio-museum"></i>--}}
+{{--                        </span>--}}
+{{--                        <span class="ml-1">{{translate('messages.bank_info')}}</span>--}}
+{{--                    </h5>--}}
+{{--                </div>--}}
+{{--                <div class="card-body d-flex flex-column justify-content-center">--}}
+{{--                    <ul class="list-unstyled list-unstyled-py-3 text-dark">--}}
+{{--                        @if($store->vendor->bank_name)--}}
+{{--                        <li class="pb-1 pt-1">--}}
+{{--                            <strong class="text--title">{{translate('messages.bank_name')}}:</strong> {{$store->vendor->bank_name ? $store->vendor->bank_name : 'No Data found'}}--}}
+{{--                        </li>--}}
+{{--                        <li class="pb-1 pt-1">--}}
+{{--                            <strong class="text--title">{{translate('messages.branch')}}  :</strong> {{$store->vendor->branch ? $store->vendor->branch : 'No Data found'}}--}}
+{{--                        </li>--}}
+{{--                        <li class="pb-1 pt-1">--}}
+{{--                            <strong class="text--title">{{translate('messages.holder_name')}} :</strong> {{$store->vendor->holder_name ? $store->vendor->holder_name : 'No Data found'}}--}}
+{{--                        </li>--}}
+{{--                        <li class="pb-1 pt-1">--}}
+{{--                            <strong class="text--title">{{translate('messages.account_no')}}  :</strong> {{$store->vendor->account_no ? $store->vendor->account_no : 'No Data found'}}--}}
+{{--                        </li>--}}
+{{--                        @else--}}
+{{--                        <li class="my-auto">--}}
+{{--                            <div class="text-center card-subtitle">{{ translate('messages.No Data found') }}</div>--}}
+{{--                        </li>--}}
+{{--                        @endif--}}
+{{--                    </ul>--}}
+{{--                </div>--}}
+{{--            </div>--}}
+{{--        </div>--}}
+        @endif
     </div>
 </div>
 
@@ -196,7 +224,8 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="{{route('admin.transactions.account-transaction.store')}}" method='post' id="add_transaction" >
+                <form action="{{route('admin.transactions.account-transaction.store')}}" method='post' id="add_transaction"
+                      >
                     @csrf
                     <input type="hidden" name="type" value="store">
                     <input type="hidden" name="store_id" value="{{ $store->id }}">
@@ -215,6 +244,7 @@
                             <input class="form-control" type="number" min=".01" step="0.01" name="amount" id="amount" max="999999999999.99" placeholder="{{translate('messages.Ex_:_1000')}}">
                     </div>
                     <div class="btn--container justify-content-end">
+                        {{-- <button type="reset" class="btn btn--reset">{{translate('reset')}}</button> --}}
                         <button type="submit" id="submit_new_customer" class="btn btn--primary">{{translate('submit')}}</button>
                     </div>
                 </form>

@@ -53,7 +53,7 @@ class CouponUpdateRequest extends FormRequest
             'start_date' => 'required',
             'expire_date' => 'required',
             'discount' => 'required',
-            'discount_type' => 'required_unless:coupon_type,free_delivery',
+            'discount_type' => 'required_unless:discount,free_delivery',
             'zone_ids' => 'required_if:coupon_type,zone_wise',
             'store_ids' => 'required_if:coupon_type,store_wise',
             'title.0' => 'required',

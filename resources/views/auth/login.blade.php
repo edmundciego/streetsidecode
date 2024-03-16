@@ -318,25 +318,24 @@
     });
 
 
-$(document).on('click','.reloadCaptcha', function(){
-    $.ajax({
-        url: "{{ route('reload-captcha') }}",
-        type: "GET",
-        dataType: 'json',
-        beforeSend: function () {
-            $('#loading').show()
-            $('.capcha-spin').addClass('active')
-        },
-        success: function(data) {
-            $('#reload-captcha').html(data.view);
-        },
-        complete: function () {
-            $('#loading').hide()
-            $('.capcha-spin').removeClass('active')
-        }
-    });
-});
-
+    $('.reloadCaptcha').on('click', function () {
+        $.ajax({
+            url: "{{ route('reload-captcha') }}",
+            type: "GET",
+            dataType: 'json',
+            beforeSend: function () {
+                $('#loading').show()
+                $('.capcha-spin').addClass('active')
+            },
+            success: function(data) {
+                $('#reload-captcha').html(data.view);
+            },
+            complete: function () {
+                $('#loading').hide()
+                $('.capcha-spin').removeClass('active')
+            }
+        });
+    })
 
     $(document).ready(function() {
         $('.onerror-image').on('error', function() {

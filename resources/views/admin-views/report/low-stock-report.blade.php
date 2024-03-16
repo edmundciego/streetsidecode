@@ -22,7 +22,7 @@
         <!-- Header -->
         <div class="card-header border-0 py-2">
             <div class="search--button-wrapper justify-content-end">
-                <form class="search-form theme-style">
+                <form class="search-form">
                     <!-- Search -->
                     <div class="input-group input--group">
                         <input id="datatableSearch" name="search" type="search" class="form-control" placeholder="{{translate('ex_:_search_name')}}" value="{{ request()?->search ?? null}}" aria-label="{{translate('messages.search_here')}}">
@@ -30,11 +30,8 @@
                     </div>
                     <!-- End Search -->
                 </form>
-                @if(request()->get('search'))
-                <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
-                @endif
                 <div class="min--200">
-                    <select name="zone_id" class="form-control js-select2-custom set-filter theme-style" data-url="{{ url()->full() }}" data-filter="zone_id" id="zone">
+                    <select name="zone_id" class="form-control js-select2-custom set-filter" data-url="{{ url()->full() }}" data-filter="zone_id" id="zone">
                         <option value="all">{{translate('All Zones')}}</option>
                         @foreach(\App\Models\Zone::orderBy('name')->get() as $z)
                         <option value="{{$z['id']}}" {{isset($zone) && $zone->id == $z['id']?'selected':''}}>
@@ -44,7 +41,7 @@
                     </select>
                 </div>
                 <div class="min--200">
-                    <select name="store_id" data-placeholder="{{translate('messages.select_store')}}" class="js-data-example-ajax form-control set-filter theme-style" data-url="{{ url()->full() }}" data-filter="store_id">
+                    <select name="store_id" data-placeholder="{{translate('messages.select_store')}}" class="js-data-example-ajax form-control set-filter" data-url="{{ url()->full() }}" data-filter="store_id">
                         @if(isset($store))
                         <option value="{{$store->id}}" selected>{{$store->name}}</option>
                         @else
@@ -106,7 +103,7 @@
                     }'>
                 <thead class="thead-light">
                     <tr>
-                        <th class="border-0">{{translate('SL')}}</th>
+                        <th class="border-0">{{translate('sl')}}</th>
                         <th class="border-0 w--2">{{translate('messages.name')}}</th>
                         <th class="border-0 w--2">{{translate('messages.store')}}</th>
                         <th class="border-0">{{translate('messages.zone')}}</th>
@@ -146,7 +143,7 @@
                         </td>
                         <td>
                             @if($item->store)
-                            {{$item->store->zone?->name}}
+                            {{$item->store->zone->name}}
                             @else
                             {{translate('messages.not_found')}}
                             @endif
@@ -183,26 +180,18 @@
 </div>
 @endsection
 
-{{-- Stock Update Modal --}}
 <div class="modal fade" id="update-quantity" tabindex="-1">
     <div class="modal-dialog">
-
         <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body py-3">
+            <div class="modal-body py-2">
                 <form action="{{route('admin.item.stock-update')}}" method="post">
                     @csrf
-
                     <div class="mt-2 rest-part w-100"></div>
-                    <div class="btn--container justify-content-center">
-                        <button type="button" class="btn btn-soft-primary min-w-100px" data-dismiss="modal" aria-label="Close">
+                    <div class="btn--container justify-content-end">
+                        <button type="button" class="btn btn--danger" data-dismiss="modal" aria-label="Close">
                             {{translate('messages.close')}}
                         </button>
-                        <button class="btn btn--primary min-w-100px" type="submit">{{translate('messages.update')}}</button>
+                        <button class="btn btn--primary" type="submit">{{translate('messages.update')}}</button>
                     </div>
                 </form>
             </div>
@@ -213,7 +202,9 @@
 
 @push('script_2')
 
-
+<script src="{{asset('public/assets/admin')}}/vendor/chart.js/dist/Chart.min.js"></script>
+<script src="{{asset('public/assets/admin')}}/vendor/chartjs-chart-matrix/dist/chartjs-chart-matrix.min.js"></script>
+<script src="{{asset('public/assets/admin')}}/js/hs.chartjs-matrix.js"></script>
 
 <script>
     "use strict";
@@ -229,12 +220,6 @@
         });
     })
 
-
-
-    $(document).on('keyup', '.update_qty', function () {
-        update_qty()
-        })
-
     function update_qty() {
         let total_qty = 0;
         let qty_elements = $('input[name^="stock_"]');
@@ -243,6 +228,7 @@
         }
         if(qty_elements.length > 0)
         {
+
             $('input[name="current_stock"]').attr("readonly", 'readonly');
             $('input[name="current_stock"]').val(total_qty);
         }

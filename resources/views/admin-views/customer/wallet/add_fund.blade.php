@@ -27,33 +27,24 @@
                     <div class="row">
                         <div class="col-sm-6 col-12">
                             <div class="form-group">
-                                <label class="input-label" for="customer">{{translate('messages.customer')}}
-                                    <span class="form-label-secondary text-danger"
-                                          data-toggle="tooltip" data-placement="right"
-                                          data-original-title="{{ translate('messages.Required.')}}"> *
-                            </span>
-                                </label>
-                                <select id='customer' name="customer_id" data-placeholder="{{translate('messages.select_customer_by_name_or_phone')}}" class="js-data-example-ajax form-control" required>
+                                <label class="input-label" for="customer">{{translate('messages.customer')}}</label>
+                                <select id='customer' name="customer_id" data-placeholder="{{translate('messages.select_customer')}}" class="js-data-example-ajax form-control" required>
 
                                 </select>
                             </div>
                         </div>
                         <div class="col-sm-6 col-12">
                             <div class="form-group">
-                                <label class="input-label" for="amount">{{translate("messages.amount")}} {{ \App\CentralLogics\Helpers::currency_symbol() }}
-                                    <span class="form-label-secondary text-danger"
-                                          data-toggle="tooltip" data-placement="right"
-                                          data-original-title="{{ translate('messages.Required.')}}"> *
-                            </span>
-                                </label>
-                                <input type="number" placeholder="{{translate('Ex: 50')}}" class="form-control" name="amount" min="0" id="amount" step=".01" required>
+                                <label class="input-label" for="amount">{{translate("messages.amount")}}</label>
+
+                                <input type="number" class="form-control" name="amount" id="amount" step=".01" required>
                             </div>
                         </div>
                         <div class="col-12">
                             <div class="form-group">
                                 <label class="input-label" for="referance">{{translate('messages.reference')}} <small>({{translate('messages.optional')}})</small></label>
 
-                                <input type="text" placeholder="{{ translate('Ex: 123') }}" class="form-control" name="referance" id="referance">
+                                <input type="text" class="form-control" name="referance" id="referance">
                             </div>
                         </div>
                     </div>
@@ -109,13 +100,13 @@
 
             Swal.fire({
                 title: '{{translate('messages.are_you_sure')}}',
-                text: '{{translate('messages.you_want_to_add_fund')}} '+$('#amount').val()+' {{\App\CentralLogics\Helpers::currency_code().' '.translate('messages.to')}} '+$('#customer option:selected').text()+'{{translate('messages.to_wallet')}}',
+                text: '{{translate('messages.you_want_to_add_fund')}}'+$('#amount').val()+' {{\App\CentralLogics\Helpers::currency_code().' '.translate('messages.to')}} '+$('#customer option:selected').text()+'{{translate('messages.to_wallet')}}',
                 type: 'info',
                 showCancelButton: true,
                 cancelButtonColor: 'default',
                 confirmButtonColor: 'primary',
                 cancelButtonText: '{{translate('messages.no')}}',
-                confirmButtonText: '{{translate('messages.add_to_fund')}}',
+                confirmButtonText: '{{translate('messages.add')}}',
                 reverseButtons: true
             }).then((result) => {
                 if (result.value) {

@@ -84,14 +84,7 @@
                         <div class="col-sm-6 col-md-{{ $pharmacy == 1 ? '2':'3' }}">
                             <div class="select-item">
                                 <select name="sub_category_id" class="form-control js-select2-custom set-filter" data-placeholder="{{ translate('messages.select_sub_category') }}" id="sub-categories" data-url="{{url()->full()}}" data-filter="sub_category_id">
-                                   @if (count($sub_categories) == 0 && $category )
-                                    <option selected>{{translate('messages.No_Subcategory')}}</option>
-
-                                    @else
                                     <option value="all" selected>{{translate('messages.all_sub_category')}}</option>
-
-                                   @endif
-
                                     @foreach($sub_categories as $z)
                                     <option
                                         value="{{$z['id']}}" {{ request()?->sub_category_id == $z['id']?'selected':''}}>
@@ -126,7 +119,7 @@
             <div class="card-header py-2 border-0">
                 <div class="search--button-wrapper justify-content-end">
                     <form class="search-form">
-
+                    {{-- @csrf --}}
                         <!-- Search -->
                         <div class="input-group input--group">
                             <input id="datatableSearch" name="search" value="{{ request()?->search ?? null }}" type="search" class="form-control h--40px" placeholder="{{translate('ex_:_search_item_by_name')}}" aria-label="{{translate('messages.search_here')}}">
@@ -134,10 +127,6 @@
                         </div>
                         <!-- End Search -->
                     </form>
-                    @if(request()->get('search'))
-                    <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
-                    @endif
-
 
                     <div class="hs-unfold mr-2">
                         <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
@@ -222,7 +211,7 @@
                             <td>
                                 <a class="media align-items-center" href="{{route('admin.item.view',[$item['id']])}}">
                                     <img class="avatar avatar-lg mr-3 onerror-image"
-
+                                    
                                     src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
                                         $item['image'] ?? '',
                                         asset('storage/app/public/product').'/'.$item['image'] ?? '',
@@ -231,17 +220,17 @@
                                     ) }}"
 
                                     data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}" alt="{{$item->name}} image">
-                                    <div title="{{ $item['name'] }}" class="media-body">
+                                    <div class="media-body">
                                         <h5 class="text-hover-primary mb-0">{{Str::limit($item['name'],20,'...')}}</h5>
                                     </div>
                                 </a>
                             </td>
-                            <td title="{{ $item?->category?->name }}">
+                            <td>
                             {{Str::limit($item->category?$item->category->name:translate('messages.category_deleted'),20,'...')}}
                             </td>
                             <td>
                                 @if ($item->store)
-                                <a title="{{ $item?->store?->name }}" href="{{route('admin.store.view', $item->store->id)}}" class="table-rest-info" alt="view store"> {{  Str::limit($item->store->name, 20, '...') }}</a>
+                                <a href="{{route('admin.store.view', $item->store->id)}}" class="table-rest-info" alt="view store"> {{  Str::limit($item->store->name, 20, '...') }}</a>
                                 @else
                                 {{  translate('messages.store deleted!') }}
                                 @endif
@@ -278,22 +267,22 @@
                     @endforeach
                     </tbody>
                 </table>
-            </div>
-            @if(count($items) !== 0)
+                @if(count($items) !== 0)
                 <hr>
-            @endif
-            <div class="page-area">
-                <tfoot class="border-top">
-                {!! $items->withQueryString()->links() !!}
-            </div>
-            @if(count($items) === 0)
+                @endif
+                <div class="page-area">
+                        <tfoot class="border-top">
+                        {!! $items->withQueryString()->links() !!}
+                </div>
+                @if(count($items) === 0)
                 <div class="empty--data">
                     <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
                     <h5>
                         {{translate('no_data_found')}}
                     </h5>
                 </div>
-            @endif
+                @endif
+            </div>
             <!-- End Table -->
         </div>
         <!-- End Card -->

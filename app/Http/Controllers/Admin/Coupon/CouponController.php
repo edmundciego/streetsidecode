@@ -46,11 +46,10 @@ class CouponController extends BaseController
             relations: ['module'],
             dataLimit: config('default_pagination'),
         );
-        $customer = $request['customer'];
         $language = getWebConfig('language');
         $defaultLang = str_replace('_', '-', app()->getLocale());
         $zones = $this->zoneRepo->getList();
-        return view(CouponViewPath::INDEX[VIEW], compact('coupons','language','defaultLang','zones','customer'));
+        return view(CouponViewPath::INDEX[VIEW], compact('coupons','language','defaultLang','zones'));
     }
 
     public function add(CouponAddRequest $request): RedirectResponse

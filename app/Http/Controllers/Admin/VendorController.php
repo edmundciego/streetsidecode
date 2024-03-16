@@ -56,6 +56,7 @@ class VendorController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->all());
         $validator = Validator::make($request->all(), [
             'f_name' => 'required|max:100',
             'l_name' => 'nullable|max:100',
@@ -69,12 +70,7 @@ class VendorController extends Controller
             'minimum_delivery_time' => 'required',
             'maximum_delivery_time' => 'required',
             'delivery_time_type'=>'required',
-            'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised(),
-                function ($attribute, $value, $fail) {
-                    if (strpos($value, ' ') !== false) {
-                        $fail('The :attribute cannot contain white spaces.');
-                    }
-                },],
+            'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
             'zone_id' => 'required',
             // 'module_id' => 'required',
             'logo' => 'required',
@@ -218,11 +214,7 @@ class VendorController extends Controller
             'latitude' => 'required',
             'longitude' => 'required',
             'tax' => 'required',
-            'password' => ['nullable', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised(),function ($attribute, $value, $fail) {
-                if (strpos($value, ' ') !== false) {
-                    $fail('The :attribute cannot contain white spaces.');
-                }
-            },],
+            'password' => ['nullable', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
             'minimum_delivery_time' => 'required',
             'maximum_delivery_time' => 'required',
             'delivery_time_type'=>'required'
@@ -349,52 +341,22 @@ class VendorController extends Controller
             Toastr::warning(translate('messages.you_can_not_delete_this_store_please_add_a_new_store_to_delete'));
             return back();
         }
-        if(Order::where('store_id', $store->id)->whereIn('order_status', ['pending','accepted','confirmed','processing','handover','picked_up'])->exists())
-        {
-            Toastr::warning(translate('messages.you_can_not_delete_this_store_Please_complete_the_ongoing_and_accepted_orders'));
-            return back();
+        if (Storage::disk('public')->exists('store/' . $store['logo'])) {
+            Storage::disk('public')->delete('store/' . $store['logo']);
         }
+        $store->delete();
 
-        if (Storage::disk('public')->exists('vendor/' . $store->vendor['image'])) {
-            Storage::disk('public')->delete('vendor/' . $store->vendor['image']);
+        $vendor = Vendor::findOrFail($store->vendor->id);
+        if($vendor->userinfo){
+            $vendor->userinfo->delete();
         }
-        if (Storage::disk('public')->exists('store/' . $store->logo)) {
-            Storage::disk('public')->delete('store/' . $store->logo);
-        }
-
-        if (Storage::disk('public')->exists('store/cover/' . $store->cover_photo)) {
-            Storage::disk('public')->delete('store/cover/' . $store->cover_photo);
-        }
-        foreach($store->deliverymen as $dm) {
-            if (Storage::disk('public')->exists('delivery-man/' . $dm['image'])) {
-                Storage::disk('public')->delete('delivery-man/' . $dm['image']);
-            }
-
-            foreach (json_decode($dm['identity_image'], true) as $img) {
-                if (Storage::disk('public')->exists('delivery-man/' . $img)) {
-                    Storage::disk('public')->delete('delivery-man/' . $img);
-                }
-            }
-        }
-
-
-        $store?->deliverymen()?->delete();
-        $store?->discount()?->delete();
-        $store?->schedules()?->delete();
-        $store?->storeConfig()?->delete();
-        $store?->translations()?->delete();
-        $store?->vendor?->userinfo()?->delete();
-        $store?->vendor()?->delete();
-        $store?->delete();
-
+        $vendor->delete();
         Toastr::success(translate('messages.store_removed'));
         return back();
     }
 
-    public function view(Request $request,$store_id, $tab=null, $sub_tab='cash')
+    public function view($store_id, $tab=null, $sub_tab='cash')
     {
-        $filter= $request?->filter;
-
         $key = explode(' ', request()->search);
 
         $store = Store::find($store_id);
@@ -424,19 +386,6 @@ class VendorController extends Controller
                             }
                         });
                     })
-                    ->when(isset($filter)  && $filter == 'scheduled_orders' , function($q){
-                        $q->Scheduled();
-                    })
-                    ->when(isset($filter)  && $filter == 'pending_orders' , function($q){
-                        $q->where(['order_status'=>'pending'])->OrderScheduledIn(30);
-                    })
-                    ->when(isset($filter)  && $filter == 'delivered_orders' , function($q){
-                        $q->where(['order_status'=>'delivered']);
-                    })
-                    ->when(isset($filter)  && $filter == 'canceled_orders' , function($q){
-                        $q->where(['order_status'=>'canceled']);
-                    })
-                    ->StoreOrder()
             ->Notpos()->paginate(10);
             return view('admin-views.vendor.view.order', compact('store','orders'));
         }
@@ -1007,7 +956,7 @@ class VendorController extends Controller
         $denied = session()->has('withdraw_status_filter') && session('withdraw_status_filter') == 'denied' ? 1 : 0;
         $pending = session()->has('withdraw_status_filter') && session('withdraw_status_filter') == 'pending' ? 1 : 0;
 
-        $withdraw_req =WithdrawRequest::with(['vendor.stores'])
+        $withdraw_req =WithdrawRequest::with(['vendor'])
             ->when($all, function ($query) {
                 return $query;
             })
@@ -1084,14 +1033,6 @@ class VendorController extends Controller
         }
     }
 
-    public function getWithdrawDetails(Request $request)
-    {
-        $withdraw = WithdrawRequest::with(['vendor.stores'])->where(['id' => $request->withdraw_id])->first();
-        return response()->json([
-            'view' => view('admin-views.wallet.partials._side_view', compact('withdraw'))->render(),
-        ]);
-    }
-
     public function withdraw_search(Request $request){
         $key = explode(' ', $request['search']);
         $withdraw_req = WithdrawRequest::whereHas('vendor', function ($query) use ($key) {
@@ -1120,9 +1061,6 @@ class VendorController extends Controller
 
     public function withdrawStatus(Request $request, $id)
     {
-        $request->validate([
-            'note' => 'max:200',
-        ]);
         $withdraw = WithdrawRequest::findOrFail($id);
         $withdraw->approved = $request->approved;
         $withdraw->transaction_note = $request['note'];

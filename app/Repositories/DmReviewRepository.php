@@ -52,30 +52,6 @@ class DmReviewRepository implements DmReviewRepositoryInterface
         return $data->paginate($dataLimit);
     }
 
-    public function getListWhereOrder(string $searchValue = null, array $filters = [], array $relations = [], array $orderBy = [], int|string $dataLimit = DEFAULT_DATA_LIMIT, int $offset = null): Collection|LengthAwarePaginator
-    {
-        $key = explode(' ', $searchValue);
-
-        $data = $this->review->with($relations)->where($filters)
-            ->when(isset($key), function($query) use($key) {
-                $query->whereHas('delivery_man', function ($query) use ($key) {
-                    foreach ($key as $value) {
-                        $query->where('f_name', 'like', "%{$value}%")->orWhere('l_name', 'like', "%{$value}%");
-                    }
-                });
-            });
-
-            if(count($orderBy) > 0 ){
-                $data->orderBy($orderBy['col'], $orderBy['type']);
-            } else{
-                $data->latest();
-            }
-        if($dataLimit == 'all'){
-            return $data->get();
-        }
-        return $data->paginate($dataLimit);
-    }
-
     public function update(string $id, array $data): bool|string|object
     {
         $review = $this->review->find($id);

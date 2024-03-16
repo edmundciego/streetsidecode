@@ -40,7 +40,7 @@ class ModuleRepository implements ModuleRepositoryInterface
     {
         $key = explode(' ', $searchValue);
 
-        return $this->module->withCount($relations)->where($filters)
+        return $this->module->withCount($relations)
             ->when(isset($key) , function($q) use($key){
                 $q->where(function ($q) use ($key) {
                     foreach ($key as $value) {

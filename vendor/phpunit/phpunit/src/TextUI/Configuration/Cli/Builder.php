@@ -806,9 +806,9 @@ final class Builder
                     break;
 
                 case '--log-events-text':
-                    $logEventsText = Filesystem::resolveStreamOrFile($option[1]);
+                    $logEventsText = Filesystem::resolvePathOrStream($option[1]);
 
-                    if ($logEventsText === false) {
+                    if (!$logEventsText) {
                         throw new Exception(
                             sprintf(
                                 'The path "%s" specified for the --log-events-text option could not be resolved',
@@ -820,9 +820,9 @@ final class Builder
                     break;
 
                 case '--log-events-verbose-text':
-                    $logEventsVerboseText = Filesystem::resolveStreamOrFile($option[1]);
+                    $logEventsVerboseText = Filesystem::resolvePathOrStream($option[1]);
 
-                    if ($logEventsVerboseText === false) {
+                    if (!$logEventsVerboseText) {
                         throw new Exception(
                             sprintf(
                                 'The path "%s" specified for the --log-events-verbose-text option could not be resolved',

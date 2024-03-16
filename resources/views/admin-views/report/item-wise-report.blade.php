@@ -122,10 +122,7 @@
                         <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
                     </div>
                     <!-- End Search -->
-                    </form>
-                    @if(request()->get('search'))
-                        <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
-                    @endif<!-- Unfold -->
+                    </form>                    <!-- Unfold -->
                     <div class="hs-unfold mr-2">
                         <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
                             data-hs-unfold-options='{
@@ -184,8 +181,7 @@
                         <th class="w--2">{{translate('messages.name')}}</th>
                         <th class="w--2">{{translate('messages.module')}}</th>
                         <th class="w--2">{{translate('messages.store')}}</th>
-                        <th>{{translate('messages.stock')}}</th>
-                        <th>{{translate('messages.sell_count')}}</th>
+                        <th>{{translate('messages.order_count')}}</th>
                         <th>{{translate('messages.price')}}</th>
                         <th>{{translate('messages.total_amount_sold')}}</th>
                         <th>{{translate('messages.total_discount_given')}}</th>
@@ -207,12 +203,10 @@
                                         asset('storage/app/public/product').'/'.$item['image'] ?? '',
                                         asset('public/assets/admin/img/160x160/img2.jpg'),
                                         'product/'
-                                    ) }}"
+                                    ) }}" 
                                     data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}" alt="{{$item->name}} image">
                                     <div class="media-body">
-                                        <h5 class="text-hover-primary mb-0" title="{{ $item['name'] }}">
-                                            {{ strlen($item['name']) > 30 ? substr($item['name'], 0, 30).'...' : $item['name'] }}
-                                        </h5>
+                                        <h5 class="text-hover-primary mb-0">{{$item['name']}}</h5>
                                     </div>
                                 </a>
                             </td>
@@ -225,9 +219,6 @@
                                 @else
                                 {{translate('messages.store_deleted')}}
                                 @endif
-                            </td>
-                            <td>
-                                {{$item->module->module_type == 'food'? translate('N/A') : $item->stock}}
                             </td>
                             <td>
                                 {{$item->orders_count}}

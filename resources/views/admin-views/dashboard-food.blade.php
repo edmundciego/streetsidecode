@@ -65,7 +65,7 @@
                             <img src="{{asset('/public/assets/admin/img/dashboard/food/items.svg')}}" alt="dashboard/grocery">
                             <h6 class="name">{{ translate('messages.foods') }}</h6>
                             <h3 class="count">{{ $data['total_items'] }}</h3>
-                            <div class="subtxt">{{ $data['new_items'] }} {{ translate('newly added') }}</div>
+        <div class="subtxt">{{ $data['new_items'] }} {{ translate('newly added') }}</div>
                         </div>
                     </div>
                     <div class="col-sm-6 col-lg-3">
@@ -73,7 +73,7 @@
                             <img src="{{asset('/public/assets/admin/img/dashboard/food/orders.svg')}}" alt="dashboard/grocery">
                             <h6 class="name">{{ translate('messages.orders') }}</h6>
                             <h3 class="count">{{ $data['total_orders'] }}</h3>
-                            <div class="subtxt">{{ $data['new_orders'] }} {{ translate('newly added') }}</div>
+        <div class="subtxt">{{ $data['new_orders'] }} {{ translate('newly added') }}</div>
                         </div>
                     </div>
                     <div class="col-sm-6 col-lg-3">
@@ -81,7 +81,7 @@
                             <img src="{{asset('/public/assets/admin/img/dashboard/food/stores.svg')}}" alt="dashboard/grocery">
                             <h6 class="name">{{ translate('messages.restaurants') }}</h6>
                             <h3 class="count">{{ $data['total_stores'] }}</h3>
-                            <div class="subtxt">{{ $data['new_stores'] }} {{ translate('newly added') }}</div>
+        <div class="subtxt">{{ $data['new_stores'] }} {{ translate('newly added') }}</div>
                         </div>
                     </div>
                     <div class="col-sm-6 col-lg-3">
@@ -89,7 +89,7 @@
                             <img src="{{asset('/public/assets/admin/img/dashboard/food/customers.svg')}}" alt="dashboard/grocery">
                             <h6 class="name">{{ translate('messages.customers') }}</h6>
                             <h3 class="count">{{ $data['total_customers'] }}</h3>
-                            <div class="subtxt">{{ $data['new_customers'] }} {{ translate('newly added') }}</div>
+        <div class="subtxt">{{ $data['new_customers'] }} {{ translate('newly added') }}</div>
                         </div>
                     </div>
                     <div class="col-12">
@@ -546,7 +546,7 @@
                 success: function (data) {
                     insert_param('zone_id', zone_id);
                     $('#order_stats').html(data.order_stats);
-                    $('#user-overview-boarde').html(data.user_overview);
+                    $('#user-overview-board').html(data.user_overview);
                     $('#monthly-earning-graph').html(data.monthly_graph);
                     $('#popular-restaurants-view').html(data.popular_restaurants);
                     $('#top-deliveryman-view').html(data.top_deliveryman);

@@ -41,8 +41,6 @@ class ModuleAddRequest extends FormRequest
         return [
             'module_name' => 'required|unique:modules|max:100',
             'module_type'=>'required',
-            'icon'=>'required',
-            'thumbnail'=>'required',
             'module_name.0' => 'required',
             'description.0' => 'required',
         ];

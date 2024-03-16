@@ -16,8 +16,8 @@ $company_name = App\Models\BusinessSetting::where('key', 'business_name')->first
                                     <img class="mb-2 mail-img-2 onerror-image" data-onerror-image="{{ asset('storage/app/public/business/' . $restaurant_logo) }}"
 
                                     src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                        data_get($data, 'logo' , null),
-                                        asset('storage/app/public/email_template').'/'.data_get($data, 'logo' , null),
+                                        $data['logo']?? '',
+                                        asset('storage/app/public/email_template').'/'.$data['logo'] ?? '',
                                         asset('storage/app/public/business/' . $restaurant_logo),
                                         'email_template/'
                                     ) }}"

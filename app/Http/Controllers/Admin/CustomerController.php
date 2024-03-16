@@ -19,15 +19,8 @@ use Rap2hpoutre\FastExcel\FastExcel;
 
 class CustomerController extends Controller
 {
-    public function __construct()
-    {
-        DB::statement("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
-    }
     public function customer_list(Request $request)
     {
-        $zone_id=  $request->zone_id ?? null;
-        $filter=  $request->filter ?? null;
-        $order_wise=  $request->order_wise ?? null;
         $key = [];
         if ($request->search) {
             $key = explode(' ', $request['search']);
@@ -39,36 +32,8 @@ class CustomerController extends Controller
                     ->orWhere('email', 'like', "%{$value}%")
                     ->orWhere('phone', 'like', "%{$value}%");
             };
-        })->withcount('orders')
-
-        ->when(isset($zone_id) && is_numeric($zone_id) , function ($query) use($zone_id){
-            $query->where('zone_id' ,$zone_id);
         })
-        ->when(isset($filter) && $filter == 'active' , function ($query) {
-            $query->where('status' ,1);
-        })
-        ->when(isset($filter) && $filter == 'blocked' , function ($query) {
-            $query->where('status' ,0);
-        })
-        ->when(isset($filter) && $filter == 'new' , function ($query) {
-            $query->whereDate('created_at', '>=', now()->subDays(30)->format('Y-m-d'));
-        })
-        ->when(isset($order_wise) && $order_wise == 'top' , function ($query) {
-            $query->orderBy('orders_count', 'desc');
-        })
-        ->when(isset($order_wise) && $order_wise == 'least' , function ($query) {
-            $query->orderBy('orders_count', 'asc');
-        })
-        ->when(isset($order_wise) && $order_wise == 'latest' , function ($query) {
-            $query->latest();
-        })
-        ->when(!$order_wise, function ($query) {
-            $query->orderBy('orders_count', 'desc');
-        })
-
-
-            ->paginate(config('default_pagination'));
-
+            ->orderBy('order_count', 'desc')->paginate(config('default_pagination'));
         return view('admin-views.customer.list', compact('customers'));
     }
 
@@ -125,22 +90,12 @@ class CustomerController extends Controller
         ]);
     }
 
-    public function view(Request $request,$id)
+    public function view($id)
     {
-        $key = $request['search'];
         $customer = User::find($id);
         if (isset($customer)) {
-            $total_order_amount = Order::selectRaw('sum(order_amount) as total_order_amount')->latest()->where(['user_id' => $id])
-                ->when(isset($key), function($query) use($key){
-                    $query->Where('id', 'like', "%{$key}%");
-                } )
-                ->Notpos()->get();
-            $orders = Order::withcount('details')->latest()->where(['user_id' => $id])
-            ->when(isset($key), function($query) use($key){
-                $query->Where('id', 'like', "%{$key}%");
-            } )
-            ->Notpos()->paginate(config('default_pagination'));
-            return view('admin-views.customer.customer-view', compact('customer', 'orders','total_order_amount'));
+            $orders = Order::latest()->where(['user_id' => $id])->Notpos()->paginate(config('default_pagination'));
+            return view('admin-views.customer.customer-view', compact('customer', 'orders'));
         }
         Toastr::error(translate('messages.customer_not_found'));
         return back();
@@ -151,7 +106,7 @@ class CustomerController extends Controller
         $customer = User::find($request->id);
 
         $orders = Order::latest()->where(['user_id' => $request->id])->Notpos()->get();
-
+        
         $data = [
             'orders'=>$orders,
             'customer_id'=>$customer->id,
@@ -159,7 +114,7 @@ class CustomerController extends Controller
             'customer_phone'=>$customer->phone,
             'customer_email'=>$customer->email,
         ];
-
+        
         if ($request->type == 'excel') {
             return Excel::download(new CustomerOrderExport($data), 'CustomerOrders.xlsx');
         } else if ($request->type == 'csv') {
@@ -167,38 +122,18 @@ class CustomerController extends Controller
         }
     }
 
-    public function subscribedCustomers(Request $request)
+    public function subscribedCustomers()
     {
-        $key = explode(' ', $request['search']);
-        $data['subscribedCustomers'] = Newsletter::orderBy('id', 'desc')
-
-        ->when(isset($key), function($query) use($key) {
-            $query->where(function ($q) use ($key) {
-                foreach ($key as $value) {
-                    $q->orWhere('email', 'like', "%". $value."%");
-                }
-            });
-        })
-        ->paginate(config('default_pagination'));
+        $data['subscribedCustomers'] = Newsletter::orderBy('id', 'desc')->get();
         return view('admin-views.customer.subscribed-emails', $data);
     }
 
     public function subscribed_customer_export(Request $request){
-        $key = explode(' ', $request['search']);
-        $customers = Newsletter::orderBy('id', 'desc')
-
-        ->when(isset($key), function($query) use($key) {
-            $query->where(function ($q) use ($key) {
-                foreach ($key as $value) {
-                    $q->orWhere('email', 'like', "%". $value."%");
-                }
-            });
-        })
-        ->get();
+        $customers = Newsletter::orderBy('id', 'desc')->get();
         $data = [
             'customers'=>$customers
         ];
-
+        
         if ($request->type == 'excel') {
             return Excel::download(new SubscriberListExport($data), 'Subscribers.xlsx');
         } else if ($request->type == 'csv') {
@@ -209,14 +144,11 @@ class CustomerController extends Controller
     public function subscriberMailSearch(Request $request)
     {
         $key = explode(' ', $request['search']);
-        $customers = Newsletter::
-        where(function ($q) use ($key) {
+        $customers = Newsletter::where(function ($q) use ($key) {
             foreach ($key as $value) {
                 $q->orWhere('email', 'like', "%". $value."%");
             }
-        })
-
-        ->orderBy('id', 'desc')->get();
+        })->orderBy('id', 'desc')->get();
         return response()->json([
             'count' => count($customers),
             'view' => view('admin-views.customer.partials._subscriber-email-table', compact('customers'))->render()
@@ -321,7 +253,7 @@ class CustomerController extends Controller
             'search'=>$request->search??null,
 
         ];
-
+        
         if ($request->type == 'excel') {
             return Excel::download(new CustomerListExport($data), 'Customers.xlsx');
         } else if ($request->type == 'csv') {

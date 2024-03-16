@@ -62,7 +62,7 @@
                             <span>{{translate('Counter Section')}}</span>
                         </span>
                         <label class="toggle-switch toggle-switch-sm m-0">
-                            <input type="checkbox" name="status" id="counter_status"
+                            <input type="checkbox" name="status"
                                    data-id="counter_status"
                                    data-type="toggle"
                                    data-image-on="{{ asset('/public/assets/admin/img/modal/counter-on.png') }}"

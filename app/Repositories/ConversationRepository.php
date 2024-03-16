@@ -75,19 +75,13 @@ class ConversationRepository implements ConversationRepositoryInterface
             ->where($params)->first();
     }
 
-    public function getListWithScope(array $orderBy = [], array $relations = [], int|string $dataLimit = DEFAULT_DATA_LIMIT, string $conversation_with = 'customer', int $offset = null, array $scopes=[]): Collection|LengthAwarePaginator
+    public function getListWithScope(array $orderBy = [], array $relations = [], int|string $dataLimit = DEFAULT_DATA_LIMIT, int $offset = null, array $scopes=[]): Collection|LengthAwarePaginator
     {
         $data = $this->conversation->with($relations)
             ->where(function ($q) use ($scopes) {
                 foreach ($scopes as $key => $value) {
                     $q->$key(implode(', ',$value));
                 }
-            })
-            ->when($conversation_with == 'store' , function($query){
-                $query->WhereUserType('vendor');
-            })
-            ->when($conversation_with != 'store' , function($query){
-                $query->WhereUserType('customer');
             });
         if($dataLimit == 'all'){
             return $data->get();
@@ -114,31 +108,25 @@ class ConversationRepository implements ConversationRepositoryInterface
         }
         return $data->paginate($dataLimit);
     }
-    public function getDmConversationList(Request $request, int|string $dataLimit = DEFAULT_DATA_LIMIT, int $user ,int $offset = null): Collection|LengthAwarePaginator
+    public function getDmConversationList(Request $request, int|string $dataLimit = DEFAULT_DATA_LIMIT, int $offset = null): Collection|LengthAwarePaginator
     {
         $key = explode(' ', $request->get('key'));
-        $data =$this->conversation->with(['sender', 'receiver', 'last_message'])->WhereUser($user)
-        ->when($request->conversation_with == 'store' , function($query){
-            $query->WhereUserType('vendor');
-        })
-        ->when($request?->conversation_with != 'store' , function($query){
-            $query->WhereUserType('customer');
-        })
-        ->when($request->get('key') , function ($query) use ($key){
+        $data = Conversation::with(['sender', 'receiver', 'last_message'])->WhereUser($request->id)
+        ->when(isset($key) , function ($query) use ($key){
             $query->where(function($qu)use($key){
                 $qu->where('sender_type','!=', 'delivery_man')->whereHas('sender',function($query)use($key){
                         foreach ($key as $value) {
                             $query->where('f_name', 'like', "%{$value}%")->orWhere('l_name', 'like', "%{$value}%")->orWhere('phone', 'like', "%{$value}%");
                         }
-                    })->orWhere(function($q)use($key){
-                        $q->where('receiver_type','!=', 'delivery_man')->whereHas('receiver',function($query)use($key){
-                            foreach ($key as $value) {
-                                $query->where('f_name', 'like', "%{$value}%")->orWhere('l_name', 'like', "%{$value}%")->orWhere('phone', 'like', "%{$value}%");
-                            }
-                        });
+                    });
+                })->orWhere(function($q)use($key){
+                    $q->where('receiver_type','!=', 'delivery_man')->whereHas('receiver',function($query)use($key){
+                        foreach ($key as $value) {
+                            $query->where('f_name', 'like', "%{$value}%")->orWhere('l_name', 'like', "%{$value}%")->orWhere('phone', 'like', "%{$value}%");
+                        }
                     });
                 });
-            });
+            })->WhereUserType('delivery_man');
             if($dataLimit == 'all'){
                 return $data->get();
             }

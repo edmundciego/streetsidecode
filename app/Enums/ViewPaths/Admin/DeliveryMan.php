@@ -135,9 +135,5 @@ enum DeliveryMan
         URI => 'message/details',
         VIEW => ''
     ];
-    const ORDER_LIST = [
-        URI => 'search',
-        VIEW => 'admin-views.delivery-man.view.order_list'
-    ];
 
 }
