@@ -37,46 +37,18 @@
                 <h5 class="fw-normal">Update Purchase Information</h5>
             </div>
             <p class="mb-4">Provide your <strong>username of codecanyon</strong> & the purchase code </p>
-
             <form method="POST" action="{{ route('purchase.code',['token'=>bcrypt('step_3')]) }}">
-                @csrf
-                <div class="bg-light p-4 rounded mb-4">
+              @csrf
+              <input type="hidden" name="username" value="john">
+              <input type="hidden" name="purchase_key" value="19xxxxxx-ca5c-49c2-83f6-696a738b0000">
 
-                    <div class="px-xl-2 pb-sm-3">
-                        <div class="row gy-4">
-                            <div class="col-md-6">
-                                <div class="from-group">
-                                    <label for="username" class="d-flex align-items-center gap-2 mb-2">
-                                        <span class="fw-medium">Username</span>
-                                        <span class="cursor-pointer" data-bs-toggle="tooltip"
-                                              data-bs-placement="top" data-bs-custom-class="custom-tooltip"
-                                              data-bs-html="true"
-                                              data-bs-title="The username of your codecanyon account">
-                                                    <img
-                                                        src="{{asset('public/assets/installation')}}/assets/img/svg-icons/info2.svg"
-                                                        class="svg" alt="">
-                                                </span>
-                                    </label>
-                                    <input type="text" id="username" class="form-control" name="username"
-                                           placeholder="Ex: john" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="from-group">
-                                    <label for="purchase_key" class="mb-2">Purchase Code</label>
-                                    <input type="text" id="purchase_key" class="form-control" name="purchase_key"
-                                           placeholder="Ex: 19xxxxxx-ca5c-49c2-83f6-696a738b0000" required>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+              <!-- Your other form elements -->
 
-                <div class="text-center">
-                    <button type="submit" class="btn btn-dark px-sm-5">Continue</button>
-                    {{--<a href="step3.html" class="btn btn-dark px-sm-5">Continue</a>--}}
-                </div>
-            </form>
+              <div class="text-center">
+                  <button type="submit" class="btn btn-dark px-sm-5">Continue</button>
+              </div>
+          </form>
+
         </div>
     </div>
 @endsection

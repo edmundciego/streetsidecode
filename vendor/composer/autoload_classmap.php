@@ -259,7 +259,7 @@ return array(
     'App\\Http\\Controllers\\Vendor\\WalletMethodController' => $baseDir . '/app/Http/Controllers/Vendor/WalletMethodController.php',
     'App\\Http\\Kernel' => $baseDir . '/app/Http/Kernel.php',
     'App\\Http\\Middleware\\APIGuestMiddleware' => $baseDir . '/app/Http/Middleware/APIGuestMiddleware.php',
-    'App\\Http\\Middleware\\ActivationCheckMiddleware' => $baseDir . '/app/Http/Middleware/ActivationCheckMiddleware.php',
+    // 'App\\Http\\Middleware\\ActivationCheckMiddleware' => $baseDir . '/app/Http/Middleware/ActivationCheckMiddleware.php',
     'App\\Http\\Middleware\\AdminMiddleware' => $baseDir . '/app/Http/Middleware/AdminMiddleware.php',
     'App\\Http\\Middleware\\Authenticate' => $baseDir . '/app/Http/Middleware/Authenticate.php',
     'App\\Http\\Middleware\\CurrentModule' => $baseDir . '/app/Http/Middleware/CurrentModule.php',
