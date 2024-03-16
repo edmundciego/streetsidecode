@@ -86,20 +86,22 @@ class InstallController extends Controller
 
     public function purchase_code(Request $request)
     {
-        Helpers::setEnvironmentValue('SOFTWARE_ID', 'MzY3NzIxMTI=');
-        Helpers::setEnvironmentValue('BUYER_USERNAME', $request['username']);
-        Helpers::setEnvironmentValue('PURCHASE_CODE', $request['purchase_key']);
+        // Helpers::setEnvironmentValue('SOFTWARE_ID', 'MzY3NzIxMTI=');
+        // Helpers::setEnvironmentValue('BUYER_USERNAME', $request['username']);
+        // Helpers::setEnvironmentValue('PURCHASE_CODE', $request['purchase_key']);
+        //
+        // $post = [
+        //     'name' => $request['name'],
+        //     'email' => $request['email'],
+        //     'username' => $request['username'],
+        //     'purchase_key' => $request['purchase_key'],
+        //     'domain' => preg_replace("#^[^:/.]*[:/]+#i", "", url('/')),
+        // ];
+        // $response = $this->dmvf($post);
+        //
+        // return redirect($response.'?token='.bcrypt('step_3'));
+        return redirect()->route('step3', ['error' => 'skipped']);
 
-        $post = [
-            'name' => $request['name'],
-            'email' => $request['email'],
-            'username' => $request['username'],
-            'purchase_key' => $request['purchase_key'],
-            'domain' => preg_replace("#^[^:/.]*[:/]+#i", "", url('/')),
-        ];
-        $response = $this->dmvf($post);
-
-        return redirect($response.'?token='.bcrypt('step_3'));
     }
 
     public function system_settings(Request $request)
