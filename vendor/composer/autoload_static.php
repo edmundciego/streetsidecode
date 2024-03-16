@@ -1178,7 +1178,7 @@ class ComposerStaticInit1eab95911c4c28bd2eee65052f62f71e
         'App\\Http\\Controllers\\Vendor\\WalletMethodController' => __DIR__ . '/../..' . '/app/Http/Controllers/Vendor/WalletMethodController.php',
         'App\\Http\\Kernel' => __DIR__ . '/../..' . '/app/Http/Kernel.php',
         'App\\Http\\Middleware\\APIGuestMiddleware' => __DIR__ . '/../..' . '/app/Http/Middleware/APIGuestMiddleware.php',
-        // 'App\\Http\\Middleware\\ActivationCheckMiddleware' => __DIR__ . '/../..' . '/app/Http/Middleware/ActivationCheckMiddleware.php',
+        'App\\Http\\Middleware\\ActivationCheckMiddleware' => __DIR__ . '/../..' . '/app/Http/Middleware/ActivationCheckMiddleware.php',
         'App\\Http\\Middleware\\AdminMiddleware' => __DIR__ . '/../..' . '/app/Http/Middleware/AdminMiddleware.php',
         'App\\Http\\Middleware\\Authenticate' => __DIR__ . '/../..' . '/app/Http/Middleware/Authenticate.php',
         'App\\Http\\Middleware\\CurrentModule' => __DIR__ . '/../..' . '/app/Http/Middleware/CurrentModule.php',
