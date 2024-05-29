@@ -41,7 +41,9 @@ class UnitController extends BaseController
 
     private function getListView(): View
     {
-        $units = $this->unitRepo->getList(
+
+        $units = $this->unitRepo->getListWhere(
+            searchValue: request()?->search,
             dataLimit: config('default_pagination')
         );
         $language = getWebConfig('language');

@@ -135,7 +135,7 @@ font-weight: 700
             object-fit: cover
         }
 .social img {
-width: 24px;    
+width: 24px;
 }
     </style>
 
@@ -147,15 +147,15 @@ width: 24px;
         <tbody>
             <tr>
                 <td class="main-table-td">
-                    <img class="mail-img-1"  @if ($data?->logo)
-                    src="{{ asset('storage/app/public/email_template/') }}/{{ $data['logo']??'' }}"
-                    @else
-                    src='{{ asset('/public/assets/admin/img/blank1.png') }}'
-                    @endif id="logoViewer" alt="">
+                    <img class="mail-img-1"
+                    src="{{\App\CentralLogics\Helpers::onerror_image_helper( data_get($data, 'logo'), asset('storage/app/public/email_template/').'/'.data_get($data, 'logo'), asset('public/assets/admin/img/emai_demo_template_2.png'), 'email_template/') }}"
+
+                    id="logoViewer" alt="">
                     <h2 id="mail-title" class="mt-2">{{ $title?? translate('Main_Title_or_Subject_of_the_Mail') }}</h2>
                     <div class="mb-1" id="mail-body">{!! $body?? translate('Hi_Sabrina,') !!}</div>
-                    <img class="mb-2 mail-img-3" id="bannerViewer" onerror="this.src='{{ asset('/public/assets/admin/img/blank2.png') }}'"
-                    src="{{ asset('storage/app/public/email_template/') }}/{{ $data['image']??'' }}" alt="">
+                    <img class="mb-2 mail-img-3" id="bannerViewer"
+                    src="{{\App\CentralLogics\Helpers::onerror_image_helper( data_get($data, 'image'), asset('storage/app/public/email_template/').'/'.data_get($data, 'image'), asset('public/assets/admin/img/emai_demo_template_1.png'), 'email_template/') }}"
+                    alt="">
                     <hr>
                     <div class="mb-2" id="mail-footer">
                         {{ $footer_text ?? translate('Please_contact_us_for_any_queries,_we’re_always_happy_to_help.') }}
@@ -179,7 +179,7 @@ width: 24px;
             <tr>
                 <td>
                     <span class="privacy">
-@php($landing_data =\App\Models\DataSetting::where('type', 'admin_landing_page')->whereIn('key', ['shipping_policy_status','refund_policy_status','cancellation_policy_status'])->pluck('value','key')->toArray())
+                    @php($landing_data =\App\Models\DataSetting::where('type', 'admin_landing_page')->whereIn('key', ['shipping_policy_status','refund_policy_status','cancellation_policy_status'])->pluck('value','key')->toArray())
                         <a href="{{ route('privacy-policy') }}" id="privacy-check" style="{{ (isset($data['privacy']) && $data['privacy'] == 1)?'':'display:none;' }}">{{ translate('Privacy_Policy')}}</a>
                         @if (isset($landing_data['refund_policy_status']) && $landing_data['refund_policy_status']  == 1)
                         <a href="{{ route('refund') }}" id="refund-check" style="{{ (isset($data['refund']) && $data['refund'] == 1)?'':'display:none;' }}"><span class="dot"></span>{{ translate('Refund_Policy') }}</a>

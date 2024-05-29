@@ -2,25 +2,26 @@
 
 namespace App\Http\Controllers\Admin\Zone;
 
-use App\Contracts\Repositories\ZoneRepositoryInterface;
-use App\Contracts\Repositories\TranslationRepositoryInterface;
-use App\Enums\ExportFileNames\Admin\Zone;
-use App\Enums\ViewPaths\Admin\Zone as ZoneViewPath;
-use App\Exports\ZoneExport;
-use App\Http\Controllers\BaseController;
-use App\Http\Requests\Admin\ZoneAddRequest;
-use App\Http\Requests\Admin\ZoneModuleUpdateRequest;
-use App\Http\Requests\Admin\ZoneUpdateRequest;
-use App\Services\ZoneService;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Brian2694\Toastr\Facades\Toastr;
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\Order;
 use Illuminate\View\View;
+use App\Exports\ZoneExport;
+use Illuminate\Http\Request;
+use App\Services\ZoneService;
+use Illuminate\Http\JsonResponse;
+use Brian2694\Toastr\Facades\Toastr;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Http\RedirectResponse;
+use App\Http\Controllers\BaseController;
+use App\Enums\ExportFileNames\Admin\Zone;
+use App\Http\Requests\Admin\ZoneAddRequest;
+use Illuminate\Database\Eloquent\Collection;
+use App\Http\Requests\Admin\ZoneUpdateRequest;
+use Illuminate\Pagination\LengthAwarePaginator;
+use App\Enums\ViewPaths\Admin\Zone as ZoneViewPath;
+use App\Http\Requests\Admin\ZoneModuleUpdateRequest;
+use App\Contracts\Repositories\ZoneRepositoryInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use App\Contracts\Repositories\TranslationRepositoryInterface;
 
 class ZoneController extends BaseController
 {
@@ -101,6 +102,11 @@ class ZoneController extends BaseController
         if(env('APP_MODE')=='demo' && $request['id'] == 1)
         {
             Toastr::warning(translate('messages.you_can_not_delete_this_zone_please_add_a_new_zone_to_delete'));
+            return back();
+        }
+        if(Order::where('zone_id',$request['id'])->whereIn('order_status', ['pending','accepted','confirmed','processing','handover','picked_up'])->exists())
+        {
+            Toastr::warning(translate('messages.you_can_not_delete_this_zone_Please_complete_the_ongoing_orders_of_this_zone'));
             return back();
         }
         $this->zoneRepo->delete(id: $request['id']);

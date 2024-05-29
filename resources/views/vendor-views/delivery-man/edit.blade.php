@@ -2,11 +2,6 @@
 
 @section('title',translate('Update delivery-man'))
 
-@push('css_or_js')
-    <link rel="stylesheet" href="{{asset('/public/assets/admin/css/intlTelInput.css')}}" />
-    <link rel="shortcut icon" href="{{asset('/public/assets/admin/img/flags.png')}}" type="image/x-icon">
-    <link rel="shortcut icon" href="{{asset('/public/assets/admin/img/flags@2x.png')}}" type="image/x-icon">
-@endpush
 
 @section('content')
     <div class="content container-fluid">
@@ -92,7 +87,7 @@
                                 <div class="btn--container" id="coba">
                                     @foreach(json_decode($delivery_man['identity_image'],true) as $img)
                                         <div>
-                                            <img class="img--120" 
+                                            <img class="img--120"
                                             src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
                                                 $img,
                                                 asset('storage/app/public/delivery-man') . '/' .$img,
@@ -145,7 +140,7 @@
                                 <div class="col-md-4 col-12">
                                     <div class="form-group mb-0">
                                         <label class="input-label" for="phone">{{translate('messages.phone')}}</label>
-                                        <input type="number" id="phone" name="phone" value="{{$delivery_man['phone']}}" class="form-control"
+                                        <input type="tel" id="phone" name="phone" value="{{$delivery_man['phone']}}" class="form-control"
                                                 placeholder="{{ translate('messages.Ex:') }} 017********"
                                                 required>
                                     </div>
@@ -214,25 +209,9 @@
 
 @push('script_2')
 
-<script src="{{asset('/public/assets/admin/js/intlTelInput.js')}}"></script>
-<script src="{{asset('/public/assets/admin/js/intlTelInput-jquery.min.js')}}"></script>
 <script src="{{asset('public/assets/admin/js/spartan-multi-image-picker.js')}}"></script>
 <script type="text/javascript">
     "use strict";
-
-        @php($country=\App\Models\BusinessSetting::where('key','country')->first())
-        let phone = $("#phone").intlTelInput({
-            utilsScript: "{{asset('/public/assets/admin/js/utils.js')}}",
-            nationalMode: true,
-            autoHideDialCode: true,
-            autoPlaceholder: "ON",
-            dropdownContainer: document.body,
-            formatOnDisplay: true,
-            hiddenInput: "phone",
-            initialCountry: "{{$country?$country->value:'auto'}}",
-            placeholderNumberType: "MOBILE",
-            separateDialCode: true
-        });
 
         $(function () {
             $("#coba").spartanMultiImagePicker({

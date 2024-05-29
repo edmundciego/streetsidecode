@@ -3,9 +3,6 @@
 @section('title',translate('Add new delivery-man'))
 
 @push('css_or_js')
-    <link rel="stylesheet" href="{{asset('/public/assets/admin/css/intlTelInput.css')}}" />
-    <link rel="shortcut icon" href="{{asset('/public/assets/admin/img/flags.png')}}" type="image/x-icon">
-    <link rel="shortcut icon" href="{{asset('/public/assets/admin/img/flags@2x.png')}}" type="image/x-icon">
 @endpush
 
 @section('content')
@@ -123,7 +120,7 @@
                                     <div class="form-group mb-0">
                                         <label class="input-label" for="phone">{{translate('messages.phone')}}</label>
                                         <div class="input-group">
-                                            <input type="number" name="tel" id="phone" placeholder="{{ translate('messages.Ex:') }} 017********" class="form-control" required>
+                                            <input type="tel" name="phone" id="phone" placeholder="{{ translate('messages.Ex:') }} 017********" class="form-control" required>
                                         </div>
                                     </div>
                                 </div>
@@ -192,25 +189,9 @@
 
 @push('script_2')
 
-<script src="{{asset('/public/assets/admin/js/intlTelInput.js')}}"></script>
-<script src="{{asset('/public/assets/admin/js/intlTelInput-jquery.min.js')}}"></script>
 <script src="{{asset('public/assets/admin/js/spartan-multi-image-picker.js')}}"></script>
 <script type="text/javascript">
     "use strict";
-
-        @php($country=\App\Models\BusinessSetting::where('key','country')->first())
-        let phone = $("#phone").intlTelInput({
-            utilsScript: "{{asset('/public/assets/admin/js/utils.js')}}",
-            autoHideDialCode: true,
-            autoPlaceholder: "ON",
-            dropdownContainer: document.body,
-            formatOnDisplay: true,
-            hiddenInput: "phone",
-            initialCountry: "{{$country?$country->value:'auto'}}",
-            placeholderNumberType: "MOBILE",
-            separateDialCode: true
-        });
-
 
         $(function () {
             $("#coba").spartanMultiImagePicker({

@@ -106,7 +106,8 @@ class CategoryRepository implements CategoryRepositoryInterface
 
     public function getNameList(Request $request, int|string $dataLimit = DEFAULT_DATA_LIMIT): SupportCollection|LengthAwarePaginator
     {
-        return $this->category->where('name', 'like', '%' . $request->q ?? $request->searchValue. '%')
+        $search = $request->q ?? $request->searchValue;
+        return $this->category->where('name', 'like', '%' . $search. '%')
             ->when($request->module_id, function ($query) use ($request) {
                 $query->where('module_id', $request->module_id);
             })->limit($dataLimit)->get()

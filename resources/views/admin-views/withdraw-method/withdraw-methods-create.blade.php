@@ -12,7 +12,6 @@
         <div class="mb-3">
             <div class="page-title-wrap d-flex justify-content-between flex-wrap align-items-center gap-3 mb-3">
                 <h2 class="page-title">
-                    {{-- <img width="20" src="{{asset('/public/assets/back-end/img/withdraw-icon.png')}}" alt=""> --}}
                     {{ translate('messages.Withdrawal_Methods')}}
                 </h2>
 
@@ -175,7 +174,50 @@
 
             $('form').on('reset', function (event) {
                 if(counter > 1) {
-                    $('#custom-field-section').html("");
+                    $('#custom-field-section').html(`
+                    <div id="custom-field-section">
+                            <div class="card card-body">
+                                <div class="row gy-4 align-items-center">
+                                    <div class="col-md-3 col-12">
+                                        <label>{{ translate('messages.Input_Field_Type')}} <span
+                                            class="input-label-secondary text-danger">*</span></label>
+                                        <select class="form-control js-select  js-select2-custom" name="field_type[]" required>
+                                            {{-- <option value="" selected disabled>{{ translate('messages.Input_Field_Type')}} *</option> --}}
+                                            <option value="string">{{ translate('messages.Text')}}</option>
+                                            <option value="number">{{ translate('messages.Number')}}</option>
+                                            <option value="date">{{ translate('messages.Date')}}</option>
+                                            <option value="email">{{ translate('messages.Email')}}</option>
+                                            <option value="phone">{{ translate('messages.Phone')}}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 col-12">
+                                        <div class="form-floating">
+                                            <label>{{ translate('messages.field_name')}} <span
+                                            class="input-label-secondary text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="field_name[]"
+                                                    placeholder="{{ translate('messages.Ex:_Account_name')}} " value="" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-12">
+                                        <div class="form-floating">
+                                            <label>{{ translate('messages.placeholder_text')}} <span
+                                            class="input-label-secondary text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="placeholder_text[]"
+                                                    placeholder="{{ translate('messages.Ex:_John')}} " value="" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="1" name="is_required[0]" id="flexCheckDefault__0" checked>
+                                            <label class="form-check-label" for="flexCheckDefault__0">
+                                                {{ translate('messages.Is_required_')}}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
                     $('#method_name').val("");
                 }
 

@@ -45,7 +45,7 @@
                                                         data-toggle="tooltip" data-placement="right"
                                                         data-original-title="{{ translate('messages.When_a_deliveryman_arrives_for_delivery,_Customers_will_get_a_4-digit_verification_code_on_the_order_details_section_in_the_Customer_App_and_needs_to_provide_the_code_to_the_delivery_man_to_verify_the_order.') }}"><img
                                                             src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
-                                                            alt="{{ translate('messages.order_varification_toggle') }}"> *
+                                                            alt="{{ translate('messages.order_varification_toggle') }}">
                                                     </span>
                                                 </span>
                                                 <input type="checkbox"
@@ -83,7 +83,7 @@
                                                         data-toggle="tooltip" data-placement="right"
                                                         data-original-title="{{ translate('messages.With_this_feature,_customers_can_place_an_order_by_uploading_prescription._Stores_can_enable/disable_this_feature_from_the_store_settings_if_needed.') }}"><img
                                                             src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
-                                                            alt="{{ translate('messages.prescription_order_status') }}"> * </span>
+                                                            alt="{{ translate('messages.prescription_order_status') }}"> </span>
                                                 </span>
                                                 <input type="checkbox"
                                                        data-id="prescription_order_status"
@@ -182,13 +182,13 @@
                                                 class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
                                                 <span class="pr-1 d-flex align-items-center switch--label">
                                                     <span class="line--limit-1">
-                                                        {{ translate('messages.Scheduled_Delivery') }}
+                                                        {{ translate('messages.Schedule_Order') }}
                                                     </span>
                                                     <span class="form-label-secondary text-danger d-flex"
                                                         data-toggle="tooltip" data-placement="right"
                                                         data-original-title="{{ translate('messages.With_this_feature,_customers_can_choose_their_preferred_delivery_slot._Customers_can_select_a_delivery_slot_for_ASAP_or_a_specific_date_(within_2_days_from_the_order).')}}"><img
                                                             src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
-                                                            alt="{{ translate('messages.customer_varification_toggle') }}"> *
+                                                            alt="{{ translate('messages.customer_varification_toggle') }}">
                                                     </span>
                                                 </span>
                                                 <input type="checkbox"
@@ -196,10 +196,10 @@
                                                        data-type="toggle"
                                                        data-image-on="{{ asset('/public/assets/admin/img/modal/schedule-on.png') }}"
                                                        data-image-off="{{ asset('/public/assets/admin/img/modal/schedule-off.png') }}"
-                                                       data-title-on="{{ translate('messages.Want_to_enable') }} <strong>{{ translate('messages.Scheduled Delivery?') }}</strong>"
-                                                       data-title-off="{{ translate('messages.Want_to_disable') }} <strong>{{ translate('messages.Scheduled Delivery?') }}</strong>"
+                                                       data-title-on="{{ translate('messages.Want_to_enable') }} <strong>{{ translate('messages.Scheduled Order?') }}</strong>"
+                                                       data-title-off="{{ translate('messages.Want_to_disable') }} <strong>{{ translate('messages.Scheduled Order?') }}</strong>"
                                                        data-text-on="<p>{{ translate('messages.If you enable this, customers can choose a suitable delivery schedule during checkout.') }}</p>"
-                                                       data-text-off="<p>{{ translate('messages.If you disable this, the Scheduled Delivery feature will be hidden.') }}</p>"
+                                                       data-text-off="<p>{{ translate('messages.If you disable this, the Scheduled Order feature will be hidden.') }}</p>"
                                                        class="status toggle-switch-input dynamic-checkbox-toggle"
                                                        value="1"
                                                     name="schedule_order" id="schedule_order"
@@ -240,6 +240,32 @@
                                                     <option  value="hour" {{ $schedule_order_slot_duration_time_format?->value == 'hour'? 'selected' : ''}}>{{ translate('Hour') }}</option>
                                                 </select>
                                             </div>
+                                        </div>
+                                    </div>
+                                    @php($extra_packaging_data = \App\Models\BusinessSetting::where('key', 'extra_packaging_data')->first()?->value ?? '')
+                                    @php($extra_packaging_data =json_decode($extra_packaging_data , true))
+                                    <div class="mt-4  mb-4 access_product_approval">
+
+                                        <label class="mb-2 input-label text-capitalize d-flex alig-items-center" for=""> <img src="{{ asset('/public/assets/admin/img/icon-park_ad-product.png') }}" alt=""
+                                            class="card-header-icon align-self-center mr-1">{{ translate('Enable Extra Packaging Charge') }}
+
+                                            <span class="form-label-secondary text-danger"
+                                            data-toggle="tooltip" data-placement="right"
+                                            data-original-title="{{ translate('messages.After_saving_information,_sellers_will_get_the_option_to_offer_extra_packaging_charge_to_the_customer') }}"><img
+                                                src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
+                                                alt="{{ translate('Extra_Packaging_Charge') }}"></span>
+
+                                        </label>
+                                        <div class="justify-content-between border form-control">
+                                            @foreach (config('module.module_type') as $key => $value)
+                                            @if ($value != 'parcel')
+                                            <div class="form-check form-check-inline mx-4  ">
+                                                <input class="mx-2 form-check-input" type="checkbox" {{  data_get($extra_packaging_data,$value,null) == 1 ? 'checked' :'' }} id="inlineCheckbox{{$key}}" value="1" name="{{ $value }}">
+                                                <label class=" form-check-label" for="inlineCheckbox{{$key}}">{{ translate($value) }}</label>
+                                            </div>
+                                            @endif
+                                            @endforeach
+
                                         </div>
                                     </div>
                                 </div>
@@ -335,8 +361,16 @@
                                             {{ translate('messages.order_cancellation_reason_list') }}
                                         </h5>
                                     </div>
+                                    <div class="my-2">
+                                        <select id="type" name="type" class="form-control h--45px set-filter" data-url="{{ url()->full() }}" data-filter="type">
+                                            <option value="all" {{ request('type') == 'all' ? 'selected' : '' }}>{{ translate('messages.all_user') }}</option>
+                                            <option value="admin" {{ request('type') == 'admin' ? 'selected' : '' }}>{{ translate('messages.admin') }}</option>
+                                            <option value="store" {{ request('type') == 'store' ? 'selected' : '' }}>{{ translate('messages.store') }}</option>
+                                            <option value="customer" {{ request('type') == 'customer' ? 'selected' : '' }}>{{ translate('messages.customer') }}</option>
+                                            <option value="deliveryman" {{ request('type') == 'deliveryman' ? 'selected' : '' }}>{{ translate('messages.deliveryman') }}</option>
+                                        </select>
+                                    </div>
                                 </div>
-
                                 <!-- Table -->
                                 <div class="card-body p-0">
                                     <div class="table-responsive datatable-custom">

@@ -426,6 +426,14 @@ class DeliverymanController extends Controller
 
         $order = Order::where(['id' => $request['order_id'], 'delivery_man_id' => $dm['id']])->dmOrder()->first();
 
+        if(!$order || (!$order->store && $order->order_type !='parcel') ){
+            return response()->json([
+                'errors' => [
+                    ['code' => 'not_found', 'message' => translate('messages.you_can_not_change_the_status_of_this_order')]
+                ]
+            ], 403);
+        }
+
         if($request['status'] =="confirmed" && config('order_confirmation_model') == 'store')
         {
             return response()->json([
@@ -584,11 +592,16 @@ class DeliverymanController extends Controller
         }
         $details = isset($order->details)?$order->details:null;
         if ($details != null && $details->count() > 0) {
+            $details[0]['vendor_id'] = $order?->store?->vendor_id;
             $details = $details = Helpers::order_details_data_formatting($details);
             return response()->json($details, 200);
-        } else if ($order->order_type == 'parcel' || $order->prescription_order == 1) {
+        }
+        else if ($order->order_type == 'parcel' ) {
             $order->delivery_address = json_decode($order->delivery_address, true);
             return response()->json(($order), 200);
+        }
+        elseif($order->prescription_order == 1){
+            return response()->json([], 200);
         }
 
         return response()->json([
@@ -732,12 +745,12 @@ class DeliverymanController extends Controller
 
         if(Order::where('delivery_man_id', $dm->id)->whereIn('order_status', ['pending','accepted','confirmed','processing','handover','picked_up'])->count())
         {
-            return response()->json(['errors'=>[['code'=>'on-going', 'message'=>translate('messages.user_account_delete_warning')]]],203);
+            return response()->json(['errors'=>[['code'=>'on-going', 'message'=>translate('messages.Please_complete_your_ongoing_and_accepted_orders')]]],203);
         }
 
         if($dm->wallet && $dm->wallet->collected_cash > 0)
         {
-            return response()->json(['errors'=>[['code'=>'on-going', 'message'=>translate('messages.user_account_wallet_delete_warning')]]],203);
+            return response()->json(['errors'=>[['code'=>'on-going', 'message'=>translate('messages.You_have_cash_in_hand,_you_have_to_pay_the_due_to_delete_your_account.')]]],203);
         }
 
         if (Storage::disk('public')->exists('delivery-man/' . $dm['image'])) {

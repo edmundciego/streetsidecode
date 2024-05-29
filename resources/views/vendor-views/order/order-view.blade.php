@@ -203,10 +203,10 @@
                                     @endif
                                 </h6>
                                 @if ($order->order_attachment)
-                                    @if ($order->prescription_order)
                                         @php
                                             $order_images = json_decode($order->order_attachment);
                                         @endphp
+                                    @if (is_array($order_images))
                                         <h5 class="text-dark">
                                             {{ translate('messages.prescription') }}:
                                         </h5>
@@ -302,6 +302,8 @@
                         $product_price = 0;
                         $store_discount_amount = 0;
                         $admin_flash_discount_amount = $order['flash_admin_discount_amount'];
+                        $ref_bonus_amount = $order['ref_bonus_amount'];
+                        $extra_packaging_amount = $order['extra_packaging_amount'];
                         $store_flash_discount_amount = $order['flash_store_discount_amount'];
 
                         if ($order->prescription_order == 1) {
@@ -525,7 +527,7 @@
 
                         $coupon_discount_amount = $order['coupon_discount_amount'];
 
-                        $total_price = $product_price + $total_addon_price - $store_discount_amount - $coupon_discount_amount - $admin_flash_discount_amount -$store_flash_discount_amount;
+                        $total_price = $product_price + $total_addon_price - $store_discount_amount - $coupon_discount_amount - $admin_flash_discount_amount -$ref_bonus_amount -$extra_packaging_amount -$store_flash_discount_amount;
 
                         $total_tax_amount = $order['total_tax_amount'];
                         if($order->tax_status == 'included'){
@@ -570,18 +572,29 @@
                                             <button class="btn btn-sm" type="button" data-toggle="modal"
                                                 data-target="#edit-discount-amount"><i class="tio-edit"></i></button>
                                         @endif
-                                        - {{ \App\CentralLogics\Helpers::format_currency($store_discount_amount + $admin_flash_discount_amount +$store_flash_discount_amount) }}
+                                        - {{ \App\CentralLogics\Helpers::format_currency($store_discount_amount + $admin_flash_discount_amount  +$store_flash_discount_amount) }}
                                     </dd>
+
+
+
                                     <dt class="col-6">{{ translate('messages.coupon_discount') }}:</dt>
                                     <dd class="col-6">
                                         - {{ \App\CentralLogics\Helpers::format_currency($coupon_discount_amount) }}</dd>
-                                        @if ($order->tax_status == 'excluded' || $order->tax_status == null  )
-                                        <dt class="col-sm-6">{{ translate('messages.vat/tax') }}:</dt>
-                                        <dd class="col-sm-6">
-                                            +
-                                            {{ \App\CentralLogics\Helpers::format_currency($total_tax_amount) }}
-                                        </dd>
-                                        @endif
+
+                                    @if ($ref_bonus_amount > 0)
+                                    <dt class="col-6">{{ translate('messages.Referral_Discount') }}:</dt>
+                                    <dd class="col-6">
+                                        - {{ \App\CentralLogics\Helpers::format_currency($ref_bonus_amount) }}</dd>
+
+                                    @endif
+
+                                    @if ($order->tax_status == 'excluded' || $order->tax_status == null  )
+                                    <dt class="col-sm-6">{{ translate('messages.vat/tax') }}:</dt>
+                                    <dd class="col-sm-6">
+                                        +
+                                        {{ \App\CentralLogics\Helpers::format_currency($total_tax_amount) }}
+                                    </dd>
+                                    @endif
                                     <dt class="col-6">{{ translate('messages.delivery_man_tips') }}</dt>
                                     <dd class="col-6">
                                         + {{ \App\CentralLogics\Helpers::format_currency($order->dm_tips) }}</dd>
@@ -596,6 +609,11 @@
                                         @php($additional_charge = $order['additional_charge'])
                                         + {{ \App\CentralLogics\Helpers::format_currency($additional_charge) }}
                                     </dd>
+                                    @if ($extra_packaging_amount > 0)
+                                    <dt class="col-6">{{ translate('messages.Extra_Packaging_Amount') }}:</dt>
+                                    <dd class="col-6">
+                                        + {{ \App\CentralLogics\Helpers::format_currency($extra_packaging_amount) }}</dd>
+                                    @endif
                                     @if ($order['partially_paid_amount'] > 0)
 
                                     <dt class="col-6">{{ translate('messages.partially_paid_amount') }}:</dt>
@@ -618,7 +636,7 @@
 
                                     <dt class="col-6">{{ translate('messages.total') }}:</dt>
                                     <dd class="col-6">
-                                        {{ \App\CentralLogics\Helpers::format_currency($product_price + $del_c + $total_tax_amount + $total_addon_price + $additional_charge - $coupon_discount_amount - $store_discount_amount - $admin_flash_discount_amount -$store_flash_discount_amount + $order->dm_tips) }}
+                                        {{ \App\CentralLogics\Helpers::format_currency($product_price + $del_c + $total_tax_amount + $total_addon_price + $additional_charge - $coupon_discount_amount - $store_discount_amount - $admin_flash_discount_amount  - $ref_bonus_amount + $extra_packaging_amount-$store_flash_discount_amount + $order->dm_tips) }}
                                     </dd>
                                     @if ($order?->payments)
                                         @foreach ($order?->payments as $payment)
@@ -1093,10 +1111,12 @@
                                 @if ($proof)
 
                                 @foreach ($proof as $key => $photo)
-                                            <div class="spartan_item_wrapper min-w-100px max-w-100px">
+                                            <div class="spartan_item_wrapper min-w-176px max-w-176px">
                                                 <img class="img--square"
                                                     src="{{ asset("storage/app/public/order/$photo") }}"
                                                     alt="order image">
+
+                                                <div class="pen spartan_remove_row"><i class="tio-edit"></i></div>
                                                 <a href="{{ route('vendor.order.remove-proof-image', ['id' => $order['id'], 'name' => $photo]) }}"
                                                     class="spartan_remove_row"><i class="tio-add-to-trash"></i></a>
                                             </div>
@@ -1296,12 +1316,12 @@
             $("#coba").spartanMultiImagePicker({
                 fieldName: 'order_proof[]',
                 maxCount: 6-{{ ($order->order_proof && is_array($order->order_proof))?count(json_decode($order->order_proof)):0 }},
-                rowHeight: '100px !important',
-                groupClassName: 'spartan_item_wrapper min-w-100px max-w-100px',
+                rowHeight: '176px !important',
+                groupClassName: 'spartan_item_wrapper min-w-176px max-w-176px',
                 maxFileSize: '',
                 placeholderImage: {
-                    image: "{{ asset('public/assets/admin/img/upload.png') }}",
-                    width: '100px'
+                    image: "{{ asset('public/assets/admin/img/upload-img.png') }}",
+                    width: '176px'
                 },
                 dropFileLabel: "Drop Here",
                 onAddRow: function(index, file) {

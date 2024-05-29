@@ -42,6 +42,9 @@ class WalletController extends Controller
         ->when($request['type'] && $request['type']=='referrer', function($query){
             $query->whereIn('transaction_type', ['referrer']);
         })
+        ->when($request['type'] && $request['type']=='CashBack', function($query){
+            $query->whereIn('transaction_type', ['CashBack']);
+        })
         ->latest()->paginate($request->limit, ['*'], 'page', $request->offset);
 
         $data = [
@@ -68,7 +71,7 @@ class WalletController extends Controller
         if($digital_payment['status'] == 0){
             return response()->json(['errors' => ['message' => 'digital_payment_is_disable']], 403);
         }
-        
+
         $customer = User::find($request->user()->id);
 
         $wallet = new WalletPayment();

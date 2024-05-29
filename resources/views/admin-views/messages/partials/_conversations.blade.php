@@ -20,11 +20,11 @@
             </button>
             <ul class="dropdown-menu conv-dropdown-menu">
                 <li>
-                    <a href="#">{{ translate('View_Details') }}</a>
+                    <a href="{{ route('admin.users.customer.view', [$user->user->id]) }}">{{ translate('View_Details') }}</a>
                 </li>
-                <li>
-                    <a href="{{ route('admin.users.customer.view', [$user->user->id]) }}">{{ translate('view_order_list') }}</a>
-                </li>
+{{--                <li>--}}
+{{--                    <a href="{{ route('admin.users.customer.view', [$user->user->id]) }}">{{ translate('view_order_list') }}</a>--}}
+{{--                </li>--}}
             </ul>
         </div>
     </div>
@@ -39,7 +39,7 @@
                                 @if($con->file!=null)
                                 @foreach (json_decode($con->file) as $img)
                                 <br>
-                                    <img class="w-100"
+                                    <img class="w-100 mb-3"
                                     src="{{asset('storage/app/public/conversation').'/'.$img}}">
                                     @endforeach
                                 @endif
@@ -55,7 +55,7 @@
                             @if($con->file!=null)
                             @foreach (json_decode($con->file) as $img)
                             <br>
-                                <img class="w-100"
+                                <img class="w-100 mb-3"
                                 src="{{asset('storage/app/public/conversation').'/'.$img}}">
                                 @endforeach
                             @endif
@@ -89,7 +89,7 @@
                     <div class="upload-btn-grp">
                         <label class="m-0">
                             <img src="{{asset('/public/assets/admin/img/gallery.png')}}" alt="">
-                            <input type="file" name="images[]" class="d-none upload_input_images" data-max_length="2"  multiple="" >
+                            <input type="file" name="images[]" class="d-none upload_input_images" data-max_length="2"  multiple="" accept="image/jpeg, image/png">
                         </label>
                         <label class="m-0 emoji-icon-hidden">
                             <img src="{{asset('/public/assets/admin/img/emoji.png')}}" alt="">

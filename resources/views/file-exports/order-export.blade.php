@@ -1,16 +1,13 @@
 <div class="row">
     <div class="col-lg-12 text-center "><h1 >{{ translate($data['status']) }} {{ translate('messages.order_list') }}</h1></div>
     <div class="col-lg-12">
-
-
-
     <table>
         <thead>
             <tr>
                 <th>{{ translate('filter_criteria') }} -</th>
                 <th></th>
                 <th></th>
-                <th> 
+                <th>
                     {{ translate('order_status' )}} : {{ translate($data['status']) }}
                     @if ($data['search'])
                     <br>
@@ -46,6 +43,11 @@
             <tr>
                 <th>{{ translate('messages.sl') }}</th>
                 <th>{{ translate('messages.order_id') }}</th>
+                @if ($data['status'] ==  'scheduled')
+                <th>{{ translate('messages.Scheduled_at') }}</th>
+                @else
+                <th>{{ translate('messages.Date') }}</th>
+                @endif
                 <th>{{ translate('messages.customer_name') }}</th>
                 <th>{{ translate('messages.store_name') }}</th>
                 <th>{{ translate('messages.item_price') }}</th>
@@ -64,6 +66,11 @@
             <tr>
                 <td>{{ $key+1 }}</td>
                 <td>{{ $order->id }}</td>
+                @if ($data['status'] ==  'scheduled')
+                <td>{{ \App\CentralLogics\Helpers::time_date_format($order->schedule_at) }}</td>
+                @else
+                <td>{{ \App\CentralLogics\Helpers::time_date_format($order->created_at) }}</td>
+                @endif
                 <td>
                     @if ($order->customer)
                         {{ $order->customer['f_name'] . ' ' . $order->customer['l_name'] }}
@@ -81,7 +88,7 @@
                 <td>{{ \App\CentralLogics\Helpers::number_format_short($order['order_amount']-$order['dm_tips']-$order['total_tax_amount']-$order['delivery_charge']+$order['coupon_discount_amount'] + $order['store_discount_amount']) }}</td>
                 <td>{{ \App\CentralLogics\Helpers::number_format_short($order->details->sum('discount_on_item')) }}</td>
                 <td>{{ \App\CentralLogics\Helpers::number_format_short($order['coupon_discount_amount']) }}</td>
-                <td>{{ \App\CentralLogics\Helpers::number_format_short($order['coupon_discount_amount'] + $order['store_discount_amount']) }}</td>
+                <td>{{ \App\CentralLogics\Helpers::number_format_short($order['coupon_discount_amount'] + $order['store_discount_amount']+ $order['ref_bonus_amount'] ) }}</td>
                 <td>{{ \App\CentralLogics\Helpers::number_format_short($order['total_tax_amount']) }}</td>
                 <td>{{ \App\CentralLogics\Helpers::number_format_short($order['order_amount']) }}</td>
                 <td>{{ translate($order->payment_status) }}</td>

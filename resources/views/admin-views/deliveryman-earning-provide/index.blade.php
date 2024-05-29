@@ -137,8 +137,8 @@
                                 <tr>
                                     <td>{{$k+$provide_dm_earning->firstItem()}}</td>
                                     <td>@if($at->delivery_man)<a href="{{route('admin.users.delivery-man.preview', $at->delivery_man_id)}}">{{$at->delivery_man->f_name.' '.$at->delivery_man->l_name}}</a> @else <label class="text-capitalize text-danger">{{translate('messages.deliveryman_deleted')}}</label> @endif </td>
-                                    <td>{{$at->created_at->format('Y-m-d '.config('timeformat'))}}</td>
-                                    <td>{{$at['amount']}}</td>
+                                    <td>{{\App\CentralLogics\Helpers::time_date_format($at->created_at)}}</td>
+                                    <td>{{\App\CentralLogics\Helpers::format_currency($at['amount'])}}</td>
                                     <td>{{$at['method']}}</td>
                                     @if(  $at['ref'] == 'delivery_man_wallet_adjustment_full')
                                         <td>{{ translate('wallet_adjusted') }}</td>

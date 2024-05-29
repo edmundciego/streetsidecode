@@ -2,22 +2,25 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\CentralLogics\Helpers;
-use App\Http\Controllers\Controller;
-use App\Models\BusinessSetting;
-use App\Models\DeliveryMan;
 use App\Models\Order;
-use App\Models\ParcelDeliveryInstruction;
-use App\Models\Translation;
 use App\Scopes\ZoneScope;
+use App\Models\DeliveryMan;
+use App\Models\Translation;
 use Illuminate\Http\Request;
+use App\CentralLogics\Helpers;
+use App\Models\BusinessSetting;
+use App\Exports\ParcelOrderExport;
+use App\Http\Controllers\Controller;
 use Brian2694\Toastr\Facades\Toastr;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Config;
+use App\Models\ParcelDeliveryInstruction;
 
 class ParcelController extends Controller
 {
     public function orders(Request $request,$status)
     {
+        $key = isset($request->search)?explode(' ', $request->search):null;
         if (session()->has('zone_filter') == false) {
             session()->put('zone_filter', 0);
         }
@@ -26,9 +29,124 @@ class ParcelController extends Controller
         {
             $request = json_decode(session('order_filter'));
         }
+        // dd($request->zone);
+        Order::withOutGlobalScope(ZoneScope::class)->where(['checked' => 0,'order_type'=>'parcel'])->update(['checked' => 1]);
 
-        $key = isset($request->search)?explode(' ', $request->search):null;
-        // $status=$request->status;
+        $orders = Order::withOutGlobalScope(ZoneScope::class)->with(['customer', 'store'])
+        ->when(isset($key),function($query)use($key){
+            return $query->where(function ($q) use ($key) {
+                foreach ($key as $value) {
+                    $q->orWhere('id', 'like', "%{$value}%")
+                    ->orWhere('order_status', 'like', "%{$value}%")
+                    ->orWhere('transaction_reference', 'like', "%{$value}%");
+                }
+            });
+        })
+        ->when(isset($request->zone), function($query)use($request){
+            return $query->whereIn('zone_id',$request->zone);
+        })
+        ->when($status == 'scheduled', function($query){
+            return $query->whereRaw('created_at <> schedule_at');
+        })
+        ->when($status == 'searching_for_deliverymen', function($query){
+            return $query->SearchingForDeliveryman();
+        })
+        ->when($status == 'pending', function($query){
+            return $query->Pending();
+        })
+        ->when($status == 'accepted', function($query){
+            return $query->AccepteByDeliveryman();
+        })
+        ->when($status == 'processing', function($query){
+            return $query->Preparing();
+        })
+        ->when($status == 'item_on_the_way', function($query){
+            return $query->ItemOnTheWay();
+        })
+        ->when($status == 'delivered', function($query){
+            return $query->Delivered();
+        })
+        ->when($status == 'canceled', function($query){
+            return $query->Canceled();
+        })
+        ->when($status == 'failed', function($query){
+            return $query->failed();
+        })
+        ->when($status == 'refunded', function($query){
+            return $query->Refunded();
+        })
+        ->when($status == 'scheduled', function($query){
+            return $query->Scheduled();
+        })
+        ->when($status == 'on_going', function($query){
+            return $query->Ongoing();
+        })
+        ->when(($status != 'all' && $status != 'scheduled' && $status != 'canceled' && $status != 'refund_requested' && $status != 'refunded' && $status != 'delivered' && $status != 'failed'), function($query){
+            return $query->OrderScheduledIn(30);
+        })
+        ->when(isset($request->vendor), function($query)use($request){
+            return $query->whereHas('store', function($query)use($request){
+                return $query->whereIn('id',$request->vendor);
+            });
+        })
+        ->when(isset($request->orderStatus) && $status == 'all', function($query)use($request){
+            return $query->whereIn('order_status',$request->orderStatus);
+        })
+        ->when(isset($request->scheduled) && $status == 'all', function($query){
+            return $query->scheduled();
+        })
+        ->when(isset($request->order_type), function($query)use($request){
+            return $query->where('order_type', $request->order_type);
+        })
+        ->when(isset($request->from_date)&&isset($request->to_date)&&$request->from_date!=null&&$request->to_date!=null, function($query)use($request){
+            return $query->whereBetween('created_at', [$request->from_date." 00:00:00",$request->to_date." 23:59:59"]);
+        })
+        ->when(isset($request->payment_status) && $request->payment_status == 'paid', function($query){
+            return $query->where('payment_status' ,'paid');
+        })
+        ->when(isset($request->payment_status) && $request->payment_status == 'unpaid', function($query){
+            return $query->where('payment_status' ,'unpaid');
+        })
+        ->when(isset($request->payment_by) && $request->payment_by == 'sender', function($query){
+            return $query->where('charge_payer' ,'sender');
+        })
+        ->when(isset($request->payment_by) && $request->payment_by == 'receiver', function($query){
+            return $query->where('charge_payer' ,'receiver');
+        })
+        ->with('parcel_category')
+        ->ParcelOrder()
+        ->module(Config::get('module.current_module_id'))
+        ->orderBy('schedule_at', 'desc')
+        ->paginate(config('default_pagination'));
+
+        $orderstatus = isset($request->orderStatus)?$request->orderStatus:[];
+        $scheduled =isset($request->scheduled)?$request->scheduled:0;
+        $vendor_ids =isset($request->vendor)?$request->vendor:[];
+        $zone_ids =isset($request->zone)?$request->zone:[];
+        $from_date =isset($request->from_date)?$request->from_date:null;
+        $to_date =isset($request->to_date)?$request->to_date:null;
+        $order_type =isset($request->order_type)?$request->order_type:null;
+        $payment_status =isset($request->payment_status)?$request->payment_status:null;
+        $payment_by =isset($request->payment_by)?$request->payment_by:null;
+        $total = $orders->total();
+
+        return view('admin-views.order.parcel-list', compact('orders', 'status', 'orderstatus', 'scheduled', 'vendor_ids', 'zone_ids', 'from_date', 'to_date', 'total','payment_by','payment_status', 'order_type'));
+    }
+
+
+
+    public function parcel_orders_export(Request $request,$status,$file_type)
+    {
+
+        $key = isset($request->search) ?explode(' ', $request->search): ($request['amp;search'] ? explode(' ', $request['amp;search']) : null) ;
+        if (session()->has('zone_filter') == false) {
+            session()->put('zone_filter', 0);
+        }
+
+        if(session()->has('order_filter'))
+        {
+            $request = json_decode(session('order_filter'));
+        }
 
         Order::withOutGlobalScope(ZoneScope::class)->where(['checked' => 0,'order_type'=>'parcel'])->update(['checked' => 1]);
 
@@ -101,20 +219,42 @@ class ParcelController extends Controller
         ->when(isset($request->from_date)&&isset($request->to_date)&&$request->from_date!=null&&$request->to_date!=null, function($query)use($request){
             return $query->whereBetween('created_at', [$request->from_date." 00:00:00",$request->to_date." 23:59:59"]);
         })
+        ->when(isset($request->payment_status) && $request->payment_status == 'paid', function($query){
+            return $query->where('payment_status' ,'paid');
+        })
+        ->when(isset($request->payment_status) && $request->payment_status == 'unpaid', function($query){
+            return $query->where('payment_status' ,'unpaid');
+        })
+        ->when(isset($request->payment_by) && $request->payment_by == 'sender', function($query){
+            return $query->where('charge_payer' ,'sender');
+        })
+        ->when(isset($request->payment_by) && $request->payment_by == 'receiver', function($query){
+            return $query->where('charge_payer' ,'receiver');
+        })
+
         ->ParcelOrder()
         ->module(Config::get('module.current_module_id'))
         ->orderBy('schedule_at', 'desc')
-        ->paginate(config('default_pagination'));
-        $orderstatus = isset($request->orderStatus)?$request->orderStatus:[];
-        $scheduled =isset($request->scheduled)?$request->scheduled:0;
-        $vendor_ids =isset($request->vendor)?$request->vendor:[];
-        $zone_ids =isset($request->zone)?$request->zone:[];
-        $from_date =isset($request->from_date)?$request->from_date:null;
-        $to_date =isset($request->to_date)?$request->to_date:null;
-        $order_type =isset($request->order_type)?$request->order_type:null;
-        $total = $orders->total();
+        ->get();
 
-        return view('admin-views.order.list', compact('orders', 'status', 'orderstatus', 'scheduled', 'vendor_ids', 'zone_ids', 'from_date', 'to_date', 'total', 'order_type'));
+
+
+        $data = [
+            'orders'=>$orders,
+            'type'=>'parcel',
+            'status'=>$status,
+            'order_status'=>isset($request->orderStatus)?implode(', ', $request->orderStatus):null,
+            'search'=>$request->search??null,
+            'from'=>$request->from_date??null,
+            'to'=>$request->to_date??null,
+            'zones'=>isset($request->zone)?Helpers::get_zones_name($request->zone):null,
+        ];
+
+    if ($file_type == 'excel') {
+        return Excel::download(new ParcelOrderExport($data), 'ParcelOrders.xlsx');
+    }
+        return Excel::download(new ParcelOrderExport($data), 'ParcelOrders.csv');
+
     }
 
     public function order_details(Request $request, $id)
@@ -177,6 +317,8 @@ class ParcelController extends Controller
 
     public function dispatch_list($status, Request $request)
     {
+
+         $key = isset($request->search) ?explode(' ', $request->search): ($request['amp;search'] ? explode(' ', $request['amp;search']) : null) ;
         $module_id = $request->query('module_id', null);
 
         if (session()->has('order_filter')) {
@@ -189,6 +331,15 @@ class ParcelController extends Controller
         $orders = Order::with(['customer', 'store'])
             ->when(isset($module_id), function ($query) use ($module_id) {
                 return $query->module($module_id);
+            })
+            ->when(isset($key),function($query)use($key){
+                return $query->where(function ($q) use ($key) {
+                    foreach ($key as $value) {
+                        $q->orWhere('id', 'like', "%{$value}%")
+                        ->orWhere('order_status', 'like', "%{$value}%")
+                        ->orWhere('transaction_reference', 'like', "%{$value}%");
+                    }
+                });
             })
             ->when(isset($request->zone), function ($query) use ($request) {
                 return $query->whereHas('store', function ($query) use ($request) {
@@ -227,6 +378,7 @@ class ParcelController extends Controller
     }
     public function parcel_dispatch_list($module,$status, Request $request)
     {
+        $key = isset($request->search) ?explode(' ', $request->search): ($request['amp;search'] ? explode(' ', $request['amp;search']) : null) ;
         $module_id = $request->query('module_id', null);
 
         if (session()->has('order_filter')) {
@@ -239,6 +391,15 @@ class ParcelController extends Controller
         $orders = Order::with(['customer', 'store'])
             ->whereHas('module', function($query) use($module){
                 $query->where('id', $module);
+            })
+            ->when(isset($key),function($query)use($key){
+                return $query->where(function ($q) use ($key) {
+                    foreach ($key as $value) {
+                        $q->orWhere('id', 'like', "%{$value}%")
+                            ->orWhere('order_status', 'like', "%{$value}%")
+                            ->orWhere('transaction_reference', 'like', "%{$value}%");
+                    }
+                });
             })
             ->when(isset($module_id), function ($query) use ($module_id) {
                 return $query->module($module_id);
@@ -274,8 +435,8 @@ class ParcelController extends Controller
         $from_date = isset($request->from_date) ? $request->from_date : null;
         $to_date = isset($request->to_date) ? $request->to_date : null;
         $total = $orders->total();
-
-        return view('admin-views.order.distaptch_list', compact('orders','module', 'status', 'orderstatus', 'scheduled', 'vendor_ids', 'zone_ids', 'from_date', 'to_date', 'total'));
+        $parcel= true;
+        return view('admin-views.order.distaptch_list', compact('orders','module', 'status', 'orderstatus', 'scheduled', 'vendor_ids', 'zone_ids', 'from_date', 'to_date', 'total','parcel'));
     }
 
     public function instruction(Request $request)

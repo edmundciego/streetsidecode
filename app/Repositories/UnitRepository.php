@@ -42,7 +42,7 @@ class UnitRepository implements UnitRepositoryInterface
             foreach ($key as $value) {
                 $q->orWhere('unit', 'like', "%{$value}%");
             }
-        })->limit($dataLimit)->get();
+        })->paginate($dataLimit);
     }
 
     public function update(string $id, array $data): bool|string|object

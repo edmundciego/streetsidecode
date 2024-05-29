@@ -12,6 +12,7 @@ class PharmacyItemDetails extends Model
     protected $casts = [
         'common_condition_id' => 'integer',
         'is_basic' => 'integer',
+        'is_prescription_required' => 'integer',
     ];
 
     public function item()

@@ -23,6 +23,9 @@ class StoreConfig extends Model
         'store_id' => 'integer',
         'is_recommended' => 'boolean',
         'is_recommended_deleted' => 'boolean',
+        'halal_tag_status' => 'boolean',
+        'extra_packaging_status' => 'boolean',
+        'extra_packaging_amount' => 'float',
     ];
 
     public function Store()

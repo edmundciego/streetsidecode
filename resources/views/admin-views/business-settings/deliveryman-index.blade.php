@@ -40,7 +40,7 @@
                                                 </span>
                                                 <span class="form-label-secondary text-danger d-flex"
                                                     data-toggle="tooltip" data-placement="right"
-                                                    data-original-title="{{ translate('messages.Customers_can_give_tips_to_deliverymen_during_checkout_from_the_Customer_App_&_Website._Admin_has_no_commission_on_it.') }}"><img
+                                                    data-original-title="{{ translate('messages.Customer_can_give_tips_to_deliveryman_during_checkout_from_the_customer_app_&_website._From_this,_admin_has_no_commission.') }}"><img
                                                         src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
                                                         alt="{{ translate('messages.dm_tips_model_hint') }}"> * </span>
                                             </span>

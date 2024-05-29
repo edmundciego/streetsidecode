@@ -108,8 +108,8 @@
                                     <div class="form-group mb-0" id="store_wise">
                                         <label class="input-label" for="exampleFormControlSelect1">{{translate('messages.store')}}<span
                                                 class="input-label-secondary"></span></label>
-                                        <select name="store_id" id="store_id" class="js-data-example-ajax form-control"  title="Select Restaurant">
-
+                                        <select name="store_id" id="store_id" class="js-data-example-ajax form-control"  title="{{translate('messages.select_store')}}">
+                                            <option disabled selected>---{{translate('messages.select_store')}}---</option>
                                         </select>
                                     </div>
                                     <div class="form-group mb-0" id="item_wise">
@@ -157,38 +157,42 @@
                             <h5 class="card-title">
                                 {{translate('messages.banner_list')}}<span class="badge badge-soft-dark ml-2" id="itemCount">{{$banners->count()}}</span>
                             </h5>
-                            <form id="search-form" class="search-form">
-                                @csrf
+                            <form  class="search-form">
                                 <!-- Search -->
                                 <div class="input-group input--group">
-                                    <input id="datatableSearch" type="search" name="search" class="form-control" placeholder="{{translate('messages.search_by_title')}}" aria-label="{{translate('messages.search_here')}}">
+                                    <input id="datatableSearch" type="search" value="{{ request()->get('search')?? '' }}" name="search" class="form-control" placeholder="{{translate('messages.search_by_title')}}" aria-label="{{translate('messages.search_here')}}">
                                     <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
                                 </div>
                                 <!-- End Search -->
                             </form>
+                            @if(request()->get('search'))
+                            <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
+                            @endif
+
                         </div>
                     </div>
                     <!-- Table -->
                     <div class="table-responsive datatable-custom">
                         <table id="columnSearchDatatable"
-                               class="table table-borderless table-thead-bordered table-nowrap table-align-middle card-table"
-                               data-hs-datatables-options='{
-                                "order": [],
-                                "orderCellsTop": true,
-                                "search": "#datatableSearch",
-                                "entries": "#datatableEntries",
-                                "isResponsive": false,
-                                "isShowPaging": false,
-                                "paging": false
-                               }'
-                               >
+                                class="table table-borderless table-thead-bordered table-nowrap table-align-middle card-table"
+                                data-hs-datatables-options='{
+                                    "order": [],
+                                    "orderCellsTop": true,
+                                    "search": "#datatableSearch",
+                                    "entries": "#datatableEntries",
+                                    "isResponsive": false,
+                                    "isShowPaging": false,
+                                    "paging": false
+                                }'
+                                >
                             <thead class="thead-light">
                                 <tr>
                                     <th class="border-0">{{ translate('messages.SL') }}</th>
                                     <th class="border-0">{{translate('messages.title')}}</th>
-                                    <th class="border-0">{{translate('messages.module')}}</th>
                                     <th class="border-0">{{translate('messages.type')}}</th>
-                                    <th class="border-0 text-center">{{translate('messages.featured')}}</th>
+                                    <th class="border-0 text-center">{{translate('messages.featured')}} <span class="input-label-secondary"
+                                        data-toggle="tooltip" data-placement="right" data-original-title="{{translate('if_you_turn/off_on_this_featured,_it_will_effect_on_website_&_user_app')}}"><img src="{{asset('public/assets/admin/img/info-circle.svg')}}"
+                                            alt="public/img"></span></th>
                                     <th class="border-0 text-center">{{translate('messages.status')}}</th>
                                     <th class="border-0 text-center">{{translate('messages.action')}}</th>
                                 </tr>
@@ -203,35 +207,61 @@
                                             <img class="img--ratio-3 w-auto h--50px rounded mr-2 onerror-image" src="{{\App\CentralLogics\Helpers::onerror_image_helper($banner['image'], asset('storage/app/public/banner/').'/'.$banner['image'], asset('public/assets/admin/img/900x400/img1.jpg'), 'banner/') }}"
                                                 data-onerror-image="{{asset('/public/assets/admin/img/900x400/img1.jpg')}}" alt="{{$banner->name}} image">
                                             <div class="media-body">
-                                                <h5 class="text-hover-primary mb-0">{{Str::limit($banner['title'], 25, '...')}}</h5>
+                                                <h5 title="{{ $banner['title'] }}" class="text-hover-primary mb-0">{{Str::limit($banner['title'], 25, '...')}}</h5>
                                             </div>
                                         </span>
                                     <span class="d-block font-size-sm text-body">
 
                                     </span>
                                     </td>
-                                    <td>{{Str::limit($banner->module->module_name, 15, '...')}}</td>
                                     <td>{{translate('messages.'.$banner['type'])}}</td>
-                                    <td>
+
+                                    <td  >
                                         <div class="d-flex justify-content-center">
                                             <label class="toggle-switch toggle-switch-sm" for="featuredCheckbox{{$banner->id}}">
-                                                <input type="checkbox" data-url="{{route('admin.banner.featured',[$banner['id'],$banner->featured?0:1])}}" class="toggle-switch-input redirect-url" id="featuredCheckbox{{$banner->id}}" {{$banner->featured?'checked':''}}>
-                                                <span class="toggle-switch-label">
-                                                    <span class="toggle-switch-indicator"></span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex justify-content-center">
-                                            <label class="toggle-switch toggle-switch-sm" for="statusCheckbox{{$banner->id}}">
-                                            <input type="checkbox" data-url="{{route('admin.banner.status',[$banner['id'],$banner->status?0:1])}}" class="toggle-switch-input redirect-url" id="statusCheckbox{{$banner->id}}" {{$banner->status?'checked':''}}>
+                                            <input type="checkbox"
+                                            data-id="featuredCheckbox{{$banner->id}}"
+                                            data-type="status"
+                                            data-image-on="{{ asset('/public/assets/admin/img/modal/basic_campaign_on.png') }}"
+                                            data-image-off="{{ asset('/public/assets/admin/img/modal/basic_campaign_off.png') }}"
+                                            data-title-on="{{ translate('By_Turning_ON_As_Featured!') }}"
+                                            data-title-off="{{ translate('By_Turning_OFF_As_Featured!') }}"
+                                            data-text-on="<p>{{ translate('If_you_turn_on_this_featured,_then_promotional_banner_will_show_on_website_and_user_app_with_store_or_item.') }}</p>"
+                                            data-text-off="<p>{{ translate('If_you_turn_off_this_featured,_then_promotional_banner_won’t_show_on_website_and_user_app') }}</p>"
+                                            class="toggle-switch-input  dynamic-checkbox" id="featuredCheckbox{{$banner->id}}" {{$banner->featured?'checked':''}}>
                                             <span class="toggle-switch-label">
                                                 <span class="toggle-switch-indicator"></span>
                                             </span>
                                         </label>
                                         </div>
                                     </td>
+                                    <form action="{{route('admin.banner.featured',[$banner['id'],$banner->featured?0:1])}}"
+                                        method="get" id="featuredCheckbox{{$banner->id}}_form">
+                                        </form>
+
+                                    <td  >
+                                        <div class="d-flex justify-content-center">
+                                            <label class="toggle-switch toggle-switch-sm" for="statusCheckbox{{$banner->id}}">
+                                            <input type="checkbox"
+                                            data-id="statusCheckbox{{$banner->id}}"
+                                            data-type="status"
+                                            data-image-on="{{ asset('/public/assets/admin/img/modal/basic_campaign_on.png') }}"
+                                            data-image-off="{{ asset('/public/assets/admin/img/modal/basic_campaign_off.png') }}"
+                                            data-title-on="{{ translate('By_Turning_ON_Banner!') }}"
+                                            data-title-off="{{ translate('By_Turning_OFF_Banner!') }}"
+                                            data-text-on="<p>{{ translate('If_you_turn_on_this_status,_it_will_show_on_user_website_and_app.') }}</p>"
+                                            data-text-off="<p>{{ translate('If_you_turn_off_this_status,_it_won’t_show_on_user_website_and_app') }}</p>"
+                                            class="toggle-switch-input  dynamic-checkbox" id="statusCheckbox{{$banner->id}}" {{$banner->status?'checked':''}}>
+                                            <span class="toggle-switch-label">
+                                                <span class="toggle-switch-indicator"></span>
+                                            </span>
+                                        </label>
+                                        </div>
+                                    </td>
+
+                                    <form action="{{route('admin.banner.status',[$banner['id'],$banner->status?0:1])}}"
+                                        method="get" id="statusCheckbox{{$banner->id}}_form">
+                                        </form>
                                     <td>
                                         <div class="btn--container justify-content-center">
                                             <a class="btn action-btn btn--primary btn-outline-primary" href="{{route('admin.banner.edit',[$banner['id']])}}" title="{{translate('messages.edit_banner')}}"><i class="tio-edit"></i>
@@ -248,22 +278,22 @@
                             @endforeach
                             </tbody>
                         </table>
-                        @if(count($banners) !== 0)
-                        <hr>
-                        @endif
-                        <div class="page-area">
-                            {!! $banners->links() !!}
-                        </div>
-                        @if(count($banners) === 0)
-                        <div class="empty--data">
-                            <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
-                            <h5>
-                                {{translate('no_data_found')}}
-                            </h5>
-                        </div>
-                        @endif
 
                     </div>
+                    @if(count($banners) !== 0)
+                    <hr>
+                    @endif
+                    <div class="page-area">
+                        {!! $banners->links() !!}
+                    </div>
+                    @if(count($banners) === 0)
+                    <div class="empty--data">
+                        <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
+                        <h5>
+                            {{translate('no_data_found')}}
+                        </h5>
+                    </div>
+                    @endif
                 </div>
             </div>
             <!-- End Table -->
@@ -365,33 +395,7 @@
             });
         });
 
-        $('#search-form').on('submit', function (e) {
-            e.preventDefault();
-            var formData = new FormData(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.post({
-                url: '{{route('admin.banner.search')}}',
-                data: formData,
-                cache: false,
-                contentType: false,
-                processData: false,
-                beforeSend: function () {
-                    $('#loading').show();
-                },
-                success: function (data) {
-                    $('#set-rows').html(data.view);
-                    $('#itemCount').html(data.count);
-                    $('.page-area').hide();
-                },
-                complete: function () {
-                    $('#loading').hide();
-                },
-            });
-        });
+
 
         $('#reset_btn').click(function(){
         $('#module_select').val(null).trigger('change');

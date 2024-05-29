@@ -12,20 +12,6 @@
         <div class="page-header">
             <h1 class="page-header-title"><i class="tio-filter-list"></i> {{translate('messages.stores')}} <span class="badge badge-soft-dark ml-2" id="itemCount">{{$stores->total()}}</span></h1>
             <div class="page-header-select-wrapper">
-
-                @if(!isset(auth('admin')->user()->zone_id))
-                <div class="select-item">
-                    <select name="zone_id" class="form-control js-select2-custom set-filter" data-url="{{url()->full()}}" data-filter="zone_id">
-                        <option value="" {{!request('zone_id')?'selected':''}}>{{ translate('messages.All_Zones') }}</option>
-                        @foreach(\App\Models\Zone::orderBy('name')->get() as $z)
-                            <option
-                                value="{{$z['id']}}" {{isset($zone) && $zone->id == $z['id']?'selected':''}}>
-                                {{$z['name']}}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                @endif
             </div>
         </div>
         <!-- End Page Header -->
@@ -111,7 +97,21 @@
             <div class="card-header py-2">
                 <div class="search--button-wrapper">
                     <h5 class="card-title">{{translate('messages.stores_list')}}</h5>
-                    <form  class="search-form">
+
+                @if(!isset(auth('admin')->user()->zone_id))
+                <div class="select-item min--280">
+                    <select name="zone_id" class="form-control js-select2-custom set-filter" data-url="{{url()->full()}}" data-filter="zone_id">
+                        <option value="" {{!request('zone_id')?'selected':''}}>{{ translate('messages.All_Zones') }}</option>
+                        @foreach(\App\Models\Zone::orderBy('name')->get() as $z)
+                            <option
+                                value="{{$z['id']}}" {{isset($zone) && $zone->id == $z['id']?'selected':''}}>
+                                {{$z['name']}}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
+                    <form class="search-form">
                                     <!-- Search -->
                         <div class="input-group input--group">
                             <input id="datatableSearch_" type="search" value="{{ request()?->search ?? null }}" name="search" class="form-control"
@@ -121,6 +121,11 @@
                         </div>
                         <!-- End Search -->
                     </form>
+                    @if(request()->get('search'))
+                    <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
+                    @endif
+
+
                     <!-- Unfold -->
                     <div class="hs-unfold mr-2">
                         <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
@@ -169,7 +174,6 @@
                     <tr>
                         <th class="border-0">{{translate('sl')}}</th>
                         <th class="border-0">{{translate('messages.store_information')}}</th>
-                        <th class="border-0">{{translate('messages.module')}}</th>
                         <th class="border-0">{{translate('messages.owner_information')}}</th>
                         <th class="border-0">{{translate('messages.zone')}}</th>
                         <th class="text-uppercase border-0">{{translate('messages.featured')}}</th>
@@ -195,7 +199,7 @@
                                             ) }}"
 
                                             >
-                                        <div class="info"><div class="text--title">
+                                        <div class="info"><div title="{{ $store?->name }}" class="text--title">
                                             {{Str::limit($store->name,20,'...')}}
                                             </div>
                                             <div class="font-light">
@@ -205,17 +209,15 @@
                                     </a>
                                 </div>
                             </td>
+
                             <td>
-                                <span class="d-block font-size-sm text-body">
-                                    {{Str::limit($store->module->module_name,20,'...')}}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="d-block font-size-sm text-body">
+                                <span title="{{ $store?->vendor?->f_name.' '.$store?->vendor?->l_name }}" class="d-block font-size-sm text-body">
                                     {{Str::limit($store->vendor->f_name.' '.$store->vendor->l_name,20,'...')}}
                                 </span>
                                 <div>
-                                    {{$store['phone']}}
+                                    <a href="tel:{{ $store['phone'] }}">
+                                        {{$store['phone']}}
+                                    </a>
                                 </div>
                             </td>
                             <td>
@@ -269,6 +271,8 @@
                     @endforeach
                     </tbody>
                 </table>
+
+            </div>
                 @if(count($stores) !== 0)
                 <hr>
                 @endif
@@ -283,8 +287,6 @@
                     </h5>
                 </div>
                 @endif
-
-            </div>
             <!-- End Table -->
         </div>
         <!-- End Card -->

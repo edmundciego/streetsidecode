@@ -2,6 +2,8 @@
 <!DOCTYPE html>
 <?php
     $landing_site_direction = session()->get('landing_site_direction');
+    $country=\App\Models\BusinessSetting::where('key','country')->first();
+$countryCode= strtolower($country?$country->value:'auto');
 ?>
 <html dir="{{ $landing_site_direction }}" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -18,6 +20,8 @@
     <link rel="stylesheet" href="{{ asset('public/assets/landing/css/owl.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('public/assets/admin/css/toastr.css') }}">
     <link rel="stylesheet" href="{{ asset('public/assets/landing/css/main.css') }}"/>
+
+    <link rel="stylesheet" href="{{asset('public/assets/admin/intltelinput/css/intlTelInput.css')}}">
 
     @php($icon = \App\Models\BusinessSetting::where(['key' => 'icon'])->first()->value ?? '')
     <link rel="icon" type="image/x-icon" href="{{ asset('storage/app/public/business/' . $icon ?? asset('public/assets/landing/img/favicon.svg')) }}">
@@ -332,6 +336,7 @@
     <script src="{{ asset('public/assets/landing/js/owl.min.js') }}"></script>
     <script src="{{ asset('public/assets/landing/js/main.js') }}"></script>
     <script src="{{ asset('public/assets/admin') }}/js/toastr.js"></script>
+
     {!! Toastr::message() !!}
     @if ($errors->any())
         <script>
@@ -347,9 +352,8 @@
 
     @stack('script_2')
 
-
     <script>
-     "use strict";
+        "use strict";
  $(".main-category-slider").owlCarousel({
             loop: true,
             nav: false,
@@ -483,7 +487,33 @@
         sync1.owlCarousel();
 
     </script>
+        <script src="{{asset('public/assets/admin/intltelinput/js/intlTelInput.min.js')}}"></script>
 
+<script>
+            "use strict";
+            const input = document.querySelector('input[type="tel"]');
+        window.intlTelInput(input, {
+        initialCountry: "{{$countryCode}}",
+        utilsScript: "{{ asset('public/assets/admin/intltelinput/js/utils.js') }}",
+        autoInsertDialCode: true,
+        nationalMode: false,
+        formatOnDisplay: false,
+        });
+
+        function keepNumbersAndPlus(inputString) {
+        let regex = /[0-9+]/g;
+        let filteredString = inputString.match(regex);
+        let result = filteredString ? filteredString.join('') : '';
+        return result;
+        }
+
+
+        $(document).on('keyup', 'input[type="tel"]', function () {
+        let input = $(this).val();
+        $(this).val(keepNumbersAndPlus(input));
+        });
+
+</script>
 
 </body>
 

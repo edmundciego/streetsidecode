@@ -29,7 +29,7 @@ class CustomerLogic
         $credit = 0.0;
         $admin_bonus = 0.0;
 
-        if (in_array($transaction_type, ['add_fund_by_admin', 'add_fund', 'order_refund', 'loyalty_point', 'referrer'])) {
+        if (in_array($transaction_type, ['add_fund_by_admin', 'add_fund', 'order_refund', 'loyalty_point', 'referrer','CashBack'])) {
             $credit = $amount;
             if ($transaction_type == 'add_fund') {
                 $admin_bonus = self::calculate_wallet_bonus($amount);
@@ -39,7 +39,7 @@ class CustomerLogic
                 $check_loyalty_point_exchange_rate = (int) BusinessSetting::where('key', 'loyalty_point_exchange_rate')->first()->value;
 
                 if($check_loyalty_point_exchange_rate == 0){
-                    
+
                     $credit = (int)($amount / 1);
                 }
                 else{
@@ -125,7 +125,7 @@ class CustomerLogic
         return false;
     }
 
-    public static function calculate_wallet_bonus($add_amount) 
+    public static function calculate_wallet_bonus($add_amount)
     {
         $percent_bonus = WalletBonus::active()->where('bonus_type','percentage')
         ->whereDate('end_date', '>=', date('Y-m-d'))->whereDate('start_date', '<=', date('Y-m-d'))->where('minimum_add_amount','<=',$add_amount)->orderBy('bonus_amount','desc')->first();
@@ -147,6 +147,6 @@ class CustomerLogic
 
         $bonus_amount = max([$p_bonus,$a_bonus]);
 
-        return $bonus_amount;    
+        return $bonus_amount;
     }
 }

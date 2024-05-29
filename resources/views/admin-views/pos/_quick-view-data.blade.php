@@ -22,7 +22,7 @@
                 'product/'
             ) }}"
 
-            
+
                 data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
                 data-zoom="{{ asset('storage/app/public/product') }}/{{ $product['image'] }}" alt="Product image"
                 width="">
@@ -147,7 +147,7 @@
                     @endforeach
                 @endif
 
-                <!-- Quantity + Add to cart -->
+                {{-- <!-- Quantity + Add to cart -->
                 <div class="d-flex justify-content-between">
                     <div class="product-description-label mt-2 text-dark h3">{{ translate('messages.quantity') }}:
                     </div>
@@ -170,7 +170,7 @@
                             </span>
                         </div>
                     </div>
-                </div>
+                </div> --}}
                 @php($add_ons = json_decode($product->add_ons))
                 @if (count($add_ons) > 0 && $add_ons[0])
                     <div class="h3 p-0 pt-2">{{ translate('messages.addon') }}</div>
@@ -215,7 +215,7 @@
                 </div>
 
                 <div class="d-flex justify-content-center mt-2">
-                    <button class="btn btn--primary add-To-Cart" type="button" class="h--45px">
+                    <button class="btn btn-secondary" type="button" class="h--45px">
                         <i class="tio-shopping-cart"></i>
                         {{ translate('messages.add_to_cart') }}
                     </button>
@@ -227,9 +227,10 @@
 <script src="{{asset('public/assets/admin')}}/js/view-pages/common.js"></script>
 <script type="text/javascript">
     "use strict";
-    cartQuantityInitialize();
-    getVariantPrice();
-    $('#add-to-cart-form input').on('change', function() {
-        getVariantPrice();
-    });
+    setTimeout(check_stock, 100);
+    // cartQuantityInitialize();
+    // getVariantPrice();
+    // $('#add-to-cart-form input').on('change', function() {
+    //     getVariantPrice();
+    // });
 </script>

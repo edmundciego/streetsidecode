@@ -294,7 +294,7 @@
                                         alt="">
                                     <h4 class="name">{{ translate('Admin Earning') }}</h4>
                                     <div class="info-icon" data-toggle="tooltip" data-placement="right"
-                                        data-original-title="{{ translate('Deducting the admin discount from the admin net income amount goes to this section.') }}">
+                                        data-original-title="{{ translate('Deducting the admin discount from the admin earning amount and goes to this section.') }}">
                                         <img src="{{ asset('/public/assets/admin/img/report/new/info1.png') }}"
                                             alt="report/new">
                                     </div>
@@ -311,7 +311,7 @@
                                         alt="">
                                     <h4 class="name">{{ translate('Store Earning') }}</h4>
                                     <div class="info-icon" data-toggle="tooltip" data-placement="right"
-                                        data-original-title="{{ translate('If self-delivery is off, deducting delivery man earnings & admin commission order amount goes to store earnings otherwise deducting admin commission all order amount goes to this section.') }}">
+                                        data-original-title="{{ translate('Adding_store_earning_amount_with_vat/tax_amount') }}">
                                         <img src="{{ asset('/public/assets/admin/img/report/new/info2.png') }}"
                                             alt="report/new">
                                     </div>
@@ -411,6 +411,7 @@
                                 <th class="border-0 min-w-120">{{ translate('messages.total_item_amount') }}</th>
                                 <th class="border-0">{{ translate('messages.item_discount') }}</th>
                                 <th class="border-0">{{ translate('messages.coupon_discount') }}</th>
+                                <th class="border-0">{{ translate('messages.referral_discount') }}</th>
                                 <th class="border-0">{{ translate('messages.discounted_amount') }}</th>
                                 <th class="border-0">{{ translate('messages.vat/tax') }}</th>
                                 <th class="border-0">{{ translate('messages.delivery_charge') }}</th>
@@ -419,6 +420,7 @@
                                 <th class="border-0">{{ translate('messages.store_discount') }}</th>
                                 <th class="border-0">{{ translate('messages.admin_commission') }}</th>
                                 <th class="border-0">{{ \App\CentralLogics\Helpers::get_business_data('additional_charge_name')??translate('messages.additional_charge') }}</th>
+                                <th class="border-0">{{ translate('messages.extra_packaging_amount') }}</th>
                                 <th class="min-w-140 text-capitalize">{{ translate('commision_on_delivery_charge') }}</th>
                                 <th class="min-w-140 text-capitalize">{{ translate('admin_net_income') }}</th>
                                 <th class="min-w-140 text-capitalize">{{ translate('store_net_income') }}</th>
@@ -458,19 +460,40 @@
                                             <label class="badge badge-danger">{{ translate('messages.invalid_customer_data') }}</label>
                                         @endif
                                     </td>
-                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->order['order_amount'] - $ot->additional_charge - $ot->order['dm_tips']-$ot->order['delivery_charge'] - $ot['tax'] + $ot->order['coupon_discount_amount'] + $ot->order['store_discount_amount']+$ot->order['flash_admin_discount_amount']+$ot->order['flash_store_discount_amount']) }}</td>
-                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->order->details->sum('discount_on_item')+$ot->order['flash_admin_discount_amount']+$ot->order['flash_store_discount_amount']) }}</td>
+                                    {{-- total_item_amount --}}
+                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->order['order_amount'] - $ot->additional_charge - $ot->order['dm_tips']-$ot->order['delivery_charge']  - $ot['tax'] - $ot->order['extra_packaging_amount'] + $ot->order['coupon_discount_amount'] + $ot->order['store_discount_amount'] + $ot->order['ref_bonus_amount']  +$ot->order['flash_admin_discount_amount'] +$ot->order['flash_store_discount_amount']) }}</td>
+
+                                    {{-- item_discount --}}
+                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->order->details()->sum(DB::raw('discount_on_item * quantity')) + $ot->order['flash_admin_discount_amount'] +$ot->order['flash_store_discount_amount']) }}</td>
+
+                                    {{-- coupon_discount --}}
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->order['coupon_discount_amount']) }}</td>
-                                    <td class="white-space-nowrap">  {{ \App\CentralLogics\Helpers::number_format_short($ot->order['coupon_discount_amount'] + $ot->order['store_discount_amount']+$ot->order['flash_store_discount_amount']+$ot->order['flash_admin_discount_amount']) }}</td>
+                                    {{-- referral_discount --}}
+                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->order['ref_bonus_amount']) }}</td>
+                                    {{-- discounted_amount --}}
+                                    <td class="white-space-nowrap">  {{ \App\CentralLogics\Helpers::format_currency($ot->order['coupon_discount_amount'] + $ot->order['store_discount_amount']+$ot->order['flash_store_discount_amount']+$ot->order['flash_admin_discount_amount'] +$ot->order['ref_bonus_amount']) }}</td>
+
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->tax) }}</td>
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->delivery_charge) }}</td>
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->order_amount) }}</td>
+
+                                    {{-- admin_discount --}}
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->admin_expense) }}</td>
+
+                                    {{-- store_discount --}}
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->discount_amount_by_store+$ot->order['flash_store_discount_amount']) }}</td>
-                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency(($ot->admin_commission + $ot->admin_expense) - $ot->delivery_fee_comission -$ot->additional_charge - $ot->order['flash_admin_discount_amount']) }}</td>
+
+                                    {{-- admin_commission --}}
+                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency(($ot->admin_commission + $ot->admin_expense) - $ot->delivery_fee_comission -$ot->additional_charge - $ot->order['flash_admin_discount_amount'] ) }}</td>
+
+
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency(($ot->additional_charge)) }}</td>
+                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency(($ot->extra_packaging_amount)) }}</td>
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->delivery_fee_comission) }}</td>
+                                    {{-- admin_net_income --}}
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency(($ot->admin_commission - $ot->order['flash_admin_discount_amount'])) }}</td>
+
+                                    {{-- store_net_income --}}
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->store_amount - $ot->tax) }}</td>
                                     @if ($ot->received_by == 'admin')
                                         <td class="text-capitalize white-space-nowrap">{{ translate('messages.admin') }}</td>

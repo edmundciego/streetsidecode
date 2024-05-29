@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class StoreLogic
 {
-    public static function get_stores( $zone_id, $filter, $type, $store_type, $limit = 10, $offset = 1, $featured=false,$longitude=0,$latitude=0)
+    public static function get_stores( $zone_id, $filter_data, $type, $store_type, $limit = 10, $offset = 1, $featured=false,$longitude=0,$latitude=0,$filter=null,$rating_count=null)
     {
         $paginator = Store::
         withOpen($longitude??0,$latitude??0)
@@ -24,10 +24,10 @@ class StoreLogic
             ->whereHas('module',function($query){
                 $query->active();
             })
-            ->when($filter=='delivery', function($q){
+            ->when($filter_data=='delivery', function($q){
                 return $q->delivery();
             })
-            ->when($filter=='take_away', function($q){
+            ->when($filter_data=='take_away', function($q){
                 return $q->takeaway();
             })
             ->when($featured, function($query){
@@ -56,6 +56,36 @@ class StoreLogic
                 return $q->withCount('orders')
                     ->orderBy('orders_count', 'desc');
             })
+            ->when($rating_count, function($query) use ($rating_count){
+                $query->selectSub(function ($query) use ($rating_count){
+                    $query->selectRaw('AVG(reviews.rating)')
+                        ->from('reviews')
+                        ->join('items', 'items.id', '=', 'reviews.item_id')
+                        ->whereColumn('items.store_id', 'stores.id')
+                        ->groupBy('items.store_id')
+                        ->havingRaw('AVG(reviews.rating) >= ?', [$rating_count]);
+                }, 'avg_r')->having('avg_r', '>=', $rating_count);
+            })
+            ->when($filter && in_array('top_rated',$filter),function ($qurey){
+                $qurey->whereNotNull('rating')->whereRaw("LENGTH(rating) > 0");
+            })
+            ->when($filter && in_array('popular',$filter),function ($qurey){
+                $qurey->withCount('orders')->orderBy('orders_count', 'desc');
+            })
+            ->when($filter && in_array('discounted',$filter),function ($qurey){
+                $qurey->where(function ($query) {
+                    $query->whereHas('items', function ($q) {
+                        $q->Discounted();
+                    });
+                });
+            })
+            ->when($filter && in_array('open',$filter),function ($qurey){
+                $qurey->orderBy('open', 'desc');
+            })
+            ->when($filter && in_array('nearby',$filter),function ($qurey){
+                $qurey->orderBy('distance');
+            })
+            ->orderBy('open', 'desc')
 
             ->paginate($limit, ['*'], 'page', $offset);
 
@@ -160,7 +190,7 @@ class StoreLogic
         ];
     }
 
-    public static function get_discounted_stores($zone_id, $limit = 50, $offset = 1, $type = 'all',$longitude=0,$latitude=0)
+    public static function get_discounted_stores($zone_id, $limit = 50, $offset = 1, $type = 'all',$longitude=0,$latitude=0,$filter=null,$rating_count=null)
     {
         $paginator = Store::withOpen($longitude??0,$latitude??0)
             ->withCount(['items','campaigns'])
@@ -182,6 +212,29 @@ class StoreLogic
             })
             ->Active()
             ->type($type)
+            ->when($rating_count, function($query) use ($rating_count){
+                $query->selectSub(function ($query) use ($rating_count){
+                    $query->selectRaw('AVG(reviews.rating)')
+                        ->from('reviews')
+                        ->join('items', 'items.id', '=', 'reviews.item_id')
+                        ->whereColumn('items.store_id', 'stores.id')
+                        ->groupBy('items.store_id')
+                        ->havingRaw('AVG(reviews.rating) >= ?', [$rating_count]);
+                }, 'avg_r')->having('avg_r', '>=', $rating_count);
+            })
+            ->when($filter && in_array('top_rated',$filter),function ($qurey){
+                $qurey->whereNotNull('rating')->whereRaw("LENGTH(rating) > 0");
+            })
+            ->when($filter && in_array('popular',$filter),function ($qurey){
+                $qurey->withCount('orders')->orderBy('orders_count', 'desc');
+            })
+            ->when($filter && in_array('open',$filter),function ($qurey){
+                $qurey->orderBy('open', 'desc');
+            })
+            ->when($filter && in_array('nearby',$filter),function ($qurey){
+                $qurey->orderBy('distance');
+            })
+            ->orderBy('open', 'desc')
             ->paginate($limit??50, ['*'], 'page', $offset??1);
 
         $paginator->each(function ($store) {
@@ -299,12 +352,14 @@ class StoreLogic
         return json_encode($store_ratings);
     }
 
-    public static function search_stores($name, $zone_id, $category_id= null,$limit = 10, $offset = 1, $type = 'all',$longitude=0,$latitude=0)
+    public static function search_stores($name, $zone_id, $category_id= null,$limit = 10, $offset = 1, $type = 'all',$longitude=0,$latitude=0,$filter=null,$rating_count=null)
     {
         $key = explode(' ', $name);
-        $paginator = Store::withOpen($longitude??0,$latitude??0)->whereHas('zone.modules', function($query){
+        $paginator = Store::withOpen($longitude??0,$latitude??0)
+        ->whereHas('zone.modules', function($query){
             $query->where('modules.id', config('module.current_module_data')['id']);
-        })->withCount(['items','campaigns'])->with(['discount'=>function($q){
+        })
+        ->withCount(['items','campaigns'])->with(['discount'=>function($q){
             return $q->validate();
         }])->weekday()->where(function ($q) use ($key) {
             foreach ($key as $value) {
@@ -322,7 +377,38 @@ class StoreLogic
                     return $q->whereId($category_id)->orWhere('parent_id', $category_id);
                 });
             })
-            ->active()->orderBy('open', 'desc')->orderBy('distance')->type($type)->paginate($limit, ['*'], 'page', $offset);
+            ->active()
+            ->when($rating_count, function($query) use ($rating_count){
+                $query->selectSub(function ($query) use ($rating_count){
+                    $query->selectRaw('AVG(reviews.rating)')
+                        ->from('reviews')
+                        ->join('items', 'items.id', '=', 'reviews.item_id')
+                        ->whereColumn('items.store_id', 'stores.id')
+                        ->groupBy('items.store_id')
+                        ->havingRaw('AVG(reviews.rating) >= ?', [$rating_count]);
+                }, 'avg_r')->having('avg_r', '>=', $rating_count);
+            })
+            ->when($filter && in_array('top_rated',$filter),function ($qurey){
+                $qurey->whereNotNull('rating')->whereRaw("LENGTH(rating) > 0");
+            })
+            ->when($filter && in_array('popular',$filter),function ($qurey){
+                $qurey->withCount('orders')->orderBy('orders_count', 'desc');
+            })
+            ->when($filter && in_array('discounted',$filter),function ($qurey){
+                $qurey->where(function ($query) {
+                    $query->whereHas('items', function ($q) {
+                        $q->Discounted();
+                    });
+                });
+            })
+            ->when($filter && in_array('open',$filter),function ($qurey){
+                $qurey->orderBy('open', 'desc');
+            })
+            ->when($filter && in_array('nearby',$filter),function ($qurey){
+                $qurey->orderBy('distance');
+            })
+            ->orderBy('open', 'desc')
+            ->type($type)->paginate($limit, ['*'], 'page', $offset);
 
 
         $paginator->each(function ($store) {

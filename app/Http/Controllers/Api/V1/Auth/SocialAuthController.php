@@ -2,23 +2,21 @@
 
 namespace App\Http\Controllers\api\v1\auth;
 
-use App\Models\User;
-use Firebase\JWT\JWT;
-use GuzzleHttp\Client;
-use Carbon\CarbonInterval;
-use Illuminate\Http\Request;
+
 use App\CentralLogics\Helpers;
-use Illuminate\Support\Carbon;
-use App\Models\BusinessSetting;
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use GuzzleHttp\Client;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use App\CentralLogics\SMS_module;
+use App\Models\BusinessSetting;
+use Illuminate\Support\Carbon;
 use App\Models\WalletTransaction;
 use Illuminate\Support\Facades\DB;
-use App\CentralLogics\CustomerLogic;
-use App\Http\Controllers\Controller;
+use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Mail;
 use Modules\Gateways\Traits\SmsGateway;
-use Illuminate\Support\Facades\Validator;
 
 class SocialAuthController extends Controller
 {
@@ -42,7 +40,13 @@ class SocialAuthController extends Controller
         $unique_id = $request['unique_id'];
         try {
             if ($request['medium'] == 'google') {
-                $res = $client->request('GET', 'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' . $token);
+
+                if($request->id_token  == true){
+                    $res = $client->request('GET', 'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' . $token);
+                } else{
+                    $res = $client->request('GET',  'https://www.googleapis.com/oauth2/v3/userinfo?access_token=' . $token);
+                }
+
                 $data = json_decode($res->getBody()->getContents(), true);
             } elseif ($request['medium'] == 'facebook') {
                 $res = $client->request('GET', 'https://graph.facebook.com/' . $unique_id . '?access_token=' . $token . '&&fields=name,email');
@@ -100,8 +104,8 @@ class SocialAuthController extends Controller
 
                         $notification_data = [
                             'title' => translate('messages.Your_referral_code_is_used_by').' '.$fast_name.' '.$last_name,
-                            'description' => translate('Be prepare to receive when they complete there first purchase') ,
-                            'order_id' => 1,
+                            'description' => translate('Be_prepare_to_receive_when_they_complete_there_first_purchase') ,
+                            'order_id' => '',
                             'image' => '',
                             'type' => 'referral_code',
                         ];
@@ -216,10 +220,10 @@ class SocialAuthController extends Controller
                 if ($check_duplicate_ref) {
                     return response()->json(['errors'=>['code'=>'ref_code','message'=>'Referral code already used']]);
                 } else {
-                    if(!isset($data['id']) && !isset($data['kid'])){
+                    if(!isset($data['id']) && !isset($data['kid']) &&  !isset($data['sub']) ){
                         return response()->json(['error' => 'wrong credential.'],403);
                     }
-                    $pk = isset($data['id'])?$data['id']:$data['kid'];
+                    $pk = isset($data['id'])?$data['id']:(  isset($data['kid']) ?  $data['kid'] : $data['sub'] );
                     $user = User::create([
                         'f_name' => $fast_name,
                         'l_name' => $last_name,
@@ -258,7 +262,7 @@ class SocialAuthController extends Controller
                         $notification_data = [
                             'title' => translate('messages.Your_referral_code_is_used_by').' '.$fast_name.' '.$last_name,
                             'description' => translate('Be prepare to receive when they complete there first purchase') ,
-                            'order_id' => 1,
+                            'order_id' => '',
                             'image' => '',
                             'type' => 'referral_code',
                         ];
@@ -381,7 +385,11 @@ class SocialAuthController extends Controller
         $unique_id = $request['unique_id'];
         try {
             if ($request['medium'] == 'google') {
-                $res = $client->request('GET', 'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' . $token);
+                if($request->id_token  == true){
+                    $res = $client->request('GET', 'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' . $token);
+                } else{
+                    $res = $client->request('GET',  'https://www.googleapis.com/oauth2/v3/userinfo?access_token=' . $token);
+                }
                 $data = json_decode($res->getBody()->getContents(), true);
             } elseif ($request['medium'] == 'facebook') {
                 $res = $client->request('GET', 'https://graph.facebook.com/' . $unique_id . '?access_token=' . $token . '&&fields=name,email');
@@ -424,7 +432,7 @@ class SocialAuthController extends Controller
         }
         if(!isset($claims)){
 
-            if (strcmp($email, $data['email']) != 0 || (!isset($data['id']) && !isset($data['kid']))) {
+            if (strcmp($email, $data['email']) != 0 && (!isset($data['id']) && !isset($data['kid']))) {
                 return response()->json(['error' => translate('messages.email_does_not_match')],403);
             }
         }

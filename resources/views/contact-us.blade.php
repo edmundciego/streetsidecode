@@ -111,7 +111,11 @@
                                 </div>
                                 <ul>
                                     <li>
-                                        {{ \App\CentralLogics\Helpers::get_settings('address') }}
+
+                                        @php($default_location = \App\CentralLogics\Helpers::get_settings('default_location'))
+
+                                        <a href="https://www.google.com/maps/search/?api=1&query={{ data_get($default_location,'lat',0)}},{{ data_get($default_location,'lng',0)}}" target="_blank">{{ \App\CentralLogics\Helpers::get_settings('address') }}</a>
+
                                     </li>
                                 </ul>
                             </div>

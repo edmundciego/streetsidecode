@@ -152,7 +152,7 @@ class OrderController extends Controller
     public function dispatch_list($module,$status, Request $request)
     {
         $module_id = $request->query('module_id', null);
-
+        $key = isset($request->search) ?explode(' ', $request->search): ($request['amp;search'] ? explode(' ', $request['amp;search']) : null) ;
         if (session()->has('order_filter')) {
             $request = json_decode(session('order_filter'));
             $zone_ids = isset($request->zone) ? $request->zone : 0;
@@ -163,6 +163,15 @@ class OrderController extends Controller
         $orders = Order::with(['customer', 'store'])
             ->whereHas('module', function($query) use($module){
                 $query->where('id', $module);
+            })
+            ->when(isset($key), function ($query) use ($key) {
+                return $query->where(function ($q) use ($key) {
+                    foreach ($key as $value) {
+                        $q->orWhere('id', 'like', "%{$value}%")
+                            ->orWhere('order_status', 'like', "%{$value}%")
+                            ->orWhere('transaction_reference', 'like', "%{$value}%");
+                    }
+                });
             })
             ->when(isset($module_id), function ($query) use ($module_id) {
                 return $query->module($module_id);
@@ -365,6 +374,11 @@ class OrderController extends Controller
         }, 'details.campaign' => function ($query) {
             return $query->withoutGlobalScope(StoreScope::class);
         }])->withOutGlobalScope(ZoneScope::class)->find($request->id);
+
+        if(!$order || (!$order->store && $order->order_type !='parcel') ){
+            Toastr::warning(translate('messages.you_can_not_change_the_status_of_this_order'));
+            return back();
+        }
 
         if (in_array($order->order_status, ['refunded', 'failed'])) {
             Toastr::warning(translate('messages.you_can_not_change_the_status_of_a_completed_order'));

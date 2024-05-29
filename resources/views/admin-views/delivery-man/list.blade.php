@@ -22,14 +22,31 @@
         <div class="card">
             <!-- Header -->
             <div class="card-header py-2 border-0">
-                <div class="search--button-wrapper">
-                    <h5 class="card-title">
+                <div class="search--button-wrapper justify-content-end">
+                    <h5 class="card-title mr-auto">
                         {{translate('messages.deliveryman_list')}}<span class="badge badge-soft-dark ml-2" id="itemCount">{{$deliveryMen->total()}}</span>
                     </h5>
+                    <div class="min--200">
+                        <select name="filter" class="form-control js-select2-custom set-filter" data-filter="filter"
+                        data-url="{{ url()->full() }}">
+                            <option  value="all">{{ translate('messages.All_Types') }}</option>
+                            <option {{  request()?->get('filter') == 'active' ? 'selected' : '' }}  value="active">{{ translate('messages.Online') }}</option>
+                            <option  {{  request()?->get('filter') == 'inactive' ? 'selected' : '' }} value="inactive">{{ translate('messages.Offline') }}</option>
+                            <option {{  request()?->get('filter') == 'blocked' ? 'selected' : '' }}  value="blocked">{{ translate('messages.Suspended') }}</option>
+                        </select>
+                    </div>
+                    <div class="min--200">
+                        <select name="job_type" class="form-control js-select2-custom set-filter" data-filter="job_type"
+                        data-url="{{ url()->full() }}">
+                            <option  value="all">{{ translate('messages.All_Job_Types') }}</option>
+                            <option  {{ request()?->get('job_type') == 'freelancer' ? 'selected' : '' }} value="freelancer">{{ translate('messages.Freelancer') }}</option>
+                            <option {{  request()?->get('job_type') == 'salary_base' ? 'selected' : '' }}  value="salary_base">{{ translate('messages.Salary_Base') }}</option>
+                        </select>
+                    </div>
                     @if(!isset(auth('admin')->user()->zone_id))
-                    <div class="col-sm-auto min--240">
-                        <select name="zone_id" class="form-control js-select2-custom zone-filter"
-                                data-url="{{route('admin.users.delivery-man.list')}}">
+                    <div class="min--200">
+                        <select name="zone_id" class="form-control js-select2-custom set-filter" data-filter="zone_id"
+                        data-url="{{ url()->full() }}">
                             <option value="all">{{ translate('messages.All_Zones') }}</option>
                             @foreach(\App\Models\Zone::orderBy('name')->get() as $z)
                                 <option
@@ -40,17 +57,20 @@
                         </select>
                     </div>
                     @endif
+
                     <form class="search-form">
-                                    <!-- Search -->
-                        {{-- @csrf --}}
                         <div class="input-group input--group">
                             <input id="datatableSearch_" type="search" name="search" class="form-control h--45px"
-                                    placeholder="{{translate('ex_:_search_name')}}" value="{{ request()->get('search') }}" aria-label="Search" required>
+                            placeholder="{{translate('ex:_DM_name_email_or_phone')}}" value="{{ request()->get('search') }}" aria-label="Search" required>
                             <button type="submit" class="btn btn--secondary h--45px"><i class="tio-search"></i></button>
 
                         </div>
                         <!-- End Search -->
                     </form>
+                    @if(request()->get('search'))
+                    <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
+                    @endif
+
                     <!-- Unfold -->
                     <div class="hs-unfold mr-2">
                         <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle h--45px min-height-40" href="javascript:;"
@@ -98,8 +118,9 @@
                         <th class="border-0 text-capitalize">{{translate('messages.name')}}</th>
                         <th class="border-0 text-capitalize">{{translate('messages.contact_info')}}</th>
                         <th class="border-0 text-capitalize">{{translate('messages.zone')}}</th>
-                        <th class="border-0 text-capitalize">{{translate('messages.total_orders')}}</th>
+                        <th class="border-0 text-capitalize">{{translate('messages.Total_Completed_Orders')}}</th>
                         <th class="border-0 text-capitalize">{{translate('messages.availability_status')}}</th>
+                        <th class="border-0 text-capitalize">{{translate('messages.Status')}}</th>
                         <th class="border-0 text-center text-capitalize">{{translate('messages.action')}}</th>
                     </tr>
                     </thead>
@@ -134,7 +155,7 @@
                                 @endif
                             </td>
                             <td>
-                                <a class="deco-none" href="tel:{{$dm['phone']}}">{{count($dm['orders'])}}</a>
+                                <a class="deco-none" href="{{route('admin.users.delivery-man.preview',['id'=> $dm['id'],'tab' => 'transaction' ])}}">{{count($dm['order_transaction'])}}</a>
                             </td>
                             <td>
                                 <div>
@@ -154,6 +175,16 @@
                                         <strong class="text-capitalize text-info">{{translate('messages.pending')}}</strong>
                                     @endif
                                 </div>
+                            </td>
+
+                            <td>
+                                @if ($dm->status == 1)
+                                <strong class="text-capitalize text-primary">{{translate('messages.Active')}}</strong>
+                                @else
+                                <strong class="text-capitalize text-danger">{{translate('messages.Suspended')}}</strong>
+
+                                @endif
+
                             </td>
                             <td>
                                 <div class="btn--container justify-content-center">
@@ -175,6 +206,7 @@
                     @endforeach
                     </tbody>
                 </table>
+            </div>
                 @if(count($deliveryMen) !== 0)
                 <hr>
                 @endif
@@ -189,7 +221,6 @@
                     </h5>
                 </div>
                 @endif
-            </div>
             <!-- End Table -->
         </div>
         <!-- End Card -->

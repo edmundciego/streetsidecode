@@ -38,6 +38,7 @@ class NotificationService
             'tergat' => $request->tergat,
             'status' => 1,
             'zone_id' => $request->zone=='all'?null:$request->zone,
+            'updated_at' => now(),
         ];
     }
 

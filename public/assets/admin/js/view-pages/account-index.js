@@ -24,4 +24,8 @@ $(document).on('ready', function () {
 $('#reset_btn').click(function(){
     $('#store').val(null).trigger('change');
     $('#deliveryman').val(null).trigger('change');
+    $('#deliveryman').removeAttr("disabled");
+    $('#store').val("").trigger( "change" );
+    $('#store').attr("disabled","true");
+
 })

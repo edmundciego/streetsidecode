@@ -132,7 +132,7 @@
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="bank_info" class="form-check-input"
                                     id="bank_info" {{in_array('bank_info',(array)json_decode($role['modules']))?'checked':''}}>
-                            <label class="form-check-label " for="bank_info">{{translate('messages.bank_info')}}</label>
+                            <label class="form-check-label " for="bank_info">{{translate('messages.profile')}}</label>
                         </div>
                     </div>
                     <div class="check-item">

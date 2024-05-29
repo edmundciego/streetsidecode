@@ -42,7 +42,8 @@ class DmVehicleController extends BaseController
 
     private function getListView(Request $request): View
     {
-        $vehicles = $this->vehicleRepo->getListWhere(
+        $vehicles = $this->vehicleRepo->getListWhereWithCount(
+            withCountRelations: ['delivery_man'],
             searchValue: $request['search'],
             dataLimit: config('default_pagination')
         );
@@ -118,7 +119,7 @@ class DmVehicleController extends BaseController
         $deliveryMen = $deliveryManRepo->getListWhere(
             searchValue: $request['search'],
             filters: ['vehicle_id'=>$vehicle['id']],
-            relations: ['vehicle'],
+            relations: ['vehicle','rating','orders'],
             dataLimit: config('default_pagination')
         );
         return view(DmVehicleViewPath::VIEW[VIEW], compact('vehicle','deliveryMen') );

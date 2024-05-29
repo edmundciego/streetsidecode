@@ -2,7 +2,7 @@
 <div class="card-header border-0 order-header-shadow">
     <h5 class="card-title d-flex justify-content-between">
         <span>
-            {{translate('top rated')}}@if (Config::get('module.current_module_type')== 'food')
+            {{translate('most rated')}}@if (Config::get('module.current_module_type')== 'food')
             {{ translate('messages.foods') }}
         @else
             {{ translate('messages.items') }}
@@ -22,7 +22,7 @@
 <!-- Body -->
 <div class="card-body">
     <div class="rated--products">
-        @foreach($top_rated_foods as $key=>$item)
+        @forelse($top_rated_foods as $key=>$item)
             <a href="{{route('admin.item.view',[$item['id']])}}">
                 <div class="rated-media d-flex align-items-center">
                     <img
@@ -34,9 +34,9 @@
                         'product/'
                     ) }}"
 
-                   
+
                     class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/100x100/2.png')}}" alt="{{Str::limit($item->name??translate('messages.Item deleted!'),20,'...')}}">
-                    <span class="line--limit-1 w-0 flex-grow-1">
+                    <span class="line--limit-1 w-0 flex-grow-1" title="{{ $item?->name }}">
                         {{Str::limit($item->name??translate('messages.Item deleted!'),20,'...')}}
                     </span>
                     <div>
@@ -44,7 +44,9 @@
                     </div>
                 </div>
             </a>
-        @endforeach
+            @empty
+
+            @endforelse
     </div>
 </div>
 <!-- End Body -->

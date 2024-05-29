@@ -8,7 +8,7 @@ $company_name = App\Models\BusinessSetting::where('key', 'business_name')->first
 
             src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
                 data_get($data, 'icon' , null),
-                asset('storage/app/public/email_template').'/'.data_get($data, 'icon' , null) ,
+                asset('storage/app/public/email_template').'/'.data_get($data, 'icon' , null),
                 asset('/public/assets/admin/img/blank3.png'),
                 'email_template/'
             ) }}"
@@ -22,9 +22,14 @@ $company_name = App\Models\BusinessSetting::where('key', 'business_name')->first
     <tr>
         <td class="email-template-table-td-style-2">
             <span class="email-template-table-td-span" id="mail-body">{!! $data['body']??'Please click the link below to change your password' !!}</span>
+
+            @if (strpos(Request::url(), '/suspend') == false)
             <span class="email-template-table-td-span-2">
                 <a href="#" class="email-template-table-td-span-h-ref">{{ translate('generated_link') }}</a>
             </span>
+
+
+            @endif
             <span class="border-top"></span>
             <span class="d-block" id="mail-footer" class="email-template-table-td-span-3  mail-footer">{{ $data['footer_text'] ?? translate('Please_contact_us_for_any_queries,_we’re_always_happy_to_help.') }}</span>
             <span class="d-block">{{ translate('Thanks_&_Regards') }},</span>

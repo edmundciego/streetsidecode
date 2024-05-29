@@ -1,7 +1,7 @@
 <!-- Header -->
 <div class="card-header border-0 order-header-shadow">
     <h5 class="card-title d-flex justify-content-between">
-        {{translate('most rated')}} @if (Config::get('module.current_module_type')== 'food')
+        {{translate('most popular')}} @if (Config::get('module.current_module_type')== 'food')
             {{ translate('messages.restaurants') }}
         @else
             {{ translate('messages.stores') }}
@@ -31,15 +31,18 @@
                     'store/'
                 ) }}"
 
-                alt="{{translate('store')}}">
-                <span class="ml-2"> {{Str::limit($item->store->name??translate('messages.store deleted!'), 20, '...')}} </span>
+                alt="{{translate('store')}}" title="{{ $item?->store?->name }}">
+                <span class="ml-2" title="{{ $item?->store?->name }}"> {{Str::limit($item->store->name??translate('messages.store deleted!'), 20, '...')}} </span>
             </div>
-            <span class="badge badge-soft text--primary px-2">
-                <span>
-                    {{$item['count']}}
-                </span>
-                <i class="tio-star"></i>
-            </span>
+            <div>
+                <span class="text-FF6D6D">{{$item['count']}} <i class="tio-heart"></i></span>
+            </div>
+{{--            <span class="badge badge-soft text--primary px-2">--}}
+{{--                <span>--}}
+{{--                    {{$item['count']}}--}}
+{{--                </span>--}}
+{{--                <i class="tio-star"></i>--}}
+{{--            </span>--}}
         </li>
     @endforeach
     </ul>

@@ -19,8 +19,18 @@
                 {{translate('Add_New_Business_Module')}}
             </span>
         </h1>
-        <div class="mt-2 d-flex">
-            <span>{{ translate('*Set_up_your_New_Business_Module_type_theme_icon_&_thumbnail.') }}</span>
+        <div class="alert alert-soft-primary alert-dismissible fade show d-flex" role="alert">
+            <div>
+                <img src="{{asset('/public/assets/admin/img/icons/intel.png')}}" width="22" alt="">
+            </div>
+            <div class="w-0 flex-grow-1 pl-3">
+                <strong>{{ translate('Attention!') }}</strong> {{ translate('Don’t_forget_to_click_the_‘Add_Module’_button_below_to_save_the_new_business_module') }}
+            </div>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <!-- <div class="mt-2 d-flex">
             <div class="d-flex flex-wrap justify-content-end align-items-center flex-grow-1 p--10">
                 <div class="blinkings active">
                     <i class="tio-info-outined"></i>
@@ -32,13 +42,14 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
     <!-- End Page Header -->
 
-    <div class="card">
-        <div class="card-body">
-            <form action="{{route('admin.business-settings.module.store')}}" method="post" enctype="multipart/form-data">
+    <h5 class="mb-3">{{translate('basic_setup')}}</h5>
+    <form action="{{route('admin.business-settings.module.store')}}" method="post" enctype="multipart/form-data">
+        <div class="card">
+            <div class="card-body pb-0">
                 @csrf
                 @if($language)
                 <ul class="nav nav-tabs mb-4 border-0">
@@ -63,12 +74,12 @@
                         <input type="text" name="module_name[]" class="form-control" maxlength="191" placeholder="{{ translate('messages.Ex:_Grocery,eCommerce,Pharmacy,etc.') }}">
                     </div>
                     <div class="form-group">
-                        <label class="input-label d-flex" for="module_type">{{ translate('Business_Module_description')}} ({{ translate('messages.default') }})<span class="form-label-secondary text-danger d-flex"
+                        <label class="input-label d-flex">{{ translate('Business_Module_description')}} ({{ translate('messages.default') }})<span class="form-label-secondary text-danger d-flex"
                             data-toggle="tooltip" data-placement="right"
                             data-original-title="{{ translate('messages.Write_a_short_description_of_your_new_business_module_within_100_words_(550_characters)') }}"><img
                                 src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
                                 alt="{{ translate('messages.veg_non_veg') }}"></span></label>
-                        <textarea class="ckeditor form-control" name="description[]"></textarea>
+                        <textarea id="description" class="ckeditor form-control" name="description[]"></textarea>
                     </div>
                 </div>
 
@@ -80,12 +91,12 @@
                         <input type="text" name="module_name[]" class="form-control" maxlength="191" placeholder="{{ translate('messages.Ex:_Grocery,eCommerce,Pharmacy,etc.') }}">
                     </div>
                     <div class="form-group">
-                        <label class="input-label d-flex" for="module_type">{{ translate('Business_Module_description')}} ({{strtoupper($lang)}})<span class="form-label-secondary text-danger d-flex"
+                        <label class="input-label d-flex">{{ translate('Business_Module_description')}} ({{strtoupper($lang)}})<span class="form-label-secondary text-danger d-flex"
                             data-toggle="tooltip" data-placement="right"
                             data-original-title="{{ translate('messages.Write_a_short_description_of_your_new_business_module_within_100_words_(550_characters)')}}"><img
                                 src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
                                 alt="{{ translate('messages.veg_non_veg') }}"></span></label>
-                        <textarea class="ckeditor form-control" name="description[]"></textarea>
+                        <textarea id="description{{ $lang }}" class="ckeditor form-control" name="description[]"></textarea>
                     </div>
                 </div>
 
@@ -97,12 +108,12 @@
                     <input type="text" name="module_name" class="form-control" value="{{old('name')}}" maxlength="191"  placeholder="{{ translate('messages.Ex:_business_Module Name') }}">
                 </div>
                 <div class="form-group">
-                    <label class="input-label" for="module_type">{{ translate('Business_Module_description')}}</label>
-                    <textarea class="ckeditor form-control" name="description"></textarea>
+                    <label class="input-label">{{ translate('Business_Module_description')}}</label>
+                    <textarea id="description" class="ckeditor form-control" name="description"></textarea>
                 </div>
                 <input type="hidden" name="lang[]" value="default">
                 @endif
-                <div class="row mt-2">
+                {{--<div class="row mt-2">
                     <div class="col-sm-6">
                         <div class="form-group">
                             <label class="input-label" for="module_type">{{translate('messages.business_module_type')}}</label>
@@ -118,51 +129,82 @@
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="card h-100 module-logo-card mb-3">
-                    <div class="card-body">
-                        <div class="row h-100">
-                            <div class="col-sm-6 mb-4 mb-sm-0">
-                                <div class="form-group m-0 h-100 d-flex flex-column justify-content-center">
-                                    <label class="form-label mb-0">
-                                        {{translate('messages.icon')}}
-                                        <small class="text-danger">* ( {{translate('messages.ratio')}} 1:1)</small>
-                                    </label>
-                                    <div class="text-center my-auto py-3">
-                                        <img class="initial--15" id="viewer" src="{{asset('public/assets/admin/img/400x400/img2.jpg')}}" alt="image" />
-                                    </div>
-                                    <div class="custom-file">
-                                        <input type="file" name="icon" id="customFileEg1" class="custom-file-input" accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" required>
-                                        <label class="custom-file-label" for="customFileEg1">{{translate('messages.choose_file')}}</label>
-                                    </div>
+                </div> --}}
+            </div>
+        </div>
+        <br>
+        <h5 class="mb-3">{{translate('module_setup')}}</h5>
+        <div class="card">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-lg-6">
+                        <h6 class="mb-3">{{translate('select_business_module_type')}}</h6>
+                        <div class="card">
+                            <div class="card-body p-0">
+                                <div class="module-radio-group">
+                                @foreach (config('module.module_type') as $key)
+                                <label class="form-check form--check">
+                                    <input class="form-check-input" type="radio" name="module_type" value="{{$key}}">
+                                    <span class="form-check-label">
+                                        {{translate($key)}}
+                                    </span>
+                                </label>
+                                @endforeach
                                 </div>
                             </div>
-                            <div class="col-sm-6">
-                                <div class="form-group m-0 h-100 d-flex flex-column justify-content-center">
-                                    <label class="form-label mb-0">
-                                        {{translate('messages.thumbnail')}}
-                                        <small class="text-danger">* ( {{translate('messages.ratio')}} 1:1)</small>
-                                    </label>
-                                    <div class="text-center my-auto py-3">
-                                        <img class="initial--15" id="viewer2" src="{{asset('public/assets/admin/img/400x400/img2.jpg')}}" alt="image" />
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <h6 class="mb-3">{{translate('Chose related images')}}</h6>
+                        <div class="card module-logo-card mb-3">
+                            <div class="card-body">
+                                <div class="row h-100">
+                                    <div class="col-sm-6 mb-4 mb-sm-0">
+                                        <div class="form-group m-0 h-100 d-flex align-items-center flex-column justify-content-center">
+                                            <label class="form-label mb-0">
+                                                {{translate('messages.icon')}}
+                                                <small class="text-danger">* ( {{translate('messages.ratio')}} 1:1)</small>
+                                            </label>
+                                            <label class="text-center my-auto position-relative">
+                                                <img class="img--176 h-unset aspect-ratio-1 image--border" id="viewer" src="{{asset('public/assets/admin/img/upload-img.png')}}" alt="image" />
+                                                <div class="icon-file-group">
+                                                    <div class="icon-file">
+                                                        <input type="file" name="icon" id="customFileEg1" class="custom-file-input" accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
+                                                        <i class="tio-edit"></i>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
                                     </div>
-                                    <div class="custom-file">
-                                        <input type="file" name="thumbnail" id="customFileEg2" class="custom-file-input" accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" required>
-                                        <label class="custom-file-label" for="customFileEg2">{{translate('messages.choose_file')}}</label>
+                                    <div class="col-sm-6">
+                                        <div class="form-group m-0 h-100 d-flex flex-column justify-content-center align-items-center">
+                                            <label class="form-label mb-4">
+                                                {{translate('messages.thumbnail')}}
+                                                <small class="text-danger">* ( {{translate('messages.ratio')}} 1:1)</small>
+                                            </label>
+                                            <label class="text-center my-auto position-relative">
+                                                <img class="img--176 h-unset aspect-ratio-1 image--border" id="viewer2" src="{{asset('public/assets/admin/img/upload-img.png')}}" alt="image" />
+                                                <div class="icon-file-group">
+                                                    <div class="icon-file">
+                                                        <input type="file" name="thumbnail" id="customFileEg2" class="custom-file-input" accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
+                                                        <i class="tio-edit"></i>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="btn--container justify-content-end">
-                    <button type="reset" id="reset_btn" class="btn btn--reset">{{translate('messages.reset')}}</button>
-                    <button type="submit" class="btn btn--primary">{{translate('messages.Add_Module')}}</button>
-                </div>
-            </form>
+            </div>
         </div>
-    </div>
+        <div class="btn--container justify-content-end mt-4">
+            <button type="reset" id="reset_btn" class="btn btn--reset">{{translate('messages.reset')}}</button>
+            <button type="submit" class="btn btn--primary">{{translate('messages.Add_Module')}}</button>
+        </div>
+    </form>
 
 </div>
 
@@ -240,6 +282,9 @@
     });
 
         $('#reset_btn').click(function(){
+            $('.ckeditor').each(function() {
+                CKEDITOR.instances[$(this).attr('id')].setData('');
+            });
             $('#viewer').attr('src','{{asset('public/assets/admin/img/400x400/img2.jpg')}}');
             $('#viewer2').attr('src','{{asset('public/assets/admin/img/400x400/img2.jpg')}}');
         })

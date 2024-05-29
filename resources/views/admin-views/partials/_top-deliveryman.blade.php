@@ -16,7 +16,7 @@
 <!-- Body -->
 <div class="card-body">
     <div class="top--selling">
-        @foreach($top_deliveryman as $key=>$item)
+        @forelse($top_deliveryman as $key=>$item)
 
             <a class="grid--card" href="{{route('admin.users.delivery-man.preview',[$item['id']])}}">
                 <img class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/admin.png')}}"
@@ -35,7 +35,9 @@
                 </div>
             </a>
 
-        @endforeach
+            @empty
+         
+            @endforelse
     </div>
 </div>
 <!-- End Body -->

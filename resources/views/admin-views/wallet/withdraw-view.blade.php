@@ -39,7 +39,7 @@
                             <h5 class="d-flex __gap-5px text-capitalize">
                                 <span>{{translate('messages.amount')}}</span>
                                 <span>:</span>
-                                <span>{{$wr->amount}}</span>
+                                <span>{{\App\CentralLogics\Helpers::format_currency($wr->amount)}}</span>
                             </h5>
                             <h5 class="d-flex __gap-5px">
                                 <span>{{ translate('messages.request_time') }}</span><span>:</span><span>{{$wr->created_at}}</span>

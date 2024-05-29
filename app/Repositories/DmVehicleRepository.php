@@ -47,6 +47,19 @@ class DmVehicleRepository implements DmVehicleRepositoryInterface
             })
             ->latest()->paginate($dataLimit);
     }
+    public function getListWhereWithCount(string $searchValue = null, array $filters = [], array $relations = [], array $withCountRelations = [], int|string $dataLimit = DEFAULT_DATA_LIMIT, int $offset = null): Collection|LengthAwarePaginator
+    {
+        $key = explode(' ', $searchValue);
+        return $this->vehicle->with($relations)->withcount($withCountRelations)->where($filters)
+            ->when(isset($key), function($query) use($key){
+                $query->where(function ($query) use ($key) {
+                    foreach ($key as $value) {
+                        $query->where('type', 'like', "%{$value}%");
+                    }
+                });
+            })
+            ->latest()->paginate($dataLimit);
+    }
 
     public function update(string $id, array $data): bool|string|object
     {

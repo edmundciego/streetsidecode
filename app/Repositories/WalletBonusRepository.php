@@ -36,7 +36,7 @@ class WalletBonusRepository implements WalletBonusRepositoryInterface
 
     public function getListWhere(string $searchValue = null, array $filters = [], array $relations = [], int|string $dataLimit = DEFAULT_DATA_LIMIT, int $offset = null): Collection|LengthAwarePaginator
     {
-        return $this->bonus->with($relations)->where($filters)->latest()->paginate($dataLimit);
+        return $this->bonus->with($relations)->where($filters)->latest('end_date')->paginate($dataLimit);
     }
 
     public function update(string $id, array $data): bool|string|object

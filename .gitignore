@@ -2,6 +2,10 @@
 /public/hot
 /public/storage
 /storage/*.key
+/vendor
+/Admin update to v2.7.1
+.well-known
+.env
 .env.backup
 .phpunit.result.cache
 docker-compose.override.yml
@@ -12,3 +16,4 @@ yarn-error.log
 error_log
 /storage/tmp
 .DS_Store
+Admin update to v2.7.1.zip

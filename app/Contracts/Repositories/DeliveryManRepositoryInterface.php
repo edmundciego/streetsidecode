@@ -43,4 +43,18 @@ interface DeliveryManRepositoryInterface extends RepositoryInterface
      * @return Model|null
      */
     public function getActiveFirstWhere(string $searchValue = null, array $filters = [], array $relations = []): ?Model;
+
+        /**
+     * @param string $zoneId
+     * @param string|null $searchValue
+     * @param array $filters
+     * @param array $additionalFilter
+     * @param array $relations
+     * @param int|string $dataLimit
+     * @param int|null $offset
+     * @return Collection|LengthAwarePaginator
+     */
+    public function getFilterWiseListWhere(string $zoneId = 'all', string $searchValue = null, array $filters = [],  string $additionalFilter = null ,string $jobType = null ,array $relations = [], int|string $dataLimit = DEFAULT_DATA_LIMIT, int $offset = null): Collection|LengthAwarePaginator;
+
+
 }

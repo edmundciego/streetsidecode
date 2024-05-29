@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers\Vendor;
 
-use App\Http\Controllers\Controller;
-use App\Models\Category;
 use App\Models\Item;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\Store;
+use App\Mail\PlaceOrder;
+use App\Models\Category;
+use App\Models\DMVehicle;
+use App\Scopes\StoreScope;
 use App\Models\OrderDetail;
-use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
-use App\CentralLogics\ProductLogic;
-use App\Mail\PlaceOrder;
 use App\Models\BusinessSetting;
-use App\Models\DMVehicle;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
+use App\CentralLogics\ProductLogic;
+use App\Http\Controllers\Controller;
+use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 
 class POSController extends Controller
 {
@@ -506,6 +507,7 @@ class POSController extends Controller
         $order->created_at = now();
         $order->schedule_at = now();
         $order->updated_at = now();
+        $order->zone_id = $store->zone_id;
         $order->otp = rand(1000, 9999);
         foreach ($cart as $c) {
             if(is_array($c))
@@ -692,9 +694,9 @@ class POSController extends Controller
             'password' => bcrypt('password')
         ]);
         try {
-            $mail_status = Helpers::get_mail_status('registration_otp_mail_status_user');
-            if (config('mail.status') && $mail_status == '1') {
-                Mail::to($request->email)->send(new \App\Mail\CustomerRegistration($request->f_name . ' ' . $request->l_name,true));
+            if (config('mail.status') && $request->email && Helpers::get_mail_status('pos_registration_mail_status_user') == '1') {
+                Mail::to($request->email)->send(new \App\Mail\CustomerRegistrationPOS($request->f_name . ' ' . $request->l_name,$request['email'],'password'));
+                Toastr::success(translate('mail_sent_to_the_user'));
             }
         } catch (\Exception $ex) {
             info($ex->getMessage());

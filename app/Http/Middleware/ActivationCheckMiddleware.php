@@ -22,6 +22,9 @@ class ActivationCheckMiddleware
      */
     public function handle($request, Closure $next)
     {
-		return $next($request);
+        if (!$this->actch()) {
+            return Redirect::away(base64_decode('aHR0cHM6Ly82YW10ZWNoLmNvbS9zb2Z0d2FyZS1hY3RpdmF0aW9u'))->send();
+        }
+        return $next($request);
     }
 }

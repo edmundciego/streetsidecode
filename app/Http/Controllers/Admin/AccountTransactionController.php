@@ -108,12 +108,7 @@ class AccountTransactionController extends Controller
             $account_transaction->save();
             $data->wallet->decrement('collected_cash', $request['amount']);
             AdminWallet::where('admin_id', Admin::where('role_id', 1)->first()->id)->increment('manual_received', $request['amount']);
-            if($request['type']=='deliveryman' && $request['deliveryman_id']){
-                $mail_status = Helpers::get_mail_status('cash_collect_mail_status_dm');
-                if (config('mail.status') && $mail_status == '1') {
-                    Mail::to($data['email'])->send(new \App\Mail\CollectCashMail($account_transaction,$data['f_name']));
-                }
-            }
+
             DB::commit();
         }
         catch(\Exception $e)
@@ -122,6 +117,16 @@ class AccountTransactionController extends Controller
             return $e;
         }
 
+        try {
+            if($request['type']=='deliveryman' && $request['deliveryman_id'] && config('mail.status')){
+                $mail_status = Helpers::get_mail_status('cash_collect_mail_status_dm');
+                if (config('mail.status') && $mail_status == '1') {
+                    Mail::to($data['email'])->send(new \App\Mail\CollectCashMail($account_transaction,$data['f_name']));
+                }
+            }
+        } catch (\Throwable $th) {
+            
+        }
         return response()->json(200);
     }
 

@@ -36,7 +36,7 @@
                     </label>
                 </div>
                 <div class="mt-2">
-                    {{ translate('messages.*Customers_cannot_request_a_Refund_if_the_Admin_does_not_specify_a_cause_for_cancellation,_even_though_they_see_the_Cancel_Order_option._So_Admin_MUST_provide_a_proper_Refund_Reason_and_select_the_related_user.') }}
+                    {{ translate('messages.*Customers_cannot_request_a_Refund_if_the_Admin_does_not_specify_a_cause_for_refund_even_though_they_see_the_Refund_option._So_Admin_MUST_provide_a_proper_Refund_Reason._At_least_one_reason_Must_be_ON_in_the_reason_list.') }}
                 </div>
             </div>
         </div>
@@ -157,7 +157,7 @@
                             <td>
                                 <div class="btn--container justify-content-center">
                                     <a class="btn btn-sm btn--primary btn-outline-primary action-btn edit-reason"
-                                        title="{{ translate('messages.edit') }}" 
+                                        title="{{ translate('messages.edit') }}"
                                             data-toggle="modal"   data-target="#add_update_reason_{{$reason->id}}"
                                         ><i class="tio-edit"></i>
                                     </a>

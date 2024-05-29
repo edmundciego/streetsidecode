@@ -26,17 +26,56 @@
             <!-- Header -->
             <div class="card-header border-0  py-2">
                 <div class="search--button-wrapper justify-content-end">
+
+
+                    <div class="col-sm-auto min--240">
+                        <select name="zone_id" class="form-control js-select2-custom set-filter"
+                        data-filter="zone_id"
+                                data-url="{{ url()->full() }}">
+                            <option value="all">{{ translate('messages.All_Zones') }}</option>
+                            @foreach(\App\Models\Zone::orderBy('name')->get() as $z)
+                                <option
+                                    value="{{$z['id']}}" {{ request()->get('zone_id')  == $z['id']?'selected':''}}>
+                                    {{$z['name']}}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-sm-auto min--240">
+                        <select name="order_wise" class="form-control js-select2-custom set-filter"
+                        data-filter="order_wise"
+                                data-url="{{ url()->full() }}">
+                            <option  {{ request()->get('order_wise')  == 'top'?'selected':''}}  value="top">{{ translate('messages.Total_orders') }} ({{ translate('messages.High_to_Low') }})</option>
+                            <option {{ request()->get('order_wise')  == 'least'?'selected':''}}  value="least">{{ translate('messages.Total_orders') }} ({{ translate('messages.Low_to_High') }})</option>
+                            <option {{ request()->get('order_wise')  == 'latest'?'selected':''}}  value="latest">{{ translate('messages.New_Customers') }}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-sm-auto min--240">
+                        <select name="filter" class="form-control js-select2-custom set-filter"
+                        data-filter="filter"
+                                data-url="{{ url()->full() }}">
+                            <option  {{ request()->get('filter')  == 'all'?'selected':''}} value="all">{{ translate('messages.All_Customers') }}</option>
+                            <option  {{ request()->get('filter')  == 'active'?'selected':''}} value="active">{{ translate('messages.Active_Customers') }}</option>
+                            <option  {{ request()->get('filter')  == 'blocked'?'selected':''}} value="blocked">{{ translate('messages.Inactive_Customers') }}</option>
+                        </select>
+                    </div>
                     <form class="search-form">
                         <!-- Search -->
                         <div class="input-group input--group">
                             <input id="datatableSearch_" type="search" name="search" class="form-control min-height-40"
-                                value="{{ request()->get('search') }}" placeholder="{{ translate('search_by_name') }}"
-                                aria-label="Search" required>
+                                value="{{ request()->get('search') }}" placeholder="{{ translate('ex:_name_email_or_phone') }}"
+                                aria-label="Search" >
                             <button type="submit" class="btn btn--secondary min-height-40"><i class="tio-search"></i></button>
-                    
+
                         </div>
                         <!-- End Search -->
                     </form>
+                    @if(request()->get('search'))
+                    <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
+                    @endif
+
                     <!-- Unfold -->
                     <div class="hs-unfold mr-2">
                         <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
@@ -203,6 +242,8 @@
                                 <th class="table-column-pl-0 border-0">{{ translate('messages.name') }}</th>
                                 <th class="border-0">{{ translate('messages.contact_information') }}</th>
                                 <th class="border-0">{{ translate('messages.total_order') }}</th>
+                                <th class="border-0">{{ translate('messages.total_order_amount') }}</th>
+                                <th class="border-0">{{ translate('messages.Joining_date') }}</th>
                                 <th class="border-0">{{ translate('messages.active') }}/{{ translate('messages.inactive') }}</th>
                                 <th class="border-0">{{ translate('messages.actions') }}</th>
                             </tr>
@@ -210,6 +251,7 @@
 
                         <tbody id="set-rows">
                             @foreach ($customers as $key => $customer)
+
                                 <tr class="">
                                     <td class="">
                                         {{ $key + $customers->firstItem() }}
@@ -221,15 +263,29 @@
                                     </td>
                                     <td>
                                         <div>
-                                            {{ $customer['email'] }}
+                                            <a href="mailto:{{ $customer['email'] }}">
+                                                {{ $customer['email'] }}
+                                            </a>
                                         </div>
                                         <div>
-                                            {{ $customer['phone'] }}
+                                            <a href="tel:{{ $customer['phone'] }}">
+                                                {{ $customer['phone'] }}
+                                            </a>
                                         </div>
                                     </td>
                                     <td>
                                         <label class="badge">
-                                            {{ $customer->order_count }}
+                                            {{ $customer->orders_count }}
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <label class="badge">
+                                            {{  \App\CentralLogics\Helpers::format_currency( $customer->orders()->sum('order_amount'))}}
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <label class="badge">
+                                            {{  \App\CentralLogics\Helpers::date_format( $customer->created_at)}}
                                         </label>
                                     </td>
                                     <td>
@@ -307,31 +363,5 @@
             })
         }
 
-        $('#search-form').on('submit', function() {
-            var formData = new FormData(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.post({
-                url: '{{ route('admin.users.customer.search') }}',
-                data: formData,
-                cache: false,
-                contentType: false,
-                processData: false,
-                beforeSend: function() {
-                    $('#loading').show();
-                },
-                success: function(data) {
-                    $('#set-rows').html(data.view);
-                    $('.card-footer').hide();
-                    $('#count').html(data.count);
-                },
-                complete: function() {
-                    $('#loading').hide();
-                },
-            });
-        });
     </script>
 @endpush

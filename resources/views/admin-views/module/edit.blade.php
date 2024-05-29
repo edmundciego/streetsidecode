@@ -21,7 +21,7 @@
         </div>
         <!-- End Page Header -->
         <div class="card">
-            <div class="card-body">
+            <div class="card-body pb-0">
                 <form action="{{route('admin.business-settings.module.update',[$module['id']])}}" method="post" enctype="multipart/form-data">
                     @method('PUT')
                     @csrf
@@ -51,7 +51,7 @@
                                     data-original-title="{{ translate('messages.Write_a_short_description_of_your_new_business_module_within_100_words_(550_characters)')}}"><img
                                         src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
                                         alt="{{ translate('messages.veg_non_veg') }}"></span></label>
-                                <textarea class="ckeditor form-control" name="description[]">{!! $module?->getRawOriginal('description') !!}</textarea>
+                                <textarea  data-value="{!! $module->description !!}" id="description"  class="ckeditor form-control" name="description[]">{!! $module?->getRawOriginal('description') !!}</textarea>
                             </div>
                         </div>
 
@@ -83,7 +83,7 @@
                                         data-original-title="{{ translate('messages.Write_a_short_description_of_your_new_business_module_within_100_words_(550_characters)')}}"><img
                                             src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
                                             alt="{{ translate('messages.veg_non_veg') }}"></span></label>
-                                    <textarea class="ckeditor form-control" name="description[]">{!! $translate[$lang]['description']??'' !!}</textarea>
+                                    <textarea  data-value="{!! $translate[$lang]['description']??'' !!}" id="description{{ $lang }}" class="ckeditor form-control" name="description[]">{!! $translate[$lang]['description']??'' !!}</textarea>
                                 </div>
                             </div>
 
@@ -96,71 +96,95 @@
                         </div>
                         <div class="form-group">
                             <label class="input-label" for="module_type">{{translate('messages.description')}}</label>
-                            <textarea class="ckeditor form-control" name="description">{!! $module->description !!}</textarea>
+                            <textarea  data-value="{!! $module->description !!}" id="description" class="ckeditor form-control" name="description">{!! $module->description !!}</textarea>
                         </div>
                         <input type="hidden" name="lang[]" value="default">
                     @endif
-                    <div class="row mt-2">
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label class="input-label" for="module_type">{{translate('messages.business_module_type')}}</label>
-                                <select name="module_type" id="module_type" class="form-control text-capitalize" disabled>
-                                    @foreach (config('module.module_type') as $key)
-                                        <option value="{{$key}}" {{$key==$module->module_type?'selected':''}}>{{translate($key)}}</option>
-                                    @endforeach
-                                </select>
-                                <div class="card mt-1" id="module_des_card">
-                                    <div class="card-body" id="module_description">{{config('module.'.$module->module_type)['description']}}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card h-100 module-logo-card mb-3">
-                        <div class="card-body">
-                            <div class="row h-100">
-                                <div class="col-sm-6">
-                                    <div class="form-group m-0 h-100 d-flex flex-column justify-content-center">
-                                        <label>
-                                            {{translate('messages.icon')}}
-                                            <small class="text-danger">* ( {{translate('messages.ratio')}} 1:1)</small>
-                                        </label>
-                                        <div class="text-center my-auto py-3">
-                                            <img class="initial--15 onerror-image" id="viewer" data-onerror-image="{{asset('public/assets/admin/img/400x400/img2.jpg')}}" src="{{\App\CentralLogics\Helpers::onerror_image_helper($module['icon'], asset('storage/app/public/module/').'/'.$module['icon'], asset('public/assets/admin/img/400x400/img2.jpg'), 'module/') }}"
-                                            alt="image" />
-                                        </div>
-                                        <div class="custom-file">
-                                            <input type="file" name="icon" id="customFileEg1" class="custom-file-input" accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
-                                            <label class="custom-file-label" for="customFileEg1">{{translate('messages.choose_file')}}</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group m-0 h-100 d-flex flex-column justify-content-center">
-                                        <label>
-                                            {{translate('messages.thumbnail')}}
-                                            <small class="text-danger">* ( {{translate('messages.ratio')}} 1:1)</small>
-                                        </label>
-                                        <div class="text-center my-auto py-3">
-                                            <img class="initial--15 onerror-image" id="viewer2" data-onerror-image="{{asset('public/assets/admin/img/400x400/img2.jpg')}}" src="{{\App\CentralLogics\Helpers::onerror_image_helper($module['thumbnail'], asset('storage/app/public/module/').'/'.$module['thumbnail'], asset('public/assets/admin/img/400x400/img2.jpg'), 'module/') }}"
-                                            alt="image" />
-                                        </div>
-                                        <div class="custom-file">
-                                            <input type="file" name="thumbnail" id="customFileEg2" class="custom-file-input" accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
-                                            <label class="custom-file-label" for="customFileEg2">{{translate('messages.choose_file')}}</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <div class="btn--container justify-content-end">
-                    <button type="reset" id="reset_btn" class="btn btn--reset">{{translate('messages.reset')}}</button>
-                    <button type="submit" class="btn btn--primary">{{translate('messages.Save_changes')}}</button>
                 </div>
-                </form>
             </div>
+                <br>
+                <h5 class="mb-3">{{translate('module_setup')}}</h5>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <h6 class="mb-3">{{translate('business_module_type')}} <span class="badge badge-danger">{{ translate('not_editable') }}</span></h6>
+                                    <div class="card">
+                                        <div class="card-body p-0">
+                                            <div class="module-radio-group">
+                                            @foreach (config('module.module_type') as $key)
+                                            <label class="form-check form--check">
+                                                <input class="form-check-input" disabled type="radio" name="module_type" value="{{$key}}" {{$key==$module->module_type?'checked':''}}>
+                                                <span class="form-check-label">
+                                                    {{translate($key)}}
+                                                </span>
+                                            </label>
+                                            @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card mt-1" id="module_des_card">
+                                        <div class="card-body" id="module_description">{{config('module.'.$module->module_type)['description']}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        <div class="col-lg-6">
+                            <h6 class="mb-3">{{translate('Chose related images')}}</h6>
+                            <div class="card module-logo-card mb-3">
+                                <div class="card-body">
+                                    <div class="row h-100">
+                                        <div class="col-sm-6">
+                                            <div class="form-group m-0 h-100 d-flex flex-column justify-content-center align-items-center">
+                                                <label>
+                                                    {{translate('messages.icon')}}
+                                                    <small class="text-danger">* ( {{translate('messages.ratio')}} 1:1)</small>
+                                                </label>
+                                                <label class="text-center my-auto position-relative">
+                                                    <img class="img--176 h-unset aspect-ratio-1 image--border" id="viewer" data-onerror-image="{{asset('public/assets/admin/img/upload-img.png')}}" src="{{\App\CentralLogics\Helpers::onerror_image_helper($module['icon'], asset('storage/app/public/module/').'/'.$module['icon'], asset('public/assets/admin/img/upload-img.png'), 'module/') }}"
+                                                    alt="image" />
+                                                    <div class="icon-file-group">
+                                                        <div class="icon-file">
+                                                            <input type="file" name="icon" id="customFileEg1" class="custom-file-input" accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
+                                                            <i class="tio-edit"></i>
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group m-0 h-100 d-flex flex-column justify-content-center align-items-center">
+                                                <label>
+                                                    {{translate('messages.thumbnail')}}
+                                                    <small class="text-danger">* ( {{translate('messages.ratio')}} 1:1)</small>
+                                                </label>
+                                                <label class="text-center my-auto position-relative">
+                                                    <img class="img--176 h-unset aspect-ratio-1 image--border" id="viewer2" data-onerror-image="{{asset('public/assets/admin/img/upload-img.png')}}" src="{{\App\CentralLogics\Helpers::onerror_image_helper($module['thumbnail'], asset('storage/app/public/module/').'/'.$module['thumbnail'], asset('public/assets/admin/img/upload-img.png'), 'module/') }}"
+                                                    alt="image" />
+                                                    <div class="icon-file-group">
+                                                        <div class="icon-file">
+                                                            <input type="file" name="thumbnail" id="customFileEg2" class="custom-file-input" accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
+                                                            <i class="tio-edit"></i>
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="btn--container justify-content-end mt-3">
+                <button type="reset" id="reset_btn" class="btn btn--reset">{{translate('messages.reset')}}</button>
+                <button type="submit" class="btn btn--primary">{{translate('messages.Save_changes')}}</button>
+            </div>
+        </form>
             <!-- End Table -->
-        </div>
+    </div>
     </div>
 
 @endsection
@@ -239,8 +263,12 @@
         });
 
         $('#reset_btn').click(function(){
-            $('#viewer').attr('src','{{asset('storage/app/public/module/'.$module['icon'])}}');
-            $('#viewer2').attr('src','{{asset('storage/app/public/module/'.$module['thumbnail'])}}');
+            $('.ckeditor').each(function() {
+                CKEDITOR.instances[$(this).attr('id')].setData($(this).data('value'));
+            });
+
+            $('#viewer').attr('src','{{\App\CentralLogics\Helpers::onerror_image_helper($module['icon'], asset('storage/app/public/module/').'/'.$module['icon'], asset('public/assets/admin/img/upload-img.png'), 'module/') }}');
+            $('#viewer2').attr('src','{{\App\CentralLogics\Helpers::onerror_image_helper($module['thumbnail'], asset('storage/app/public/module/').'/'.$module['thumbnail'], asset('public/assets/admin/img/upload-img.png'), 'module/') }}');
         })
 </script>
 @endpush

@@ -35,6 +35,7 @@ class CustomRoleController extends BaseController
     private function getAddView(): View
     {
         $roles = $this->roleRepo->getListWhere(
+            searchValue: request()?->search,
             dataLimit: config('default_pagination')
         );
         $language = getWebConfig('language');

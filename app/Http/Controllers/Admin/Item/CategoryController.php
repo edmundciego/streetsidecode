@@ -78,7 +78,7 @@ class CategoryController extends BaseController
             )
         );
         $this->translationRepo->addByModel(request: $request, model: $category, modelPath: 'App\Models\Category', attribute: 'name');
-        Toastr::success(translate('messages.category_added_successfully'));
+        Toastr::success( $request['position'] == 0 ?    translate('messages.category_added_successfully') : translate('messages.Sub_category_added_successfully'));
         return back();
     }
 
@@ -109,8 +109,8 @@ class CategoryController extends BaseController
         $mainCategory = $this->categoryRepo->getFirstWhere(params: ['id' => $id]);
         $category = $this->categoryRepo->update(id: $id, data: $this->categoryService->getUpdateData(request: $request, object: $mainCategory));
         $this->translationRepo->updateByModel(request: $request, model: $category, modelPath: 'App\Models\Category', attribute: 'name');
-        Toastr::success(translate('messages.category_updated_successfully'));
-        return back();
+        Toastr::success( $category['position'] == 0 ?    translate('messages.category_updated_successfully') : translate('messages.Sub_category_updated_successfully'));
+        return redirect()->route('admin.category.add',['position' => $mainCategory->position]);
     }
 
     public function delete(Request $request): RedirectResponse

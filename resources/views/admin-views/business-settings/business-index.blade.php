@@ -37,7 +37,7 @@
                     </label>
                 </div>
                 <div class="mt-2">
-                    {{ translate('messages.maintenance_txt') }}
+                    {{ translate('messages.By_turning_the_‘Maintenance_Mode’_ON,_all_your_apps_and_customer_website_will_be_disabled_temporarily._Only_the_Admin_Panel,_Admin_Landing_Page_&_Store_Panel_will_be_functional.') }}
                 </div>
             </div>
         </div>
@@ -352,7 +352,7 @@
                                         </div>
                                         <div class="col-sm-6">
                                             @php($default_location = \App\Models\BusinessSetting::where('key', 'default_location')->first())
-                                            @php($default_location = $default_location->value ? json_decode($default_location->value, true) : 0)
+                                            @php($default_location = $default_location?->value ? json_decode($default_location->value, true) : 0)
                                             <div class="form-group mb-0">
                                                 <label class="form-label text-capitalize"
                                                     for="latitude">{{ translate('messages.latitude') }}<span
@@ -382,48 +382,69 @@
                                         </div>
                                     </div>
                                     <div class="d-flex __gap-12px mt-4">
-                                        <label class="__custom-upload-img mr-lg-5">
+                                        <div class="__custom-upload-img mr-lg-5">
                                             @php($logo = \App\Models\BusinessSetting::where('key', 'logo')->first())
                                             @php($logo = $logo->value ?? '')
                                             <label class="form-label">
                                                 {{ translate('logo') }} <span class="text--primary">( {{ translate('3:1') }} )</span>
                                             </label>
-                                            <div class="text-center">
-                                                <img class="img--vertical onerror-image" id="viewer"
+                                            <label class="text-center position-relative">
+                                                <img class="img--vertical onerror-image image--border" id="viewer"
                                                     data-onerror-image="{{ asset('public/assets/admin/img/upload-img.png') }}"
                                                     src="{{ \App\CentralLogics\Helpers::onerror_image_helper($logo, asset('storage/app/public/business/').'/'.$logo, asset('public/assets/admin/img/upload-img.png'),'business/') }}"
                                                     alt="logo image" />
-                                            </div>
-                                            <input type="file" name="logo" id="customFileEg1"
-                                                class="custom-file-input"
-                                                accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
-                                        </label>
+                                                <div class="icon-file-group">
+                                                    <div class="icon-file">
+                                                        <input type="file" name="logo" id="customFileEg1"
+                                                            class="custom-file-input"
+                                                            accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
+                                                            <i class="tio-edit"></i>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
 
-                                        <label class="__custom-upload-img">
+                                        <div class="__custom-upload-img">
                                             @php($icon = \App\Models\BusinessSetting::where('key', 'icon')->first())
                                             @php($icon = $icon->value ?? '')
                                             <label class="form-label">
                                                 {{ translate('Favicon') }}  <span class="text--primary">( {{ translate('1:1') }} )</span>
                                             </label>
-
-
-                                            <div class="text-center">
-                                                <img class="img--110 onerror-image" id="iconViewer"
+                                            <label class="text-center position-relative">
+                                                <img class="img--133 onerror-image image--border" id="iconViewer"
                                                     data-onerror-image="{{ asset('public/assets/admin/img/upload-img.png') }}"
                                                     src="{{ \App\CentralLogics\Helpers::onerror_image_helper($icon, asset('storage/app/public/business/').'/'.$icon, asset('public/assets/admin/img/upload-img.png') , 'business/')}}"
                                                     alt="Fav icon" />
-                                            </div>
-                                            <input type="file" name="icon" id="favIconUpload"
-                                                class="custom-file-input"
-                                                accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
-                                        </label>
+                                                <div class="icon-file-group">
+                                                    <div class="icon-file">
+                                                        <input type="file" name="icon" id="favIconUpload"
+                                                            class="custom-file-input"
+                                                            accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
+                                                            <i class="tio-edit"></i>
+                                                    </div>
+                                                    <button class="btn action-btn btn-outline-danger">
+                                                        <i class="tio-delete-outlined"></i>
+                                                    </button>
+                                                </div>
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="mt-md-4">
-
-                                        <input id="pac-input" class="controls rounded" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('messages.search_your_location_here') }}" type="text" placeholder="{{ translate('messages.search_here') }}" />
-                                        <div id="location_map_canvas" class="overflow-hidden rounded height-285px"></div>
+                                    <div>
+                                        <label class="form-label">&nbsp;</label>
+                                        <div class="p-3 rounded border border-success">
+                                            <div class="d-flex mb-3 fs-12">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V11H13V17ZM13 9H11V7H13V9Z" fill="#039D55"/>
+                                                </svg>
+                                                <div class="w-0 flex-grow pl-2">
+                                                    {{ translate('clicking_on_the_map_will_set_Latitude_and_Longitude_automatically') }}
+                                                </div>
+                                            </div>
+                                            <input id="pac-input" class="controls rounded" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('messages.search_your_location_here') }}" type="text" placeholder="{{ translate('messages.search_here') }}" />
+                                            <div id="location_map_canvas" class="overflow-hidden rounded height-285px"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -873,28 +894,6 @@
                                     </div>
                                 </div>
                                 <div class="col-sm-6 col-lg-4">
-                                    @php($minimum_shipping_charge = \App\Models\BusinessSetting::where('key', 'minimum_shipping_charge')->first())
-                                    <div class="form-group mb-0">
-                                        <label class="form-label text-capitalize"
-                                            for="minimum_shipping_charge">{{ translate('messages.minimum_shipping_charge') }}</label>
-                                        <input type="number" name="minimum_shipping_charge" class="form-control"
-                                            id="minimum_shipping_charge" min="0" step=".01"  placeholder="{{ translate('messages.Ex:_10') }}"
-                                            value="{{ $minimum_shipping_charge ? $minimum_shipping_charge->value : 0 }}"
-                                            required>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-4">
-                                    @php($per_km_shipping_charge = \App\Models\BusinessSetting::where('key', 'per_km_shipping_charge')->first())
-                                    <div class="form-group mb-0">
-                                        <label class="form-label text-capitalize"
-                                            for="per_km_shipping_charge">{{ translate('messages.per_km_shipping_charge') }}</label>
-                                        <input type="number" name="per_km_shipping_charge" class="form-control"
-                                            id="per_km_shipping_charge" min="0" step=".01"  placeholder="{{ translate('messages.Ex:_100') }}"
-                                            value="{{ $per_km_shipping_charge ? $per_km_shipping_charge->value : 0 }}"
-                                            required>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-4">
                                     @php($vnv = \App\Models\BusinessSetting::where('key', 'toggle_veg_non_veg')->first())
                                     @php($vnv = $vnv ? $vnv->value : 0)
                                     <div class="form-group mb-0">
@@ -1034,151 +1033,6 @@
                                     </div>
                                 </div>
                                 <div class="col-sm-6 col-lg-4">
-                                    @php($partial_payment = \App\Models\BusinessSetting::where('key', 'partial_payment_status')->first())
-                                    @php($partial_payment = $partial_payment ? $partial_payment->value : 0)
-                                    <div class="form-group mb-0">
-                                        <label
-                                            class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
-                                            <span class="pr-1 d-flex align-items-center switch--label">
-                                                <span class="line--limit-1">
-                                                    {{ translate('messages.partial_payment') }}
-                                                </span>
-                                                <span class="form-label-secondary text-danger d-flex"
-                                                    data-toggle="tooltip" data-placement="right"
-                                                    data-original-title="{{ translate('messages.If_enabled,_customers_can_make_partial_payments._For_example,_a_customer_can_pay_$20_initially_out_of_their_$50_payment_&_use_other_payment_methods_for_the_rest._Partial_payments_must_be_made_through_their_wallets.')}}"><img
-                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
-                                                        alt="{{ translate('messages.customer_varification_toggle') }}"> *
-                                                </span>
-                                            </span>
-                                            <input type="checkbox"
-                                                   data-id="partial_payment"
-                                                   data-type="toggle"
-                                                   data-image-on="{{ asset('/public/assets/admin/img/modal/schedule-on.png') }}"
-                                                   data-image-off="{{ asset('/public/assets/admin/img/modal/schedule-off.png') }}"
-                                                   data-title-on="{{ translate('messages.Want_to_enable') }} <strong>{{ translate('messages.partial_payment_?') }}</strong>"
-                                                   data-title-off="{{ translate('messages.Want_to_disable') }} <strong>{{ translate('messages.partial_payment_?') }}</strong>"
-                                                   data-text-on="<p>{{ translate('messages.If_you_enable_this,_customers_can_choose_partial_payment_during_checkout.') }}</p>"
-                                                   data-text-off="<p>{{ translate('messages.If_you_disable_this,_the_partial_payment_feature_will_be_hidden.') }}</p>"
-                                                   class="status toggle-switch-input dynamic-checkbox-toggle"
-                                                   value="1"
-                                                name="partial_payment_status" id="partial_payment"
-                                                {{ $partial_payment == 1 ? 'checked' : '' }}>
-                                            <span class="toggle-switch-label text">
-                                                <span class="toggle-switch-indicator"></span>
-                                            </span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-4">
-                                    @php($partial_payment_method = \App\Models\BusinessSetting::where('key', 'partial_payment_method')->first())
-                                    <div class="form-group mb-0">
-                                        <label class="input-label text-capitalize d-flex alig-items-center"><span
-                                            class="line--limit-1">{{ translate('Can_Pay_the_Rest_Amount_using') }}
-                                        <span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('messages.Set_the_method(s)_that_customers_can_pay_the_remainder_after_partial_payment.') }}" alt="">
-                                            <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
-                                        </span>
-                                        </span>
-                                    </label>
-                                        <div class="resturant-type-group border">
-                                            <label class="form-check form--check mr-2 mr-md-4">
-                                                <input class="form-check-input" type="radio" value="cod" name="partial_payment_method" {{ $partial_payment_method ? ($partial_payment_method->value == 'cod' ? 'checked' : '') : '' }}>
-                                                <span class="form-check-label">
-                                                    {{translate('cod')}}
-                                                </span>
-                                            </label>
-                                            <label class="form-check form--check mr-2 mr-md-4">
-                                                <input class="form-check-input" type="radio" value="digital_payment" name="partial_payment_method" {{ $partial_payment_method ? ($partial_payment_method->value == 'digital_payment' ? 'checked' : '') : '' }}>
-                                                <span class="form-check-label">
-                                                    {{translate('digital_payment')}}
-                                                </span>
-                                            </label>
-                                            <label class="form-check form--check mr-2 mr-md-4">
-                                                <input class="form-check-input" type="radio" value="both" name="partial_payment_method" {{ $partial_payment_method ? ($partial_payment_method->value == 'both' ? 'checked' : '') : '' }}>
-                                                <span class="form-check-label">
-                                                    {{translate('both')}}
-                                                </span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-4">
-                                    @php($additional_charge_status = \App\Models\BusinessSetting::where('key', 'additional_charge_status')->first())
-                                    @php($additional_charge_status = $additional_charge_status ? $additional_charge_status->value : 0)
-                                    <div class="form-group mb-0">
-                                        <label
-                                            class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
-                                            <span class="pr-1 d-flex align-items-center switch--label">
-                                                <span class="line--limit-1">
-                                                    {{translate('messages.additional_charge') }}
-                                                </span>
-                                                <span class="form-label-secondary text-danger d-flex"
-                                                    data-toggle="tooltip" data-placement="right"
-                                                    data-original-title="{{ translate('messages.If_enabled,_customers_need_to_pay_an_extra_charge_while_checking_out_orders.')}}"><img
-                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
-                                                        alt="{{ translate('messages.customer_varification_toggle') }}"> *
-                                                </span>
-                                            </span>
-                                            <input type="checkbox"
-                                                   data-id="additional_charge_status"
-                                                   data-type="toggle"
-                                                   data-image-on="{{ asset('/public/assets/admin/img/modal/dm-tips-on.png') }}"
-                                                   data-image-off="{{ asset('/public/assets/admin/img/modal/dm-tips-off.png') }}"
-                                                   data-title-on="<strong>{{ translate('messages.Want_to_enable_additional_charge?') }}</strong>"
-                                                   data-title-off="<strong>{{ translate('messages.Want_to_disable_additional_charge?') }}</strong>"
-                                                   data-text-on="<p>{{ translate('messages.If_you_enable_this,_additional_charge_will_be_added_with_order_amount,_it_will_be_added_in_admin_wallet') }}</p>"
-                                                   data-text-off="<p>{{ translate('messages.If_you_disable_this,_additional_charge_will_not_be_added_with_order_amount.') }}</p>"
-                                                   class="status toggle-switch-input dynamic-checkbox-toggle"
-                                                   value="1"
-                                                name="additional_charge_status" id="additional_charge_status"
-                                                {{ $additional_charge_status == 1 ? 'checked' : '' }}>
-                                            <span class="toggle-switch-label text">
-                                                <span class="toggle-switch-indicator"></span>
-                                            </span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-4">
-                                    @php($additional_charge_name = \App\Models\BusinessSetting::where('key', 'additional_charge_name')->first())
-                                    <div class="form-group mb-0">
-                                        <label class="form-label d-flex justify-content-between text-capitalize mb-1"
-                                            for="additional_charge_name">
-                                            <span class="line--limit-1">{{ translate('messages.additional_charge_name') }}
-                                                <small
-                                                class="text-danger"><span class="form-label-secondary"
-                                                    data-toggle="tooltip" data-placement="right"
-                                                    data-original-title="{{ translate('messages.Set_a_name_for_the_additional_charge,_e.g._“Processing_Fee”.') }}"><img
-                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
-                                                        alt="{{ translate('messages.free_over_delivery_message') }}"></span>
-                                                *</small></span>
-                                        </label>
-
-                                        <input type="text" name="additional_charge_name" class="form-control"
-                                            id="additional_charge_name"  placeholder="{{ translate('messages.Ex:_Processing_Fee') }}"
-                                            value="{{ $additional_charge_name ? $additional_charge_name->value : '' }}" {{ isset($additional_charge_status) ? '' : 'readonly' }} required>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-4">
-                                    @php($additional_charge = \App\Models\BusinessSetting::where('key', 'additional_charge')->first())
-                                    <div class="form-group mb-0">
-                                        <label class="form-label d-flex justify-content-between text-capitalize mb-1"
-                                            for="additional_charge">
-                                            <span class="line--limit-1">{{ translate('messages.charge_amount') }}
-                                                ({{ \App\CentralLogics\Helpers::currency_symbol() }}) <small
-                                                class="text-danger"><span class="form-label-secondary"
-                                                    data-toggle="tooltip" data-placement="right"
-                                                    data-original-title="{{ translate('messages.Set_the_value_(amount)_customers_need_to_pay_as_additional_charge.') }}"><img
-                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
-                                                        alt="{{ translate('messages.free_over_delivery_message') }}"></span>
-                                                *</small></span>
-                                        </label>
-
-                                        <input type="number" name="additional_charge" class="form-control"
-                                            id="additional_charge"  placeholder="{{ translate('messages.Ex:_10') }}"
-                                            value="{{ $additional_charge ? $additional_charge->value : 0 }}"
-                                            min="0" step=".01" {{ isset($additional_charge_status) ? '' : 'readonly' }}>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-4">
                                     @php($guest_checkout_status = \App\Models\BusinessSetting::where('key', 'guest_checkout_status')->first())
                                     @php($guest_checkout_status = $guest_checkout_status ? $guest_checkout_status->value : 0)
                                     <div class="form-group mb-0">
@@ -1215,6 +1069,200 @@
                                     </div>
                                 </div>
 
+                            </div>
+                            <div class="__bg-F8F9FC-card p-0 mt-4">
+                                <div class="border-bottom p-3">
+                                    <h4 class="card-title m-0 text--title">{{translate('Additional Charge')}}</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-sm-6 col-lg-4">
+                                            @php($additional_charge_status = \App\Models\BusinessSetting::where('key', 'additional_charge_status')->first())
+                                            @php($additional_charge_status = $additional_charge_status ? $additional_charge_status->value : 0)
+                                            <div class="form-group mb-0">
+                                                <label
+                                                    class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
+                                                    <span class="pr-1 d-flex align-items-center switch--label">
+                                                        <span class="line--limit-1">
+                                                            {{translate('messages.additional_charge') }}
+                                                        </span>
+                                                        <span class="form-label-secondary text-danger d-flex"
+                                                            data-toggle="tooltip" data-placement="right"
+                                                            data-original-title="{{ translate('messages.If_enabled,_customers_need_to_pay_an_extra_charge_while_checking_out_orders.')}}"><img
+                                                                src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
+                                                                alt="{{ translate('messages.customer_varification_toggle') }}"> *
+                                                        </span>
+                                                    </span>
+                                                    <input type="checkbox"
+                                                        data-id="additional_charge_status"
+                                                        data-type="toggle"
+                                                        data-image-on="{{ asset('/public/assets/admin/img/modal/dm-tips-on.png') }}"
+                                                        data-image-off="{{ asset('/public/assets/admin/img/modal/dm-tips-off.png') }}"
+                                                        data-title-on="<strong>{{ translate('messages.Want_to_enable_additional_charge?') }}</strong>"
+                                                        data-title-off="<strong>{{ translate('messages.Want_to_disable_additional_charge?') }}</strong>"
+                                                        data-text-on="<p>{{ translate('messages.If_you_enable_this,_additional_charge_will_be_added_with_order_amount,_it_will_be_added_in_admin_wallet') }}</p>"
+                                                        data-text-off="<p>{{ translate('messages.If_you_disable_this,_additional_charge_will_not_be_added_with_order_amount.') }}</p>"
+                                                        class="status toggle-switch-input dynamic-checkbox-toggle"
+                                                        value="1"
+                                                        name="additional_charge_status" id="additional_charge_status"
+                                                        {{ $additional_charge_status == 1 ? 'checked' : '' }}>
+                                                    <span class="toggle-switch-label text">
+                                                        <span class="toggle-switch-indicator"></span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 col-lg-4">
+                                            @php($additional_charge_name = \App\Models\BusinessSetting::where('key', 'additional_charge_name')->first())
+                                            <div class="form-group mb-0">
+                                                <label class="form-label d-flex justify-content-between text-capitalize mb-1"
+                                                    for="additional_charge_name">
+                                                    <span class="line--limit-1">{{ translate('messages.additional_charge_name') }}
+                                                        <small
+                                                        class="text-danger"><span class="form-label-secondary"
+                                                            data-toggle="tooltip" data-placement="right"
+                                                            data-original-title="{{ translate('messages.Set_a_name_for_the_additional_charge,_e.g._“Processing_Fee”.') }}"><img
+                                                                src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
+                                                                alt="{{ translate('messages.free_over_delivery_message') }}"></span>
+                                                        *</small></span>
+                                                </label>
+
+                                                <input type="text" name="additional_charge_name" class="form-control"
+                                                    id="additional_charge_name"  placeholder="{{ translate('messages.Ex:_Processing_Fee') }}"
+                                                    value="{{ $additional_charge_name ? $additional_charge_name->value : '' }}" {{ isset($additional_charge_status) ? '' : 'readonly' }} required>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 col-lg-4">
+                                            @php($additional_charge = \App\Models\BusinessSetting::where('key', 'additional_charge')->first())
+                                            <div class="form-group mb-0">
+                                                <label class="form-label d-flex justify-content-between text-capitalize mb-1"
+                                                    for="additional_charge">
+                                                    <span class="line--limit-1">{{ translate('messages.charge_amount') }}
+                                                        ({{ \App\CentralLogics\Helpers::currency_symbol() }}) <small
+                                                        class="text-danger"><span class="form-label-secondary"
+                                                            data-toggle="tooltip" data-placement="right"
+                                                            data-original-title="{{ translate('messages.Set_the_value_(amount)_customers_need_to_pay_as_additional_charge.') }}"><img
+                                                                src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
+                                                                alt="{{ translate('messages.free_over_delivery_message') }}"></span>
+                                                        *</small></span>
+                                                </label>
+
+                                                <input type="number" name="additional_charge" class="form-control"
+                                                    id="additional_charge"  placeholder="{{ translate('messages.Ex:_10') }}"
+                                                    value="{{ $additional_charge ? $additional_charge->value : 0 }}"
+                                                    min="0" step=".01" {{ isset($additional_charge_status) ? '' : 'readonly' }}>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="__bg-F8F9FC-card p-0 mt-4">
+                                <div class="border-bottom p-3">
+                                    <h4 class="card-title m-0 text--title">{{translate('Payment')}}</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-sm-6 col-lg-4">
+                                            @php($partial_payment = \App\Models\BusinessSetting::where('key', 'partial_payment_status')->first())
+                                            @php($partial_payment = $partial_payment ? $partial_payment->value : 0)
+                                            <div class="form-group mb-0">
+                                                <label
+                                                    class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
+                                                    <span class="pr-1 d-flex align-items-center switch--label">
+                                                        <span class="line--limit-1">
+                                                            {{ translate('messages.partial_payment') }}
+                                                        </span>
+                                                        <span class="form-label-secondary text-danger d-flex"
+                                                            data-toggle="tooltip" data-placement="right"
+                                                            data-original-title="{{ translate('messages.If_enabled,_customers_can_make_partial_payments._For_example,_a_customer_can_pay_$20_initially_out_of_their_$50_payment_&_use_other_payment_methods_for_the_rest._Partial_payments_must_be_made_through_their_wallets.')}}"><img
+                                                                src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
+                                                                alt="{{ translate('messages.customer_varification_toggle') }}"> *
+                                                        </span>
+                                                    </span>
+                                                    <input type="checkbox"
+                                                        data-id="partial_payment"
+                                                        data-type="toggle"
+                                                        data-image-on="{{ asset('/public/assets/admin/img/modal/schedule-on.png') }}"
+                                                        data-image-off="{{ asset('/public/assets/admin/img/modal/schedule-off.png') }}"
+                                                        data-title-on="{{ translate('messages.Want_to_enable') }} <strong>{{ translate('messages.partial_payment_?') }}</strong>"
+                                                        data-title-off="{{ translate('messages.Want_to_disable') }} <strong>{{ translate('messages.partial_payment_?') }}</strong>"
+                                                        data-text-on="<p>{{ translate('messages.If_you_enable_this,_customers_can_choose_partial_payment_during_checkout.') }}</p>"
+                                                        data-text-off="<p>{{ translate('messages.If_you_disable_this,_the_partial_payment_feature_will_be_hidden.') }}</p>"
+                                                        class="status toggle-switch-input dynamic-checkbox-toggle"
+                                                        value="1"
+                                                        name="partial_payment_status" id="partial_payment"
+                                                        {{ $partial_payment == 1 ? 'checked' : '' }}>
+                                                    <span class="toggle-switch-label text">
+                                                        <span class="toggle-switch-indicator"></span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 col-lg-4">
+                                            @php($partial_payment_method = \App\Models\BusinessSetting::where('key', 'partial_payment_method')->first())
+                                            <div class="form-group mb-0">
+                                                <label class="input-label text-capitalize d-flex alig-items-center"><span
+                                                    class="line--limit-1">{{ translate('Can_Pay_the_Rest_Amount_using') }}
+                                                <span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('messages.Set_the_method(s)_that_customers_can_pay_the_remainder_after_partial_payment.') }}" alt="">
+                                                    <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
+                                                </span>
+                                                </span>
+                                            </label>
+                                                <div class="resturant-type-group border bg-white">
+                                                    <label class="form-check form--check">
+                                                        <input class="form-check-input" type="radio" value="cod" name="partial_payment_method" {{ $partial_payment_method ? ($partial_payment_method->value == 'cod' ? 'checked' : '') : '' }}>
+                                                        <span class="form-check-label">
+                                                            {{translate('cod')}}
+                                                        </span>
+                                                    </label>
+                                                    <label class="form-check form--check">
+                                                        <input class="form-check-input" type="radio" value="digital_payment" name="partial_payment_method" {{ $partial_payment_method ? ($partial_payment_method->value == 'digital_payment' ? 'checked' : '') : '' }}>
+                                                        <span class="form-check-label">
+                                                            {{translate('digital_payment')}}
+                                                        </span>
+                                                    </label>
+                                                    <label class="form-check form--check">
+                                                        <input class="form-check-input" type="radio" value="both" name="partial_payment_method" {{ $partial_payment_method ? ($partial_payment_method->value == 'both' ? 'checked' : '') : '' }}>
+                                                        <span class="form-check-label">
+                                                            {{translate('both')}}
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="__bg-F8F9FC-card p-0 mt-4">
+                                <div class="border-bottom p-3">
+                                    <h4 class="card-title m-0 text--title">{{translate('Shipping Charge')}}</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-sm-6 col-lg-4">
+                                            @php($minimum_shipping_charge = \App\Models\BusinessSetting::where('key', 'minimum_shipping_charge')->first())
+                                            <div class="form-group mb-0">
+                                                <label class="form-label text-capitalize"
+                                                    for="minimum_shipping_charge">{{ translate('messages.minimum_shipping_charge') }}</label>
+                                                <input type="number" name="minimum_shipping_charge" class="form-control"
+                                                    id="minimum_shipping_charge" min="0" step=".01"  placeholder="{{ translate('messages.Ex:_10') }}"
+                                                    value="{{ $minimum_shipping_charge ? $minimum_shipping_charge->value : 0 }}"
+                                                    required>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 col-lg-4">
+                                            @php($per_km_shipping_charge = \App\Models\BusinessSetting::where('key', 'per_km_shipping_charge')->first())
+                                            <div class="form-group mb-0">
+                                                <label class="form-label text-capitalize"
+                                                    for="per_km_shipping_charge">{{ translate('messages.per_km_shipping_charge') }}</label>
+                                                <input type="number" name="per_km_shipping_charge" class="form-control"
+                                                    id="per_km_shipping_charge" min="0" step=".01"  placeholder="{{ translate('messages.Ex:_100') }}"
+                                                    value="{{ $per_km_shipping_charge ? $per_km_shipping_charge->value : 0 }}"
+                                                    required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="btn--container justify-content-end mt-3">
                                 <button type="reset" class="btn btn--reset">{{ translate('messages.reset') }}</button>
@@ -1344,7 +1392,7 @@
                 }, function(results, status) {
                     if (status == google.maps.GeocoderStatus.OK) {
                         if (results[1]) {
-                            document.getElementById('address').innerHtml = results[1].formatted_address;
+                            document.getElementById('address').value = results[1].formatted_address;
                         }
                     }
                 });

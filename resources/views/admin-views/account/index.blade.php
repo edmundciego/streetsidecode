@@ -2,10 +2,6 @@
 
 @section('title',translate('messages.account_transaction'))
 
-@push('css_or_js')
-
-@endpush
-
 @section('content')
 <div class="content container-fluid">
     <div class="page-header">
@@ -82,21 +78,26 @@
             <div class="card">
                 <div class="card-header py-2 border-0">
                     <div class="search--button-wrapper">
-                        <h5 class="card-title">
+                        <h5 class="card-title d-flex gap-2 align-items-center">
                             <span>
                                 {{ translate('messages.transaction_history')}}
                             </span>
                             <span class="badge badge-soft-secondary" id="itemCount">
-                                ({{ $account_transaction->total() }})
+                                {{ $account_transaction->total() }}
                             </span>
                         </h5>
 
-                        <form class="search-form">
+                        <form class="search-form theme-style">
                             <div class="input-group input--group">
-                                <input id="datatableSearch" name="search" type="search" class="form-control h--40px" placeholder="{{translate('Search By Referance  or Name')}}" value="{{ request()?->search ?? null}}" aria-label="{{translate('messages.search_here')}}">
+                                <input id="datatableSearch" name="search" type="search" class="form-control h--40px" placeholder="{{translate('Ex:_Referance,_Name')}}" value="{{ request()?->search ?? null}}" aria-label="{{translate('messages.search_here')}}">
                                 <button type="submit" class="btn btn--secondary h--40px"><i class="tio-search"></i></button>
                             </div>
                         </form>
+
+                        @if(request()->get('search'))
+                            <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
+                        @endif
+
 
                         <div class="hs-unfold mr-2">
                             <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
@@ -132,7 +133,7 @@
                             class="table table-hover table-borderless table-thead-bordered table-nowrap table-align-middle card-table">
                             <thead class="thead-light">
                                 <tr>
-                                    <th class="border-0">{{translate('sl')}}</th>
+                                    <th class="border-0">{{translate('SL')}}</th>
                                     <th class="border-0">{{ translate('messages.collect_from') }}</th>
                                     <th class="border-0">{{ translate('messages.type') }}</th>
                                     <th class="border-0">{{translate('messages.received_at')}}</th>
@@ -155,17 +156,28 @@
                                         @endif
                                     </td>
                                     <td><label class="text-uppercase">{{translate($at['from_type'])}}</label></td>
-                                    <td>{{$at->created_at->format('Y-m-d '.config('timeformat'))}}</td>
+                                    <td>{{\App\CentralLogics\Helpers::time_date_format($at->created_at)}}</td>
                                     <td><div class="pl-4">
-                                        {{$at['amount']}}
+                                        {{\App\CentralLogics\Helpers::format_currency($at['amount'])}}
                                     </div></td>
-                                    <td><div class="pl-4">
-                                        {{translate($at['ref'])}}
+                                    <td><div title="{{ translate($at['ref']) }}" class="pl-4">
+                                        {{Str::limit(translate($at['ref']),40,'...')}}
+
                                     </div></td>
                                     <td>
-                                        <div class="btn--container justify-content-center">
-                                            <a href="{{route('admin.transactions.account-transaction.view',[$at['id']])}}"
-                                            class="btn action-btn btn--warning btn-outline-warning"><i class="tio-visible"></i>
+                                        <div class="btn--container justify-content-center"> <a href="#"
+                                            data-payment_method="{{ $at->method }}"
+                                            data-ref="{{translate($at['ref'])}}"
+                                            data-amount="{{\App\CentralLogics\Helpers::format_currency($at['amount'])}}"
+                                            data-date="{{\App\CentralLogics\Helpers::time_date_format($at->created_at)}}"
+                                            data-type="{{ $at->from_type == 'deliveryman' ?  translate('DeliveryMan_Info') : translate('Store_Info') }}"
+                                            data-phone="{{ $at->store ?  $at?->store?->phone : $at?->deliveryman?->phone  }}"
+                                            data-address="{{ $at->store ?  $at?->store?->address : $at?->deliveryman?->last_location?->location ?? tralslate('address_not_found') }}"
+                                            data-latitude="{{ $at->store ?  $at?->store?->latitude : $at?->deliveryman?->last_location?->location ?? 0 }}"
+                                            data-longitude="{{ $at->store ?  $at?->store?->longitude : $at?->deliveryman?->last_location?->location ?? 0 }}"
+                                            data-name="{{ $at->store ?  $at?->store?->name : $at?->deliveryman?->f_name.' '.$at?->deliveryman?->l_name }}"
+
+                                            class="btn action-btn btn--warning btn-outline-warning withdraw-info-show" ><i class="tio-visible"></i>
                                             </a>
                                         </div>
                                     </td>
@@ -193,9 +205,87 @@
         </div>
      </div>
 </div>
+
+
+<div class="sidebar-wrap">
+    <div class="withdraw-info-sidebar-overlay"></div>
+    <div class="withdraw-info-sidebar">
+        <div class="d-flex pb-3">
+            <span class="circle bg-light withdraw-info-hide cursor-pointer">
+                <i class="tio-clear"></i>
+            </span>
+        </div>
+
+        <div class="d-flex flex-column align-items-center gap-1 mb-4">
+            <h3 class="mb-3">{{translate('account_Transaction_Information')}}</h3>
+            <div class="d-flex gap-2 align-items-center fs-12">
+                <span>{{translate('method')}}:</span>
+                <span id="payment_method" class="text-dark font-semibold"></span>
+            </div>
+            <div class="d-flex gap-2 align-items-center fs-12">
+                <span>{{translate('amount')}}:</span>
+                <span class="text-dark font-bold" id="amount"> </span>
+            </div>
+            <div class="d-flex gap-2 align-items-center fs-12">
+                <span>{{translate('request_time')}}:</span>
+                <span id="date"></span>
+            </div>
+            <div class="d-flex gap-2 align-items-center fs-12">
+                <span>{{translate('reference')}}:</span>
+                <span id="ref"></span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0 font-medium" id="type"></h6>
+            </div>
+            <div class="card-body">
+                <div class="key-val-list d-flex flex-column gap-2" style="--min-width: 60px">
+                    <div class="key-val-list-item d-flex gap-3">
+                        <span>{{translate('name')}}:</span>
+                        <span id="name"></span>
+                    </div>
+                    <div class="key-val-list-item d-flex gap-3">
+                        <span>{{translate('phone')}}:</span>
+                        <a href="tel:" id="phone" class="text-dark"></a>
+                    </div>
+                    <div class="key-val-list-item d-flex gap-3">
+                        <span>{{translate('address')}}:</span>
+                        <a id="address" target="_blank"></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('script_2')
+<script>
+    "use strict";
+    $('.withdraw-info-hide, .withdraw-info-sidebar-overlay').on('click', function () {
+        $('.withdraw-info-sidebar, .withdraw-info-sidebar-overlay').removeClass('show');
+    });
+    $('.withdraw-info-show').on('click', function () {
+
+        let data = $(this).data();
+        console.log(data)
+            $('.sidebar-wrap #payment_method').text(data.payment_method);
+            $('.sidebar-wrap #amount').text(data.amount);
+            $('.sidebar-wrap #type').text(data.type);
+            $('.sidebar-wrap #date').text(data.date);
+            $('.sidebar-wrap #ref').text(data.ref);
+            $('.sidebar-wrap #name') .text(data.name);
+            $('.sidebar-wrap #phone').text(data.phone).attr('href', 'tel:' + data.phone);
+            $('.sidebar-wrap #address').text(data.address).attr('href', "https://www.google.com/maps/search/?api=1&query=" + data.latitude + "," + data.longitude);
+            // $('#deliverymanReviewModal').modal('show');
+
+            $('.withdraw-info-sidebar, .withdraw-info-sidebar-overlay').addClass('show');
+
+    })
+</script>
+
 <script src="{{asset('public/assets/admin')}}/js/view-pages/account-index.js"></script>
 <script>
     "use strict";
@@ -305,31 +395,6 @@
         });
     });
 
-    $('#search-form').on('submit', function () {
-            var formData = new FormData(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.post({
-                url: '{{route('admin.transactions.account-transaction.search')}}',
-                data: formData,
-                cache: false,
-                contentType: false,
-                processData: false,
-                beforeSend: function () {
-                    $('#loading').show();
-                },
-                success: function (data) {
-                    $('#set-rows').html(data.view);
-                    $('#itemCount').html(data.total);
-                    $('.page-area').hide();
-                },
-                complete: function () {
-                    $('#loading').hide();
-                },
-            });
-        });
+
 </script>
 @endpush

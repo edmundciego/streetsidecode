@@ -20,21 +20,51 @@
         </div>
         <div class="card mt-2 rest-part">
             <div class="card-body">
-                <div class="export-steps">
-                    <div class="export-steps-item">
-                        <div class="inner">
-                            <h5>{{translate('STEP 1')}}</h5>
-                            <p>
-                                {{translate('Select Data Type')}}
-                            </p>
+                <div class="export-steps-2">
+                    <div class="row g-4">
+                        <div class="col-sm-6 col-lg-4">
+                            <div class="export-steps-item-2 h-100">
+                                <div class="top">
+                                    <div>
+                                        <h3 class="fs-20">{{translate('Step 1')}}</h3>
+                                        <div>
+                                            {{translate('Select Data Type')}}
+                                        </div>
+                                    </div>
+                                    <img src="{{asset('/public/assets/admin/img/bulk-export-1.png')}}" alt="">
+                                </div>
+                                <h4>{{ translate('Instruction') }}</h4>
+                                <ul class="m-0 pl-4">
+                                    <li>
+                                       {{ translate('Select_data_type_in_which_order_you_want_your_data_sorted_while_downloading.') }}
+                                    </li>
+
+
+                                </ul>
+                            </div>
                         </div>
-                    </div>
-                    <div class="export-steps-item">
-                        <div class="inner">
-                            <h5>{{translate('STEP 2')}}</h5>
-                            <p>
-                                {{translate('Select Data Range by Date or ID and Export')}}
-                            </p>
+                        <div class="col-sm-6 col-lg-4">
+                            <div class="export-steps-item-2 h-100">
+                                <div class="top">
+                                    <div>
+                                        <h3 class="fs-20">{{translate('Step 2')}}</h3>
+                                        <div>
+                                            {{translate('Select Data Range by Date or ID and Export')}}
+                                        </div>
+                                    </div>
+                                    <img src="{{asset('/public/assets/admin/img/bulk-export-2.png')}}" alt="">
+                                </div>
+                                <h4>{{ translate('Instruction') }}</h4>
+                                <ul class="m-0 pl-4">
+
+                                    <li>
+                                        {{ translate('The_file_will_be_downloaded_in_.xls_format') }}
+                                    </li>
+                                    <li>
+                                        {{ translate('Click_reset_if_you_want_to_clear_you_changes_and_want_to_download_in_default_sort_wise_data') }}
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -80,7 +110,7 @@
                         </div>
                         <div class="col-12">
                             <div class="btn--container justify-content-end">
-                                <button type="reset" class="btn btn--reset">{{translate('clear')}}</button>
+                                <button type="reset" id="reset-btn" class="btn btn--reset">{{translate('clear')}}</button>
                                 <button type="submit" class="btn btn--primary">{{translate('export')}}</button>
                             </div>
                         </div>
@@ -102,6 +132,11 @@
             $('.id_wise').hide();
             $('.date_wise').hide();
             $('.'+$(this).val()).show();
+        })
+        $('#reset-btn').on('click', function()
+        {
+            $('.id_wise').hide();
+            $('.date_wise').hide();
         })
     });
 </script>

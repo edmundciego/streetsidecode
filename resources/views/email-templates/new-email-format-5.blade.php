@@ -98,11 +98,7 @@ width: 24px;
         <tr>
             <td style="padding:30px 30px 0">
                 <img class="mail-img-2"
-                @if ($data && $data['icon'])
-                src="{{ asset('storage/app/public/email_template/') }}/{{ $data['icon']??'' }}"
-                @else
-                src='{{ asset('/public/assets/admin/img/email-template-img.png') }}'
-                @endif
+                src="{{\App\CentralLogics\Helpers::onerror_image_helper( data_get($data, 'icon'), asset('storage/app/public/email_template/').'/'.data_get($data, 'icon'), asset('public/assets/admin/img/emai_demo_template_2.png'), 'email_template/') }}"
                 id="iconViewer" alt="">
                 <h3 style="font-size:17px;font-weight:500" class="mt-2" id="mail-title">{{ $title?? translate('Main_Title_or_Subject_of_the_Mail') }}</h3>
 
@@ -131,7 +127,9 @@ width: 24px;
                 <span class="d-block" style="margin-bottom:20px">{{ $company_name }}</span>
 
                 @if ($data?->logo)
-                <img style="width:100px;display:block;margin:10px auto" src="{{ asset('storage/app/public/email_template/') }}/{{ $data['logo']??'' }}" alt="public/img">
+                <img style="width:100px;display:block;margin:10px auto"
+                 src="{{\App\CentralLogics\Helpers::onerror_image_helper( data_get($data, 'logo'), asset('storage/app/public/email_template/').'/'.data_get($data, 'logo'), asset('public/assets/admin/img/emai_demo_template_2.png'), 'email_template/') }}"
+                 alt="public/img">
                 @else
                 @php($store_logo = \App\Models\BusinessSetting::where(['key' => 'logo'])->first()->value)
                 <img style="width:100px;display:block;margin:10px auto" src='{{ asset('storage/app/public/business/' . $store_logo) }}'alt="public/img">

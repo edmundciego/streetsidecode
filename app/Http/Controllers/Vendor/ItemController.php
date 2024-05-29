@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Vendor;
 
+use App\Models\Brand;
 use DateTime;
 use Carbon\Carbon;
 use App\Models\Tag;
@@ -17,10 +18,12 @@ use App\Models\FlashSaleItem;
 use App\CentralLogics\Helpers;
 use App\Models\BusinessSetting;
 use App\Models\CommonCondition;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use App\CentralLogics\ProductLogic;
 use App\Models\PharmacyItemDetails;
 use App\Http\Controllers\Controller;
+use App\Models\EcommerceItemDetails;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\File;
 use Rap2hpoutre\FastExcel\FastExcel;
@@ -38,8 +41,9 @@ class ItemController extends Controller
         }
         $categories = Category::where(['position' => 0])->module(Helpers::get_store_data()->module_id)->get();
         $conditions = CommonCondition::all();
+        $brands = Brand::all();
         $module_data = config('module.'. Helpers::get_store_data()->module->module_type);
-        return view('vendor-views.product.index', compact('categories','module_data','conditions'));
+        return view('vendor-views.product.index', compact('categories','module_data','conditions','brands'));
     }
 
     public function store(Request $request)
@@ -57,7 +61,11 @@ class ItemController extends Controller
             'name.0' => 'required',
             'name.*' => 'max:191',
             'category_id' => 'required',
-            'image' => 'required_unless:product_gellary,1',
+            'image' => [
+                Rule::requiredIf(function ()use ($request) {
+                    return (Helpers::get_store_data()->module->module_type != 'food' && $request?->product_gellary == null )  ;
+                })
+            ],
             'price' => 'required|numeric|between:.01,999999999999.99',
             'description.*' => 'max:1000',
             'description.0' => 'required',
@@ -273,6 +281,7 @@ class ItemController extends Controller
         if($module_type == 'grocery'){
             $food->organic = $request->organic ?? 0;
         }
+        $food->is_halal = $request->is_halal ?? 0;
         $food->save();
         $food->tags()->sync($tag_ids);
 
@@ -281,6 +290,14 @@ class ItemController extends Controller
             $item_details->item_id = $food->id;
             $item_details->common_condition_id = $request->condition_id;
             $item_details->is_basic = $request->basic ?? 0;
+            $item_details->is_prescription_required = $request->is_prescription_required ?? 0;
+            $item_details->save();
+        }
+
+        if ($module_type == 'ecommerce') {
+            $item_details = new EcommerceItemDetails();
+            $item_details->item_id = $food->id;
+            $item_details->brand_id = $request->brand_id;
             $item_details->save();
         }
 
@@ -331,7 +348,8 @@ class ItemController extends Controller
         $categories = Category::where(['parent_id' => 0])->module(Helpers::get_store_data()->module_id)->get();
         $module_data = config('module.'. Helpers::get_store_data()->module->module_type);
         $conditions = CommonCondition::all();
-        return view('vendor-views.product.edit', compact('product', 'product_category', 'categories','module_data', 'temp_product','conditions'));
+        $brands = Brand::all();
+        return view('vendor-views.product.edit', compact('product', 'product_category', 'categories','module_data', 'temp_product','conditions','brands'));
     }
 
     public function status(Request $request)
@@ -545,6 +563,7 @@ class ItemController extends Controller
         $p->add_ons = $request->has('addon_ids') ? json_encode($request->addon_ids) : json_encode([]);
         $p->stock = $request->current_stock??0;
         $p->organic = $request->organic ?? 0;
+        $p->is_halal = $request->is_halal ?? 0;
 
 
 
@@ -577,6 +596,17 @@ class ItemController extends Controller
                     [
                         'common_condition_id' => $request->condition_id,
                         'is_basic' => $request->basic ?? 0,
+                        'is_prescription_required' => $request->is_prescription_required ?? 0,
+                    ]
+                );
+        }
+
+        if($p->module->module_type == 'ecommerce'){
+            DB::table('ecommerce_item_details')
+                ->updateOrInsert(
+                    ['item_id' => $p->id],
+                    [
+                        'brand_id' => $request->brand_id,
                     ]
                 );
         }
@@ -846,7 +876,7 @@ class ItemController extends Controller
                         'attributes' => $collection['Attributes'] ?($collection['Attributes']==""?json_encode([]):$collection['Attributes']): json_encode([]),
                         'store_id' => Helpers::get_store_id(),
                         'module_id' => Helpers::get_store_data()->module_id,
-                        'choice_options' => json_encode([]),
+                        'choice_options' => $module_type == 'food' ? json_encode([]) : $collection['ChoiceOptions'] ?? json_encode([]),
                         'status' => $collection['Status'] == 'active' ? 1 : 0,
                         'veg' => $collection['Veg'] == 'yes' ? 1 : 0,
                         'recommended' => $collection['Recommended'] == 'yes' ? 1 : 0,
@@ -875,7 +905,7 @@ class ItemController extends Controller
                             'item_id' => $data[$key]['id'],
                             'slug' => $slug,
                             'tag_ids' => json_encode([]),
-                            'choice_options' => json_encode([]),
+                            'choice_options' => $data[$key]['choice_options'],
                             'food_variations' => $data[$key]['food_variations'],
                             'variations' => $data[$key]['variations'],
                             'add_ons' =>  $data[$key]['add_ons'],
@@ -991,6 +1021,7 @@ class ItemController extends Controller
                     'veg' => $collection['Veg'] == 'yes' ? 1 : 0,
                     'recommended' => $collection['Recommended'] == 'yes' ? 1 : 0,
                     'updated_at' => now(),
+                    'choice_options' => $module_type == 'food' ? json_encode([]) : $collection['ChoiceOptions'] ?? json_encode([]),
                 ]);
 
         if ($product_approval_active && ((data_get($product_approval_datas,'Update_anything_in_product_details',null) == 1) || (data_get($product_approval_datas,'Update_product_price',null) == 1) || ( data_get($product_approval_datas,'Update_product_variation',null) == 1)) )  {
@@ -1022,7 +1053,7 @@ class ItemController extends Controller
                             'item_id' => $data[$key]['id'],
                             // 'slug' => null,
                             'tag_ids' => json_encode([]),
-                            'choice_options' => json_encode([]),
+                            'choice_options' => $data[$key]['choice_options'],
 
                             'updated_at' => now()
                         ]);
@@ -1056,7 +1087,7 @@ class ItemController extends Controller
             } else {
                 $chunk_items= array_chunk($data,$chunkSize);
                 foreach($chunk_items as $key=> $chunk_item){
-                    DB::table('items')->upsert($chunk_item,['id','module_id'],['name','description','image','images','category_id','category_ids','unit_id','stock','price','discount','discount_type','available_time_starts','available_time_ends','variations','food_variations','add_ons','attributes','store_id','status','veg','recommended', 'updated_at']);
+                    DB::table('items')->upsert($chunk_item,['id','module_id'],['name','description','image','images','category_id','category_ids','unit_id','stock','price','discount','discount_type','available_time_starts','available_time_ends','variations','food_variations','add_ons','attributes','store_id','status','veg','recommended', 'updated_at','choice_options']);
                 }
             }
 
@@ -1252,7 +1283,8 @@ class ItemController extends Controller
 
         return response()->json([
             'choice_options' => json_encode($choice_options),
-            'variation' => json_encode($variations)
+            'variation' => json_encode($variations),
+            'attributes' => $request->has('attribute_id') ? json_encode($request->attribute_id) : json_encode([])
         ]);
     }
 
@@ -1337,13 +1369,18 @@ class ItemController extends Controller
         $temp_item->maximum_cart_quantity = $data->maximum_cart_quantity;
         $temp_item->veg = $data->veg ?? 0;
         $temp_item->organic = $data->organic ?? 0;
+        $temp_item->is_halal = $request->is_halal ?? 0;
         $temp_item->basic =  $data->basic ?? 0;
         $temp_item->common_condition_id =  $data->common_condition_id;
+        $temp_item->brand_id =  $request->brand_id ?? 0;
         $temp_item->stock =  $data->stock ?? 0;
         $module_type = Helpers::get_store_data()->module->module_type;
         if($module_type=='pharmacy'){
             $temp_item->common_condition_id =  $request->condition_id ?? 0;
             $temp_item->basic =  $request->basic ?? 0;
+        }
+        if($module_type=='ecommerce'){
+            $temp_item->brand_id =  $request->brand_id ?? 0;
         }
 
 
@@ -1416,6 +1453,17 @@ class ItemController extends Controller
                     [
                         'common_condition_id' => $request->condition_id,
                         'is_basic' => $request->basic ?? 0,
+                        'is_prescription_required' => $request->is_prescription_required ?? 0,
+                        'item_id' => null
+                    ]
+                );
+        }
+        if($module_type=='ecommerce'){
+            DB::table('ecommerce_item_details')
+                ->updateOrInsert(
+                    ['temp_product_id' => $temp_item->id],
+                    [
+                        'brand_id' => $request->brand_id,
                         'item_id' => null
                     ]
                 );

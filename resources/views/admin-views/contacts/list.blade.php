@@ -26,17 +26,54 @@
                             <h5 class="card-title">
                                 {{translate('messages.message_lists')}} <span class="badge badge-soft-dark ml-2" id="itemCount">{{$contacts->total()}}</span>
                             </h5>
-                            <form action="javascript:" id="search-form" class="search-form">
-                                <!-- Search -->
-                                @csrf
+                            <form class="search-form">
                                 <div class="input-group input--group">
-                                    <input id="datatableSearch_" type="search" name="search" class="form-control"
-                                            placeholder="{{translate('messages.ex_:_message_name')}}" aria-label="Search" required>
+                                    <input  type="search" name="search" class="form-control"
+                                    placeholder="{{translate('ex_: search_by_name,_email,_or_subject')}}" aria-label="{{translate('messages.search')}}" value="{{request()?->search}}" >
                                     <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
                                 </div>
-                                <!-- End Search -->
                             </form>
+                           @if(request()->get('search'))
+                                <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
+                                @endif
+
+
+                            <!-- Unfold -->
+                            <div class="hs-unfold mr-2">
+                                <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40"
+                                   href="javascript:"
+                                   data-hs-unfold-options='{
+                                                        "target": "#usersExportDropdown",
+                                                        "type": "css-animation"
+                                                    }'>
+                                    <i class="tio-download-to mr-1"></i> {{ translate('messages.export') }}
+                                </a>
+
+                                <div id="usersExportDropdown"
+                                     class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
+                                    <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
+                                    <a id="export-excel" class="dropdown-item"
+                                       href="{{route('admin.users.contact.exportList', ['type'=>'excel',request()->getQueryString()])}}">
+                                        <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                             src="{{ asset('public/assets/admin/svg/components/excel.svg') }}"
+                                             alt="Image Description">
+                                        {{ translate('messages.excel') }}
+                                    </a>
+                                    <a id="export-csv" class="dropdown-item"
+                                       href="{{route('admin.users.contact.exportList', ['type'=>'csv',request()->getQueryString()])}}">
+                                        <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                             src="{{ asset('public/assets/admin/svg/components/placeholder-csv-format.svg') }}"
+                                             alt="Image Description">
+                                        .{{ translate('messages.csv') }}
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- End Unfold -->
+
+
                         </div>
+
+
                     </div>
                     <!-- Table -->
                     <div class="table-responsive datatable-custom">
@@ -107,21 +144,21 @@
                             @endforeach
                             </tbody>
                         </table>
-                        @if(count($contacts) !== 0)
-                        <hr>
-                        @endif
-                        <div class="page-area">
-                            {!! $contacts->links() !!}
-                        </div>
-                        @if(count($contacts) === 0)
-                        <div class="empty--data">
-                            <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
-                            <h5>
-                                {{translate('messages.no_data_found')}}
-                            </h5>
-                        </div>
-                        @endif
                     </div>
+                    @if(count($contacts) !== 0)
+                    <hr>
+                    @endif
+                    <div class="page-area">
+                        {!! $contacts->links() !!}
+                    </div>
+                    @if(count($contacts) === 0)
+                    <div class="empty--data">
+                        <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
+                        <h5>
+                            {{translate('messages.no_data_found')}}
+                        </h5>
+                    </div>
+                    @endif
                 </div>
             </div>
             <!-- End Table -->
@@ -132,35 +169,4 @@
 
 @push('script_2')
     <script src="{{asset('public/assets/admin')}}/js/view-pages/contact-index.js"></script>
-
-    <script>
-        "use strict";
-        $('#search-form').on('submit', function () {
-            var formData = new FormData(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.post({
-                url: '{{route('admin.users.contact.contact-search')}}',
-                data: formData,
-                cache: false,
-                contentType: false,
-                processData: false,
-                beforeSend: function () {
-                    $('#loading').show();
-                },
-                success: function (data) {
-                    console.log(data.view)
-                    $('#set-rows').html(data.view);
-                    $('#itemCount').html(data.count);
-                    $('.page-area').hide();
-                },
-                complete: function () {
-                    $('#loading').hide();
-                },
-            });
-        });
-    </script>
 @endpush

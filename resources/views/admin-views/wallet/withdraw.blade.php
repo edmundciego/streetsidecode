@@ -12,11 +12,10 @@
         <div class="page-header">
             <h1 class="page-header-title mr-3 mb-md-0">
                 <span class="page-header-icon">
-                    <img src="{{asset('public/assets/admin/img/withdraw.png')}}" class="w--26" alt="">
+                    <img src="{{asset('public/assets/admin/img/icons/wallet.png')}}" class="w--26" alt="">
                 </span>
                 <span>
-                    {{ translate('messages.store_withdraw_transaction')}} <span
-                        class="badge badge-soft-dark ml-2" id="itemCount">{{$withdraw_req->total()}}</span>
+                    {{ translate('messages.store_withdraw_transaction')}}
                 </span>
             </h1>
         </div>
@@ -24,21 +23,27 @@
         <div class="card mt-2">
 
             <!-- Header -->
-            <div class="card-header py-2 border-0">
+            <div class="card-header flex-wrap py-2 border-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <h4 class="mb-0">{{ translate('messages.transaction_History')}}</h4>
+                    <span class="badge badge-soft-dark rounded-circle">{{$withdraw_req->total()}}</span>
+                </div>
                 <div class="search--button-wrapper justify-content-end">
-                    <form class="search-form">
-                        {{-- @csrf --}}
-                        <!-- Search -->
+                    <form class="search-form theme-style">
+
                         <div class="input-group input--group">
                             <input id="datatableSearch" name="search" type="search" value="{{ request()?->search ?? null}}" class="form-control h--40px" placeholder="{{translate('ex_:_search_store_name')}}" aria-label="{{translate('messages.search_here')}}">
                             <button type="submit" class="btn btn--secondary h--40px"><i class="tio-search"></i></button>
                         </div>
-                        <!-- End Search -->
+
                     </form>
+                    @if(request()->get('search'))
+                    <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
+                    @endif
+
 
                     <div class="max-sm-flex-1">
-                        <select name="withdraw_status_filter"
-                                class="custom-select h--40px py-0 status-filter">
+                        <select name="withdraw_status_filter" class="custom-select h--40px py-0 status-filter theme-style">
                             <option
                                 value="all" {{session()->has('withdraw_status_filter') && session('withdraw_status_filter') == 'all'?'selected':''}}>
                                 {{translate('messages.all')}}
@@ -96,7 +101,7 @@
                             class="table table-hover table-borderless table-thead-bordered table-nowrap table-align-middle card-table">
                         <thead class="thead-light">
                         <tr>
-                            <th class="border-0">{{translate('sl')}}</th>
+                            <th class="border-0">{{translate('SL')}}</th>
                             <th class="border-0">{{translate('messages.amount')}}</th>
                             <th class="border-0">{{ translate('messages.store') }}</th>
                             <th class="border-0">{{translate('messages.request_time')}}</th>
@@ -108,29 +113,31 @@
                         @foreach($withdraw_req as $k=>$wr)
                             <tr>
                                 <td scope="row">{{$k+$withdraw_req->firstItem()}}</td>
-                                <td>{{$wr['amount']}}</td>
+                                <td>{{\App\CentralLogics\Helpers::format_currency($wr['amount'])}}</td>
                                 <td>
                                     @if($wr->vendor)
-                                    <a class="deco-none"
-                                        href="{{route('admin.store.view',[$wr->vendor['id'],'module_id'=>$wr->vendor->stores[0]->module_id])}}">{{ Str::limit($wr->vendor->stores[0]->name, 20, '...') }}</a>
+                                    <a class="deco-none" title="{{ $wr->vendor->stores[0]->name }}"
+                                        href="{{route('admin.store.view',[$wr->vendor->stores[0]->id,'module_id'=>$wr->vendor->stores[0]->module_id])}}">{{ Str::limit($wr->vendor->stores[0]->name, 20, '...') }}</a>
                                     @else
                                     {{translate('messages.store deleted!') }}
                                     @endif
                                 </td>
-                                <td>{{date('Y-m-d '.config('timeformat'),strtotime($wr->created_at))}}</td>
+                                <td>  {{ \App\CentralLogics\Helpers::time_date_format($wr->created_at) }} </td>
                                 <td>
                                     @if($wr->approved==0)
-                                        <label class="badge badge-primary">{{ translate('messages.pending') }}</label>
+                                        <label class="badge badge-soft-primary">{{ translate('messages.pending') }}</label>
                                     @elseif($wr->approved==1)
-                                        <label class="badge badge-success">{{ translate('messages.approved') }}</label>
+                                        <label class="badge badge-soft-success">{{ translate('messages.approved') }}</label>
                                     @else
-                                        <label class="badge badge-danger">{{ translate('messages.denied') }}</label>
+                                        <label class="badge badge-soft-danger">{{ translate('messages.denied') }}</label>
                                     @endif
                                 </td>
                                 <td>
                                     @if($wr->vendor)
-                                    <a href="{{route('admin.transactions.store.withdraw_view',[$wr['id'],$wr->vendor['id']])}}"
-                                        class="btn action-btn btn--warning btn-outline-warning"><i class="tio-visible-outlined"></i>
+
+                                    <a href="#"
+                                       data-id="{{$wr->id}}"
+                                        class="btn action-btn btn--warning btn-outline-warning withdraw-info-show"><i class="tio-visible-outlined"></i>
                                     </a>
                                     @else
                                     {{translate('messages.store_deleted') }}
@@ -158,11 +165,84 @@
             @endif
         </div>
     </div>
+
+
+    <div class="withdraw-info-sidebar-wrap">
+        <div class="withdraw-info-sidebar-overlay"></div>
+        <div class="withdraw-info-sidebar">
+            <div class="d-flex pb-3">
+                <span class="circle bg-light withdraw-info-hide cursor-pointer">
+                    <i class="tio-clear"></i>
+                </span>
+            </div>
+
+             <div id="data-view">
+
+             </div>
+
+        </div>
+    </div>
 @endsection
 
 @push('script_2')
     <script>
         "use strict";
+        $('.withdraw-info-hide, .withdraw-info-sidebar-overlay').on('click', function () {
+            $('.withdraw-info-sidebar, .withdraw-info-sidebar-overlay').removeClass('show');
+        });
+
+        $(document).on('click', '.withdraw-info-show', function () {
+            let id = $(this).data('id');
+            fetch_data(id)
+        })
+
+
+        $(document).on('click', '.show-approve-view', function () {
+            let id = $(this).data('id');
+            let url = "{{ route('admin.transactions.store.withdraw_status', ['id']) }}";
+            url = url.replace('id', id);
+            let htmlContent = `
+            <form action="${url}" method="POST">
+                    @csrf
+                <div class="mt-5">
+                    <h5 class="font-semibold text-center mb-3">{{translate('approval_note')}} </h5>
+                    <textarea required name="note" id="" class="form-control" rows="6" maxlength="200" placeholder="{{translate('Type_a_note_about_request_approval')}}"></textarea>
+                    <input name="approved" value="1" type="hidden">
+                    <div class="mt-4 d-flex justify-content-center gap-3">
+                        <button type="button"  data-id="${id}" class="btn btn-soft-secondary min-w-100px withdraw-info-show">
+                            <i class="tio-arrow-backward"></i>
+                            {{translate('back')}}
+                        </button>
+                        <button type="submit" class="btn btn-success min-w-100px">{{translate('complete')}}</button>
+                    </div>
+                </div>
+              </form>`
+            $('#data-view').empty().html(htmlContent);
+        });
+
+        $(document).on('click', '.show-deny-view', function () {
+            let id = $(this).data('id');
+            let url = "{{ route('admin.transactions.store.withdraw_status', ['id']) }}";
+            url = url.replace('id', id);
+            let htmlContent = `
+            <form action="${url}" method="POST">
+                    @csrf
+                <div class="mt-5">
+                    <h5 class="font-semibold text-center mb-3">{{translate('denial_note')}} </h5>
+                    <textarea required name="note" id="" class="form-control" rows="6" placeholder="{{translate('Type_a_note_about_request_denial')}}"></textarea>
+                    <input name="approved" value="2" type="hidden">
+                    <div class="mt-4 d-flex justify-content-center gap-3">
+                        <button type="button"  data-id="${id}" class="btn btn-soft-secondary min-w-100px withdraw-info-show">
+                            <i class="tio-arrow-backward"></i>
+                            {{translate('back')}}
+                        </button>
+                        <button type="submit" class="btn btn-success min-w-100px">{{translate('complete')}}</button>
+                    </div>
+                </div>
+              </form>`
+            $('#data-view').empty().html(htmlContent);
+        });
+
         $('.status-filter').on('change',function () {
             let type = $(this).val();
             $.ajaxSetup({
@@ -183,37 +263,32 @@
                     location.reload();
                 },
                 complete: function () {
-                    $('#loading').hide()
+                    // $('#loading').hide()
                 }
             });
         })
 
-        $('#search-form').on('submit', function () {
-            let formData = new FormData(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.post({
-                url: '{{route('admin.transactions.store.withdraw_search')}}',
-                data: formData,
-                cache: false,
-                contentType: false,
-                processData: false,
+        function fetch_data(id) {
+            $.ajax({
+                url: "{{ route('admin.transactions.store.getWithdrawDetails') }}" + '?withdraw_id=' + id,
+                type: "get",
                 beforeSend: function () {
-                    $('#loading').show();
+                    $('#data-view').empty();
+                    $('#loading').show()
                 },
-                success: function (data) {
-                    $('#set-rows').html(data.view);
-                    $('#itemCount').html(data.total);
-                    $('.page-area').hide();
+                success: function(data) {
+                    $('.withdraw-info-sidebar, .withdraw-info-sidebar-overlay').addClass('show');
+                    $("#data-view").append(data.view);
                 },
                 complete: function () {
-                    $('#loading').hide();
-                },
-            });
-        });
+                    $('#loading').hide()
+                }
+            })
+        }
+
+
+
+
     </script>
 @endpush
 

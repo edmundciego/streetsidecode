@@ -23,7 +23,7 @@ class ModuleCheckMiddleware
         foreach ($except as $except) {
             if ($request->fullUrlIs($except) || $request->is($except)) {
                 if(!$request->hasHeader('moduleId')) {
-                    return $next($request);                
+                    return $next($request);
                 }
             }
         }

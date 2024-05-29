@@ -21,7 +21,15 @@
     <div class="card mt-4">
         <div class="p-4 mb-md-3 mx-xl-4 px-md-5">
             <div class="d-flex justify-content-end mb-2">
-				<a style="color:red;" href="https://cutt.ly/PLFZenO" target="_blank">NULLED Web Community</a>
+                <a href="https://help.market.envato.com/hc/en-us/articles/202822600-Where-Is-My-Purchase-Code-"
+                   class="d-flex align-items-center gap-1" target="_blank">
+                    Where to get this information?
+                    <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                          data-bs-title="Purchase code information">
+                                <img src="{{asset('public/assets/installation')}}/assets/img/svg-icons/info.svg" alt=""
+                                     class="svg">
+                            </span>
+                </a>
             </div>
 
             <div class="d-flex align-items-center column-gap-3 flex-wrap">
@@ -50,7 +58,7 @@
                                                 </span>
                                     </label>
                                     <input type="text" id="username" class="form-control" name="username"
-                                           placeholder="Ex: raz0r" required>
+                                           placeholder="Ex: john" required>
                                 </div>
                             </div>
                             <div class="col-md-6">

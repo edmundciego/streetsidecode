@@ -22,6 +22,7 @@ class ItemReviewExport implements  FromView, ShouldAutoSize, WithStyles ,WithHea
 
     public function __construct($data) {
         $this->data = $data;
+
     }
 
     public function view(): View
@@ -105,8 +106,8 @@ class ItemReviewExport implements  FromView, ShouldAutoSize, WithStyles ,WithHea
                     $event->sheet->mergeCells('C2:H2');
 
                     if(isset($this->data['type']) && $this->data['type'] == 'single'){
-                        $event->sheet->mergeCells('B4:B'.$this->data['data']->count() +3);
-                        $event->sheet->mergeCells('E4:E'.$this->data['data']->count() +3);
+                        $event->sheet->mergeCells('B4:B'.$this->data['data']->count() +4);
+                        $event->sheet->mergeCells('E4:E'.$this->data['data']->count() +4);
                     }
 
 

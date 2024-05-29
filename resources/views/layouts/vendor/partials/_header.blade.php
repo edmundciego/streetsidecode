@@ -120,8 +120,8 @@
 
                                 <div class="dropdown-divider"></div>
 
-                                <a class="dropdown-item log-out" href="javascript:" >
-                                    <span class="text-truncate pr-2" title="Sign out">{{translate('messages.sign_out')}}</span>
+                                <a class="dropdown-item log-out" >
+                                    <span class="text-truncate pr-2 log-out" title="Sign out">{{translate('messages.sign_out')}}</span>
                                 </a>
                             </div>
                         </div>
@@ -164,3 +164,24 @@ $val= (string) ($cash_in_hand_overflow_store_amount - (($cash_in_hand_overflow_s
     </div>
 @endif
 
+<script>
+   document.addEventListener('DOMContentLoaded', function () {
+            $(document).on('click', '.log-out', function () {
+            Swal.fire({
+            title: '{{ translate('Do you want to logout?') }}',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonColor: '#FC6A57',
+            cancelButtonColor: '#363636',
+            confirmButtonText: `{{ translate('yes')}}`,
+            cancelButtonText: `{{ translate('Do_not_Logout')}}`,
+            }).then((result) => {
+            if (result.value) {
+            location.href='{{route('logout')}}';
+            } else{
+            Swal.fire('{{ translate('messages.canceled') }}', '', 'info')
+            }
+        })
+});
+});
+</script>

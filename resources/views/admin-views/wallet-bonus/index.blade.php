@@ -52,7 +52,10 @@
                                                 <div class="form-group">
                                                     <label class="input-label"
                                                         for="default_title">{{ translate('messages.Bonus_Title') }}
-                                                        ({{ translate('messages.Default') }})
+                                                        ({{ translate('messages.Default') }})   <span class="form-label-secondary text-danger"
+                                                        data-toggle="tooltip" data-placement="right"
+                                                        data-original-title="{{ translate('messages.Required.')}}"> *
+                                                        </span>
                                                     </label>
                                                     <input type="text" name="title[]" id="default_title"
                                                         class="form-control" placeholder="{{ translate('messages.Ex:_EID_Dhamaka') }}"
@@ -63,7 +66,10 @@
                                                 <div class="form-group">
                                                     <label class="input-label"
                                                         for="default_description">{{ translate('messages.Short_Description') }}
-                                                        ({{ translate('messages.Default') }})
+                                                        ({{ translate('messages.Default') }}) <span class="form-label-secondary text-danger"
+                                                        data-toggle="tooltip" data-placement="right"
+                                                        data-original-title="{{ translate('messages.Required.')}}"> *
+                                                        </span>
                                                     </label>
                                                     <input type="text" name="description[]" id="default_description"
                                                         class="form-control" placeholder="{{ translate('messages.Ex:_EID_Dhamaka') }}"
@@ -115,16 +121,20 @@
                                 </div>
                                 <div class="col-md-4 col-lg-4 col-sm-6">
                                     <div class="form-group">
-                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.Bonus_Type')}}</label>
+                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.Bonus_Type')}} <span class="form-label-secondary text-danger"
+                                            data-toggle="tooltip" data-placement="right"
+                                            data-original-title="{{ translate('messages.Required.')}}"> *
+                                            </span></label>
                                         <select name="bonus_type" class="form-control" id="bonus_type" required>
                                             <option value="percentage">{{translate('messages.percentage')}} (%)</option>
-                                            <option value="amount">{{translate('messages.amount')}}</option>
+                                            <option value="amount">{{translate('messages.amount')}} {{ \App\CentralLogics\Helpers::currency_symbol() }}</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-md-4 col-lg-4 col-sm-6">
                                     <div class="form-group">
                                         <label class="input-label" for="exampleFormControlInput1">{{translate('messages.Bonus_Amount')}}
+
                                             <span  class="d-none" id='cuttency_symbol'>({{ \App\CentralLogics\Helpers::currency_symbol() }})
                                             </span>
                                             <span id="percentage">(%)</span>
@@ -135,7 +145,10 @@
                                             data-original-title="{{ translate('Set_the_bonus_amount/percentage_a_customer_will_receive_after_adding_money_to_his_wallet.') }}">
                                             <i class="tio-info-outined"></i>
                                         </span>
-
+                                        <span class="form-label-secondary text-danger"
+                                        data-toggle="tooltip" data-placement="right"
+                                        data-original-title="{{ translate('messages.Required.')}}"> *
+                                        </span>
 
                                         </label>
                                         <input type="number" step="0.01" min="1" max="999999999999.99"  placeholder="{{ translate('messages.Ex:_100') }}"  name="bonus_amount" id="bonus_amount" class="form-control" required>
@@ -143,12 +156,18 @@
                                 </div>
                                 <div class="col-md-4 col-lg-4 col-sm-6">
                                     <div class="form-group">
-                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.Minimum_Add_Money_Amount')}} ({{ \App\CentralLogics\Helpers::currency_symbol() }})
+                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.Minimum_Add_Money_Amount')}}
+
+                                                         ({{ \App\CentralLogics\Helpers::currency_symbol() }})
                                             <span
                                             class="input-label-secondary text--title" data-toggle="tooltip"
                                             data-placement="right"
                                             data-original-title="{{ translate('Set_the_minimum_add_money_amount_for_a_customer_to_be_eligible_for_the_bonus.') }}">
                                             <i class="tio-info-outined"></i>
+                                        </span>
+                                        <span class="form-label-secondary text-danger"
+                                        data-toggle="tooltip" data-placement="right"
+                                        data-original-title="{{ translate('messages.Required.')}}"> *
                                         </span>
                                         </label>
                                         <input type="number" step="0.01" min="1" max="999999999999.99" placeholder="{{ translate('messages.Ex:_10') }}" name="minimum_add_amount" id="minimum_add_amount" class="form-control" required>
@@ -170,13 +189,19 @@
                                 </div>
                                 <div class="col-md-4 col-lg-4 col-sm-6">
                                     <div class="form-group">
-                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.start_date')}}</label>
+                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.start_date')}}<span class="form-label-secondary text-danger"
+                                                        data-toggle="tooltip" data-placement="right"
+                                                        data-original-title="{{ translate('messages.Required.')}}"> *
+                                                        </span></label>
                                         <input type="date" name="start_date" class="form-control" id="date_from" required>
                                     </div>
                                 </div>
                                 <div class="col-md-4 col-lg-4 col-sm-6">
                                     <div class="form-group">
-                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.expire_date')}}</label>
+                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.expire_date')}}<span class="form-label-secondary text-danger"
+                                                        data-toggle="tooltip" data-placement="right"
+                                                        data-original-title="{{ translate('messages.Required.')}}"> *
+                                                        </span></label>
                                         <input type="date" name="end_date" class="form-control" id="date_to" required>
                                     </div>
                                 </div>

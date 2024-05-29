@@ -34,14 +34,15 @@ class Order extends Model
         'processing_time' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'original_delivery_charge' => 'float',
+        'extra_packaging_amount' => 'float',
         'receiver_details' => 'array',
         'dm_tips' => 'float',
         'distance' => 'float',
         'tax_percentage' => 'float',
         'prescription_order' => 'boolean',
         'cutlery' => 'boolean',
-        'is_guest' => 'boolean'
+        'is_guest' => 'boolean',
+        'ref_bonus_amount' => 'float',
     ];
 
     protected $appends = ['module_type'];
@@ -50,6 +51,12 @@ class Order extends Model
     {
         $this->attributes['delivery_charge'] = round($value, 3);
     }
+
+    public function cashback_history()
+    {
+        return $this->hasOne(CashBackHistory::class, 'order_id');
+    }
+
 
     public function offline_payments()
     {

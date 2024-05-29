@@ -35,10 +35,12 @@
 
             <!-- Content -->
             <div class="navbar-vertical-content bg--005555" id="navbar-vertical-content">
-                <form class="sidebar--search-form">
+                <form autocomplete="off"   class="sidebar--search-form">
                     <div class="search--form-group">
                         <button type="button" class="btn"><i class="tio-search"></i></button>
-                        <input type="text" class="form-control form--control" placeholder="{{ translate('Search Menu...') }}" id="search-sidebar-menu">
+                        <input  autocomplete="false" name="qq" type="text" class="form-control form--control" placeholder="{{ translate('Search Menu...') }}" id="search">
+
+                        <div id="search-suggestions" class="flex-wrap mt-1"></div>
                     </div>
                 </form>
                 <ul class="navbar-nav navbar-nav-lg nav-tabs">
@@ -61,14 +63,14 @@
                         <small class="tio-more-horizontal nav-subtitle-replacer"></small>
                     </li>
 
-                    <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/parcel/orders/*') ? 'active' : '' }}">
+                    <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/parcel/orders/*')  ? 'active' : '' }}">
                         <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:" title="{{ translate('messages.orders') }}">
                             <i class="tio-shopping-cart nav-icon"></i>
                             <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
                                 {{ translate('messages.orders') }}
                             </span>
                         </a>
-                        <ul class="js-navbar-vertical-aside-submenu nav nav-sub" style="display:{{ Request::is('admin/parcel/orders/*') ? 'block' : 'none' }}">
+                        <ul class="js-navbar-vertical-aside-submenu nav nav-sub" style="display:{{ Request::is('admin/parcel/orders/*') || Request::is('admin/order/offline/payment/list*')? 'block' : 'none' }}">
                             <li class="nav-item {{ Request::is('admin/parcel/orders/all') ? 'active' : '' }}">
                                 <a class="nav-link" href="{{ route('admin.parcel.orders', ['all']) }}" title="{{ translate('messages.all_orders') }}">
                                     <span class="tio-circle nav-indicator-icon"></span>
@@ -80,7 +82,7 @@
                                     </span>
                                 </a>
                             </li>
-                            <li class="nav-item {{ Request::is('admin/parcel/orders/scheduled') ? 'active' : '' }}">
+                            {{-- <li class="nav-item {{ Request::is('admin/parcel/orders/scheduled') ? 'active' : '' }}">
                                 <a class="nav-link" href="{{ route('admin.parcel.orders', ['scheduled']) }}" title="{{ translate('messages.scheduled_orders') }}">
                                     <span class="tio-circle nav-indicator-icon"></span>
                                     <span class="text-truncate sidebar--badge-container">
@@ -90,7 +92,7 @@
                                         </span>
                                     </span>
                                 </a>
-                            </li>
+                            </li> --}}
                             <li class="nav-item {{ Request::is('admin/parcel/orders/pending') ? 'active' : '' }}">
                                 <a class="nav-link " href="{{ route('admin.parcel.orders', ['pending']) }}" title="{{ translate('messages.pending_orders') }}">
                                     <span class="tio-circle nav-indicator-icon"></span>
@@ -169,7 +171,7 @@
                                     </span>
                                 </a>
                             </li>
-                            <li class="nav-item {{ Request::is('admin/parcel/orders/refunded') ? 'active' : '' }}">
+                            {{-- <li class="nav-item {{ Request::is('admin/parcel/orders/refunded') ? 'active' : '' }}">
                                 <a class="nav-link " href="{{ route('admin.parcel.orders', ['refunded']) }}" title="{{ translate('messages.refunded_orders') }}">
                                     <span class="tio-circle nav-indicator-icon"></span>
                                     <span class="text-truncate sidebar--badge-container">
@@ -179,7 +181,7 @@
                                         </span>
                                     </span>
                                 </a>
-                            </li>
+                            </li> --}}
 
                             <li class="nav-item {{ Request::is('admin/order/offline/payment/list*') ? 'active' : '' }}">
                                 <a class="nav-link " href="{{ route('admin.order.offline_verification_list', ['all']) }}" title="{{ translate('Offline_Payments') }}">
@@ -384,5 +386,70 @@
             return !~text.indexOf(val);
         }).hide();
     });
+    $(document).ready(function() {
+            const $searchInput = $('#search');
+            const $suggestionsList = $('#search-suggestions');
+            const $rows = $('#navbar-vertical-content li');
+            const $subrows = $('#navbar-vertical-content li ul li');
+            {{--const suggestions = ['{{strtolower(translate('messages.order'))  }}', '{{ strtolower(translate('messages.category')) }}', '{{ strtolower(translate('messages.banner')) }}','{{ strtolower(translate('messages.delivery_setup')) }}' ];--}}
+            const focusInput = () => updateSuggestions($searchInput.val());
+            const hideSuggestions = () => $suggestionsList.slideUp(700);
+            const showSuggestions = () => $suggestionsList.slideDown(700);
+            let clickSuggestion = function() {
+                let suggestionText = $(this).text();
+                $searchInput.val(suggestionText);
+                hideSuggestions();
+                filterItems(suggestionText.toLowerCase());
+                updateSuggestions(suggestionText);
+            };
+            let filterItems = (val) => {
+                let unmatchedItems = $rows.show().filter((index, element) => !~$(element).text().replace(
+                    /\s+/g, ' ').toLowerCase().indexOf(val));
+                let matchedItems = $rows.show().filter((index, element) => ~$(element).text().replace(/\s+/g,
+                    ' ').toLowerCase().indexOf(val));
+                unmatchedItems.hide();
+                matchedItems.each(function() {
+                    let $submenu = $(this).find($subrows);
+                    let keywordCountInRows = 0;
+                    $rows.each(function() {
+                        let rowText = $(this).text().toLowerCase();
+                        let valLower = val.toLowerCase();
+                        let keywordCountRow = rowText.split(valLower).length - 1;
+                        keywordCountInRows += keywordCountRow;
+                    });
+                    if ($submenu.length > 0) {
+                        $subrows.show();
+                        $submenu.each(function() {
+                            let $submenu2 = !~$(this).text().replace(/\s+/g, ' ')
+                                .toLowerCase().indexOf(val);
+                            if ($submenu2 && keywordCountInRows <= 2) {
+                                $(this).hide();
+                            }
+                        });
+                    }
+                });
+            };
+            let updateSuggestions = (val) => {
+                $suggestionsList.empty();
+                suggestions.forEach(suggestion => {
+                    if (suggestion.toLowerCase().includes(val.toLowerCase())) {
+                        $suggestionsList.append(
+                            `<span class="search-suggestion badge badge-soft-light m-1 fs-14">${suggestion}</span>`
+                        );
+                    }
+                });
+                // showSuggestions();
+            };
+            $searchInput.focus(focusInput);
+            $searchInput.on('input', function() {
+                updateSuggestions($(this).val());
+            });
+            $suggestionsList.on('click', '.search-suggestion', clickSuggestion);
+            $searchInput.keyup(function() {
+                filterItems($(this).val().toLowerCase());
+            });
+            $searchInput.on('focusout', hideSuggestions);
+            $searchInput.on('focus', showSuggestions);
+        });
 </script>
 @endpush

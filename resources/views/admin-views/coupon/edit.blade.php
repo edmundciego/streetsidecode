@@ -158,10 +158,10 @@
                             <div class="form-group m-0">
                                 <label class="input-label" for="discount_type">{{translate('messages.discount_type')}}</label>
                                 <select name="discount_type" id="discount_type" class="form-control">
-                                    <option value="amount" {{$coupon['discount_type']=='amount'?'selected':''}}>{{translate('messages.amount')}}
+                                    <option value="amount" {{$coupon['discount_type']=='amount'?'selected':''}}>{{translate('messages.amount')}} ({{ \App\CentralLogics\Helpers::currency_symbol() }})
                                     </option>
                                     <option value="percent" {{$coupon['discount_type']=='percent'?'selected':''}}>
-                                        {{translate('messages.percent')}}
+                                        {{translate('messages.percent')}} (%)
                                     </option>
                                 </select>
                             </div>
@@ -181,13 +181,13 @@
                         </div>
                         <div class="col-md-4 col-lg-3 col-sm-6">
                             <div class="form-group m-0">
-                                <label class="input-label" for="exampleFormControlInput1">{{translate('messages.max_discount')}}</label>
+                                <label class="input-label" for="exampleFormControlInput1">{{translate('messages.max_discount')}} ({{ \App\CentralLogics\Helpers::currency_symbol() }})</label>
                                 <input type="number" min="0" max="999999999999.99" step="0.01" value="{{$coupon['max_discount']}}" name="max_discount" id="max_discount" class="form-control" {{$coupon['discount_type']=='amount'?'readonly="readonly"':''}}>
                             </div>
                         </div>
                         <div class="col-md-4 col-lg-3 col-sm-6">
                             <div class="form-group m-0">
-                                <label class="input-label" for="exampleFormControlInput1">{{translate('messages.min_purchase')}}</label>
+                                <label class="input-label" for="exampleFormControlInput1">{{translate('messages.min_purchase')}} ({{ \App\CentralLogics\Helpers::currency_symbol() }})</label>
                                 <input type="number" name="min_purchase" step="0.01" value="{{$coupon['min_purchase']}}"
                                        min="0" max="999999999999.99" class="form-control"
                                        placeholder="100">
@@ -216,6 +216,10 @@
             let module_id = 0;
             $('#date_from').attr('max','{{date("Y-m-d",strtotime($coupon["expire_date"]))}}');
             $('#date_to').attr('min','{{date("Y-m-d",strtotime($coupon["start_date"]))}}');
+            @if($coupon['discount_type']=='amount')
+            $('#max_discount').attr("readonly","true");
+            $('#max_discount').val(0);
+            @endif
 
 
             $('.js-data-example-ajax').select2({

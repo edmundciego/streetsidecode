@@ -44,11 +44,7 @@ $('#reset_btn').click(function(){
 })
 
 
-$(document).on("click", ".submit_btn", function(e){
-    e.preventDefault();
-    let data = $(this).val();
-    myFunction(data)
-});
+
 
 
 

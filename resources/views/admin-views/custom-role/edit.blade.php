@@ -42,7 +42,11 @@
                             </ul>
                             <div class="lang_form" id="default-form">
                                 <div class="form-group">
-                                    <label class="input-label" for="default_title">{{translate('messages.role_name')}} ({{translate('messages.default')}})</label>
+                                    <label class="input-label" for="default_title">{{translate('messages.role_name')}} ({{translate('messages.default')}}) <span class="form-label-secondary text-danger"
+                                        data-toggle="tooltip" data-placement="right"
+                                        data-original-title="{{ translate('messages.Required.')}}"> *
+                                        </span>
+                                 </label>
                                     <input type="text" name="name[]" id="default_title" class="form-control" placeholder="{{translate('role_name_example')}}" value="{{$role?->getRawOriginal('name')}}"  >
                                 </div>
                                 <input type="hidden" name="lang[]" value="default">
@@ -78,7 +82,7 @@
                         @endif
 
                         <div class="d-flex flex-wrap select--all-checkes">
-                            <h5 class="input-label m-0 text-capitalize">{{translate('messages.module_permission')}} : </h5>
+                            <h5 class="input-label m-0 text-capitalize">{{translate('messages.Update_permission')}} : </h5>
                             <div class="check-item pb-0 w-auto">
                                 <div class="form-group form-check form--check m-0 ml-2">
                                     <input type="checkbox" name="modules[]" value="account" class="form-check-input" id="select-all">

@@ -64,11 +64,11 @@
                         @forelse(json_decode($language) as $lang)
                             <?php
                                 if($about_us?->translations){
-                                    $translate = [];
+                                    $translateDescription = [];
                                     foreach($about_us?->translations as $t)
                                     {
                                         if($t->locale == $lang && $t->key=="about_us"){
-                                            $translate[$lang]['about_us'] = $t->value;
+                                            $translateDescription[$lang]['about_us'] = $t->value;
                                         }
                                     }
                                 }
@@ -93,7 +93,7 @@
 
                                 <div class="form-group">
                                     <label for="about_us{{$lang}}">{{ translate('messages.about_us_description') }}({{ $lang }})</label>
-                                    <textarea id="about_us{{$lang}}" class="ckeditor form-control" name="about_us[]">{!!  $translate[$lang]['about_us'] ?? null !!}</textarea>
+                                    <textarea id="about_us{{$lang}}" class="ckeditor form-control" name="about_us[]">{!!  $translateDescription[$lang]['about_us'] ?? null !!}</textarea>
                                 </div>
                                 <input type="hidden" name="lang[]" value="{{$lang}}">
                             </div>

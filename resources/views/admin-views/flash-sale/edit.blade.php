@@ -83,14 +83,14 @@
                                                         <label class="form-label">{{ translate('admin') }}(%)</label>
                                                     <input type="number" min=".01" step="0.001" max="100" name="admin_discount_percentage"
                                                             value="{{ $flash_sale->admin_discount_percentage }}"
-                                                            class="form-control"
+                                                            class="form-control" id="adminDiscount"
                                                             placeholder="{{ translate('Ex_:_50') }}" required>
                                                     </div>
                                                     <div class="col-sm-6">
                                                         <label class="form-label">{{ translate('messages.store_owner') }}(%)</label>
                                                     <input type="number" min=".01" step="0.001" max="100" name="vendor_discount_percentage"
                                                             value="{{ $flash_sale->vendor_discount_percentage }}"
-                                                            class="form-control"
+                                                            class="form-control"  id="storeDiscount"
                                                             placeholder="{{ translate('Ex_:_50') }}" required>
                                                     </div>
                                                 </div>
@@ -130,6 +130,7 @@
 @endsection
 
 @push('script_2')
+<script src="{{asset('public/assets/admin')}}/js/view-pages/flash-sale-index.js"></script>
 <script>
     "use strict";
         $(document).on('ready', function () {
@@ -137,22 +138,6 @@
             $('#from').attr('max','{{$flash_sale->end_date}}');
             $('#to').attr('min','{{$flash_sale->start_date}}');
         });
-        $("#from").on("change", function () {
-            $('#to').attr('min',$(this).val());
-        });
 
-        $("#to").on("change", function () {
-            $('#from').attr('max',$(this).val());
-        });
-    $(".lang_link").click(function(e){
-        e.preventDefault();
-        $(".lang_link").removeClass('active');
-        $(".lang_form").addClass('d-none');
-        $(this).addClass('active');
-
-        let form_id = this.id;
-        let lang = form_id.substring(0, form_id.length - 5);
-        $("#"+lang+"-form").removeClass('d-none');
-    })
 </script>
 @endpush

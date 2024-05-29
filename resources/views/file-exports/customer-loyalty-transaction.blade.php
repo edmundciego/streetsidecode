@@ -38,9 +38,9 @@
                 <th>{{ translate('Analytics') }}</th>
                 <th></th>
                 <th>
-                    {{ translate('messages.debit')  }}- {{$debit}}
+                    {{ translate('messages.earned')  }}- {{$debit}}
                     <br>
-                    {{ translate('messages.credit')  }}- {{$credit}}
+                    {{ translate('messages.converted')  }}- {{$credit}}
                     <br>
                     {{ translate('messages.balance')  }}- {{$balance}}
                 </th>
@@ -54,8 +54,8 @@
             <th>{{translate('messages.transaction_id')}}</th>
             <th>{{translate('messages.transaction_date')}}</th>
             <th>{{translate('messages.customer')}}</th>
-            <th>{{translate('messages.credit')}}</th>
-            <th>{{translate('messages.debit')}}</th>
+            <th>{{translate('messages.earned')}}</th>
+            <th>{{translate('messages.converted')}}</th>
             <th>{{translate('messages.balance')}}</th>
             <th>{{translate('messages.transaction_type')}}</th>
             <th>{{translate('messages.reference')}}</th>

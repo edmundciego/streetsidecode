@@ -11,6 +11,14 @@ class VendorEmployee extends Authenticatable
 
     protected $fillable = ['remember_token'];
 
+    protected $casts = [
+        'employee_role_id' => 'integer',
+        'vendor_id' => 'integer',
+        'store_id' => 'integer',
+        // 'status' => 'integer',
+        'is_logged_in' => 'boolean',
+    ];
+
     protected $hidden = [
         'password',
         'auth_token',
@@ -21,7 +29,7 @@ class VendorEmployee extends Authenticatable
     {
         return $this->belongsTo(Store::class);
     }
-    
+
     public function vendor()
     {
         return $this->belongsTo(Vendor::class);

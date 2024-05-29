@@ -45,7 +45,11 @@
                                         <div class="form-group">
                                             <label class="input-label"
                                                 for="default_title">{{ translate('messages.name') }}
-                                                ({{translate('messages.default')}})
+                                                ({{translate('messages.default')}}) <span class="form-label-secondary text-danger"
+                                                data-toggle="tooltip" data-placement="right"
+                                                data-original-title="{{ translate('messages.Required.')}}"> *
+                                                </span>
+
                                             </label>
                                             <input type="text" name="unit[]" id="default_title"
                                                 class="form-control" placeholder="{{ translate('messages.unit_name') }}" maxlength="191"
@@ -95,18 +99,23 @@
                         <div class="search--button-wrapper">
                             <h5 class="card-title">
                                 {{translate('messages.unit_list')}}<span class="badge badge-soft-dark ml-2" id="itemCount">{{$units->total()}}</span></h5>
-                            <form action="javascript:" id="search-form" class="search-form">
+                            <form class="search-form">
                                 <!-- Search -->
-                                @csrf
+
                                 <div class="input-group input--group">
-                                    <input id="datatableSearch_" type="search" name="search" class="form-control"
-                                            placeholder="{{translate('messages.search_unit')}}" aria-label="Search" required>
+                                    <input id="datatableSearch_" type="search" name="search" class="form-control"  value="{{request()?->search}}"
+                                            placeholder="{{translate('messages.search_unit')}}" aria-label="Search" >
                                     <button type="submit" class="btn btn--secondary">
                                         <i class="tio-search"></i>
                                     </button>
                                 </div>
                                 <!-- End Search -->
                             </form>
+
+                            @if(request()->get('search'))
+                            <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
+                            @endif
+
                             <!-- Unfold -->
                             <div class="hs-unfold mr-2">
                                 <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
@@ -160,7 +169,7 @@
                                 <tr>
                                     <td>{{$key+$units->firstItem()}}</td>
                                     <td>
-                                    <span class="d-block font-size-sm text-body">
+                                    <span title="{{ $unit['unit'] }}" class="d-block font-size-sm text-body">
                                         {{Str::limit($unit['unit'],20,'...')}}
                                     </span>
                                     </td>
@@ -180,21 +189,21 @@
                             @endforeach
                             </tbody>
                         </table>
-                        @if(count($units) !== 0)
-                        <hr>
-                        @endif
-                        <div class="page-area">
-                            {!! $units->links() !!}
-                        </div>
-                        @if(count($units) === 0)
-                        <div class="empty--data">
-                            <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
-                            <h5>
-                                {{translate('no_data_found')}}
-                            </h5>
-                        </div>
-                        @endif
                     </div>
+                    @if(count($units) !== 0)
+                    <hr>
+                    @endif
+                    <div class="page-area">
+                        {!! $units->links() !!}
+                    </div>
+                    @if(count($units) === 0)
+                    <div class="empty--data">
+                        <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
+                        <h5>
+                            {{translate('no_data_found')}}
+                        </h5>
+                    </div>
+                    @endif
                 </div>
             </div>
             <!-- End Table -->

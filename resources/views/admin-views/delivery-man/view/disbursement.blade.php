@@ -16,25 +16,8 @@
                 </span>
                 <span>{{$deliveryMan['f_name'].' '.$deliveryMan['l_name']}}</span>
             </h1>
-            <div class="row">
-                <div class="js-nav-scroller hs-nav-scroller-horizontal mt-2">
-                    <!-- Nav -->
-                    <ul class="nav nav-tabs nav--tabs border-0">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'info'])}}"  aria-disabled="true">{{translate('messages.info')}}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'transaction'])}}"  aria-disabled="true">{{translate('messages.transaction')}}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'conversation'])}}"  aria-disabled="true">{{translate('messages.conversations')}}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'disbursement'])}}"  aria-disabled="true">{{translate('messages.disbursements')}}</a>
-                        </li>
-                    </ul>
-                    <!-- End Nav -->
-                </div>
+            <div class="">
+                @include('admin-views.delivery-man.partials._tab_menu')
             </div>
         </div>
         <!-- End Page Header -->

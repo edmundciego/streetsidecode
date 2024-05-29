@@ -35,7 +35,7 @@ class WithdrawalMethodController extends Controller
         return view('admin-views.withdraw-method.withdraw-methods-list', compact('withdrawal_methods', 'search'));
     }
 
-    public function create(Request $request)
+    public function create()
     {
         return view('admin-views.withdraw-method.withdraw-methods-create');
     }
@@ -81,6 +81,14 @@ class WithdrawalMethodController extends Controller
     {
         $withdrawal_method = $this->withdrawal_method->find($id);
         return View('admin-views.withdraw-method.withdraw-methods-edit', compact('withdrawal_method'));
+    }
+    public function getMethodInfo(Request $request)
+    {
+        $withdrawal_method = $this->withdrawal_method->find($request->id);
+        return response()->json([
+            'view' => view('admin-views.withdraw-method.partials._method_info', compact('withdrawal_method'))->render(),
+        ]);
+
     }
 
     public function update(Request $request)

@@ -368,6 +368,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
             Route::get('item-or-store-search', 'ItemController@item_or_store_search');
             Route::post('reviews/submit', 'ItemController@submit_product_review')->middleware('auth:api');
             Route::get('common-conditions', 'ItemController@get_store_condition_products');
+            Route::get('get-products', 'ItemController@get_products');
         });
 
         Route::group(['prefix' => 'stores'], function () {
@@ -380,7 +381,9 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
             Route::get('popular-items/{id}', 'StoreController@get_popular_store_items');
             Route::get('reviews', 'StoreController@reviews');
             Route::get('search', 'StoreController@get_searched_stores');
+            Route::get('get-data', 'StoreController@get_combined_data');
         });
+        Route::get('get-combined-data', 'SearchController@get_combined_data');
 
         Route::group(['prefix' => 'banners'], function () {
             Route::get('/', 'BannerController@get_banners');
@@ -409,6 +412,11 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
             Route::get('items/{condition_id}', 'CommonConditionController@get_products');
         });
 
+        Route::group(['prefix' => 'brand'], function () {
+            Route::get('/', 'BrandController@get_brands');
+            Route::get('items/{brand_id}', 'BrandController@get_products');
+        });
+
         Route::group(['prefix' => 'campaigns'], function () {
             Route::get('basic', 'CampaignController@get_basic_campaigns');
             Route::get('basic-campaign-details', 'CampaignController@basic_campaign_details');
@@ -423,6 +431,10 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::get('coupon/list', 'CouponController@list');
         Route::group(['prefix' => 'coupon', 'middleware' => 'auth:api'], function () {
             Route::get('apply', 'CouponController@apply');
+        });
+        Route::get('cashback/list', 'CashBackController@list');
+        Route::group(['prefix' => 'cashback', 'middleware' => 'auth:api'], function () {
+            Route::get('getCashback', 'CashBackController@getCashback');
         });
 
         Route::get('parcel-category','ParcelCategoryController@index');

@@ -99,7 +99,39 @@
                                                             asset('storage/app/public/promotional_banner').'/'.$banner->value ?? '',
                                                             asset('/public/assets/admin/img/upload-3.png'),
                                                             'promotional_banner/'
-                                                        ) }}"  data-onerror-image="{{asset('/public/assets/admin/img/upload-3.png')}}" class="__size-105 onerror-image" alt="">
+                                                        ) }}" data-toggle="modal"
+                                                             data-target="#imagemodal{{ $key }}"  data-onerror-image="{{asset('/public/assets/admin/img/upload-3.png')}}" class="__size-105 onerror-image" alt="">
+                                                        <div class="modal fade" id="imagemodal{{ $key }}" tabindex="-1"
+                                                             role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h4 class="modal-title" id="myModalLabel">
+                                                                            {{ translate('messages.banner') }}</h4>
+                                                                        <button type="button" class="close"
+                                                                                data-dismiss="modal"><span
+                                                                                aria-hidden="true">&times;</span><span
+                                                                                class="sr-only">{{ translate('messages.cancel') }}</span></button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <img src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                                                            $banner->value ?? '',
+                                                            asset('storage/app/public/promotional_banner').'/'.$banner->value ?? '',
+                                                            asset('/public/assets/admin/img/upload-3.png'),
+                                                            'promotional_banner/'
+                                                        ) }}"
+                                                                             class="initial--22 w-100">
+                                                                    </div>
+{{--                                                                    <div class="modal-footer">--}}
+{{--                                                                        <a class="btn btn-primary"--}}
+{{--                                                                           href="{{ route('admin.file-manager.download', base64_encode('public/promotional_banner/' . $banner->value ?? '')) }}"><i--}}
+{{--                                                                                class="tio-download"></i>--}}
+{{--                                                                            {{ translate('messages.download') }}--}}
+{{--                                                                        </a>--}}
+{{--                                                                    </div>--}}
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </td>
                                                     <td>
                                                         <label class="toggle-switch toggle-switch-sm">

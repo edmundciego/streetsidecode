@@ -27,6 +27,12 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link {{ Request::is('admin/business-settings/email-setup/dm/unsuspend') ? 'active' : '' }}"
+                href="{{ route('admin.business-settings.email-setup', ['dm','unsuspend']) }}">
+                    {{translate('Account_Unsuspension')}}
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link {{ Request::is('admin/business-settings/email-setup/dm/cash-collect') ? 'active' : '' }}"
                 href="{{ route('admin.business-settings.email-setup', ['dm','cash-collect']) }}">
                     {{translate('Cash_Collection')}}

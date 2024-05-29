@@ -2,10 +2,6 @@
 
 @section('title',translate('messages.Delivery Man Preview'))
 
-@push('css_or_js')
-
-@endpush
-
 @section('content')
     <div class="content container-fluid">
         <!-- Page Header -->
@@ -16,30 +12,13 @@
                 </span>
                 <span>{{$deliveryMan['f_name'].' '.$deliveryMan['l_name']}}</span>
             </h1>
-            <div class="row">
-                <div class="js-nav-scroller hs-nav-scroller-horizontal mt-2">
-                    <!-- Nav -->
-                    <ul class="nav nav-tabs nav--tabs border-0">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'info'])}}"  aria-disabled="true">{{translate('messages.info')}}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'transaction'])}}"  aria-disabled="true">{{translate('messages.transaction')}}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'conversation'])}}"  aria-disabled="true">{{translate('messages.conversations')}}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'disbursement'])}}"  aria-disabled="true">{{translate('messages.disbursements')}}</a>
-                        </li>
-                    </ul>
-                    <!-- End Nav -->
-                </div>
+            <div class="">
+                @include('admin-views.delivery-man.partials._tab_menu')
             </div>
         </div>
         <!-- End Page Header -->
 
-        <div class="content container-fluid">
+        <div class="content">
             <!-- Page Header -->
             <div class="page-header">
                 <h1 class="page-header-title">{{ translate('messages.conversation_list') }}</h1>
@@ -61,19 +40,29 @@
                         </div>
                         <!-- Body -->
                         <div class="card-body p-0 initial-19"  id="dm-conversation-list">
-                            <div class="border-bottom"></div>
-                            @include('admin-views.delivery-man.partials._conversation_list')
+                            <div class="d-flex justify-content-center gap-4 mb-3 tab-button-group">
+                                <button id="customer_conversations" data-url="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'conversation','conversation_with' =>'customer'])}}" class="{{ request()?->conversation_with != 'store' ? 'active' : 'redirect-url' }}">{{ translate('Customer') }}</button>
+                                <button id="store_conversations" data-url="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'conversation','conversation_with' =>'store'])}}" class="{{ request()?->conversation_with == 'store' ? 'active' : 'redirect-url' }}">{{ translate('Store')}}</button>
+                            </div>
+                            <div id="dm-conversation-list-search">
+                                @include('admin-views.delivery-man.partials._conversation_list')
+                            </div>
                         </div>
                         <!-- End Body -->
                     </div>
                     <!-- End Card -->
                 </div>
                 <div class="col-lg-8 col-nd-6" id="dm-view-conversation">
-                    <div class="text-center mt-2">
-                        <h4 class="initial-20">{{ translate('messages.view_conversation') }}
-                        </h4>
+                    <div class="h-100 d-flex align-items-center justify-content-center">
+                        <div class="text-center">
+                            <div class="empty-conversation-content d-flex flex-column align-items-center gap-3">
+                                <img width="128" height="128" src="{{asset('/public/assets/admin/img/icons/empty-conversation.png')}}" alt="public">
+                                <h5 class="text-muted">
+                                    {{translate('no_conversation_found')}}
+                                </h5>
+                            </div>
+                        </div>
                     </div>
-                    {{-- view here --}}
                 </div>
             </div>
             <!-- End Row -->
@@ -85,18 +74,20 @@
 @push('script_2')
 <script>
     "use strict";
+    let lastPage ={{ is_object($conversations) ? $conversations?->lastPage() : 1 }};
 
-    $('.view-conv').on('click', function (){
-        let url = $(this).data('url');
-        let id_to_active = $(this).data('active-id');
-        let conv_id = $(this).data('conv-id');
-        let sender_id = $(this).data('sender-id');
-        viewConvs(url, id_to_active, conv_id, sender_id);
-    })
+    $(document).on('click', '.view-conv', function () {
+    let url = $(this).data('url');
+    let id_to_active = $(this).data('active-id');
+    let conv_id = $(this).data('conv-id');
+    let sender_id = $(this).data('sender-id');
+    viewConvs(url, id_to_active, conv_id, sender_id);
+});
+
     function viewConvs(url, id_to_active, conv_id, sender_id) {
         $('.customer-list').removeClass('conv-active');
         $('#' + id_to_active).addClass('conv-active');
-        let new_url= "{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'conversation'])}}" + '?conversation=' + conv_id+ '&user=' + sender_id;
+        let new_url= "{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'conversation' , 'conversation_with' => request()?->conversation_with  ? request()?->conversation_with : 'customer'  ])}}" + '&conversation=' + conv_id+ '&user=' + sender_id;
             $.get({
                 url: url,
                 success: function(data) {
@@ -107,10 +98,9 @@
     }
 
     let page = 1;
-    let user_id =  $('#deliver_man').val();
+    let user_id =  {{ $deliveryMan->id }};
     $('#dm-conversation-list').scroll(function() {
-        if ($('#dm-conversation-list').scrollTop() + $('#dm-conversation-list').height() >= $('#dm-conversation-list')
-            .height()) {
+        if ($('#dm-conversation-list').scrollTop() + $('#dm-conversation-list').height() >= $('#dm-conversation-list').height()  && lastPage > page ) {
             page++;
             loadMoreData(page);
         }
@@ -118,7 +108,7 @@
 
     function loadMoreData(page) {
         $.ajax({
-                url: "{{ route('admin.users.delivery-man.message-list-search') }}" + '?page=' + page,
+                url: "{{ route('admin.users.delivery-man.message-list-search') }}" + '?page=' + page + "&conversation_with=" + "{{request()->conversation_with  ? request()->conversation_with : 'customer'}}",
                 type: "get",
                 data:{"user_id":user_id},
                 beforeSend: function() {
@@ -129,7 +119,7 @@
                 if (data.html == " ") {
                     return;
                 }
-                $("#dm-conversation-list").append(data.html);
+                $("#dm-conversation-list-search").append(data.html);
             })
             .fail(function(jqXHR, ajaxOptions, thrownError) {
                 alert('server not responding...');
@@ -138,12 +128,12 @@
 
     function fetch_data(page, query) {
             $.ajax({
-                url: "{{ route('admin.users.delivery-man.message-list-search') }}" + '?page=' + page + "&key=" + query,
+                url: "{{ route('admin.users.delivery-man.message-list-search') }}" + '?page=' + page + "&key=" + query + "&conversation_with=" + "{{request()->conversation_with  ? request()->conversation_with : 'customer'}}",
                 type: "get",
                 data:{"user_id":user_id},
                 success: function(data) {
-                    $('#dm-conversation-list').empty();
-                    $("#dm-conversation-list").append(data.html);
+                    $('#dm-conversation-list-search').empty();
+                    $("#dm-conversation-list-search").append(data.html);
                 }
             })
         };

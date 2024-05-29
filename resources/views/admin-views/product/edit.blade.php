@@ -22,7 +22,7 @@
                     {{ request()->product_gellary  == 1 ?  translate('Add_item') : translate('item_update') }}
                 </span>
             </h1>
-            <div class="d-flex align-items-end">
+            <div class="d-flex align-items-end flex-wrap">
                 @if(Config::get('module.current_module_type') == 'food')
                 <div class="text--primary-2 py-1 d-flex flex-wrap align-items-center foodModalShow" type="button" >
                     <strong class="mr-2">{{translate('See_how_it_works!')}}</strong>
@@ -79,7 +79,10 @@
                                 <div class="lang_form" id="default-form">
                                     <div class="form-group">
                                         <label class="input-label" for="default_name">{{ translate('messages.name') }}
-                                            ({{ translate('messages.default') }})</label>
+                                            ({{ translate('messages.default') }})  <span class="form-label-secondary text-danger"
+                                            data-toggle="tooltip" data-placement="right"
+                                            data-original-title="{{ translate('messages.Required.')}}"> *
+                                            </span></label>
                                         <input type="text" name="name[]" id="default_name" class="form-control"
                                             placeholder="{{ translate('messages.new_food') }}"
                                             value="{{ $product?->getRawOriginal('name') }}" required
@@ -89,7 +92,10 @@
                                     <div class="form-group pt-2 mb-0">
                                         <label class="input-label"
                                             for="exampleFormControlInput1">{{ translate('messages.short_description') }}
-                                            ({{ translate('messages.default') }})</label>
+                                            ({{ translate('messages.default') }})  <span class="form-label-secondary text-danger"
+                                            data-toggle="tooltip" data-placement="right"
+                                            data-original-title="{{ translate('messages.Required.')}}"> *
+                                            </span></label>
                                         <textarea type="text" name="description[]" class="form-control ckeditor min--height-200">{!! $product?->getRawOriginal('description') !!}</textarea>
                                     </div>
                                 </div>
@@ -154,22 +160,23 @@
                                 <div class="flex-grow-1 mx-auto">
                                     <label class="text-dark d-block">
                                         {{ translate('messages.item_image') }}
-                                        <small class="text-danger">* ( {{ translate('messages.ratio') }} 1:1 )</small>
+                                        <small >( {{ translate('messages.ratio') }} 1:1 )</small>
                                     </label>
                                     <div class="d-flex flex-wrap __gap-12px __new-coba" id="coba">
 
                                         <input type="hidden" id="removedImageKeysInput" name="removedImageKeys" value="">
                                         @foreach($product->images as $key => $photo)
-                                            <div id="product_images_{{ $key }}" class="spartan_item_wrapper min-w-100px max-w-100px">
+                                            <div id="product_images_{{ $key }}" class="spartan_item_wrapper min-w-176px max-w-176px">
                                                 <img class="img--square onerror-image"
                                                 src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
                                                     $photo ?? '',
                                                     asset('storage/app/public/product').'/'.$photo ?? '',
-                                                    asset('public/assets/admin/img/upload.png'),
+                                                    asset('public/assets/admin/img/upload-img.png'),
                                                     'product/'
                                                 ) }}"
-                                                    data-onerror-image="{{ asset('public/assets/admin/img/upload.png') }}"
+                                                    data-onerror-image="{{ asset('public/assets/admin/img/upload-img.png') }}"
                                                     alt="Product image">
+                                                    <div class="pen spartan_remove_row"><i class="tio-edit"></i></div>
                                                     @if (request()->product_gellary  == 1)
                                                         <a href="#" data-key={{ $key }} data-photo="{{ $photo }}"
                                                         class="spartan_remove_row function_remove_img"><i class="tio-add-to-trash"></i></a>
@@ -186,19 +193,23 @@
                                         {{ translate('messages.item_thumbnail') }}
                                         <small class="text-danger">* ( {{ translate('messages.ratio') }} 1:1 )</small>
                                     </label>
-                                    <label class="d-inline-block m-0">
-                                        <img class="img--100 onerror-image" id="viewer"
+                                    <label class="d-inline-block m-0 position-relative">
+                                        <img class="img--176 border onerror-image" id="viewer"
                                         src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
                                             $product['image'] ?? '',
                                             asset('storage/app/public/product').'/'.$product['image'] ?? '',
-                                            asset('public/assets/admin/img/upload.png'),
+                                            asset('public/assets/admin/img/upload-img.png'),
                                             'product/'
                                         ) }}"
-                                            data-onerror-image="{{ asset('public/assets/admin/img/upload.png') }}"
+                                            data-onerror-image="{{ asset('public/assets/admin/img/upload-img.png') }}"
                                             alt="thumbnail" />
-                                        <input type="file" name="image" id="customFileEg1"
-                                            class="custom-file-input d-none"
-                                            accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
+                                        <div class="icon-file-group">
+                                            <div class="icon-file">
+                                                <input type="file" name="image" id="customFileEg1" class="custom-file-input read-url"
+                                                    accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" >
+                                                    <i class="tio-edit"></i>
+                                            </div>
+                                        </div>
                                     </label>
                                 </div>
                             </div>
@@ -219,7 +230,10 @@
                             <div class="row g-2">
                                 <div class="col-sm-6 col-lg-3">
                                     <div class="form-group mb-0">
-                                        <label class="input-label" for="store_id">{{ translate('messages.store') }}<span
+                                        <label class="input-label" for="store_id">{{ translate('messages.store') }}  <span class="form-label-secondary text-danger"
+                                            data-toggle="tooltip" data-placement="right"
+                                            data-original-title="{{ translate('messages.Required.')}}"> *
+                                            </span><span
                                                 class="input-label-secondary"></span></label>
                                         <select name="store_id"
                                             data-placeholder="{{ translate('messages.select_store') }}"
@@ -238,8 +252,10 @@
                                 <div class="col-sm-6 col-lg-3">
                                     <div class="form-group mb-0">
                                         <label class="input-label"
-                                            for="category_id">{{ translate('messages.category') }}<span
-                                                class="input-label-secondary">*</span></label>
+                                            for="category_id">{{ translate('messages.category') }} <span class="form-label-secondary text-danger"
+                                            data-toggle="tooltip" data-placement="right"
+                                            data-original-title="{{ translate('messages.Required.')}}"> *
+                                            </span></label>
                                         <select name="category_id" class="js-data-example-ajax form-control"
                                             id="category_id">
                                             @if ($category)
@@ -279,6 +295,25 @@
                                             @elseif((isset($temp_product) && $temp_product == 1 && $product->common_condition_id))
                                             <option value="{{ $product->common_condition_id }}" selected="selected">
                                                 {{ $product->common_condition->name }}</option>
+                                            @endif
+
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-3" id="brand_input">
+                                    <div class="form-group mb-0">
+                                        <label class="input-label" for="brand_id">{{ translate('messages.Brand') }}<span
+                                                class="input-label-secondary"></span></label>
+                                        <select name="brand_id" id="brand_id"
+                                            data-placeholder="{{ translate('messages.Select_brand') }}"
+                                            id="brand_id" class="js-data-example-ajax form-control"
+                                            oninvalid="this.setCustomValidity('{{ translate('messages.Select_brand') }}')">
+                                            @if (isset($product->ecommerce_item_details?->brand_id))
+                                                <option value="{{ $product->ecommerce_item_details->brand_id }}" selected="selected">
+                                                    {{ $product->ecommerce_item_details?->brand->name }}</option>
+                                            @elseif((isset($temp_product) && $temp_product == 1 && $product->brand_id))
+                                            <option value="{{ $product->brand_id }}" selected="selected">
+                                                {{ $product->brand->name }}</option>
                                             @endif
 
                                         </select>
@@ -339,6 +374,16 @@
                                         </label>
                                       </div>
                                 </div>
+                                @if(Config::get('module.current_module_type') == 'pharmacy')
+                                <div class="col-sm-6 col-lg-3" id="is_prescription_required">
+                                    <div class="form-check mb-0 p-6">
+                                        <input class="form-check-input" name="is_prescription_required" type="checkbox" value="1" id="flexCheckDefaultprescription" {{ $product->pharmacy_item_details?->is_prescription_required == 1?'checked':((isset($temp_product) && $temp_product == 1 && $product->is_prescription_required ==1)?'checked':'') }}>
+                                        <label class="form-check-label" for="flexCheckDefaultprescription">
+                                          {{ translate('messages.is_prescription_required') }}
+                                        </label>
+                                      </div>
+                                </div>
+                                @endif
                                 <div class="col-sm-6 col-lg-3" id="basic">
                                     <div class="form-check mb-0 p-6">
                                         <input class="form-check-input" name="basic" type="checkbox" value="1" id="flexCheckDefaultbasic" {{ $product->pharmacy_item_details?->is_basic == 1?'checked':((isset($temp_product) && $temp_product == 1 && $product->basic ==1)?'checked':'') }}>
@@ -347,6 +392,16 @@
                                         </label>
                                       </div>
                                 </div>
+                                @if(Config::get('module.current_module_type') == 'grocery' || Config::get('module.current_module_type') == 'food')
+                                    <div class="col-sm-6 col-lg-3" id="halal">
+                                        <div class="form-check mb-0 p-6">
+                                            <input class="form-check-input" name="is_halal" type="checkbox" value="1" id="flexCheckDefault1" {{ $product->is_halal == 1?'checked':((isset($temp_product) && $temp_product == 1 && $product->is_halal ==1)?'checked':'') }}>
+                                            <label class="form-check-label" for="flexCheckDefault1">
+                                                {{ translate('messages.Is_It_Halal') }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -410,8 +465,8 @@
                     <div class="card shadow--card-2 border-0">
                         <div class="card-header">
                             <h5 class="card-title">
-                                <span class="card-header-icon"><i class="tio-dollar-outlined"></i></span>
-                                <span>{{ translate('amount') }}</span>
+                                <span class="card-header-icon"><i class="tio-label-outlined"></i></span>
+                                <span>{{ translate('Price Information') }}</span>
                             </h5>
                         </div>
                         <div class="card-body">
@@ -419,7 +474,10 @@
                                 <div class="col-sm-4 col-6">
                                     <div class="form-group mb-0">
                                         <label class="input-label"
-                                            for="exampleFormControlInput1">{{ translate('messages.price') }}</label>
+                                            for="exampleFormControlInput1">{{ translate('messages.price') }}  <span class="form-label-secondary text-danger"
+                                            data-toggle="tooltip" data-placement="right"
+                                            data-original-title="{{ translate('messages.Required.')}}"> *
+                                            </span></label>
                                         <input type="number" value="{{ $product->price }}" min="0"
                                             max="999999999999.99" name="price" class="form-control" step="0.01"
                                             placeholder="{{ translate('messages.Ex:') }} 100" required>
@@ -428,20 +486,23 @@
                                 <div class="col-sm-4 col-6">
                                     <div class="form-group mb-0">
                                         <label class="input-label"
-                                            for="exampleFormControlInput1">{{ translate('messages.discount_type') }}<span
+                                            for="exampleFormControlInput1">{{ translate('messages.discount_type') }} <span class="form-label-secondary text-danger"
+                                            data-toggle="tooltip" data-placement="right"
+                                            data-original-title="{{ translate('messages.Required.')}}"> *
+                                            </span><span
                                                 class="input-label-secondary text--title" data-toggle="tooltip"
                                                 data-placement="right"
                                                 data-original-title="{{ translate('Admin_shares_the_same_percentage/amount_on_discount_as_he_takes_commissions_from_stores.') }}">
                                                 <i class="tio-info-outined"></i>
                                             </span></label>
-                                        <select name="discount_type" class="form-control js-select2-custom">
+                                        <select name="discount_type" id="discount_type" class="form-control js-select2-custom">
                                             <option value="percent"
                                                 {{ $product['discount_type'] == 'percent' ? 'selected' : '' }}>
-                                                {{ translate('messages.percent') }}
+                                                {{ translate('messages.percent') }} (%)
                                             </option>
                                             <option value="amount"
                                                 {{ $product['discount_type'] == 'amount' ? 'selected' : '' }}>
-                                                {{ translate('messages.amount') }}
+                                                {{ translate('messages.amount') }} ({{ \App\CentralLogics\Helpers::currency_symbol() }})
                                             </option>
                                         </select>
                                     </div>
@@ -449,7 +510,12 @@
                                 <div class="col-sm-4 col-6">
                                     <div class="form-group mb-0">
                                         <label class="input-label"
-                                            for="exampleFormControlInput1">{{ translate('messages.discount') }}</label>
+                                            for="exampleFormControlInput1">{{ translate('messages.discount') }}
+                                        <span id=symble>  {{  $product['discount_type'] == 'amount' ? ( \App\CentralLogics\Helpers::currency_symbol()) : '(%)' }}</span>
+                                            <span class="form-label-secondary text-danger"
+                                            data-toggle="tooltip" data-placement="right"
+                                            data-original-title="{{ translate('messages.Required.')}}"> *
+                                            </span></label>
                                         <input type="number" min="0" value="{{ $product['discount'] }}"
                                             max="100000" name="discount" class="form-control"
                                             placeholder="{{ translate('messages.Ex:') }} 100">
@@ -617,7 +683,6 @@
         </div>
     </div>
 </div>
-
 @endsection
 
 
@@ -628,17 +693,22 @@
     "use strict";
      let removedImageKeys = [];
     let element = "";
-     $('.function_remove_img').on('change', function () {
-         let key = $(this).data('key');
+
+
+    $(document).on('click','.function_remove_img' ,function(){
+    let key = $(this).data('key');
          let photo = $(this).data('photo');
          function_remove_img(key,photo);
-     })
+    });
+
         function function_remove_img(key,photo) {
         $('#product_images_' + key).addClass('d-none');
         removedImageKeys.push(photo);
         $('#removedImageKeysInput').val(removedImageKeys.join(','));
         console.log('Removed Image Keys:', removedImageKeys);
     }
+
+
     function show_min_max(data) {
         console.log(data);
         $('#min_max1_' + data).removeAttr("readonly");
@@ -662,19 +732,29 @@
          show_min_max(data);
      });
 
+     $(document).on('change', '#discount_type', function () {
+         let data =  document.getElementById("discount_type");
+         if(data.value === 'amount'){
+             $('#symble').text("({{ \App\CentralLogics\Helpers::currency_symbol() }})");
+            }
+            else{
+             $('#symble').text("(%)");
+         }
+     });
+
      $(document).on('change', '.hide_min_max', function () {
          let data = $(this).data('count');
          hide_min_max(data);
      });
 
-    let count = {{ isset($product->food_variations) ? count(json_decode($product->food_variations, true)) : 0 }};
+    let count =   $('.count_div').length;
 
     $(document).ready(function() {
         $("#add_new_option_button").click(function(e) {
             $('#empty-variation').hide();
             count++;
             let add_option_view = `
-                    <div class="__bg-F8F9FC-card view_new_option mb-2">
+                    <div class="__bg-F8F9FC-card count_div view_new_option mb-2">
                         <div>
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <label class="form-check form--check">
@@ -796,19 +876,19 @@
     let countRow = 0;
 
     function add_new_row_button(data) {
-        count = data;
+        // count = data;
         countRow = 1 + $('#option_price_view_' + data).children('.add_new_view_row_class').length;
         let add_new_row_view = `
             <div class="row add_new_view_row_class mb-3 position-relative pt-3 pt-sm-0">
                 <div class="col-md-4 col-sm-5">
                         <label for="">{{ translate('Option_name') }}</label>
-                        <input class="form-control" required type="text" name="options[` + count + `][values][` +
+                        <input class="form-control" required type="text" name="options[` + data + `][values][` +
             countRow + `][label]" id="">
                     </div>
                     <div class="col-md-4 col-sm-5">
                         <label for="">{{ translate('Additional_price') }}</label>
                         <input class="form-control"  required type="number" min="0" step="0.01" name="options[` +
-            count +
+                        data +
             `][values][` + countRow + `][optionPrice]" id="">
                     </div>
                     <div class="col-sm-2 max-sm-absolute">
@@ -950,6 +1030,11 @@
         } else {
             $('#condition_input').hide();
         }
+        if (module_data.brand) {
+            $('#brand_input').show();
+        } else {
+            $('#brand_input').hide();
+        }
         if (module_type == 'food') {
             $('#food_variation_section').show();
             $('#attribute_section').hide();
@@ -1001,6 +1086,31 @@
     $('#condition_id').select2({
             ajax: {
                 url: '{{ url('/') }}/admin/common-condition/get-all',
+                data: function(params) {
+                    return {
+                        q: params.term, // search term
+                        page: params.page,
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: data
+                    };
+                },
+                __port: function(params, success, failure) {
+                    let $request = $.ajax(params);
+
+                    $request.then(success);
+                    $request.fail(failure);
+
+                    return $request;
+                }
+            }
+        });
+
+    $('#brand_id').select2({
+            ajax: {
+                url: '{{ url('/') }}/admin/brand/get-all',
                 data: function(params) {
                     return {
                         q: params.term, // search term
@@ -1245,11 +1355,11 @@
             fieldName: 'item_images[]',
             maxCount: 6,
             // rowHeight: '100px !important',
-            groupClassName: 'spartan_item_wrapper min-w-100px max-w-100px',
+            groupClassName: 'spartan_item_wrapper min-w-176px max-w-176px',
             maxFileSize: '',
             placeholderImage: {
-                image: "{{ asset('public/assets/admin/img/upload.png') }}",
-                width: '100px'
+                image: "{{ asset('public/assets/admin/img/upload-img.png') }}",
+                width: '176px'
             },
             dropFileLabel: "Drop Here",
             onAddRow: function(index, file) {
@@ -1293,11 +1403,11 @@
         $("#coba").empty().spartanMultiImagePicker({
             fieldName: 'item_images[]',
             maxCount: 6,
-            rowHeight: '100px !important',
-            groupClassName: 'spartan_item_wrapper min-w-100px max-w-100px',
+            rowHeight: '176px !important',
+            groupClassName: 'spartan_item_wrapper min-w-176px max-w-176px',
             maxFileSize: '',
             placeholderImage: {
-                image: "{{ asset('public/assets/admin/img/upload.png') }}",
+                image: "{{ asset('public/assets/admin/img/upload-img.png') }}",
                 width: '100%'
             },
             dropFileLabel: "Drop Here",

@@ -46,9 +46,7 @@
                                                 (Default)
                                             </label>
                                             <input type="text" name="title[]" id="default_title"
-                                                class="form-control" placeholder="{{ translate('messages.new_coupon') }}"
-
-                                                 >
+                                                class="form-control" placeholder="{{ translate('messages.new_coupon') }}" >
                                         </div>
                                         <input type="hidden" name="lang[]" value="default">
                                     </div>
@@ -83,6 +81,7 @@
                                     <div class="form-group">
                                         <label class="input-label" for="exampleFormControlInput1">{{translate('messages.coupon_type')}}</label>
                                         <select name="coupon_type" id="coupon_type" class="form-control">
+                                            <option disabled selected>---{{translate('messages.Select_coupon_type')}}---</option>
                                             <option value="store_wise">{{translate('messages.store_wise')}}</option>
                                             <option value="zone_wise">{{translate('messages.zone_wise')}}</option>
                                             <option value="free_delivery">{{translate('messages.free_delivery')}}</option>
@@ -96,6 +95,7 @@
                                         <label class="input-label" for="exampleFormControlSelect1">{{translate('messages.store')}}<span
                                                 class="input-label-secondary"></span></label>
                                         <select name="store_ids[]" id="store_id" class="js-data-example-ajax form-control" data-placeholder="{{translate('messages.select_store')}}" title="{{translate('messages.select_store')}}">
+                                            <option disabled selected>---{{translate('messages.select_store')}}---</option>
                                         </select>
                                     </div>
                                 </div>
@@ -117,9 +117,9 @@
                                         <select name="customer_ids[]" id="select_customer"
                                             class="form-control js-select2-custom"
                                             multiple="multiple" data-placeholder="{{translate('messages.select_customer')}}">
-                                            <option value="all">{{translate('messages.all')}} </option>
+                                            <option  value="all">{{translate('messages.all')}} </option>
                                         @foreach(\App\Models\User::get(['id','f_name','l_name']) as $user)
-                                            <option value="{{$user->id}}">{{$user->f_name.' '.$user->l_name}}</option>
+                                            <option class="select_customer_option" value="{{$user->id}}" {{ (isset($customer) && is_numeric($customer) && ($customer == $user->id))?'selected':'' }}>{{$user->f_name.' '.$user->l_name}}</option>
                                         @endforeach
                                         </select>
                                     </div>
@@ -153,8 +153,9 @@
                                     <div class="form-group">
                                         <label class="input-label" for="exampleFormControlInput1">{{translate('messages.discount_type')}}</label>
                                         <select name="discount_type" class="form-control" id="discount_type" required>
-                                            <option value="amount">{{translate('messages.amount')}}</option>
-                                            <option value="percent">{{translate('messages.percent')}}</option>
+                                            <option value="amount">{{translate('messages.amount')}} ({{ \App\CentralLogics\Helpers::currency_symbol() }})
+                                            </option>
+                                            <option value="percent">{{translate('messages.percent')}} (%)</option>
                                         </select>
                                     </div>
                                 </div>
@@ -163,7 +164,7 @@
                                         <label class="input-label" for="exampleFormControlInput1">{{translate('messages.discount')}}
                                             <span class="input-label-secondary text--title" data-toggle="tooltip"
                                                 data-placement="right"
-                                                data-original-title="{{ translate('Currently you need to manage discount with the Restaurant.') }}">
+                                                data-original-title="{{ translate('Currently_you_need_to_manage_discount_with_the_Store.') }}">
                                                 <i class="tio-info-outined"></i>
                                             </span>
                                         </label>
@@ -172,13 +173,13 @@
                                 </div>
                                 <div class="col-md-4 col-lg-3 col-sm-6">
                                     <div class="form-group">
-                                        <label class="input-label" for="max_discount">{{translate('messages.max_discount')}}</label>
+                                        <label class="input-label" for="max_discount">{{translate('messages.max_discount')}} ({{ \App\CentralLogics\Helpers::currency_symbol() }})</label>
                                         <input type="number" step="0.01" min="0" value="0" max="999999999999.99" name="max_discount" id="max_discount" class="form-control" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-4 col-lg-3 col-sm-6">
                                     <div class="form-group">
-                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.min_purchase')}}</label>
+                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.min_purchase')}} ({{ \App\CentralLogics\Helpers::currency_symbol() }})</label>
                                         <input type="number" step="0.01" name="min_purchase" value="0" min="0" max="999999999999.99" class="form-control"
                                             placeholder="100">
                                     </div>
@@ -202,11 +203,15 @@
 
                                 <!-- Search -->
                                 <div class="input-group input--group">
-                                    <input id="datatableSearch" type="search" name="search" value="{{ request()?->search ?? null }}" class="form-control" placeholder="{{ translate('messages.Ex:_Coupon Title') }}" aria-label="{{translate('messages.search_here')}}">
+                                    <input id="datatableSearch" type="search" name="search" value="{{ request()?->search ?? null }}" class="form-control" placeholder="{{ translate('messages.Ex:_Coupon_Title_Or_Code') }}" aria-label="{{translate('messages.search_here')}}">
                                     <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
                                 </div>
                                 <!-- End Search -->
                             </form>
+                            @if(request()->get('search'))
+                            <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
+                            @endif
+
 
                             <div class="hs-unfold mr-2">
                                 <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
@@ -258,7 +263,6 @@
                                 <th class="border-0">{{translate('sl')}}</th>
                                 <th class="border-0">{{translate('messages.title')}}</th>
                                 <th class="border-0">{{translate('messages.code')}}</th>
-                                <th class="border-0">{{translate('messages.module')}}</th>
                                 <th class="border-0">{{translate('messages.type')}}</th>
                                 <th class="border-0">{{translate('messages.total_uses')}}</th>
                                 <th class="border-0">{{translate('messages.min_purchase')}}</th>
@@ -277,20 +281,20 @@
                                 <tr>
                                     <td>{{$key+$coupons->firstItem()}}</td>
                                     <td>
-                                    <span class="d-block font-size-sm text-body">
+                                    <span title="{{ $coupon['title'] }}" class="d-block font-size-sm text-body">
                                     {{Str::limit($coupon['title'],15,'...')}}
                                     </span>
                                     </td>
                                     <td>{{$coupon['code']}}</td>
-                                    <td>{{Str::limit($coupon->module->module_name, 15, '...')}}</td>
+
                                     <td>{{translate('messages.'.$coupon->coupon_type)}}</td>
                                     <td>{{$coupon->total_uses}}</td>
                                     <td>{{\App\CentralLogics\Helpers::format_currency($coupon['min_purchase'])}}</td>
                                     <td>{{\App\CentralLogics\Helpers::format_currency($coupon['max_discount'])}}</td>
                                     <td>{{$coupon['discount']}}</td>
-                                    <td>{{translate($coupon['discount_type'])}}</td>
-                                    <td>{{$coupon['start_date']}}</td>
-                                    <td>{{$coupon['expire_date']}}</td>
+                                    <td>{{translate($coupon['discount_type'])}} {{ $coupon['discount_type'] == 'amount' ? (\App\CentralLogics\Helpers::currency_symbol())  : ( $coupon['discount_type'] == 'percent' ? ("%") : '')}}</td>
+                                    <td>{{ \App\CentralLogics\Helpers::date_format($coupon['start_date']) }}</td>
+                                    <td>{{\App\CentralLogics\Helpers::date_format($coupon['expire_date'])}}</td>
                                     <td>
                                         <label class="toggle-switch toggle-switch-sm" for="couponCheckbox{{$coupon->id}}">
                                             <input type="checkbox" data-url="{{route('admin.coupon.status',[$coupon['id'],$coupon->status?0:1])}}" class="toggle-switch-input redirect-url" id="couponCheckbox{{$coupon->id}}" {{$coupon->status?'checked':''}}>
@@ -316,6 +320,7 @@
                             @endforeach
                             </tbody>
                         </table>
+                    </div>
 
                         @if(count($coupons) !== 0)
                         <hr>
@@ -331,7 +336,6 @@
                             </h5>
                         </div>
                         @endif
-                    </div>
                 </div>
             </div>
             <!-- End Table -->
@@ -376,6 +380,15 @@
         });
 
     });
-
+    $('#select_customer').on('change', function () {
+    let customer = $(this).val();
+    if (Array.isArray(customer) && customer.includes("all")) {
+        $('.select_customer_option').prop('disabled', true);
+        customer = ["all"];
+        $(this).val(customer);
+    } else {
+        $('.select_customer_option').prop('disabled', false);
+    }
+    });
     </script>
 @endpush

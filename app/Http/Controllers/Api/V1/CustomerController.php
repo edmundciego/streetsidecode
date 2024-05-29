@@ -14,6 +14,7 @@ use Illuminate\Support\Carbon;
 use App\Models\CustomerAddress;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\BusinessSetting;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
@@ -181,10 +182,17 @@ class CustomerController extends Controller
     $user->current_language_key = $current_language;
     $user->save();
 
-        $data = $request->user();
-        $data['userinfo'] = $data->userinfo;
-        $data['order_count'] =(integer)$request->user()->orders->count();
-        $data['member_since_days'] =(integer)$request->user()->created_at->diffInDays();
+    $data = $request->user();
+    $data['userinfo'] = $data->userinfo;
+    $data['order_count'] =(integer)$request->user()->orders->count();
+    $data['member_since_days'] =(integer)$request->user()->created_at->diffInDays();
+    $data['selected_modules_for_interest'] =$request->user()?->module_ids ? json_decode($user?->module_ids, true) :[];
+    $discount_data= Helpers::getCusromerFirstOrderDiscount(order_count:$data['order_count'] ,user_creation_date:$request->user()->created_at,refby:$request->user()->ref_by);
+    $data['is_valid_for_discount'] = data_get($discount_data,'is_valid');
+    $data['discount_amount'] = (float) data_get($discount_data,'discount_amount');
+    $data['discount_amount_type'] = data_get($discount_data,'discount_amount_type');
+    $data['validity'] =(string) data_get($discount_data,'validity');
+
         unset($data['orders']);
         return response()->json($data, 200);
     }
@@ -248,11 +256,17 @@ class CustomerController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
 
-        $userDetails = [
-            'interest' => json_encode($request->interest),
-        ];
+        $user=User::where(['id' => $request->user()->id])->first();
+        $module_ids=$user?->module_ids ? json_decode($user?->module_ids, true) :[];
+        array_push($module_ids, $request->header('moduleId'));
+        $module_ids=  array_unique($module_ids);
 
-        User::where(['id' => $request->user()->id])->update($userDetails);
+        $interest=  $user?->interest ? json_decode($user?->interest, true) :[];
+        $interest = array_unique(array_merge($interest, $request->interest));
+        $user->interest = json_encode(array_values($interest));
+
+        $user->module_ids = json_encode($module_ids);
+        $user->save();
 
         return response()->json(['message' => translate('messages.interest_updated_successfully')], 200);
     }
@@ -336,7 +350,7 @@ class CustomerController extends Controller
 
         if(Order::where('user_id', $user->id)->whereIn('order_status', ['pending','accepted','confirmed','processing','handover','picked_up'])->count())
         {
-            return response()->json(['errors'=>[['code'=>'on-going', 'message'=>translate('messages.user_account_delete_warning')]]],203);
+            return response()->json(['errors'=>[['code'=>'on-going', 'message'=>translate('messages.Please_complete_your_ongoing_and_accepted_orders')]]],203);
         }
         $request->user()->token()->revoke();
         if($user->userinfo){

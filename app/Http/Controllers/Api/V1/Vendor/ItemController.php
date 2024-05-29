@@ -11,9 +11,11 @@ use App\Models\TempProduct;
 use App\Models\Translation;
 use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use App\Models\PharmacyItemDetails;
 use App\Http\Controllers\Controller;
+use App\Models\EcommerceItemDetails;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -34,7 +36,11 @@ class ItemController extends Controller
 
         $validator = Validator::make($request->all(), [
             'category_id' => 'required',
-            'image' => 'required',
+            'image' => [
+                Rule::requiredIf(function ()use ($request) {
+                    return ($request['vendor']->stores[0]->module->module_type != 'food')  ;
+                })
+            ],
             'price' => 'required|numeric|min:0.01',
             'discount' => 'required|numeric|min:0',
             'translations'=>'required',
@@ -227,6 +233,7 @@ class ItemController extends Controller
         $item->images = $images;
         $item->unit_id = $request->unit;
         $item->organic = $request->organic??0;
+        $item->is_halal =  $request->is_halal ?? 0;
         $item->save();
         $item->tags()->sync($tag_ids);
 
@@ -236,6 +243,14 @@ class ItemController extends Controller
             $item_details->item_id = $item->id;
             $item_details->common_condition_id = $request->condition_id;
             $item_details->is_basic = $request->basic ?? 0;
+            $item_details->is_prescription_required = $request->is_prescription_required ?? 0;
+            $item_details->save();
+        }
+
+        if ($request['vendor']->stores[0]->module->module_type == 'ecommerce') {
+            $item_details = new EcommerceItemDetails();
+            $item_details->item_id = $item->id;
+            $item_details->brand_id = $request->brand_id;
             $item_details->save();
         }
 
@@ -251,7 +266,7 @@ class ItemController extends Controller
             $this->store_temp_data($item, $request,$tag_ids);
             $item->is_approved = 0;
             $item->save();
-            return response()->json(['success' => translate('messages.The_product_will_be_published_once_it_receives_approval_from_the_admin.')], 200);
+            return response()->json(['message' => translate('messages.The_product_will_be_published_once_it_receives_approval_from_the_admin.')], 200);
 
         }
 
@@ -507,8 +522,7 @@ class ItemController extends Controller
         $p->images = array_values($images);
         $p->unit_id = $request->unit;
         $p->organic = $request->organic??0;
-
-
+        $p->is_halal =  $request->is_halal ?? 0;
 
         $product_approval_datas = \App\Models\BusinessSetting::where('key', 'product_approval_datas')->first()?->value ?? '';
         $product_approval_datas =json_decode($product_approval_datas , true);
@@ -517,7 +531,7 @@ class ItemController extends Controller
         if (Helpers::get_mail_status('product_approval') && ((data_get($product_approval_datas,'Update_anything_in_product_details',null) == 1) || (data_get($product_approval_datas,'Update_product_price',null) == 1 && $old_price !=  $request->price) || ( data_get($product_approval_datas,'Update_product_variation',null) == 1 &&  $variation_changed)) )  {
 
             $this->store_temp_data($p, $request,$tag_ids, true);
-            return response()->json(['product_approval' => translate('your_product_added_for_approval')], 200);
+            return response()->json(['message' => translate('your_product_added_for_approval')], 200);
         }
 
 
@@ -528,6 +542,17 @@ class ItemController extends Controller
                     [
                         'common_condition_id' => $request->condition_id,
                         'is_basic' => $request->basic ?? 0,
+                        'is_prescription_required' => $request->is_prescription_required ?? 0,
+                    ]
+                );
+        }
+
+        if($request['vendor']->stores[0]->module->module_type == 'ecommerce'){
+            DB::table('ecommerce_item_details')
+                ->updateOrInsert(
+                    ['item_id' => $p->id],
+                    [
+                        'brand_id' => $request->brand_id,
                     ]
                 );
         }
@@ -762,6 +787,9 @@ class ItemController extends Controller
         $item->organic = $data->organic ?? 0;
         $item->stock =  $data->stock ?? 0;
         $item->common_condition_id =  $request->condition_id ?? 0;
+        $item->brand_id =  $request->brand_id ?? 0;
+        $item->is_halal =  $request->is_halal ?? 0;
+        $item->is_prescription_required =  $request->is_prescription_required ?? 0;
         $item->basic =  $request->basic ?? 0;
 
 
@@ -777,7 +805,17 @@ class ItemController extends Controller
                     [
                         'common_condition_id' => $request->condition_id,
                         'is_basic' => $request->basic ?? 0,
+                        'is_prescription_required' => $request->is_prescription_required ?? 0,
                         'item_id' => null
+                    ]
+                );
+        }
+        if($request['vendor']->stores[0]->module->module_type == 'ecommerce'){
+            DB::table('ecommerce_item_details')
+                ->updateOrInsert(
+                    ['item_id' => $item->id],
+                    [
+                        'brand_id' => $request->brand_id,
                     ]
                 );
         }

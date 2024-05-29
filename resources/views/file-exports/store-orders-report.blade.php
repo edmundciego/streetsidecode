@@ -93,7 +93,7 @@
                 </td>
                 <td>{{ \App\CentralLogics\Helpers::number_format_short($order['order_amount']) }}</td>
                 <td>{{ translate($order->payment_status) }}</td>
-                <td>{{ \App\CentralLogics\Helpers::number_format_short($order['coupon_discount_amount'] + $order['store_discount_amount']) }}</td>
+                <td>{{ \App\CentralLogics\Helpers::number_format_short($order['coupon_discount_amount']  + $order['ref_bonus_amount'] +  $order['store_discount_amount']) }}</td>
                 <td>{{ \App\CentralLogics\Helpers::number_format_short($order['total_tax_amount']) }}</td>
                 <td>{{ \App\CentralLogics\Helpers::number_format_short($order['delivery_charge']) }}</td>
             </tr>

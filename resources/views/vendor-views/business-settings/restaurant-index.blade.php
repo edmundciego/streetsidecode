@@ -157,6 +157,44 @@
                         </div>
                     </div>
                     @endif
+                    @if (config('module.'.$store->module->module_type)['halal'])
+                        <div class="col-xl-4 col-md-4 col-sm-6">
+                            <div class="form-group mb-0">
+                                <label
+                                    class="toggle-switch toggle-switch-sm d-flex justify-content-between border  rounded px-3 form-control"
+                                    for="halal_tag_status">
+                                <span class="pr-2 d-flex">
+                                    <span class="line--limit-1">
+                                        {{translate('messages.halal_tag_status')}}
+                                    </span>
+                                    <span data-toggle="tooltip" data-placement="right"
+                                          data-original-title='{{translate("If_enabled,_customers_can_see_halal_tag_on_product")}}'
+                                          class="input-label-secondary">
+                                        <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="i">
+                                    </span>
+                                </span>
+                                    <input type="checkbox"
+                                           data-id="halal_tag_status"
+                                           data-type="status"
+                                           data-image-on="{{ asset('/public/assets/admin/img/modal/schedule-on.png') }}"
+                                           data-image-off="{{ asset('/public/assets/admin/img/modal/schedule-off.png') }}"
+                                           data-title-on="{{ translate('Want_to_enable_halal_tag_status_for_this_restaurant?') }}"
+                                           data-title-off="{{ translate('Want_to_disable_halal_tag_status_for_this_restaurant?') }}"
+                                           data-text-on="<p>{{ translate('If_enabled,_customers_can_see_halal_tag_on_product') }}"
+                                           data-text-off="<p>{{ translate('If_disabled,_customers_can_not_see_halal_tag_on_product.') }}</p>"
+                                           class="toggle-switch-input dynamic-checkbox"
+                                           id="halal_tag_status" {{$store->storeConfig?->halal_tag_status == 1?'checked':''}}>
+                                    <span class="toggle-switch-label">
+                                    <span class="toggle-switch-indicator"></span>
+                                </span>
+                                </label>
+                                <form
+                                    action="{{route('vendor.business-settings.toggle-settings',[$store->id,$store->storeConfig?->halal_tag_status?0:1, 'halal_tag_status'])}}"
+                                    method="get" id="halal_tag_status_form">
+                                </form>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -176,6 +214,7 @@
                     enctype="multipart/form-data">
                     @csrf
                     <div class="row">
+
                         <div class="form-group mb-0 col-md-4">
                             <label class="input-label text-capitalize" for="minimum_order">{{translate('messages.minimum_order_amount')}}<span class="input-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{translate('Specify_the_minimum_order_amount_required_for_customers_when_ordering_from_this_store.')}}"><img src="{{asset('/public/assets/admin/img/info-circle.svg')}}" alt="{{translate('messages.self_delivery_hint')}}"></span></label>
                             <input type="number" id="minimum_order" name="minimum_order" step="0.01" min="0" max="100000" class="form-control" placeholder="100" value="{{$store->minimum_order>0?$store->minimum_order :''}}">
@@ -228,11 +267,11 @@
                         </div>
                         @endif
 
-                        <div class="col-sm-{{$store->self_delivery_system?'4':'6'}}">
+                        <div class="col-sm-6">
                             <div class="form-group mb-0 p-2">
                                 <label class="d-flex justify-content-between switch toggle-switch-sm text-dark" for="gst_status">
                                     <span>{{translate('messages.gst')}} <span class="form-label-secondary" data-toggle="tooltip" data-placement="right"
-            data-original-title="{{translate('messages.gst_status_warning')}}"><img src="{{asset('/public/assets/admin/img/info-circle.svg')}}" alt="{{translate('messages.gst_status_warning')}}"></span></span>
+                                    data-original-title="{{translate('messages.gst_status')}}"><img src="{{asset('/public/assets/admin/img/info-circle.svg')}}" alt="{{translate('messages.gst_status')}}"></span></span>
                                     <input type="checkbox" class="toggle-switch-input" name="gst_status" id="gst_status" value="1" {{$store->gst_status?'checked':''}}>
                                     <span class="toggle-switch-label">
                                         <span class="toggle-switch-indicator"></span>
@@ -241,6 +280,38 @@
                                 <input type="text" id="gst" name="gst" class="form-control" value="{{$store->gst_code}}" {{isset($store->gst_status)?'':'readonly'}}>
                             </div>
                         </div>
+
+                        @php($extra_packaging_data = \App\Models\BusinessSetting::where('key', 'extra_packaging_data')->first()?->value ?? '')
+                        @php($extra_packaging_data =json_decode($extra_packaging_data , true))
+                        @if   ( !empty($extra_packaging_data) && $extra_packaging_data[$store->module->module_type]=='1')
+                            <div class="col-sm-6">
+                                <div class="form-group mb-0 p-2">
+                                    <label class="d-flex justify-content-between switch toggle-switch-sm text-dark" for="extra_packaging_status">
+                                        <span>{{translate('messages.extra_packaging_charge_amount')}} <span class="form-label-secondary" data-toggle="tooltip" data-placement="right"
+                                        data-original-title="{{translate("By_enabling_the_status_customer_will_get_the_option_for_choosing_extra_packaging_charge_when_placing_order._for_extra_package_offer")}}"><img src="{{asset('/public/assets/admin/img/info-circle.svg')}}" alt="{{translate("By_enabling_the_status_customer_will_get_the_option_for_choosing_extra_packaging_charge_when_placing_order._for_extra_package_offer")}}"></span></span>
+                                        <input type="checkbox"
+                                        data-id="extra_packaging_status"
+                                        data-type="status"
+                                        data-image-on="{{ asset('/public/assets/admin/img/modal/schedule-on.png') }}"
+                                        data-image-off="{{ asset('/public/assets/admin/img/modal/schedule-off.png') }}"
+                                        data-title-on="{{ translate('Want_to_enable_extra_packaging_status_for_this_restaurant?') }}"
+                                        data-title-off="{{ translate('Want_to_disable_extra_packaging_status_for_this_restaurant?') }}"
+                                        data-text-on="<p>{{ translate('If_enabled,_customers_have_to_pay_extra_packaging_charge_on_order') }}"
+                                        data-text-off="<p>{{ translate('If_disabled,_customers_do_not_have_to_pay_extra_packaging_charge_on_order.') }}</p>"
+                                        class="toggle-switch-input dynamic-checkbox-toggle"
+                                        name="extra_packaging_status" value="1"
+                                        id="extra_packaging_status" {{$store->storeConfig?->extra_packaging_status == 1?'checked':''}}>
+
+                                        <span class="toggle-switch-label">
+                                            <span class="toggle-switch-indicator"></span>
+                                        </span>
+                                    </label>
+                                    <input type="number" id="extra_packaging_amount" name="extra_packaging_amount" step="0.01" min="0" max="9999999999"   class="form-control" placeholder="100" {{$store->storeConfig?->extra_packaging_status == 1 ? 'required':'readonly'}} value="{{$store->storeConfig?->extra_packaging_amount}}">
+                                </div>
+                            </div>
+
+                        @endif
+
                         <div class="col-12">
                             <div class="btn--container mt-3 justify-content-end">
                                 <button type="reset" class="btn btn--reset">{{translate('messages.reset')}}</button>

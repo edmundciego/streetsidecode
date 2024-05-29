@@ -119,8 +119,8 @@
                                         </td>
                                         <td>
                                             <div class="btn--container justify-content-center">
-                                                <a class="btn btn-sm btn--primary btn-outline-primary action-btn" href="{{route('admin.delivery-man.edit',[$dm['id']])}}" title="{{translate('messages.edit')}}"><i class="tio-edit"></i></a>
-                                            </div>
+                                                <a class="btn btn-sm btn--primary btn-outline-primary action-btn" href="{{route('admin.users.delivery-man.edit',[$dm['id']])}}" title="{{translate('messages.edit')}}"><i class="tio-edit"></i></a>
+                                            </div> 
                                         </td>
                                     </tr>
                                 @endforeach

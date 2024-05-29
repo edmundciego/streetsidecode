@@ -23,7 +23,7 @@
     --success: #00c9a7;
     --info: #00c9db;
     --warning: #f5ca99;
-    --danger: #ed4c78;
+    --danger: #ff6d6d;
     --light: #f9fafc;
     --dark: #132144;
     --breakpoint-xs: 0;
@@ -20937,6 +20937,7 @@ a.badge-soft-primary:hover {
 .badge-soft-secondary {
     color: #71869d;
     background-color: rgba(113, 134, 157, 0.1);
+    /* border: 1px solid rgba(113, 134, 157, 0.6); */
 }
 
 a.badge-soft-secondary:focus,
@@ -20948,6 +20949,7 @@ a.badge-soft-secondary:hover {
 .badge-soft-success {
     color: #00c9a7;
     background-color: rgba(0, 201, 167, 0.1);
+    border: 1px solid rgba(0, 201, 167, 0.6);
 }
 
 a.badge-soft-success:focus,
@@ -20959,6 +20961,7 @@ a.badge-soft-success:hover {
 .badge-soft-info {
     color: #00c9db;
     background-color: rgba(0, 201, 219, 0.1);
+    border: 1px solid rgba(0, 201, 219, 0.6);
 }
 
 a.badge-soft-info:focus,
@@ -20970,6 +20973,7 @@ a.badge-soft-info:hover {
 .badge-soft-warning {
     color: #f5ca99;
     background-color: rgba(245, 202, 153, 0.1);
+    border: 1px solid rgba(245, 202, 153, 0.6);
 }
 
 a.badge-soft-warning:focus,
@@ -20981,6 +20985,7 @@ a.badge-soft-warning:hover {
 .badge-soft-danger {
     color: #ed4c78;
     background-color: rgba(237, 76, 120, 0.1);
+    border: 1px solid rgba(237, 76, 120, 0.6);
 }
 
 a.badge-soft-danger:focus,
@@ -20992,6 +20997,7 @@ a.badge-soft-danger:hover {
 .badge-soft-light {
     color: #f9fafc;
     background-color: rgba(249, 250, 252, 0.1);
+    border: 1px solid rgba(249, 250, 253, 0.6);
 }
 
 a.badge-soft-light:focus,
@@ -21003,6 +21009,7 @@ a.badge-soft-light:hover {
 .badge-soft-dark {
     color: #132144;
     background-color: rgba(19, 33, 68, 0.1);
+    /* border: 1px solid rgba(19, 33, 68, 0.6); */
 }
 
 a.badge-soft-dark:focus,

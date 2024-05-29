@@ -154,7 +154,7 @@ font-weight: 700
             object-fit: cover
         }
 .social img {
-width: 24px;    
+width: 24px;
 }
     </style>
 
@@ -168,12 +168,11 @@ width: 24px;
             <tr>
                 <td class="main-table-td">
                     <div class="text-center">
-                    <img class="mail-img-2"                 
-                    @if ($data && $data['icon'])
-                    src="{{ asset('storage/app/public/email_template/') }}/{{ $data['icon']??'' }}"
-                    @else
-                    src='{{ asset('/public/assets/admin/img/email-template-img.png') }}'
-                    @endif id="iconViewer" alt="">
+                    <img class="mail-img-2"
+                    src="{{\App\CentralLogics\Helpers::onerror_image_helper( data_get($data, 'icon'), asset('storage/app/public/email_template/').'/'.data_get($data, 'icon'), asset('public/assets/admin/img/emai_demo_template_2.png'), 'email_template/') }}"
+
+
+                    id="iconViewer" alt="">
                         <h2 id="mail-title" class="mt-2">{{ $title?? translate('Main_Title_or_Subject_of_the_Mail') }}</h2>
                         <div class="mb-2" id="mail-body">{!! $body?? translate('Hi_Sabrina,') !!}</div>
                     </div>

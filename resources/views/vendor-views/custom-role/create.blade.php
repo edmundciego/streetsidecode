@@ -112,7 +112,7 @@
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="bank_info" class="form-check-input"
                                     id="bank_info">
-                            <label class="form-check-label input-label " for="bank_info">{{translate('messages.bank_info')}}</label>
+                            <label class="form-check-label input-label " for="bank_info">{{translate('messages.profile')}}</label>
                         </div>
                     </div>
                     <div class="check-item">
@@ -214,7 +214,15 @@
                             <td class="text-capitalize">
                                 @if($r['modules']!=null)
                                     @foreach((array)json_decode($r['modules']) as $key=>$m)
-                                        {{translate(str_replace('_',' ',$m))}},
+
+                                    @if ($m == 'bank_info')
+                                    {{translate('messages.profile')}}
+                                    @else
+                                    {{translate(str_replace('_',' ',$m))}}
+                                    @endif
+
+
+                                    {{  !$loop->last ? ',' : '.'}}
                                     @endforeach
                                 @endif
                             </td>

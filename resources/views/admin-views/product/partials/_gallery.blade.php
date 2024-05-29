@@ -8,78 +8,81 @@
                     <div class="min-width-720">
                     <div class="d-flex">
                         <div>
-                            <div class="d-flex flex-wrap align-items-center food--media position-relative mr-4">
-                                <img class="avatar avatar-xxl avatar-4by3 onerror-image"
+                            <img class="avatar avatar-xxl avatar-4by3 onerror-image aspect-ratio-1 h-unset"
 
-                                src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                    $item['image'] ?? '',
-                                    asset('storage/app/public/product').'/'.$item['image'] ?? '',
-                                    asset('public/assets/admin/img/160x160/img2.jpg'),
-                                    'product/'
-                                ) }}" 
-                                    data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
-                                    alt="Image Description">
-                            </div>
+                            src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                                $item['image'] ?? '',
+                                asset('storage/app/public/product').'/'.$item['image'] ?? '',
+                                asset('public/assets/admin/img/160x160/img2.jpg'),
+                                'product/'
+                            ) }}"
+                                data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
+                                alt="Image Description">
                         </div>
                         <div class="col-10">
-                            <div class="d-flex justify-content-between">
-                                <h2 class="ml-3">{{ $item?->getRawOriginal('name') }} </h2>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="mb-0 ml-4">{{ $item?->getRawOriginal('name') }} </h4>
                                 <div>
                                     <a target="_blank" href="{{ route('admin.item.edit',['id' => $item->id , 'product_gellary' => true ]) }}" class="btn btn--sm btn-outline-primary">
                                             {{ translate('messages.use_this_product_info') }}
                                     </a>
-
-
                                 </div>
                             </div>
-                            <table class="table table-borderless table-thead-bordered">
-                                <thead>
-                                    <tr>
-                                        <th class="px-4 border-0">
-                                            <h4 class="m-0 text-capitalize">{{ translate('General_Information') }}</h4>
-                                        </th>
-                                        <th class="px-4 border-0">
-                                            <h4 class="m-0 text-capitalize">{{ translate('Available_Variations') }}</h4>
-                                        </th>
-                                        <th class="px-4 border-0">
-                                            <h4 class="m-0 text-capitalize">{{ translate('tags') }}</h4>
-                                        </th>
-                                    </tr>
-                                </thead>
+                            <table class="table table-borderless table-thead-bordered m-0">
                                 <tbody>
                                     <tr>
-                                        <td class="px-4 max-w--220px">
+                                        <td class="px-4 max-w--220px product-gallery-info">
+                                            <h6 class="m-0 text-capitalize">{{ translate('General_Information') }}</h6>
+                                        </td>
+                                        <td class="px-4 product-gallery-info">
+                                            <h6 class="m-0 text-capitalize">{{ translate('Available_Variations') }}</h6>
+                                        </td>
+                                        <td>
+                                            <h6 class="m-0 text-capitalize">{{ translate('tags') }}</h6>
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 max-w--220px product-gallery-info">
                                             <span class="d-block mb-1">
-                                                <span>{{ translate('messages.Category') }} : </span>
+                                                <span>{{ translate('messages.Category') }}</span>
+                                                <span>:</span>
                                                 <strong>{{ Str::limit(($item?->category?->parent ? $item?->category?->parent?->name : $item?->category?->name )  ?? translate('messages.uncategorize')
                                                     , 20, '...') }}</strong>
                                             </span>
                                             <span class="d-block mb-1">
-                                                <span>{{ translate('messages.Sub_Category') }} : </span>
+                                                <span>{{ translate('messages.Sub_Category') }}</span>
+                                                <span>:</span>
                                                 <strong>{{ Str::limit(($item?->category?->name )  ?? translate('messages.uncategorize')
                                                     , 20, '...') }}</strong>
                                             </span>
                                             @if ($item->module->module_type == 'grocery')
                                             <span class="d-block mb-1">
-                                                <span>{{ translate('messages.Is_Organic') }} : </span>
+                                                <span>{{ translate('messages.Is_Organic') }}</span>
+                                                <span>:</span>
                                                 <strong> {{  $item->organic == 1 ?  translate('messages.yes') : translate('messages.no') }}</strong>
                                             </span>
                                             @endif
                                             @if ($item->module->module_type == 'food')
                                             <span class="d-block mb-1">
                                                 <span>{{ translate('messages.Item_type') }} : </span>
+                                                <span>:</span>
                                                 <strong> {{  $item->veg == 1 ?  translate('messages.veg') : translate('messages.non_veg') }}</strong>
                                             </span>
                                             @else
                                                 @if ($item?->unit)
                                                 <span class="d-block mb-1">
                                                     <span>{{ translate('messages.Unit') }} : </span>
+                                                    <span>:</span>
                                                     <strong> {{ $item?->unit?->unit  }}</strong>
                                                 </span>
                                                 @endif
                                             @endif
                                         </td>
-                                        <td class="px-4">
+                                        <td class="px-4 product-gallery-info">
                                             @if ($item->module->module_type == 'food')
                                                 @if ($item->food_variations && is_array(json_decode($item['food_variations'], true)))
                                                     @foreach (json_decode($item->food_variations, true) as $variation)
@@ -114,7 +117,7 @@
                                                         @if (isset($variation['values']))
                                                             @foreach ($variation['values'] as $value)
                                                                 <span class="d-block text-capitalize">
-                                                                    &nbsp; &nbsp; {{ $value['label'] }} :
+                                                                    <span>{{ $value['label'] }}</span> <span>:</span>
                                                                     <strong>{{ \App\CentralLogics\Helpers::format_currency($value['optionPrice']) }}</strong>
                                                                 </span>
                                                             @endforeach
@@ -126,8 +129,9 @@
                                             @if ($item->variations && is_array(json_decode($item['variations'], true)))
                                                 @foreach (json_decode($item['variations'], true) as $variation)
                                                     <span class="d-block mb-1 text-capitalize">
-                                                        {{ $variation['type'] }} :
-                                                        {{ \App\CentralLogics\Helpers::format_currency($variation['price']) }}
+                                                        <span>{{ $variation['type'] }} </span>
+                                                        <span>:</span>
+                                                        <strong>{{ \App\CentralLogics\Helpers::format_currency($variation['price']) }}</strong>
                                                     </span>
                                                 @endforeach
                                             @endif
@@ -135,9 +139,13 @@
                                     @endif
 
                                         <td>
-                                                @foreach($item->tags as $c) {{$c->tag.','}} @endforeach
+                                                @foreach($item->tags as $c) {{ $c->tag }}{{ !$loop->last ? ',' : '.'}} @endforeach
                                         </td>
 
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
                                 </tr>
                             </tbody>
                             </table>

@@ -212,6 +212,23 @@
                                     </div>
                                 </div>
                                 @endif
+                                @if ($module_data['brand'])
+                                <div class="col-sm-6 col-lg-4">
+                                    <div class="form-group mb-0">
+                                        <label class="input-label" for="brand_id">{{ translate('messages.Brand') }}<span
+                                                class="input-label-secondary"></span></label>
+                                        <select name="brand_id" id="brand_id"
+                                            data-placeholder="{{ translate('messages.Select_brand') }}"
+                                            id="brand_id" class="js-select2-custom form-control"
+                                            oninvalid="this.setCustomValidity('{{ translate('messages.Select_brand') }}')">
+                                            <option value="">---{{translate('messages.select')}}---</option>
+                                            @foreach($brands as $brand)
+                                                <option value="{{$brand['id']}}">{{$brand['name']}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                @endif
                                 @if ($module_data['veg_non_veg'])
                                 <div class="col-sm-6 col-lg-4">
                                     <div class="form-group mb-0">
@@ -282,6 +299,26 @@
                                         <input class="form-check-input" name="basic" type="checkbox" value="1" id="flexCheckDefault" checked>
                                         <label class="form-check-label" for="flexCheckDefault">
                                           {{ translate('messages.is_basic') }}
+                                        </label>
+                                      </div>
+                                </div>
+                                @endif
+                                @if ($module_type == 'pharmacy')
+                                <div class="col-sm-6 col-lg-4" id="is_prescription_required">
+                                    <div class="form-check mb-0 p-6">
+                                        <input class="form-check-input" name="is_prescription_required" type="checkbox" value="1" id="flexCheckDefaultPrescription" checked>
+                                        <label class="form-check-label" for="flexCheckDefault">
+                                          {{ translate('messages.is_prescription_required') }}
+                                        </label>
+                                      </div>
+                                </div>
+                                @endif
+                                @if ($module_data['halal'])
+                                <div class="col-sm-6 col-lg-4" id="halal">
+                                    <div class="form-check mb-0 p-6">
+                                        <input class="form-check-input" name="is_halal" type="checkbox" value="1" id="flexCheckDefault" checked>
+                                        <label class="form-check-label" for="flexCheckDefault">
+                                          {{ translate('messages.is_it_halal') }}
                                         </label>
                                       </div>
                                 </div>

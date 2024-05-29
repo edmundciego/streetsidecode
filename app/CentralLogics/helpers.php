@@ -2,6 +2,7 @@
 
 namespace App\CentralLogics;
 
+use DateTime;
 use App\Models\User;
 use App\Models\Zone;
 use App\Models\AddOn;
@@ -11,6 +12,7 @@ use App\Models\Module;
 use App\Models\Review;
 use App\Models\Expense;
 use App\Mail\PlaceOrder;
+use App\Models\CashBack;
 use App\Models\Category;
 use App\Models\Currency;
 use App\Models\DMReview;
@@ -28,9 +30,11 @@ use App\Models\NotificationMessage;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use MatanYadaev\EloquentSpatial\Objects\Point;
 use Laravelpkg\Laravelchk\Http\Controllers\LaravelchkController;
+
 
 class Helpers
 {
@@ -178,7 +182,10 @@ class Helpers
         $data['min_delivery_time'] =  (int) explode('-',$data->store->delivery_time)[0] ?? 0;
         $data['max_delivery_time'] =  (int) explode('-',$data->store->delivery_time)[1] ?? 0;
         $data['common_condition_id'] =  (int) $data->pharmacy_item_details?->common_condition_id ?? 0;
+        $data['brand_id'] =  (int) $data->ecommerce_item_details?->brand_id ?? 0;
         $data['is_basic'] =  (int) $data->pharmacy_item_details?->is_basic ?? 0;
+        $data['is_prescription_required'] =  (int) $data->pharmacy_item_details?->is_prescription_required ?? 0;
+        $data['halal_tag_status'] =  (int) $data->store->storeConfig?->halal_tag_status??0;
 
         unset($data['pharmacy_item_details']);
         unset($data['store']);
@@ -258,7 +265,10 @@ class Helpers
                 $item['min_delivery_time'] =  (int) explode('-',$item->store?->delivery_time)[0] ?? 0;
                 $item['max_delivery_time'] =  (int) explode('-',$item->store?->delivery_time)[1] ?? 0;
                 $item['common_condition_id'] =  (int) $item->pharmacy_item_details?->common_condition_id ?? 0;
+                $item['brand_id'] =  (int) $item->ecommerce_item_details?->brand_id ?? 0;
                 $item['is_basic'] =  (int) $item->pharmacy_item_details?->is_basic ?? 0;
+                $item['is_prescription_required'] =  (int) $item->pharmacy_item_details?->is_prescription_required ?? 0;
+                $item['halal_tag_status'] =  (int) $item->store->storeConfig?->halal_tag_status??0;
 
                 unset($item['pharmacy_item_details']);
                 unset($item['store']);
@@ -326,7 +336,10 @@ class Helpers
             $data['min_delivery_time'] =  (int) explode('-',$data->store->delivery_time)[0] ?? 0;
             $data['max_delivery_time'] =  (int) explode('-',$data->store->delivery_time)[1] ?? 0;
             $data['common_condition_id'] =  (int) $data->pharmacy_item_details?->common_condition_id ?? 0;
+            $data['brand_id'] =  (int) $data->ecommerce_item_details?->brand_id ?? 0;
             $data['is_basic'] =  (int) $data->pharmacy_item_details?->is_basic ?? 0;
+            $data['is_prescription_required'] =  (int) $data->pharmacy_item_details?->is_prescription_required ?? 0;
+            $data['halal_tag_status'] =  (int) $data->store->storeConfig?->halal_tag_status??0;
             if($temp_product == true){
                 $data['tags']=\App\Models\Tag::whereIn('id',json_decode($data?->tag_ids) )->get(['tag','id']);
             }
@@ -389,17 +402,23 @@ class Helpers
                 $running_flash_sale = FlashSaleItem::Active()->whereHas('flashSale', function ($query) {
                     $query->Active()->Running();
                 })
-                    ->where(['item_id' => $data['id']])->first();
-                $data['flash_sale'] =(int) (($running_flash_sale) ? 1 :0);
-                $data['stock'] = ($running_flash_sale && ($running_flash_sale->available_stock > 0)) ? $running_flash_sale->available_stock : $data['stock'];
-                $data['discount'] = ($running_flash_sale && ($running_flash_sale->available_stock > 0)) ? $running_flash_sale->discount : $data['discount'];
-                $data['discount_type'] = ($running_flash_sale && ($running_flash_sale->available_stock > 0)) ? $running_flash_sale->discount_type : $data['discount_type'];
-                $data['store_discount'] = ($running_flash_sale && ($running_flash_sale->available_stock > 0)) ? 0 : (self::get_store_discount($data->store) ? $data->store?->discount->discount : 0);
+                    ->where(['item_id' => $item['id']])->first();
+                $item['flash_sale'] =(int) (($running_flash_sale) ? 1 :0);
+                $item['stock'] = ($running_flash_sale && ($running_flash_sale->available_stock > 0)) ? $running_flash_sale->available_stock : $item['stock'];
+                $item['discount'] = ($running_flash_sale && ($running_flash_sale->available_stock > 0)) ? $running_flash_sale->discount : $item['discount'];
+                $item['discount_type'] = ($running_flash_sale && ($running_flash_sale->available_stock > 0)) ? $running_flash_sale->discount_type : $item['discount_type'];
+                $item['store_discount'] = ($running_flash_sale && ($running_flash_sale->available_stock > 0)) ? 0 : (self::get_store_discount($item->store) ? $item->store?->discount->discount : 0);
                 $item['schedule_order'] = $item->store->schedule_order;
                 $item['tax'] = $item->store->tax;
                 $item['rating_count'] = (int)($item->rating ? array_sum(json_decode($item->rating, true)) : 0);
                 $item['avg_rating'] = (float)($item->avg_rating ? $item->avg_rating : 0);
                 $item['recommended'] =(int) $item->recommended;
+
+                $item['common_condition_id'] =  (int) $item->pharmacy_item_details?->common_condition_id ?? 0;
+                $item['brand_id'] =  (int) $item->ecommerce_item_details?->brand_id ?? 0;
+                $item['is_basic'] =  (int) $item->pharmacy_item_details?->is_basic ?? 0;
+                $item['is_prescription_required'] =  (int) $item->pharmacy_item_details?->is_prescription_required ?? 0;
+                $item['halal_tag_status'] =  (int) $item->store->storeConfig?->halal_tag_status??0;
 
                 if ($trans) {
                     $item['translations'][] = [
@@ -439,7 +458,8 @@ class Helpers
                 if (!$trans) {
                     unset($item['translations']);
                 }
-
+                unset($item['ecommerce_item_details']);
+                unset($item['pharmacy_item_details']);
                 unset($item['store']);
                 unset($item['rating']);
                 array_push($storage, $item);
@@ -501,6 +521,12 @@ class Helpers
             $data['rating_count'] = (int)($data->rating ? array_sum(json_decode($data->rating, true)) : 0);
             $data['avg_rating'] = (float)($data->avg_rating ? $data->avg_rating : 0);
 
+            $data['common_condition_id'] =  (int) $data->pharmacy_item_details?->common_condition_id ?? 0;
+            $data['brand_id'] =  (int) $data->ecommerce_item_details?->brand_id ?? 0;
+            $data['is_basic'] =  (int) $data->pharmacy_item_details?->is_basic ?? 0;
+            $data['is_prescription_required'] =  (int) $data->pharmacy_item_details?->is_prescription_required ?? 0;
+            $data['halal_tag_status'] =  (int) $data->store->storeConfig?->halal_tag_status??0;
+
             if ($trans) {
                 $data['translations'][] = [
                     'translationable_type' => 'App\Models\Item',
@@ -539,7 +565,8 @@ class Helpers
             if (!$trans) {
                 unset($data['translations']);
             }
-
+            unset($data['ecommerce_item_details']);
+            unset($data['pharmacy_item_details']);
             unset($data['store']);
             unset($data['rating']);
         }
@@ -702,6 +729,11 @@ class Helpers
                 $item['total_items'] = $item['items_count'];
                 $item['total_campaigns'] = $item['campaigns_count'];
                 $item['is_recommended'] = false;
+                $item['halal_tag_status'] =   (bool) $item?->storeConfig?->halal_tag_status;
+                $extra_packaging_data = \App\Models\BusinessSetting::where('key', 'extra_packaging_data')->first()?->value ?? '';
+                $extra_packaging_data =json_decode($extra_packaging_data , true);
+                $item['extra_packaging_status'] =   (bool) (!empty($extra_packaging_data) && $extra_packaging_data[$item->module->module_type]=='1')?$item?->storeConfig?->extra_packaging_status:false;
+                $item['extra_packaging_amount'] =   (float) (!empty($extra_packaging_data) && ($extra_packaging_data[$item->module->module_type]=='1') && ($item?->storeConfig?->extra_packaging_status == '1'))?$item?->storeConfig?->extra_packaging_amount:0;
                 if($item->storeConfig && $item->storeConfig->is_recommended_deleted == 0 ){
                     $item['is_recommended'] = $item->storeConfig->is_recommended;
                 }
@@ -716,6 +748,11 @@ class Helpers
         } else {
             $data->load('storeConfig');
             $data['is_recommended'] = false;
+            $data['halal_tag_status'] =   (bool) $data?->storeConfig?->halal_tag_status;
+            $extra_packaging_data = \App\Models\BusinessSetting::where('key', 'extra_packaging_data')->first()?->value ?? '';
+            $extra_packaging_data =json_decode($extra_packaging_data , true);
+            $data['extra_packaging_status'] =   (bool) (!empty($extra_packaging_data) && $extra_packaging_data[$data->module->module_type]=='1')?$data?->storeConfig?->extra_packaging_status:false;
+            $data['extra_packaging_amount'] =   (float) (!empty($extra_packaging_data) && ($extra_packaging_data[$data->module->module_type]=='1') && ($data?->storeConfig?->extra_packaging_status == '1'))?$data?->storeConfig?->extra_packaging_amount:0;
             if($data->storeConfig && $data->storeConfig->is_recommended_deleted == 0 ){
                 $data['is_recommended'] = $data->storeConfig->is_recommended;
             }
@@ -922,58 +959,93 @@ class Helpers
 
     public static function currency_code()
     {
-        if(!request()->is('/api*') && !session()->has('currency_code')){
-            $currency = BusinessSetting::where(['key' => 'currency'])->first()->value;
-            session()->put('currency_code',$currency);
-        }else{
-            $currency = BusinessSetting::where(['key' => 'currency'])->first()->value;
+        if (!config('currency') ){
+            $currency = BusinessSetting::where(['key' => 'currency'])->first()?->value;
+            Config::set('currency', $currency );
         }
-
-        if(!request()->is('/api*')){
-            $currency = session()->get('currency_code');
+        else{
+            $currency = config('currency');
         }
 
         return $currency;
     }
 
 
-
     public static function currency_symbol()
     {
-        if(!session()->has('currency_symbol')){
-            $currency_symbol = Currency::where(['currency_code' => Helpers::currency_code()])->first()->currency_symbol;
-            session()->put('currency_symbol',$currency_symbol);
+        if (!config('currency_symbol') ){
+            $currency_symbol = Currency::where(['currency_code' => Helpers::currency_code()])->first()?->currency_symbol;
+            Config::set('currency_symbol', $currency_symbol );
         }
-        $currency_symbol = session()->get('currency_symbol');
-        return $currency_symbol;
+        else{
+            $currency_symbol =config('currency_symbol');
+        }
+        return $currency_symbol ;
     }
 
 
 
     public static function format_currency($value)
     {
-        if(!session()->has('currency_symbol_position')){
-            $currency_symbol_position = BusinessSetting::where(['key' => 'currency_symbol_position'])->first()->value;
-            session()->put('currency_symbol_position',$currency_symbol_position);
+        if (!config('currency_symbol_position') ){
+            $currency_symbol_position = BusinessSetting::where(['key' => 'currency_symbol_position'])->first()?->value;
+            Config::set('currency_symbol_position', $currency_symbol_position );
         }
-        $currency_symbol_position = session()->get('currency_symbol_position');
+        else{
+            $currency_symbol_position =config('currency_symbol_position');
+        }
+
         return $currency_symbol_position == 'right' ? number_format($value, config('round_up_to_digit')) . ' ' . self::currency_symbol() : self::currency_symbol() . ' ' . number_format($value, config('round_up_to_digit'));
+    }
+
+    public static function sendNotificationToHttp(array|null $data)
+    {
+        $config = self::get_business_settings('push_notification_service_file_content');
+        $key = (array)$config;
+        if($key['project_id']){
+            $url = 'https://fcm.googleapis.com/v1/projects/'.$key['project_id'].'/messages:send';
+            $headers = [
+                'Authorization' => 'Bearer ' . self::getAccessToken($key),
+                'Content-Type' => 'application/json',
+            ];
+            try {
+                Http::withHeaders($headers)->post($url, $data);
+            }catch (\Exception $exception){
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public static function getAccessToken($key)
+    {
+        $jwtToken = [
+            'iss' => $key['client_email'],
+            'scope' => 'https://www.googleapis.com/auth/firebase.messaging',
+            'aud' => 'https://oauth2.googleapis.com/token',
+            'exp' => time() + 3600,
+            'iat' => time(),
+        ];
+        $jwtHeader = base64_encode(json_encode(['alg' => 'RS256', 'typ' => 'JWT']));
+        $jwtPayload = base64_encode(json_encode($jwtToken));
+        $unsignedJwt = $jwtHeader . '.' . $jwtPayload;
+        openssl_sign($unsignedJwt, $signature, $key['private_key'], OPENSSL_ALGO_SHA256);
+        $jwt = $unsignedJwt . '.' . base64_encode($signature);
+
+        $response = Http::asForm()->post('https://oauth2.googleapis.com/token', [
+            'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+            'assertion' => $jwt,
+        ]);
+        return $response->json('access_token');
     }
 
     public static function send_push_notif_to_device($fcm_token, $data, $web_push_link = null)
     {
-        $key = BusinessSetting::where(['key' => 'push_notification_key'])->first()->value;
-        $url = "https://fcm.googleapis.com/fcm/send";
-        $header = array(
-            "authorization: key=" . $key . "",
-            "content-type: application/json"
-        );
-
-        if(isset($data['message'])){
-            $message = $data['message'];
-        }else{
-            $message = '';
-        }
+//        if(isset($data['message'])){
+//            $message = $data['message'];
+//        }else{
+//            $message = '';
+//        }
         if(isset($data['conversation_id'])){
             $conversation_id = $data['conversation_id'];
         }else{
@@ -995,69 +1067,38 @@ class Helpers
             $order_type = '';
         }
 
-        $click_action = "";
-        if($web_push_link){
-            $click_action = ',
-            "click_action": "'.$web_push_link.'"';
-        }
+//        $click_action = "";
+//        if($web_push_link){
+//            $click_action = ',
+//            "click_action": "'.$web_push_link.'"';
+//        }
+        $postData = [
+            'message' => [
+                "token" => $fcm_token,
+                "data" => [
+                    "title" => (string)$data['title'],
+                    "body" => (string)$data['description'],
+                    "image" => (string)$data['image'],
+                    "order_id" => (string)$data['order_id'],
+                    "type" => (string)$data['type'],
+                    "conversation_id" => (string)$conversation_id,
+                    "module_id" => (string)$module_id,
+                    "sender_type" => (string)$sender_type,
+                    "order_type" => (string)$order_type,
+                    "click_action" => $web_push_link?(string)$web_push_link:'',
+                ],
+                "notification" => [
+                    'title' => (string)$data['title'],
+                    'body' => (string)$data['description'],
+                ],
+            ]
+        ];
 
-        $postdata = '{
-            "to" : "' . $fcm_token . '",
-            "mutable_content": true,
-            "data" : {
-                "title":"' . $data['title'] . '",
-                "body" : "' . $data['description'] . '",
-                "image" : "' . $data['image'] . '",
-                "order_id":"' . $data['order_id'] . '",
-                "type":"' . $data['type'] . '",
-                "conversation_id":"' . $conversation_id . '",
-                "sender_type":"' . $sender_type . '",
-                "module_id":"' . $module_id . '",
-                "order_type":"' . $order_type . '",
-                "is_read": 0
-            },
-            "notification" : {
-                "title" :"' . $data['title'] . '",
-                "body" : "' . $data['description'] . '",
-                "image" : "' . $data['image'] . '",
-                "order_id":"' . $data['order_id'] . '",
-                "title_loc_key":"' . $data['order_id'] . '",
-                "body_loc_key":"' . $data['type'] . '",
-                "type":"' . $data['type'] . '",
-                "is_read": 0,
-                "icon" : "new",
-                "sound": "notification.wav",
-                "android_channel_id": "6ammart"
-                '.$click_action.'
-            }
-        }';
-        $ch = curl_init();
-        $timeout = 120;
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-
-        // Get URL content
-        $result = curl_exec($ch);
-        // close handle to release resources
-        curl_close($ch);
-
-        return $result;
+        return self::sendNotificationToHttp($postData);
     }
 
     public static function send_push_notif_to_topic($data, $topic, $type,$web_push_link = null)
     {
-        // info([$data, $topic, $type, $web_push_link]);
-        $key = BusinessSetting::where(['key' => 'push_notification_key'])->first()->value;
-
-        $url = "https://fcm.googleapis.com/fcm/send";
-        $header = array(
-            "authorization: key=" . $key . "",
-            "content-type: application/json"
-        );
         if(isset($data['module_id'])){
             $module_id = $data['module_id'];
         }else{
@@ -1081,77 +1122,49 @@ class Helpers
         }
 
         if (isset($data['order_id'])) {
-            $postdata = '{
-                "to" : "/topics/' . $topic . '",
-                "mutable_content": true,
-                "data" : {
-                    "title":"' . $data['title'] . '",
-                    "body" : "' . $data['description'] . '",
-                    "image" : "' . $data['image'] . '",
-                    "order_id":"' . $data['order_id'] . '",
-                    "module_id":"' . $module_id . '",
-                    "order_type":"' . $order_type . '",
-                    "zone_id":"' . $zone_id . '",
-                    "is_read": 0,
-                    "type":"' . $type . '"
-                },
-                "notification" : {
-                    "title":"' . $data['title'] . '",
-                    "body" : "' . $data['description'] . '",
-                    "image" : "' . $data['image'] . '",
-                    "order_id":"' . $data['order_id'] . '",
-                    "title_loc_key":"' . $data['order_id'] . '",
-                    "body_loc_key":"' . $type . '",
-                    "type":"' . $type . '",
-                    "is_read": 0,
-                    "icon" : "new",
-                    "sound": "notification.wav",
-                    "android_channel_id": "6ammart"
-                    '.$click_action.'
-                  }
-            }';
+            $postData = [
+                'message' => [
+                    "topic" => $topic,
+                    "data" => [
+                        "title" => (string)$data['title'],
+                        "body" => (string)$data['description'],
+                        "order_id" => (string)$data['order_id'],
+                        "order_type" => (string)$order_type,
+                        "type" => (string)$type,
+                        "image" => (string)$data['image'],
+                        "module_id" => (string)$module_id,
+                        "zone_id" => (string)$zone_id,
+                        "title_loc_key" => (string)$data['order_id'],
+                        "body_loc_key" => (string)$type,
+                        "click_action" => $web_push_link?(string)$web_push_link:'',
+                    ],
+                    "notification" => [
+                        "title" => (string)$data['title'],
+                        "body" => (string)$data['description'],
+                    ],
+                ]
+            ];
         } else {
-            $postdata = '{
-                "to" : "/topics/' . $topic . '",
-                "mutable_content": true,
-                "data" : {
-                    "title":"' . $data['title'] . '",
-                    "body" : "' . $data['description'] . '",
-                    "image" : "' . $data['image'] . '",
-                    "is_read": 0,
-                    "type":"' . $type . '"
-                },
-                "notification" : {
-                    "title":"' . $data['title'] . '",
-                    "body" : "' . $data['description'] . '",
-                    "image" : "' . $data['image'] . '",
-                    "body_loc_key":"' . $type . '",
-                    "type":"' . $type . '",
-                    "is_read": 0,
-                    "icon" : "new",
-                    "sound": "notification.wav",
-                    "android_channel_id": "6ammart"
-                    '.$click_action.'
-                  }
-            }';
+            $postData = [
+                'message' => [
+                    "topic" => $topic,
+                    "data" => [
+                        "title" => (string)$data['title'],
+                        "body" => (string)$data['description'],
+                        "type" => (string)$type,
+                        "image" => (string)$data['image'],
+                        "body_loc_key" => (string)$type,
+                        "click_action" => $web_push_link?(string)$web_push_link:'',
+                    ],
+                    "notification" => [
+                        "title" => (string)$data['title'],
+                        "body" => (string)$data['description'],
+                    ],
+                ]
+            ];
         }
 
-
-        $ch = curl_init();
-        $timeout = 120;
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-
-        // Get URL content
-        $result = curl_exec($ch);
-        // close handle to release resources
-        curl_close($ch);
-
-        return $result;
+        return self::sendNotificationToHttp($postData);
     }
 
 
@@ -3241,6 +3254,178 @@ class Helpers
             return $src;
         }
         return $error_src;
+    }
+
+
+    public static function getCalculatedCashBackAmount($amount,$customer_id){
+        $data=[
+            'calculated_amount'=> (float) 0,
+            'cashback_amount'=>0,
+            'cashback_type'=>'',
+            'min_purchase'=>0,
+            'max_discount'=>0,
+            'id'=>0,
+        ];
+
+        try {
+            $percent_bonus = CashBack::active()
+            ->where('cashback_type', 'percentage')
+            ->Running()
+            ->where('min_purchase', '<=', $amount)
+            ->where(function($query) use ($customer_id) {
+                $query->whereJsonContains('customer_id', [$customer_id])->orWhereJsonContains('customer_id', ['all']);
+            })
+                ->when(is_numeric($customer_id), function($q) use ($customer_id){
+                $q->where('same_user_limit', '>', function($query) use ($customer_id) {
+                    $query->select(DB::raw('COUNT(*)'))
+                            ->from('cash_back_histories')
+                            ->where('user_id', $customer_id)
+                            ->whereColumn('cash_back_id', 'cash_backs.id');
+                    });
+                })
+
+            ->orderBy('cashback_amount', 'desc')
+            ->first();
+
+            $amount_bonus = CashBack::active()->where('cashback_type','amount')
+            ->Running()
+            ->where(function($query)use($customer_id){
+                $query->whereJsonContains('customer_id', [$customer_id])->orWhereJsonContains('customer_id', ['all']);
+            })
+            ->where('min_purchase','<=',$amount )
+            ->when(is_numeric($customer_id), function($q) use ($customer_id){
+                $q->where('same_user_limit', '>', function($query) use ($customer_id) {
+                    $query->select(DB::raw('COUNT(*)'))
+                            ->from('cash_back_histories')
+                            ->where('user_id', $customer_id)
+                            ->whereColumn('cash_back_id', 'cash_backs.id');
+                    });
+                })
+            ->orderBy('cashback_amount','desc')->first();
+
+            if($percent_bonus && ($amount >=$percent_bonus->min_purchase)){
+                $p_bonus = ($amount  * $percent_bonus->cashback_amount)/100;
+                $p_bonus = $p_bonus > $percent_bonus->max_discount ? $percent_bonus->max_discount : $p_bonus;
+                $p_bonus = round($p_bonus,config('round_up_to_digit'));
+            }else{
+                $p_bonus = 0;
+            }
+
+            if($amount_bonus && ($amount >=$amount_bonus->min_purchase)){
+                $a_bonus = $amount_bonus?$amount_bonus->cashback_amount: 0;
+                $a_bonus = round($a_bonus,config('round_up_to_digit'));
+            }else{
+                $a_bonus = 0;
+            }
+
+            $cashback_amount = max([$p_bonus,$a_bonus]);
+
+            if($p_bonus ==  $cashback_amount){
+                $data=[
+                    'calculated_amount'=> (float)$cashback_amount,
+                    'cashback_amount'=>$percent_bonus?->cashback_amount ?? 0,
+                    'cashback_type'=>$percent_bonus?->cashback_type ?? '',
+                    'min_purchase'=>$percent_bonus?->min_purchase ?? 0,
+                    'max_discount'=>$percent_bonus?->max_discount ?? 0,
+                    'id'=>$percent_bonus?->id,
+                ];
+
+            } elseif($a_bonus == $cashback_amount){
+                $data=[
+                    'calculated_amount'=> (float)$cashback_amount,
+                    'cashback_amount'=>$amount_bonus?->cashback_amount ?? 0,
+                    'cashback_type'=>$amount_bonus?->cashback_type ?? '',
+                    'min_purchase'=>$amount_bonus?->min_purchase ?? 0,
+                    'max_discount'=>$amount_bonus?->max_discount ?? 0,
+                    'id'=>$amount_bonus?->id,
+                ];
+            }
+
+            return $data ;
+        } catch (\Exception $exception) {
+            info([$exception->getFile(),$exception->getLine(),$exception->getMessage()]);
+            return $data ;
+        }
+
+    }
+
+
+
+     public static function getCusromerFirstOrderDiscount($order_count, $user_creation_date,$refby, $price = null){
+
+        $data=[
+            'is_valid' => false,
+            'discount_amount' => 0,
+            'discount_amount_type' => '',
+            'validity' => '',
+            'calculated_amount' => 0,
+        ];
+        if($order_count > 0 || !$refby){
+            return $data?? [];
+        }
+    $settings =  array_column(BusinessSetting::whereIn('key',['new_customer_discount_status','new_customer_discount_amount','new_customer_discount_amount_type','new_customer_discount_amount_validity','new_customer_discount_validity_type',])->get()->toArray(), 'value', 'key');
+
+        $validity_value = data_get($settings,'new_customer_discount_amount_validity');
+        $validity_unit = data_get($settings,'new_customer_discount_validity_type');
+
+        if($validity_unit == 'day'){
+            $validity_end_date = (new DateTime($user_creation_date))->modify("+$validity_value day");
+
+        } elseif($validity_unit == 'month'){
+            $validity_end_date = (new DateTime($user_creation_date))->modify("+$validity_value month");
+
+        } elseif($validity_unit == 'year'){
+            $validity_end_date = (new DateTime($user_creation_date))->modify("+$validity_value year");
+        }
+        else{
+            $validity_end_date = (new DateTime($user_creation_date))->modify("-1 day");
+        }
+
+        $is_valid=false;
+        $current_date = new DateTime();
+        if($validity_end_date >= $current_date){
+        $is_valid=true;
+        }
+
+
+
+    if($order_count == 0 && $is_valid && data_get($settings,'new_customer_discount_status' ) == 1 && data_get($settings,'new_customer_discount_amount' ) > 0 ){
+        $calculated_amount=0;
+        if(data_get($settings,'new_customer_discount_amount_type') == 'percentage' && isset($price)){
+            $calculated_amount= ($price / 100) * data_get($settings,'new_customer_discount_amount');
+        } else{
+            $calculated_amount=data_get($settings,'new_customer_discount_amount');
+        }
+
+        $data=[
+            'is_valid' => $is_valid,
+            'discount_amount' => data_get($settings,'new_customer_discount_amount'),
+            'discount_amount_type' => data_get($settings,'new_customer_discount_amount_type'),
+            'validity' => data_get($settings,'new_customer_discount_amount_validity') .' '. translate(Str::plural((data_get($settings,'new_customer_discount_validity_type') ?? 'day'),data_get($settings,'new_customer_discount_amount_validity'))),
+            'calculated_amount' => round($calculated_amount,config('round_up_to_digit')),
+        ];
+    }
+
+    return $data?? [];
+    }
+
+
+    public static function send_push_notif_for_demo_reset($data, $topic, $type,)
+    {
+        $postData = [
+            'message' => [
+                "topic" => $topic,
+                "data" => [
+                    "title" => (string)$data['title'],
+                    "body" => (string)$data['description'],
+                    "type" => (string)$type,
+                    "image" => (string)$data['image'],
+                    "body_loc_key" => (string)$type,
+                ]
+            ]
+        ];
+
+        return self::sendNotificationToHttp($postData);
     }
 
 }

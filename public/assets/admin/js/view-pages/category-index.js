@@ -6,9 +6,7 @@ $(document).on('ready', function () {
     });
 });
 
-$('#reset_btn').click(function(){
-    $('#exampleFormControlSelect1').val(null).trigger('change');
-})
+
 var forms = document.querySelectorAll('.priority-form');
 
 forms.forEach(function(form) {

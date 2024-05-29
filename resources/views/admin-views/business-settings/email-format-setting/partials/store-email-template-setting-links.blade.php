@@ -21,6 +21,18 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link {{ Request::is('admin/business-settings/email-setup/store/suspend') ? 'active' : '' }}"
+                href="{{ route('admin.business-settings.email-setup', ['store','suspend']) }}">
+                    {{translate('Account_Suspend')}}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('admin/business-settings/email-setup/store/unsuspend') ? 'active' : '' }}"
+                href="{{ route('admin.business-settings.email-setup', ['store','unsuspend']) }}">
+                    {{translate('Account_Unsuspend')}}
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link {{ Request::is('admin/business-settings/email-setup/store/withdraw-approve') ? 'active' : '' }}"
                 href="{{ route('admin.business-settings.email-setup', ['store','withdraw-approve']) }}">
                     {{translate('Withdraw_Approval')}}

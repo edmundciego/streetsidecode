@@ -41,6 +41,7 @@
             <th>{{translate('messages.item_name')}}</th>
             <th>{{translate('messages.module')}}</th>
             <th>{{translate('messages.store_name')}}</th>
+            <th>{{translate('messages.stock')}}</th>
             <th>{{translate('messages.total_order_count')}}</th>
             <th>{{translate('messages.unit_price')}}</th>
             <th>{{translate('messages.total_amount_sold')}}</th>
@@ -64,6 +65,9 @@
                     @else
                     {{translate('messages.store_deleted')}}
                     @endif
+                </td>
+                <td>
+                    {{$item->module->module_type == 'food'? translate('N/A') : $item->stock}}
                 </td>
                 <td>
                     {{$item->orders_count}}

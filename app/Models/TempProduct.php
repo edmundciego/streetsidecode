@@ -52,6 +52,9 @@ class TempProduct extends Model
     public function common_condition(){
         return $this->belongsTo(CommonCondition::class,'common_condition_id');
     }
+    public function brand(){
+        return $this->belongsTo(Brand::class,'brand_id');
+    }
 
     public function pharmacy_item_details()
     {

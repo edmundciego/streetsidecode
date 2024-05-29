@@ -2,6 +2,14 @@
 
 @section('title',translate('messages.Update category'))
 
+@if($category->position ==  1)
+@section('sub_category')
+@else
+@section('main_category')
+@endif
+active
+@endsection
+
 @push('css_or_js')
 
 @endpush
@@ -25,9 +33,9 @@
                 <form action="{{route('admin.category.update',[$category['id']])}}" method="post" enctype="multipart/form-data">
                     @csrf
                     <div class="row">
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                             @if($language)
-                                <ul class="nav nav-tabs mb-4">
+                                <ul class="nav nav-tabs mb-4 border-0">
                                     <li class="nav-item">
                                         <a class="nav-link lang_link active"
                                         href="#"
@@ -42,11 +50,13 @@
                                     @endforeach
                                 </ul>
                             @endif
-                        </div>
-                        <div class="col-md-12">
                             @if($language)
                                 <div class="form-group lang_form" id="default-form">
-                                    <label class="input-label" for="exampleFormControlInput1">{{translate('messages.name')}} ({{ translate('messages.default') }})</label>
+                                    <label class="input-label" for="exampleFormControlInput1">{{translate('messages.name')}} ({{ translate('messages.default') }}) <span class="form-label-secondary text-danger"
+                                        data-toggle="tooltip" data-placement="right"
+                                        data-original-title="{{ translate('messages.Required.')}}"> *
+                                        </span>
+                                    </label>
                                     <input type="text" name="name[]" class="form-control" placeholder="{{translate('messages.new_category')}}" maxlength="191" value="{{$category?->getRawOriginal('name')}}"  >
                                 </div>
                                 <input type="hidden" name="lang[]" value="default">
@@ -80,21 +90,23 @@
                         </div>
                         <div class="col-md-6">
                             @if ($category->position == 0)
-                            <div class="h-100 d-flex flex-column">
-                                <label class="mb-0">{{translate('messages.image')}}
+                            <div class="h-100 d-flex align-items-center flex-column">
+                                <label class="mb-4">{{translate('messages.image')}}
                                     <small class="text-danger">* ( {{translate('messages.ratio')}} 1:1 )</small>
                                 </label>
-                                <div class="text-center py-3 my-auto">
-                                    <img class="img--100 onerror-image" id="viewer"
-                                    src="{{\App\CentralLogics\Helpers::onerror_image_helper($category['image'], asset('storage/app/public/category/').'/'.$category['image'], asset('public/assets/admin/img/900x400/img1.jpg'), 'category/') }}"
-                                        data-onerror-image="{{asset('public/assets/admin/img/900x400/img1.jpg')}}"
+                                <label class="text-center my-auto position-relative d-inline-block">
+                                    <img class="img--176 border" id="viewer"
+                                    src="{{\App\CentralLogics\Helpers::onerror_image_helper($category['image'], asset('storage/app/public/category/').'/'.$category['image'], asset('public/assets/admin/img/upload-img.png'), 'category/') }}"
+                                        data-onerror-image="{{asset('public/assets/admin/img/upload-img.png')}}"
                                         alt=""/>
-                                </div>
-                                <div class="custom-file">
-                                    <input type="file" name="image" id="customFileEg1" class="custom-file-input read-url"
-                                            accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
-                                    <label class="custom-file-label mb-0" for="customFileEg1">{{translate('messages.choose_file')}}</label>
-                                </div>
+                                    <div class="icon-file-group">
+                                        <div class="icon-file">
+                                            <input type="file" name="image" id="customFileEg1" class="custom-file-input read-url"
+                                                accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
+                                                <i class="tio-edit"></i>
+                                        </div>
+                                    </div>
+                                </label>
                             </div>
                             @endif
                         </div>
@@ -117,7 +129,14 @@
         "use strict";
         $('#reset_btn').click(function(){
             $('#module_id').val("{{ $category->module_id }}").trigger('change');
-            $('#viewer').attr('src', "{{asset('storage/app/public/category')}}/{{$category['image']}}");
+            $('#viewer').attr('src', "{{\App\CentralLogics\Helpers::onerror_image_helper($category['image'], asset('storage/app/public/category/').'/'.$category['image'], asset('public/assets/admin/img/upload-img.png'), 'category/') }}");
         })
+        $("#customFileEg1").change(function() {
+            readURL(this);
+            $('#viewer').show(1000)
+        });
+
+
+
     </script>
 @endpush

@@ -248,4 +248,11 @@ function HSDemo() {
   document.getElementById("sidebarCompact").parentNode.removeChild(document.getElementById("sidebarCompact"));
 }
 
+document.addEventListener('DOMContentLoaded', function () {
+  var tooltips = new bootstrap.Tooltip(document.body, {
+    selector: '[data-toggle="tooltip"]'
+  });
+});
+
+
 HSDemo();

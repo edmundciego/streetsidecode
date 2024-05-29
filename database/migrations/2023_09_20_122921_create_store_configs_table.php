@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('storeConfigs', function (Blueprint $table) {
+        Schema::create('store_configs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('store_id');
             $table->boolean('is_recommended')->default(0);
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('storeConfigs');
+        Schema::dropIfExists('store_configs');
     }
 };

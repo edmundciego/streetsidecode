@@ -590,17 +590,17 @@ trait  SmsGateway
             $curl = curl_init();
 
             curl_setopt_array($curl, array(
-              CURLOPT_URL => 'https://api.sms.net.bd/sendsms',
-              CURLOPT_RETURNTRANSFER => true,
-              CURLOPT_CUSTOMREQUEST => 'POST',
-              CURLOPT_POSTFIELDS => array('api_key' => $api_key,'msg' => $message ,'to' => $receiver),
+                CURLOPT_URL => 'https://api.sms.net.bd/sendsms',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_POSTFIELDS => array('api_key' => $api_key, 'msg' => $message, 'to' => $receiver),
             ));
 
             $response = curl_exec($curl);
             $err = curl_error($curl);
             curl_close($curl);
 
-            if (!$err) {
+            if ((int) data_get(json_decode($response,true),'error') === 0) {
                 $response = 'success';
             } else {
                 $response = 'error';

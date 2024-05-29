@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 
+use App\Models\Brand;
+use App\Models\EcommerceItemDetails;
 use Carbon\Carbon;
 use App\Models\Tag;
 use App\Models\Item;
@@ -18,6 +20,7 @@ use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
 use App\Exports\ItemListExport;
 use App\Models\CommonCondition;
+use Illuminate\Validation\Rule;
 use App\Exports\StoreItemExport;
 use App\Exports\ItemReviewExport;
 use Illuminate\Support\Facades\DB;
@@ -48,7 +51,11 @@ class ItemController extends Controller
             'name.0' => 'required',
             'name.*' => 'max:191',
             'category_id' => 'required',
-            'image' => 'required_unless:product_gellary,1',
+            'image' => [
+                Rule::requiredIf(function ()use ($request) {
+                    return (Config::get('module.current_module_type') != 'food' && $request?->product_gellary == null )  ;
+                })
+            ],
             'price' => 'required|numeric|between:.01,999999999999.99',
             'discount' => 'required|numeric|min:0',
             'store_id' => 'required',
@@ -59,7 +66,7 @@ class ItemController extends Controller
             'description.*.max' => translate('messages.description_length_warning'),
             'name.0.required' => translate('messages.item_name_required'),
             'category_id.required' => translate('messages.category_required'),
-            'image.required_unless' => translate('messages.Image_is_required'),
+            'image.required' => translate('messages.thumbnail image is required'),
             'name.0.required' => translate('default_name_is_required'),
             'description.0.required' => translate('default_description_is_required'),
         ]);
@@ -70,12 +77,14 @@ class ItemController extends Controller
         }
 
         if ($request['price'] <= $dis) {
-            $validator->getMessageBag()->add('unit_price', translate('messages.discount_can_not_be_more_than_or_equal'));
+                $validator->getMessageBag()->add('unit_price', translate("Discount amount can't be greater than 100%
+"));
         }
 
         if ($request['price'] <= $dis || $validator->fails()) {
-            return response()->json(['errors' => Helpers::error_processor($validator)]);
-        }
+                return response()->json(['errors' => Helpers::error_processor($validator)]);
+            }
+
         $images = [];
 
         if($request->item_id && $request?->product_gellary == 1 ){
@@ -250,6 +259,7 @@ class ItemController extends Controller
         }
         $item->stock = $request->current_stock ?? 0;
         $item->images = $images;
+        $item->is_halal =  $request->is_halal ?? 0;
         $item->save();
         $item->tags()->sync($tag_ids);
         if ($module_type == 'pharmacy') {
@@ -257,6 +267,13 @@ class ItemController extends Controller
             $item_details->item_id = $item->id;
             $item_details->common_condition_id = $request->condition_id;
             $item_details->is_basic = $request->basic ?? 0;
+            $item_details->is_prescription_required = $request->is_prescription_required ?? 0;
+            $item_details->save();
+        }
+        if ($module_type == 'ecommerce') {
+            $item_details = new EcommerceItemDetails();
+            $item_details->item_id = $item->id;
+            $item_details->brand_id = $request->brand_id;
             $item_details->save();
         }
 
@@ -337,7 +354,7 @@ class ItemController extends Controller
         }
 
         if ($request['price'] <= $dis) {
-            $validator->getMessageBag()->add('unit_price', translate('messages.discount_can_not_be_more_than_or_equal'));
+            $validator->getMessageBag()->add('unit_price', translate("Discount amount can't be greater than 100%"));
         }
 
         if ($request['price'] <= $dis || $validator->fails()) {
@@ -487,6 +504,7 @@ class ItemController extends Controller
         $item->maximum_cart_quantity = $request->maximum_cart_quantity;
         // $item->module_id= $request->module_id;
         $item->stock = $request->current_stock ?? 0;
+        $item->is_halal = $request->is_halal ?? 0;
         $item->organic = $request->organic ?? 0;
         $item->veg = $request->veg;
         $item->images = $images;
@@ -523,6 +541,16 @@ class ItemController extends Controller
                     [
                         'common_condition_id' => $request->condition_id,
                         'is_basic' => $request->basic ?? 0,
+                        'is_prescription_required' => $request->is_prescription_required ?? 0,
+                    ]
+                );
+        }
+        if($item->module->module_type == 'ecommerce'){
+            DB::table('ecommerce_item_details')
+                ->updateOrInsert(
+                    ['item_id' => $item->id],
+                    [
+                        'brand_id' => $request->brand_id,
                     ]
                 );
         }
@@ -739,6 +767,7 @@ class ItemController extends Controller
         $sub_category_id = $request->query('sub_category_id', 'all');
         $zone_id = $request->query('zone_id', 'all');
         $condition_id = $request->query('condition_id', 'all');
+        $brand_id = $request->query('brand_id', 'all');
 
         $type = $request->query('type', 'all');
         $key = explode(' ', $request['search']);
@@ -764,13 +793,20 @@ class ItemController extends Controller
             })
             ->when(is_numeric($condition_id), function ($query) use ($condition_id) {
                 return $query->whereHas('pharmacy_item_details', function ($q) use ($condition_id) {
-                    return $q->where('id'  , $condition_id);
+                    return $q->where('common_condition_id'  , $condition_id);
+                });
+            })
+            ->when(is_numeric($brand_id), function ($query) use ($brand_id) {
+                return $query->whereHas('ecommerce_item_details', function ($q) use ($brand_id) {
+                    return $q->where('brand_id'  , $brand_id);
                 });
             })
             ->when($request['search'], function ($query) use ($key) {
                 return $query->where(function ($q) use ($key) {
                     foreach ($key as $value) {
-                        $q->where('name', 'like', "%{$value}%");
+                        $q->where('name', 'like', "%{$value}%")->orWhereHas('category', function ($q) use ($value) {
+                            return $q->where('name', 'like', "%{$value}%");
+                        });
                     }
                 });
             })
@@ -782,6 +818,7 @@ class ItemController extends Controller
         $category = $category_id != 'all' ? Category::findOrFail($category_id) : null;
         $sub_categories = $category_id != 'all' ? Category::where('parent_id', $category_id)->get(['id','name']) : [];
         $condition = $condition_id != 'all' ? CommonCondition::findOrFail($condition_id) : [];
+        $brand = $brand_id != 'all' ? Brand::findOrFail($brand_id) : [];
 
         return view('admin-views.product.list', compact('items', 'store', 'category', 'type','sub_categories', 'condition'));
     }
@@ -828,10 +865,20 @@ class ItemController extends Controller
     {
         $view='admin-views.product.partials._table';
         $key = explode(' ', $request['search']);
-        $items = Item::withoutGlobalScope(StoreScope::class)->where(function ($q) use ($key) {
+        $store_id = $request->query('store_id', 'all');
+        $category_id = $request->query('category_id', 'all');
+        $items = Item::withoutGlobalScope(StoreScope::class)
+        ->where(function ($q) use ($key) {
             foreach ($key as $value) {
                 $q->where('name', 'like', "%{$value}%");
             }
+        })->when(is_numeric($store_id), function ($query) use ($store_id) {
+            return $query->where('store_id', $store_id);
+        })
+        ->when(is_numeric($category_id), function ($query) use ($category_id) {
+            return $query->whereHas('category', function ($q) use ($category_id) {
+                return $q->whereId($category_id)->orWhere('parent_id', $category_id);
+            });
         })->module(Config::get('module.current_module_id'))->where('is_approved',1);
 
         if(isset($request->product_gallery) && $request->product_gallery==1){
@@ -850,26 +897,30 @@ class ItemController extends Controller
 
     public function review_list(Request $request)
     {
-        // $reviews = Review::with(['item'=>function($query){
-        //     $query->withOutGlobalScope(StoreScope::class);
-        // }, 'customer'])->whereHas('item', function ($q) use ($request) {
-        //     return $q->where('module_id', Config::get('module.current_module_id'))->withOutGlobalScope(StoreScope::class);
-        // })
 
         $key = explode(' ', $request['search']);
         $reviews = Review::with('item')
-            ->when(isset($key), function ($query) use ($key) {
-                $query->whereHas('item', function ($query) use ($key) {
-                    foreach ($key as $value) {
-                        $query->where('name', 'like', "%{$value}%");
-                    }
+            ->when(isset($key), function ($query) use ($key,$request) {
+                $query->where(function($query) use($key,$request) {
+
+                    $query->whereHas('item', function ($query) use ($key) {
+                        foreach ($key as $value) {
+                            $query->where('name', 'like', "%{$value}%");
+                        }
+                    })->orWhereHas('customer', function ($query) use ($key){
+                        foreach ($key as $value) {
+                            $query->where('f_name', 'like', "%{$value}%")->orwhere('l_name', 'like', "%{$value}%");
+                        }
+                    })->orwhere('rating', $request['search']);
                 });
+
             })
             ->whereHas('item', function ($q) {
                 return $q->where('module_id', Config::get('module.current_module_id'))->withoutGlobalScope(StoreScope::class);
             })
 
             ->latest()->paginate(config('default_pagination'));
+
         return view('admin-views.product.reviews-list', compact('reviews'));
     }
 
@@ -973,7 +1024,6 @@ class ItemController extends Controller
             Toastr::error(translate('messages.you_have_uploaded_a_wrong_format_file'));
             return back();
         }
-
         if ($request->button == 'import') {
             $data = [];
             try{
@@ -982,7 +1032,6 @@ class ItemController extends Controller
                         Toastr::error(translate('messages.please_fill_all_required_fields'));
                         return back();
                     }
-
                     if (isset($collection['Price']) && ($collection['Price'] < 0)) {
                         Toastr::error(translate('messages.Price_must_be_greater_then_0') . ' ' . $collection['Id']);
                         return back();
@@ -991,7 +1040,6 @@ class ItemController extends Controller
                         Toastr::error(translate('messages.Discount_must_be_greater_then_0') . ' ' . $collection['Id']);
                         return back();
                     }
-
                     try {
                         $t1 = Carbon::parse($collection['AvailableTimeStarts']);
                         $t2 = Carbon::parse($collection['AvailableTimeEnds']);
@@ -1004,7 +1052,6 @@ class ItemController extends Controller
                         Toastr::error(translate('messages.Invalid_AvailableTimeEnds_or_AvailableTimeStarts_on_id') . ' ' . $collection['Id']);
                         return back();
                     }
-
                     array_push($data, [
                         'name' => $collection['Name'],
                         'description' => $collection['Description'],
@@ -1020,12 +1067,12 @@ class ItemController extends Controller
                         'available_time_starts' => $collection['AvailableTimeStarts'] ?? '00:00:00',
                         'available_time_ends' => $collection['AvailableTimeEnds'] ?? '23:59:59',
                         'variations' => $module_type == 'food' ? json_encode([]) : $collection['Variations'] ?? json_encode([]),
+                        'choice_options' => $module_type == 'food' ? json_encode([]) : $collection['ChoiceOptions'] ?? json_encode([]),
                         'food_variations' => $module_type == 'food' ? $collection['Variations'] ?? json_encode([]) : json_encode([]),
                         'add_ons' => $collection['AddOns'] ? ($collection['AddOns'] == "" ? json_encode([]) : $collection['AddOns']) : json_encode([]),
                         'attributes' => $collection['Attributes'] ? ($collection['Attributes'] == "" ? json_encode([]) : $collection['Attributes']) : json_encode([]),
                         'store_id' => $collection['StoreId'],
                         'module_id' => $module_id,
-                        'choice_options' => json_encode([]),
                         'status' => $collection['Status'] == 'active' ? 1 : 0,
                         'veg' => $collection['Veg'] == 'yes' ? 1 : 0,
                         'recommended' => $collection['Recommended'] == 'yes' ? 1 : 0,
@@ -1040,10 +1087,8 @@ class ItemController extends Controller
             }
             try {
                 DB::beginTransaction();
-
                 $chunkSize = 100;
                 $chunk_items = array_chunk($data, $chunkSize);
-
                 foreach ($chunk_items as $key => $chunk_item) {
                     DB::table('items')->insert($chunk_item);
                 }
@@ -1054,11 +1099,9 @@ class ItemController extends Controller
                 Toastr::error(translate('messages.failed_to_import_data'));
                 return back();
             }
-
             Toastr::success(translate('messages.product_imported_successfully', ['count' => count($data)]));
             return back();
         }
-
         $data = [];
         try {
                 foreach ($collections as $collection) {
@@ -1078,7 +1121,6 @@ class ItemController extends Controller
                         Toastr::error(translate('messages.Discount_must_be_less_then_100') . ' ' . $collection['Id']);
                         return back();
                     }
-
                     try {
                         $t1 = Carbon::parse($collection['AvailableTimeStarts']);
                         $t2 = Carbon::parse($collection['AvailableTimeEnds']);
@@ -1091,8 +1133,6 @@ class ItemController extends Controller
                         Toastr::error(translate('messages.Invalid_AvailableTimeEnds_or_AvailableTimeStarts_on_id') . ' ' . $collection['Id']);
                         return back();
                     }
-
-
                     array_push($data, [
                         'id' => $collection['Id'],
                         'name' => $collection['Name'],
@@ -1109,6 +1149,7 @@ class ItemController extends Controller
                         'available_time_starts' => $collection['AvailableTimeStarts'] ?? '00:00:00',
                         'available_time_ends' => $collection['AvailableTimeEnds'] ?? '23:59:59',
                         'variations' => $module_type == 'food' ? json_encode([]) : $collection['Variations'] ?? json_encode([]),
+                        'choice_options' => $module_type == 'food' ? json_encode([]) : $collection['ChoiceOptions'] ?? json_encode([]),
                         'food_variations' => $module_type == 'food' ? $collection['Variations'] ?? json_encode([]) : json_encode([]),
                         'add_ons' => $collection['AddOns'] ? ($collection['AddOns'] == "" ? json_encode([]) : $collection['AddOns']) : json_encode([]),
                         'attributes' => $collection['Attributes'] ? ($collection['Attributes'] == "" ? json_encode([]) : $collection['Attributes']) : json_encode([]),
@@ -1125,22 +1166,17 @@ class ItemController extends Controller
                     Toastr::error(translate('messages.Item_doesnt_exist_at_the_database'));
                     return back();
                 }
-
-
             }catch(\Exception $e){
                 info(["line___{$e->getLine()}",$e->getMessage()]);
                 Toastr::error(translate('messages.failed_to_import_data'));
                 return back();
             }
-
         try {
             DB::beginTransaction();
-
             $chunkSize = 100;
             $chunk_items = array_chunk($data, $chunkSize);
-
             foreach ($chunk_items as $key => $chunk_item) {
-                DB::table('items')->upsert($chunk_item, ['id', 'module_id'], ['name', 'description', 'image', 'images', 'category_id', 'category_ids', 'unit_id', 'stock', 'price', 'discount', 'discount_type', 'available_time_starts', 'available_time_ends', 'variations', 'food_variations', 'add_ons', 'attributes', 'store_id', 'status', 'veg', 'recommended']);
+                DB::table('items')->upsert($chunk_item, ['id', 'module_id'], ['name', 'description', 'image', 'images', 'category_id', 'category_ids', 'unit_id', 'stock', 'price', 'discount', 'discount_type', 'available_time_starts', 'available_time_ends','choice_options', 'variations', 'food_variations', 'add_ons', 'attributes', 'store_id', 'status', 'veg', 'recommended']);
             }
             DB::commit();
         } catch (\Exception $e) {
@@ -1149,7 +1185,6 @@ class ItemController extends Controller
             Toastr::error(translate('messages.failed_to_import_data'));
             return back();
         }
-
         Toastr::success(translate('messages.product_imported_successfully', ['count' => count($data)]));
         return back();
     }
@@ -1490,7 +1525,8 @@ class ItemController extends Controller
 
         return response()->json([
             'choice_options' => json_encode($choice_options),
-            'variation' => json_encode($variations)
+            'variation' => json_encode($variations),
+            'attributes' => $request->has('attribute_id') ? json_encode($request->attribute_id) : json_encode([])
         ]);
     }
 
@@ -1503,7 +1539,10 @@ class ItemController extends Controller
         $sub_category_id = $request->query('sub_category_id', 'all');
         $zone_id = $request->query('zone_id', 'all');
         $type = $request->query('type', 'all');
+        $filter = $request->query('filter');
         $key = explode(' ', $request['search']);
+        $from =  $request->query('from');
+        $to =  $request->query('to');
 
         $items = TempProduct::withoutGlobalScope(StoreScope::class)
             ->when($request->query('module_id', null), function ($query) use ($request) {
@@ -1532,15 +1571,26 @@ class ItemController extends Controller
                     }
                 });
             })
-            // ->where('is_rejected',1)
+            ->when(isset($filter) && $filter == 'pending' , function ($query)  {
+                return $query->where('is_rejected', 0);
+            })
+            ->when(isset($filter) && $filter == 'rejected' , function ($query)  {
+                return $query->where('is_rejected', 1);
+            })
+            ->when(isset($from) && isset($to) && $from != null && $to != null && isset($filter) && $filter == 'custom', function ($query) use ($from, $to) {
+                return $query->whereBetween('updated_at', [$from . " 00:00:00", $to . " 23:59:59"]);
+            })
+
             ->module(Config::get('module.current_module_id'))
             ->type($type)
-            ->latest()->paginate(config('default_pagination'));
+            ->orderBy('is_rejected', 'asc')
+            ->orderBy('updated_at', 'desc')
+            ->paginate(config('default_pagination'));
         $store = $store_id != 'all' ? Store::findOrFail($store_id) : null;
         $category = $category_id != 'all' ? Category::findOrFail($category_id) : null;
         $sub_categories = $category_id != 'all' ? Category::where('parent_id', $category_id)->get(['id','name']) : [];
 
-        return view('admin-views.product.approv_list', compact('items', 'store', 'category', 'type','sub_categories'));
+        return view('admin-views.product.approv_list', compact('items', 'store', 'category', 'type','sub_categories','filter'));
     }
 
 
@@ -1603,6 +1653,7 @@ class ItemController extends Controller
         $item->veg = $data->veg;
 
         $item->organic = $data->organic;
+        $item->is_halal = $data->is_halal;
         $item->stock =  $data->stock;
         $item->is_approved = 1;
 
@@ -1666,6 +1717,7 @@ class ItemController extends Controller
                     }
                 });
             })
+            ->orderByRaw("FIELD(name, ?) DESC", [$request['name']])
             ->where('is_approved',1)
             ->module(Config::get('module.current_module_id'))
             ->type($type)

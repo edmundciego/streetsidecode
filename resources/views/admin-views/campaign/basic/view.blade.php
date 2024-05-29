@@ -92,20 +92,23 @@
                                 >
                             </td>
                             <td>
-                                <a href="{{route('admin.store.view', $store->id)}}" class="d-block font-size-sm text-body">
+                                <a href="{{route('admin.store.view', $store->id)}}" title="{{$store->name}}" class="d-block font-size-sm text-body">
                                     {{$store->name}}
                                 </a>
                             </td>
                             <td>
-                                <span class="d-block font-size-sm text-body">
+                                <span title=" {{$store->vendor->f_name.' '.$store->vendor->l_name}}" class="d-block font-size-sm text-body">
                                     {{$store->vendor->f_name.' '.$store->vendor->l_name}}
                                 </span>
                             </td>
-                            <td>
-                                {{$store->email}}
+                            <td title="{{$store->email}}">
+                                <a href="mailto:{{$store->email}}">
+                                {{$store->email}}</a>
                             </td>
-                            <td>
-                                {{$store['phone']}}
+                            <td title="{{$store['phone']}}">
+                                <a href="tel:{{$store['phone']}}">
+                                    {{$store['phone']}}
+                                </a>
                             </td>
                             @php($status = $store->pivot ? $store->pivot->campaign_status : translate('messages.not_found'))
                                 <td class="text-capitalize">

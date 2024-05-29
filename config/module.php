@@ -22,7 +22,9 @@ return [
         'cutlery'=>false,
         'common_condition'=>false,
         'basic'=>false,
-        'description'=>'In this type, You can set delivery slot start after x minutes from current time, No available time for items and has stock for items.',    
+        'halal'=>true,
+        'brand'=>false,
+        'description'=>'In this type, You can set delivery slot start after x minutes from current time, No available time for items and has stock for items.',
     ],
 
     'food'=>[
@@ -42,6 +44,8 @@ return [
         'cutlery'=>true,
         'common_condition'=>false,
         'basic'=>false,
+        'halal'=>true,
+        'brand'=>false,
         'description'=>'In this type, you can set item available time, no stock management for items and has option to add add-on.',
     ],
 
@@ -62,6 +66,8 @@ return [
         'cutlery'=>false,
         'common_condition'=>true,
         'basic'=>true,
+        'halal'=>false,
+        'brand'=>false,
         'description'=>'In this type, Customer can upload prescription when place order, No available time for items and has stock for items.',
     ],
 
@@ -82,9 +88,11 @@ return [
         'cutlery'=>false,
         'common_condition'=>false,
         'basic'=>false,
+        'halal'=>false,
+        'brand'=>true,
         'description'=>'In this type, No opening and closing time for store, no available time for items and has stock for items.',
     ],
-   
+
     'parcel'=>[
         'order_status'=>['accepted'=>false],
         'order_place_to_schedule_interval'=>false,
@@ -102,6 +110,8 @@ return [
         'cutlery'=>false,
         'common_condition'=>false,
         'basic'=>false,
+        'halal'=>false,
+        'brand'=>false,
         'description'=>'',
     ],
 ];

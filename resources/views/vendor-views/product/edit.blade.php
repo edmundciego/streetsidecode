@@ -248,6 +248,23 @@
                                     </div>
                                 </div>
                                 @endif
+                                @if ($module_data['brand'])
+                                <div class="col-sm-6 col-lg-4">
+                                    <div class="form-group mb-0">
+                                        <label class="input-label" for="brand_id">{{ translate('messages.Brand') }}<span
+                                                class="input-label-secondary"></span></label>
+                                        <select name="brand_id" id="brand_id"
+                                            data-placeholder="{{ translate('messages.Select_brand') }}"
+                                            id="brand_id" class="js-select2-custom form-control"
+                                            oninvalid="this.setCustomValidity('{{ translate('messages.Select_brand') }}')">
+                                            <option value="">---{{translate('messages.select')}}---</option>
+                                            @foreach($brands as $brand)
+                                                <option value="{{$brand['id']}}" {{ $product->ecommerce_item_details?->brand_id  == $brand['id'] ? 'selected' : '' }}>{{$brand['name']}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                @endif
                             @if ($module_data['unit'])
                                 <div class="col-sm-6 col-lg-4" id="unit_input">
                                     <div class="form-group mb-0">
@@ -336,6 +353,26 @@
                                         <input class="form-check-input" name="basic" type="checkbox" value="1" id="flexCheckDefaultbasic" {{ $product->pharmacy_item_details?->is_basic == 1?'checked':'' }}>
                                         <label class="form-check-label" for="flexCheckDefaultbasic">
                                           {{ translate('messages.is_basic') }}
+                                        </label>
+                                      </div>
+                                </div>
+                                @endif
+                                @if ($module_type == 'pharmacy')
+                                <div class="col-sm-6 col-lg-4" id="is_prescription_required">
+                                    <div class="form-check mb-0 p-6">
+                                        <input class="form-check-input" name="is_prescription_required" type="checkbox" value="1" id="flexCheckDefaultPrescription" {{ $product->pharmacy_item_details?->is_prescription_required == 1?'checked':'' }}>
+                                        <label class="form-check-label" for="flexCheckDefaultPrescription">
+                                          {{ translate('messages.is_prescription_required') }}
+                                        </label>
+                                      </div>
+                                </div>
+                                @endif
+                                @if ($module_data['halal'])
+                                <div class="col-sm-6 col-lg-4" id="halal">
+                                    <div class="form-check mb-0 p-6">
+                                        <input class="form-check-input" name="is_halal" type="checkbox" value="1" id="flexCheckDefaulthalal" {{ $product->is_halal == 1?'checked':'' }}>
+                                        <label class="form-check-label" for="flexCheckDefaulthalal">
+                                          {{ translate('messages.is_it_halal') }}
                                         </label>
                                       </div>
                                 </div>
@@ -540,7 +577,7 @@
             $('#empty-variation').hide();
             count++;
             let add_option_view = `
-                    <div class="__bg-F8F9FC-card view_new_option mb-2">
+                    <div class="__bg-F8F9FC-card count_div view_new_option mb-2">
                         <div>
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <label class="form-check form--check">
@@ -635,19 +672,17 @@
     });
 
     function add_new_row_button(data) {
-        count = data;
         countRow = 1 + $('#option_price_view_' + data).children('.add_new_view_row_class').length;
         let add_new_row_view = `
             <div class="row add_new_view_row_class mb-3 position-relative pt-3 pt-sm-0">
                 <div class="col-md-4 col-sm-5">
                         <label for="">{{ translate('Option_name') }}</label>
-                        <input class="form-control" required type="text" name="options[` + count + `][values][` +
+                        <input class="form-control" required type="text" name="options[` + data + `][values][` +
             countRow + `][label]" id="">
                     </div>
                     <div class="col-md-4 col-sm-5">
                         <label for="">{{ translate('Additional_price') }}</label>
-                        <input class="form-control"  required type="number" min="0" step="0.01" name="options[` +
-            count +
+                        <input class="form-control"  required type="number" min="0" step="0.01" name="options[` + data +
             `][values][` + countRow + `][optionPrice]" id="">
                     </div>
                     <div class="col-sm-2 max-sm-absolute">

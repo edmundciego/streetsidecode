@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
 use App\Models\AdminPromotionalBanner;
 use App\Models\FlutterSpecialCriteria;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -36,12 +37,13 @@ class BusinessSettingsController extends Controller
 {
     use Processor;
 
-    public function business_index($tab = 'business')
+    public function business_index(Request $request,$tab = 'business')
     {
         if (!Helpers::module_permission_check('settings')) {
             Toastr::error(translate('messages.access_denied'));
             return back();
         }
+        $type =$request->type;
         if ($tab == 'business') {
             return view('admin-views.business-settings.business-index');
         } else if ($tab == 'customer') {
@@ -50,14 +52,17 @@ class BusinessSettingsController extends Controller
                 ->orWhere('key', 'like', 'ref_earning_%')
                 ->orWhere('key', 'like', 'add_fund_status%')
                 ->orWhere('key', 'like', 'customer_%')
+                ->orWhere('key', 'like', 'new_customer_discount_%')
                 ->orWhere('key', 'like', 'ref_earning_%')->get();
             $data = array_column($data->toArray(), 'value', 'key');
             return view('admin-views.business-settings.customer-index', compact('data'));
         } else if ($tab == 'deliveryman') {
             return view('admin-views.business-settings.deliveryman-index');
         } else if ($tab == 'order') {
-            $reasons = OrderCancelReason::latest()->paginate(config('default_pagination'));
-            return view('admin-views.business-settings.order-index', compact('reasons'));
+            $reasons = OrderCancelReason::when($request->type && ($request->type != 'all'), function ($query) use ($request) {
+                $query->where('user_type', $request->type);
+            })->latest()->paginate(config('default_pagination'));
+            return view('admin-views.business-settings.order-index', compact('reasons','type'));
         } else if ($tab == 'store') {
             return view('admin-views.business-settings.store-index');
         } else if ($tab == 'refund-settings') {
@@ -151,6 +156,15 @@ class BusinessSettingsController extends Controller
         if ($request['product_approval'] == null){
             $this->product_approval_all();
         }
+        if ($request['product_approval'] == 1) {
+            if (!($request->Update_product_price || $request->Add_new_product || $request->Update_product_variation || $request->Update_anything_in_product_details)) {
+                DB::table('business_settings')->updateOrInsert(['key' => 'product_approval'], [
+                    'value' => 0
+                ]);
+                Toastr::error(translate('messages.need_to_check_minimum_1_criteria_for_product_approval'));
+                return back();
+            }
+        }
         BusinessSetting::updateOrInsert(['key' => 'cash_in_hand_overflow_store'], [
             'value' => $request['cash_in_hand_overflow_store'] ?? 0
         ]);
@@ -170,6 +184,7 @@ class BusinessSettingsController extends Controller
         DB::table('business_settings')->updateOrInsert(['key' => 'product_approval'], [
             'value' => $request['product_approval']
         ]);
+
         $values=[
             'Update_product_price'=> $request->Update_product_price ?? 0,
             'Add_new_product'=> $request->Add_new_product ?? 0,
@@ -226,6 +241,15 @@ class BusinessSettingsController extends Controller
         ]);
         BusinessSetting::updateOrInsert(['key' => 'schedule_order_slot_duration_time_format'], [
             'value' => $request['schedule_order_slot_duration_time_format']
+        ]);
+
+        $values=[];
+        foreach (config('module.module_type') as $key => $value){
+            $values[$value] = $request[$value] ?? 0;
+        }
+
+        DB::table('business_settings')->updateOrInsert(['key' => 'extra_packaging_data'], [
+            'value' => json_encode($values)
         ]);
 
         Toastr::success(translate('messages.successfully_updated_to_changes_restart_app'));
@@ -448,15 +472,8 @@ class BusinessSettingsController extends Controller
             $image_name = $fav_icon['value'];
         }
 
-        if (session()->has('currency_symbol')) {
-            session()->forget('currency_symbol');
-        }
-        if (session()->has('currency_code')) {
-            session()->forget('currency_code');
-        }
-        if (session()->has('currency_symbol_position')) {
-            session()->forget('currency_symbol_position');
-        }
+        Config::set('currency', $request['currency']);
+        Config::set('currency_symbol_position', $request['currency_symbol_position']);
 
         DB::table('business_settings')->updateOrInsert(['key' => 'site_direction'], [
             'value' => $request['site_direction']
@@ -558,17 +575,6 @@ class BusinessSettingsController extends Controller
             'value' => $request['guest_checkout_status'] ? $request['guest_checkout_status'] : 0
         ]);
 
-        // $languages = $request['language'];
-
-        // if (in_array('en', $languages)) {
-        //     unset($languages[array_search('en', $languages)]);
-        // }
-        // array_unshift($languages, 'en');
-
-        // DB::table('business_settings')->updateOrInsert(['key' => 'language'], [
-        //     'value' => json_encode($languages),
-        // ]);
-
         DB::table('business_settings')->updateOrInsert(['key' => 'timeformat'], [
             'value' => $request['time_format']
         ]);
@@ -587,16 +593,6 @@ class BusinessSettingsController extends Controller
         DB::table('business_settings')->updateOrInsert(['key' => 'delivery_charge_comission'], [
             'value' => $request['admin_comission_in_delivery_charge']
         ]);
-
-        // DB::table('business_settings')->updateOrInsert(['key' => 'max_otp_hit'], [
-        //     'value' => $request['max_otp_hit']
-        // ]);
-        // DB::table('business_settings')->updateOrInsert(['key' => 'max_otp_hit_time'], [
-        //     'value' => $request['max_otp_hit_time']
-        // ]);
-        // DB::table('business_settings')->updateOrInsert(['key' => 'otp_interval_time'], [
-        //     'value' => $request['otp_interval_time']
-        // ]);
 
 
         Toastr::success(translate('messages.successfully_updated_to_changes_restart_app'));
@@ -1952,8 +1948,8 @@ class BusinessSettingsController extends Controller
 
     public function about_us()
     {
-        $about_us =DataSetting::withoutGlobalScope('translate')->where('type', 'admin_landing_page')->where('key', 'about_us')->first();
-        $about_title =DataSetting::withoutGlobalScope('translate')->where('type', 'admin_landing_page')->where('key', 'about_title')->first();
+        $about_us =DataSetting::withoutGlobalScope('translate')->with('translations')->where('type', 'admin_landing_page')->where('key', 'about_us')->first();
+        $about_title =DataSetting::withoutGlobalScope('translate')->with('translations')->where('type', 'admin_landing_page')->where('key', 'about_title')->first();
         return view('admin-views.business-settings.about-us', compact('about_us','about_title'));
     }
 
@@ -1980,13 +1976,17 @@ class BusinessSettingsController extends Controller
 
     public function update_fcm(Request $request)
     {
+        DB::table('business_settings')->updateOrInsert(['key' => 'push_notification_service_file_content'], [
+            'value' => $request['push_notification_service_file_content'],
+        ]);
+
         DB::table('business_settings')->updateOrInsert(['key' => 'fcm_project_id'], [
             'value' => $request['projectId']
         ]);
 
-        DB::table('business_settings')->updateOrInsert(['key' => 'push_notification_key'], [
-            'value' => $request['push_notification_key']
-        ]);
+//        DB::table('business_settings')->updateOrInsert(['key' => 'push_notification_key'], [
+//            'value' => $request['push_notification_key']
+//        ]);
 
         DB::table('business_settings')->updateOrInsert(['key' => 'fcm_credentials'], [
             'value' => json_encode([
@@ -5821,6 +5821,10 @@ class BusinessSettingsController extends Controller
             return view('admin-views.business-settings.email-format-setting.'.$type.'-email-formats.offline-approved-format',compact('template'));
         } else if ($tab == 'offline-payment-deny') {
             return view('admin-views.business-settings.email-format-setting.'.$type.'-email-formats.offline-deny-format',compact('template'));
+        } else if ($tab == 'pos-registration') {
+            return view('admin-views.business-settings.email-format-setting.'.$type.'-email-formats.pos-registration-format',compact('template'));
+        } else if ($tab == 'unsuspend') {
+            return view('admin-views.business-settings.email-format-setting.'.$type.'-email-formats.unsuspend-format',compact('template'));
         }
 
     }
@@ -5914,6 +5918,12 @@ class BusinessSettingsController extends Controller
         }elseif($tab == 'offline-payment-approve'){
             $email_type = 'offline_payment_approve';
             $template = EmailTemplate::where('type',$type)->where('email_type', 'offline_payment_approve')->first();
+        }elseif($tab == 'pos-registration'){
+            $email_type = 'pos_registration';
+            $template = EmailTemplate::where('type',$type)->where('email_type', 'pos_registration')->first();
+        }elseif($tab == 'unsuspend'){
+            $email_type = 'unsuspend';
+            $template = EmailTemplate::where('type',$type)->where('email_type', 'unsuspend')->first();
         }
 
         if ($template == null) {
@@ -5925,6 +5935,7 @@ class BusinessSettingsController extends Controller
         }
         $template->title = $request->title[array_search('default', $request->lang)];
         $template->body = $request->body[array_search('default', $request->lang)];
+        $template->body_2 = $request?->body_2 ? $request->body_2[array_search('default', $request->lang)] : null;
         $template->button_name = $request->button_name?$request->button_name[array_search('default', $request->lang)]:'';
         $template->footer_text = $request->footer_text[array_search('default', $request->lang)];
         $template->copyright_text = $request->copyright_text[array_search('default', $request->lang)];
@@ -5996,6 +6007,32 @@ class BusinessSettingsController extends Controller
                             'key'                   => 'body'
                         ],
                         ['value'                 => $request->body[$index]]
+                    );
+                }
+            }
+            if ($request?->body_2 && $default_lang == $key && !($request->body_2[$index])) {
+                if ($key != 'default') {
+                    Translation::updateOrInsert(
+                        [
+                            'translationable_type'  => 'App\Models\EmailTemplate',
+                            'translationable_id'    => $template->id,
+                            'locale'                => $key,
+                            'key'                   => 'body_2'
+                        ],
+                        ['value'                 => $template->body_2]
+                    );
+                }
+            } else {
+
+                if ($request?->body_2 && $request->body_2[$index] && $key != 'default') {
+                    Translation::updateOrInsert(
+                        [
+                            'translationable_type'  => 'App\Models\EmailTemplate',
+                            'translationable_id'    => $template->id,
+                            'locale'                => $key,
+                            'key'                   => 'body_2'
+                        ],
+                        ['value'                 => $request->body_2[$index]]
                     );
                 }
             }
@@ -6198,6 +6235,14 @@ class BusinessSettingsController extends Controller
             ]);
         } else if ($tab == 'offline-payment-approve') {
             DB::table('business_settings')->updateOrInsert(['key' => 'offline_payment_approve_mail_status_'.$type], [
+                'value' => $status
+            ]);
+        } else if ($tab == 'pos-registration') {
+            DB::table('business_settings')->updateOrInsert(['key' => 'pos_registration_mail_status_'.$type], [
+                'value' => $status
+            ]);
+        } else if ($tab == 'unsuspend') {
+            BusinessSetting::query()->updateOrInsert(['key' => 'unsuspend_mail_status_'.$type], [
                 'value' => $status
             ]);
         }
@@ -6467,6 +6512,16 @@ class BusinessSettingsController extends Controller
                         [
                             'common_condition_id' => $data->condition_id,
                             'is_basic' => $data->basic ?? 0,
+                            'is_prescription_required' => $data->is_prescription_required ?? 0,
+                        ]
+                    );
+            }
+            if($item->module->module_type == 'ecommerce'){
+                DB::table('ecommerce_item_details')
+                    ->updateOrInsert(
+                        ['item_id' => $item->id],
+                        [
+                            'brand_id' => $data->brand_id,
                         ]
                     );
             }

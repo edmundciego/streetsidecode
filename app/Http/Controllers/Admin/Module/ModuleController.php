@@ -40,6 +40,7 @@ class ModuleController extends BaseController
     {
         $modules = $this->moduleRepo->getListWhere(
             searchValue: $request['search'],
+            filters: ($request['module_type'] && $request['module_type'] != 'all')?['module_type' => $request['module_type']]:[],
             relations: ['stores'],
             dataLimit: config('default_pagination')
         );

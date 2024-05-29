@@ -126,7 +126,7 @@
                                     asset('storage/app/public/product').'/'.$item['image'] ?? '',
                                     asset('public/assets/admin/img/160x160/img2.jpg'),
                                     'product/'
-                                ) }}" 
+                                ) }}"
                                  data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}" alt="{{$item->name}} image">
                                 <div class="media-body">
                                     <h5 class="text-hover-primary mb-0 max-width-200px word-break line--limit-2">{{$item['name']}}</h5>
@@ -142,7 +142,7 @@
                         </td>
                         <td>
                             @if($item->store)
-                            {{$item->store->zone->name}}
+                            {{$item->store?->zone?->name}}
                             @else
                             {{translate('messages.not_found')}}
                             @endif
@@ -158,6 +158,7 @@
                     @endforeach
                 </tbody>
             </table>
+        </div>
             @if(count($items) !== 0)
             <hr>
             @endif
@@ -172,7 +173,6 @@
                 </h5>
             </div>
             @endif
-        </div>
         <!-- End Table -->
     </div>
     <!-- End Card -->
@@ -198,9 +198,7 @@
 @endsection
 
 
-@push('script')
 
-@endpush
 
 @push('script_2')
 
@@ -218,6 +216,7 @@
             success: function (data) {
 
                 $('.rest-part').empty().html(data.view);
+                update_qty();
             },
         });
     })

@@ -28,6 +28,10 @@ class SMS_module
         if (isset($config) && $config['status'] == 1) {
             return self::msg_91($receiver, $otp);
         }
+        $config = self::get_settings('alphanet_sms');
+        if (isset($config) && $config['status'] == 1) {
+            return self::alphanet_sms($receiver, $otp);
+        }
 
         return 'not_found';
     }
@@ -148,6 +152,38 @@ class SMS_module
         }
         return $response;
     }
+
+    public static function alphanet_sms($receiver, $otp): string
+    {
+        $config = self::get_settings('alphanet_sms');
+        $response = 'error';
+        if (isset($config) && $config['status'] == 1) {
+            $receiver = str_replace("+", "", $receiver);
+            $message = str_replace("#OTP#", $otp, $config['otp_template']);
+            $api_key = $config['api_key'];
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://api.sms.net.bd/sendsms',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_POSTFIELDS => array('api_key' => $api_key, 'msg' => $message, 'to' => $receiver),
+            ));
+
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+            curl_close($curl);
+
+            if ((int) data_get(json_decode($response,true),'error') === 0) {
+                $response = 'success';
+            } else {
+                $response = 'error';
+            }
+        }
+        return $response;
+    }
+
+
+
 
     public static function get_settings($name)
     {

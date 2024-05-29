@@ -62,7 +62,7 @@ class PaymentController extends Controller
                 'first_name' => $address['contact_person_name'],
                 'last_name' => '',
                 'phone' => $address['contact_person_number'],
-                'email' => '',
+                'email' => $address['contact_person_email'],
             ]);
 
         } else {

@@ -56,7 +56,12 @@ class DashboardController extends Controller
             return $q->where('zone_id', $params['zone_id']);
         })
         ->Zonewise()->where('application_status','approved')->where('active',0)->count();
-        
+
+        $blocked_deliveryman = DeliveryMan::when(is_numeric($params['zone_id']), function ($q) use ($params) {
+            return $q->where('zone_id', $params['zone_id']);
+        })
+        ->Zonewise()->where('application_status','approved')->where('status',0)->count();
+
         $newly_joined_deliveryman = DeliveryMan::when(is_numeric($params['zone_id']), function ($q) use ($params) {
             return $q->where('zone_id', $params['zone_id']);
         })
@@ -122,16 +127,20 @@ class DashboardController extends Controller
         $blocked_customers = User::zone($params['zone_id'])->where('status',0)->count();
         $newly_joined = User::zone($params['zone_id'])->whereDate('created_at', '>=', now()->subDays(30)->format('Y-m-d'))->count();
 
-        $employees = Admin::zone()->with(['role'])->where('role_id', '!=','1')->get();
+        $employees = Admin::zone()->with(['role'])->where('role_id', '!=','1')
+        ->when(is_numeric($params['zone_id']), function ($q) use ($params) {
+            return $q->where('zone_id', $params['zone_id']);
+        })
+        ->get();
 
-        $deliveryMen = DeliveryMan::when(is_numeric($params['zone_id']), function ($q) use ($params) {
+        $deliveryMen = DeliveryMan::with('last_location')->when(is_numeric($params['zone_id']), function ($q) use ($params) {
             return $q->where('zone_id', $params['zone_id']);
         })->zonewise()->available()->active()->get();
 
         $deliveryMen = Helpers::deliverymen_list_formatting($deliveryMen);
 
         $module_type = Config::get('module.current_module_type');
-        return view("admin-views.dashboard-{$module_type}", compact('data','reviews','this_month','user_data','neutral_reviews','good_reviews','negative_reviews','positive_reviews','employees','active_deliveryman','deliveryMen','inactive_deliveryman','newly_joined_deliveryman','delivery_man', 'total_sell', 'commission', 'delivery_commission', 'params','module_type', 'customers','active_customers','blocked_customers', 'newly_joined','last_year_users'));
+        return view("admin-views.dashboard-{$module_type}", compact('data','reviews','this_month','user_data','neutral_reviews','good_reviews','negative_reviews','positive_reviews','employees','active_deliveryman','deliveryMen','inactive_deliveryman','newly_joined_deliveryman','delivery_man', 'total_sell', 'commission', 'delivery_commission', 'params','module_type', 'customers','active_customers','blocked_customers', 'newly_joined','last_year_users', 'blocked_deliveryman'));
     }
 
     public function transaction_dashboard(Request $request)
@@ -175,6 +184,11 @@ class DashboardController extends Controller
         })
         ->Zonewise()->where('application_status','approved')->where('active',0)->count();
 
+        $suspend_deliveryman = DeliveryMan::when(is_numeric($params['zone_id']), function ($q) use ($params) {
+            return $q->where('zone_id', $params['zone_id']);
+        })
+        ->Zonewise()->where('application_status','approved')->where('status',0)->count();
+
         $unavailable_deliveryman = DeliveryMan::when(is_numeric($params['zone_id']), function ($q) use ($params) {
             return $q->where('zone_id', $params['zone_id']);
         })
@@ -184,7 +198,7 @@ class DashboardController extends Controller
             return $q->where('zone_id', $params['zone_id']);
         })
         ->Zonewise()->where('active',1)->Available()->count();
-        
+
         $newly_joined_deliveryman = DeliveryMan::when(is_numeric($params['zone_id']), function ($q) use ($params) {
             return $q->where('zone_id', $params['zone_id']);
         })
@@ -197,7 +211,7 @@ class DashboardController extends Controller
         $deliveryMen = Helpers::deliverymen_list_formatting($deliveryMen);
 
         $module_type = Config::get('module.current_module_type');
-        return view("admin-views.dashboard-{$module_type}", compact('data','active_deliveryman','deliveryMen','unavailable_deliveryman','available_deliveryman','inactive_deliveryman','newly_joined_deliveryman','delivery_man', 'total_sell', 'commission', 'delivery_commission','label', 'params','module_type'));
+        return view("admin-views.dashboard-{$module_type}", compact('data','active_deliveryman','deliveryMen','unavailable_deliveryman','available_deliveryman','inactive_deliveryman','newly_joined_deliveryman','delivery_man', 'total_sell', 'commission', 'delivery_commission','label', 'params','module_type','suspend_deliveryman'));
     }
 
     public function dashboard(Request $request)
@@ -245,6 +259,10 @@ class DashboardController extends Controller
             return response()->json([
                 'view' => view('admin-views.partials._dashboard-order-stats-parcel', compact('data'))->render()
             ], 200);
+        }elseif($module_type == 'food'){
+            return response()->json([
+                'view' => view('admin-views.partials._dashboard-order-stats-food', compact('data'))->render()
+            ], 200);
         }
         return response()->json([
             'view' => view('admin-views.partials._dashboard-order-stats', compact('data'))->render()
@@ -272,11 +290,6 @@ class DashboardController extends Controller
         $top_sell = $data['top_sell'];
         $delivery_commission = $data['delivery_commission'];
         $module_type = Config::get('module.current_module_type');
-        // if ($module_type == 'parcel') {
-        //     return response()->json([
-        //         'view' => view('admin-views.partials._user-overview-chart-parcel', compact('data'))->render()
-        //     ], 200);
-        // }
 
         return response()->json([
             'popular_restaurants' => view('admin-views.partials._popular-restaurants', compact('popular'))->render(),
@@ -286,7 +299,12 @@ class DashboardController extends Controller
             'top_customers' => view('admin-views.partials._top-customer', compact('top_customers'))->render(),
             'top_selling_foods' => view('admin-views.partials._top-selling-foods', compact('top_sell'))->render(),
 
-            'order_stats' =>$module_type == 'parcel'? view('admin-views.partials._dashboard-order-stats-parcel', compact('data'))->render():view('admin-views.partials._dashboard-order-stats', compact('data'))->render(),
+            'order_stats' =>$module_type == 'parcel'? view('admin-views.partials._dashboard-order-stats-parcel', compact('data'))->render():
+
+            ($module_type == 'food'? view('admin-views.partials._dashboard-order-stats-food', compact('data'))->render():
+            view('admin-views.partials._dashboard-order-stats', compact('data'))->render()),
+
+
             'user_overview' => view('admin-views.partials._user-overview-chart', compact('data'))->render(),
             'monthly_graph' => view('admin-views.partials._monthly-earning-graph', compact('total_sell', 'commission', 'delivery_commission'))->render(),
             'stat_zone' => view('admin-views.partials._zone-change', compact('data'))->render(),
@@ -351,7 +369,11 @@ class DashboardController extends Controller
             $new_items = Item::where('module_id', $module_id)->whereDate('created_at', Carbon::now());
             $new_stores = Store::where('module_id', $module_id)->whereDate('created_at', Carbon::now());
             $new_customers = User::whereDate('created_at', Carbon::now());
-            $total_orders = Order::where('module_id', $module_id);
+            if($module_type =='parcel'){
+                $total_orders = Order::where('module_id', $module_id)->whereDate('created_at', Carbon::now());
+            } else{
+                $total_orders = Order::where('module_id', $module_id);
+            }
             $total_items = Item::where('module_id', $module_id);
             $total_stores = Store::where('module_id', $module_id);
             $total_customers = User::all();
@@ -442,7 +464,7 @@ class DashboardController extends Controller
             $total_customers = User::all();
         }
 
-        if (is_numeric($zone_id) && $module_id && $module_type!='food') {
+        if (is_numeric($zone_id) && $module_id &&  !in_array($module_type ,['parcel']) ) {
             $searching_for_dm = $searching_for_dm->StoreOrder()->OrderScheduledIn(30)->where('zone_id', $zone_id)->count();
             $accepted_by_dm = $accepted_by_dm->StoreOrder()->where('zone_id', $zone_id)->count();
             $preparing_in_rs = $preparing_in_rs->StoreOrder()->where('zone_id', $zone_id)->count();
@@ -476,7 +498,25 @@ class DashboardController extends Controller
             $new_items = $new_items->count();
             $new_stores = $new_stores->count();
             $new_customers = $new_customers->count();
-        } elseif($module_id && $module_type =='parcel') {
+        } elseif(is_numeric($zone_id) && $module_id && $module_type =='parcel') {
+            $searching_for_dm = $searching_for_dm->ParcelOrder()->OrderScheduledIn(30)->where('zone_id', $zone_id)->count();
+            $accepted_by_dm = $accepted_by_dm->ParcelOrder()->where('zone_id', $zone_id)->count();
+            $preparing_in_rs = $preparing_in_rs->ParcelOrder()->where('zone_id', $zone_id)->count();
+            $picked_up = $picked_up->ParcelOrder()->where('zone_id', $zone_id)->count();
+            $delivered = $delivered->ParcelOrder()->where('zone_id', $zone_id)->count();
+            $canceled = $canceled->ParcelOrder()->where('zone_id', $zone_id)->count();
+            $refund_requested = $refund_requested->ParcelOrder()->where('zone_id', $zone_id)->count();
+            $refunded = $refunded->ParcelOrder()->where('zone_id', $zone_id)->count();
+            $total_orders = $total_orders->ParcelOrder()->where('zone_id', $zone_id)->count();
+            $total_items = $total_items->count();
+            $total_stores = $total_stores->where('zone_id', $zone_id)->count();
+            $total_customers = $total_customers->where('zone_id', $zone_id)->count();
+            $new_orders = $new_orders->ParcelOrder()->where('zone_id', $zone_id)->count();
+            $new_items = $new_items->count();
+            $new_stores = $new_stores->where('zone_id', $zone_id)->count();
+            $new_customers = $new_customers->where('zone_id', $zone_id)->count();
+        }
+        elseif($module_id && $module_type =='parcel') {
             $searching_for_dm = $searching_for_dm->ParcelOrder()->OrderScheduledIn(30)->count();
             $accepted_by_dm = $accepted_by_dm->ParcelOrder()->count();
             $preparing_in_rs = $preparing_in_rs->ParcelOrder()->count();
@@ -493,7 +533,9 @@ class DashboardController extends Controller
             $new_items = $new_items->count();
             $new_stores = $new_stores->count();
             $new_customers = $new_customers->count();
-        }else{
+        }
+
+        else{
             $searching_for_dm = $searching_for_dm->StoreOrder()->OrderScheduledIn(30)->count();
             $accepted_by_dm = $accepted_by_dm->StoreOrder()->count();
             $preparing_in_rs = $preparing_in_rs->StoreOrder()->count();
@@ -631,7 +673,7 @@ class DashboardController extends Controller
         $top_deliveryman = DeliveryMan::withCount('orders')->when(is_numeric($params['zone_id']), function ($q) use ($params) {
                 return $q->where('zone_id', $params['zone_id']);
             })
-            ->Zonewise()    
+            ->Zonewise()
             ->orderBy("orders_count", 'desc')
             ->take(6)
             ->get();

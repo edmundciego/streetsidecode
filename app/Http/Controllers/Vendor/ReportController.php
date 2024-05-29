@@ -33,7 +33,7 @@ class ReportController extends Controller
             $to = $request->to ?? null;
         }
         $key = explode(' ', $request['search']);
-        $expense = Expense::with('order')->where('created_by','vendor')->where('store_id',Helpers::get_store_id())
+        $expense = Expense::with('order')->where('created_by','vendor')->where('store_id',Helpers::get_store_id())->where('amount', '>' ,0)
         ->when(isset($from) && isset($to) && $from != null && $to != null && $filter == 'custom', function ($query) use ($from, $to) {
             return $query->whereBetween('created_at', [$from . " 00:00:00", $to . " 23:59:59"]);
         })
@@ -77,7 +77,7 @@ class ReportController extends Controller
             $to = $request->to ?? null;
         }
         $key = explode(' ', $request['search']);
-        $expense = Expense::with('order')->where('created_by','vendor')->where('store_id',Helpers::get_store_id())
+        $expense = Expense::with('order')->where('created_by','vendor')->where('store_id',Helpers::get_store_id())->where('amount', '>' ,0)
         ->when(isset($from) && isset($to) && $from != null && $to != null && $filter == 'custom', function ($query) use ($from, $to) {
             return $query->whereBetween('created_at', [$from . " 00:00:00", $to . " 23:59:59"]);
         })

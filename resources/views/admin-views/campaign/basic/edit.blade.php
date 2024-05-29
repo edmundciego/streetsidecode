@@ -98,16 +98,7 @@
                     <div class="row g-3">
                         <div class="col-lg-6">
                             <div class="row g-3">
-                                <div class="col-sm-12">
-                                    <div>
-                                        <label class="input-label">{{translate('messages.module')}}</label>
-                                        <select name="module_id" class="form-control js-select2-custom"  data-placeholder="{{translate('messages.select_module')}}" id="module_select" disabled>
-                                            @foreach(\App\Models\Module::notParcel()->get() as $module)
-                                                <option value="{{$module->id}}" {{$module->id == $campaign->module_id?'selected':''}} >{{$module->module_name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
+                        
                                 <div class="col-sm-6">
                                     <div>
                                         <label class="input-label" for="title">{{translate('messages.start_date')}}</label>

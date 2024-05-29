@@ -9,6 +9,12 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link {{ Request::is('admin/business-settings/email-setup/user/pos-registration') ? 'active' : '' }}"
+                   href="{{ route('admin.business-settings.email-setup', ['user','pos-registration']) }}">
+                    {{translate('POS_New_Customer_Registration')}}
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link {{ Request::is('admin/business-settings/email-setup/user/registration-otp') ? 'active' : '' }}"
                 href="{{ route('admin.business-settings.email-setup', ['user','registration-otp']) }}">
                     {{translate('Registration OTP')}}
@@ -62,6 +68,18 @@
                 <a class="nav-link {{ Request::is('admin/business-settings/email-setup/user/offline-payment-deny') ? 'active' : '' }}"
                 href="{{ route('admin.business-settings.email-setup', ['user','offline-payment-deny']) }}">
                     {{translate('Offline_Payment_Deny')}}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('admin/business-settings/email-setup/user/suspend') ? 'active' : '' }}"
+                href="{{ route('admin.business-settings.email-setup', ['user','suspend']) }}">
+                    {{translate('Account_Suspension')}}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('admin/business-settings/email-setup/user/unsuspend') ? 'active' : '' }}"
+                href="{{ route('admin.business-settings.email-setup', ['user','unsuspend']) }}">
+                    {{translate('Account_Unsuspension')}}
                 </a>
             </li>
         </ul>

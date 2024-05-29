@@ -12,10 +12,9 @@
             <img class="img-responsive initial--20 onerror-image"
             src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
                 $product['image'],
-                asset($item_type == 'item' ? 'storage/app/public/product/' : 'storage/app/public/campaign/') . $product['image'],
+                asset($item_type == 'item' ? 'storage/app/public/product/' : 'storage/app/public/campaign/') .'/'.$product['image'],
                 asset('public/assets/admin/img/160x160/img2.jpg'),
-                $item_type == 'item' ? 'product/' : 'campaign/'
-            ) }}"
+                $item_type == 'item' ? 'product/' : 'campaign/' ) }}"
 
                 data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}" alt="Product image"
                 width="">
@@ -24,7 +23,7 @@
         <!-- Product details-->
         <div class="details pl-2 w-0 flex-grow">
             @if ($item_type == 'item')
-                <a href="{{ route('vendor.item.view', $product->id) }}"
+                <a href="{{ route('admin.item.view', $product->id) }}"
                     class="h3 mb-2 product-title">{{ $product->name }}</a>
             @else
                 <div class="h3 mb-2 product-title">{{ $product->title }}</div>

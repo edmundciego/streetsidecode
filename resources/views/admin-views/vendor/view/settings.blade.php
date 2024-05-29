@@ -104,6 +104,44 @@
                                 </label>
                             </div>
                         </div>
+                        @if ($store->module->module_type == 'grocery' || $store->module->module_type == 'food')
+                        <div class="col-xl-4 col-md-4 col-sm-6">
+                            <div class="form-group mb-0">
+                                <label
+                                    class="toggle-switch toggle-switch-sm d-flex justify-content-between border  rounded px-3 form-control"
+                                    for="halal_tag_status">
+                                <span class="pr-2 d-flex">
+                                    <span class="line--limit-1">
+                                        {{translate('messages.halal_tag_status')}}
+                                    </span>
+                                    <span data-toggle="tooltip" data-placement="right"
+                                          data-original-title='{{translate("If_enabled,_customers_can_see_halal_tag_on_product")}}'
+                                          class="input-label-secondary">
+                                        <img src="{{asset('/public/assets/admin/img/info-circle.svg')}}">
+                                    </span>
+                                </span>
+                                    <input type="checkbox"
+                                           data-id="halal_tag_status"
+                                           data-type="status"
+                                           data-image-on="{{ asset('/public/assets/admin/img/modal/schedule-on.png') }}"
+                                           data-image-off="{{ asset('/public/assets/admin/img/modal/schedule-off.png') }}"
+                                           data-title-on="{{ translate('Want_to_enable_halal_tag_status_for_this_store?') }}"
+                                           data-title-off="{{ translate('Want_to_disable_halal_tag_status_for_this_store?') }}"
+                                           data-text-on="<p>{{ translate('If_enabled,_customers_can_see_halal_tag_on_product') }}"
+                                           data-text-off="<p>{{ translate('If_disabled,_customers_can_not_see_halal_tag_on_product.') }}</p>"
+                                           class="toggle-switch-input dynamic-checkbox"
+                                           id="halal_tag_status" {{$store->storeConfig?->halal_tag_status == 1?'checked':''}}>
+                                    <span class="toggle-switch-label">
+                                    <span class="toggle-switch-indicator"></span>
+                                </span>
+                                </label>
+                                <form
+                                    action="{{route('admin.store.toggle-settings',[$store->id,$store->storeConfig?->halal_tag_status?0:1, 'halal_tag_status'])}}"
+                                    method="get" id="halal_tag_status_form">
+                                </form>
+                            </div>
+                        </div>
+                        @endif
                         @if ($store->module->module_type == 'pharmacy')
                         @php($prescription_order_status = \App\Models\BusinessSetting::where('key', 'prescription_order_status')->first())
                         @php($prescription_order_status = $prescription_order_status ? $prescription_order_status->value : 0)

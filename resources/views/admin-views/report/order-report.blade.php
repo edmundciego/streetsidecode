@@ -245,10 +245,12 @@
                                 <th class="border-top border-bottom">{{ translate('messages.total_item_amount') }}</th>
                                 <th class="border-top border-bottom">{{ translate('messages.item_discount') }}</th>
                                 <th class="border-top border-bottom">{{ translate('messages.coupon_discount') }}</th>
+                                <th class="border-top border-bottom">{{ translate('messages.referral_discount') }}</th>
                                 <th class="border-top border-bottom">{{ translate('messages.discounted_amount') }}</th>
                                 <th class="border-top border-bottom text-center">{{ translate('messages.tax') }}</th>
                                 <th class="border-top border-bottom text-center">{{ translate('messages.delivery_charge') }}</th>
                                 <th class="border-top border-bottom text-center">{{ \App\CentralLogics\Helpers::get_business_data('additional_charge_name')??translate('messages.additional_charge') }}</th>
+                                <th class="border-top border-bottom text-center">{{ translate('messages.extra_packaging_amount') }}</th>
                                 <th class="border-top border-bottom">{{ translate('messages.order_amount') }}</th>
                                 <th class="border-top border-bottom">{{ translate('messages.amount_received_by') }}</th>
                                 <th class="border-top border-bottom">{{ translate('messages.payment_method') }}</th>
@@ -292,7 +294,7 @@
                                     <td>
                                         <div class="text-right mw--85px">
                                             <div>
-                                                {{ \App\CentralLogics\Helpers::number_format_short($order['order_amount']-$order['dm_tips']-$order['total_tax_amount']-$order['delivery_charge']+$order['coupon_discount_amount'] + $order['store_discount_amount']) }}
+                                                {{ \App\CentralLogics\Helpers::number_format_short($order['order_amount'] - $order->additional_charge - $order['dm_tips']-$order['total_tax_amount']-$order['delivery_charge']+$order['coupon_discount_amount'] + $order['store_discount_amount'] + $order['ref_bonus_amount'] - $order['extra_packaging_amount'] +$order['flash_admin_discount_amount'] +$order['flash_store_discount_amount'] ) }}
                                             </div>
                                             @if ($order->payment_status == 'paid')
                                                 <strong class="text-success">
@@ -306,13 +308,16 @@
                                         </div>
                                     </td>
                                     <td class="text-center mw--85px">
-                                        {{ \App\CentralLogics\Helpers::number_format_short($order->details->sum('discount_on_item')) }}
+                                        {{ \App\CentralLogics\Helpers::number_format_short($order->details()->sum(DB::raw('discount_on_item * quantity')) + $order['flash_admin_discount_amount'] +$order['flash_store_discount_amount'] ) }}
                                     </td>
                                     <td class="text-center mw--85px">
                                         {{ \App\CentralLogics\Helpers::number_format_short($order['coupon_discount_amount']) }}
                                     </td>
                                     <td class="text-center mw--85px">
-                                        {{ \App\CentralLogics\Helpers::number_format_short($order['coupon_discount_amount'] + $order['store_discount_amount']) }}
+                                        {{ \App\CentralLogics\Helpers::number_format_short($order['ref_bonus_amount']) }}
+                                    </td>
+                                    <td class="text-center mw--85px">
+                                        {{ \App\CentralLogics\Helpers::number_format_short($order['coupon_discount_amount'] + $order['store_discount_amount'] + $order['ref_bonus_amount'])  }}
                                     </td>
                                     <td class="text-center mw--85px white-space-nowrap">
                                         {{ \App\CentralLogics\Helpers::number_format_short($order['total_tax_amount']) }}
@@ -322,6 +327,9 @@
                                     </td>
                                     <td class="text-center mw--85px">
                                         {{ \App\CentralLogics\Helpers::number_format_short($order['additional_charge']) }}
+                                    </td>
+                                    <td class="text-center mw--85px">
+                                        {{ \App\CentralLogics\Helpers::number_format_short($order['extra_packaging_amount']) }}
                                     </td>
                                     <td>
                                         <div class="text-right mw--85px">

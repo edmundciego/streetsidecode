@@ -2,9 +2,6 @@
 
 @section('title',translate('Campaign List'))
 
-@push('css_or_js')
-
-@endpush
 
 @section('content')
     <div class="content container-fluid">
@@ -42,6 +39,10 @@
                         </div>
                         <!-- End Search -->
                     </form>
+                    @if(request()->get('search'))
+                    <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
+                    @endif
+
                        <!-- Unfold -->
                        <div class="hs-unfold mr-2">
                         <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
@@ -89,7 +90,6 @@
                     <tr>
                         <th class="border-0">{{translate('messages.#')}}</th>
                         <th class="border-0" >{{translate('messages.title')}}</th>
-                        <th class="border-0">{{translate('messages.module')}}</th>
                         <th class="border-0" >{{translate('messages.date_duration')}}</th>
                         <th class="border-0" >{{translate('messages.time_duration')}}</th>
                         <th class="border-0">{{translate('messages.status')}}</th>
@@ -102,23 +102,34 @@
                         <tr>
                             <td>{{$key+$campaigns->firstItem()}}</td>
                             <td>
-                                <a href="{{route('admin.campaign.view',['basic',$campaign->id])}}" class="d-block text-body">{{Str::limit($campaign['title'],25, '...')}}</a>
-                            </td>
-                            <td>{{Str::limit($campaign->module->module_name, 15, '...')}}</td>
-                            <td>
-                                <span class="bg-gradient-light text-dark">{{$campaign->start_date?$campaign->start_date->format('d/M/Y'). ' - ' .$campaign->end_date->format('d/M/Y'): 'N/A'}}</span>
+                                <a href="{{route('admin.campaign.view',['basic',$campaign->id])}}" title="{{ $campaign['title'] }}" class="d-block text-body">{{Str::limit($campaign['title'],25, '...')}}</a>
                             </td>
                             <td>
-                                <span class="bg-gradient-light text-dark text-uppercase">{{$campaign->start_time?date(config('timeformat'),strtotime($campaign->start_time)). ' - ' .date(config('timeformat'),strtotime($campaign->end_time)): 'N/A'}}</span>
+                                <span class="bg-gradient-light text-dark">{{$campaign->start_date? \App\CentralLogics\Helpers::date_format($campaign?->end_date).'-'.  \App\CentralLogics\Helpers::date_format($campaign?->end_date): 'N/A'}}</span>
+                            </td>
+                            <td>
+                                <span class="bg-gradient-light text-dark">{{$campaign->start_time? \App\CentralLogics\Helpers::time_format($campaign?->start_time).'-'.  \App\CentralLogics\Helpers::time_format($campaign?->end_time): 'N/A'}}</span>
                             </td>
                             <td>
                                 <label class="toggle-switch toggle-switch-sm" for="stocksCheckbox{{$campaign->id}}">
-                                    <input type="checkbox" data-url="{{route('admin.campaign.status',['basic',$campaign['id'],$campaign->status?0:1])}}" class="toggle-switch-input redirect-url" id="stocksCheckbox{{$campaign->id}}" {{$campaign->status?'checked':''}}>
+                                    <input type="checkbox" data-url=""
+                                    data-id="stocksCheckbox{{$campaign->id}}"
+                                    data-type="status"
+                                    data-image-on="{{ asset('/public/assets/admin/img/modal/basic_campaign_on.png') }}"
+                                    data-image-off="{{ asset('/public/assets/admin/img/modal/basic_campaign_off.png') }}"
+                                    data-title-on="{{ translate('By_Turning_ON_Campaign!') }}"
+                                    data-title-off="{{ translate('By_Turning_OFF_Campaign!') }}"
+                                    data-text-on="<p>{{ translate('If_you_turn_on_this_status,_it_will_show_on_user_website_and_app.') }}</p>"
+                                    data-text-off="<p>{{ translate('If_you_turn_off_this_status,_it_won’t_show_on_user_website_and_app') }}</p>"
+                                    class="toggle-switch-input dynamic-checkbox" id="stocksCheckbox{{$campaign->id}}" {{$campaign->status?'checked':''}}>
                                     <span class="toggle-switch-label">
                                         <span class="toggle-switch-indicator"></span>
                                     </span>
                                 </label>
                             </td>
+                            <form action="{{route('admin.campaign.status',['basic',$campaign['id'],$campaign->status?0:1])}}"
+                            method="get" id="stocksCheckbox{{$campaign->id}}_form">
+                            </form>
                             <td>
                                 <div class="btn--container justify-content-center">
                                     <a class="btn action-btn btn-outline-primary btn--primary"
@@ -137,6 +148,7 @@
                     @endforeach
                     </tbody>
                 </table>
+            </div>
                 @if(count($campaigns) !== 0)
                 <hr>
                 @endif
@@ -151,7 +163,6 @@
                     </h5>
                 </div>
                 @endif
-            </div>
             <!-- End Table -->
         </div>
         <!-- End Card -->

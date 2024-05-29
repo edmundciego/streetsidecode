@@ -14,7 +14,8 @@
             <div class="page-header-select-wrapper">
                 @if(!isset(auth('admin')->user()->zone_id))
                 <div class="col-sm-auto min--240">
-                    <select name="zone_id" class="form-control js-select2-custom zone-filter"
+                    <select name="zone_id" class="form-control js-select2-custom set-filter"
+                    data-filter="zone_id"
                             data-url="{{ url()->full() }}">
                         <option value="all">{{ translate('messages.All_Zones') }}</option>
                         @foreach(\App\Models\Zone::orderBy('name')->get() as $z)
@@ -44,6 +45,7 @@
                 </div>
             </div>
         </div>
+
         <!-- End Page Header -->
         <!-- Card -->
         <div class="card">
@@ -53,15 +55,16 @@
                     <h5 class="card-title">
                         {{translate('messages.deliveryman_list')}} <span class="badge badge-soft-dark ml-2" id="itemCount">{{$deliveryMen->total()}}</span>
                     </h5>
-                    <form action="javascript:" id="search-form" class="search-form">
-                        <!-- Search -->
-                            @csrf
+                    <form class="search-form">
                             <div class="input-group input--group">
-                                <input id="datatableSearch_" type="search" name="search" class="form-control"
-                                        placeholder="{{translate('ex_: search_delivery_man')}}" aria-label="{{translate('messages.search')}}" value="{{isset($search_by) ? $search_by : ''}}" required>
+                                <input  type="search" name="search_by" class="form-control"
+                                placeholder="{{translate('ex_: search_delivery_man_,_email_or_phone')}}" aria-label="{{translate('messages.search')}}" value="{{request()?->search_by}}" >
                                 <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
                             </div>
                         </form>
+                        @if(request()->get('search_by'))
+                        <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
+                        @endif
                 </div>
             </div>
             <!-- End Header -->
@@ -81,8 +84,8 @@
                         <th class="border-0 text-capitalize">{{translate('messages.name')}}</th>
                         <th class="border-0 text-capitalize">{{translate('messages.contact_info')}}</th>
                         <th class="border-0 text-capitalize">{{translate('messages.zone')}}</th>
-                        <th class="border-0 text-capitalize">{{translate('messages.total_orders')}}</th>
-                        <th class="border-0 text-capitalize">{{translate('messages.availability_status')}}</th>
+                        <th class="border-0 text-capitalize">{{translate('messages.job_type')}}</th>
+                        <th class="border-0 text-capitalize">{{translate('messages.join_request_date')}}</th>
                         <th class="border-0 text-center text-capitalize">{{translate('messages.action')}}</th>
                     </tr>
                     </thead>
@@ -98,11 +101,7 @@
                                     alt="{{$dm['f_name']}} {{$dm['l_name']}}">
                                     <div class="info">
                                         <h5 class="text-hover-primary mb-0">{{$dm['f_name'].' '.$dm['l_name']}}</h5>
-                                        <span class="d-block text-body">
-                                            <span class="rating">
-                                            <i class="tio-star"></i> {{count($dm->rating)>0?number_format($dm->rating[0]->average, 1, '.', ' '):0}}
-                                            </span>
-                                        </span>
+
                                     </div>
                                 </a>
                             </td>
@@ -117,37 +116,24 @@
                                 @endif
                             </td>
                             <td>
-                                <a class="deco-none" href="tel:{{$dm['phone']}}">{{count($dm['orders'])}}</a>
+                                {{ $dm->earning ==  1 ?  translate('messages.freelancer')  : translate('messages.salary_based')}}
                             </td>
                             <td>
-                                <div>
-                                    {{translate('messages.currently_assigned_orders')}} : {{$dm->current_orders}}
-                                </div>
-                                <div>
-                                    {{translate('messages.active_status')}} :
-                                    @if($dm->application_status == 'approved')
-                                        @if($dm->active)
-                                        <strong class="text-capitalize text-primary">{{translate('messages.online')}}</strong>
-                                        @else
-                                        <strong class="text-capitalize text-secondary">{{translate('messages.offline')}}</strong>
-                                        @endif
-                                    @elseif ($dm->application_status == 'denied')
-                                        <strong class="text-capitalize text-danger">{{translate('messages.denied')}}</strong>
-                                    @else
-                                        <strong class="text-capitalize text-info">{{translate('messages.pending')}}</strong>
-                                    @endif
-                                </div>
+                                {{\App\CentralLogics\Helpers::time_date_format($dm->created_at )   }}
+
                             </td>
                             <td>
                                 @if($dm->application_status == 'approved')
 
                                 @else
                                 <div class="col-md-12">
-                                    <div class="btn--container justify-content-end">
+                                    <div class="btn--container justify-content-center">
                                         <a class="btn action-btn btn--primary btn-outline-primary request-alert" data-toggle="tooltip" data-placement="top"
                                         data-original-title="{{ translate('messages.approve') }}"
-                                           data-url="{{route('admin.users.delivery-man.application',[$dm['id'],'approved'])}}" data-message="{{translate('messages.you_want_to_approve_this_application')}}"
+                                            data-url="{{route('admin.users.delivery-man.application',[$dm['id'],'approved'])}}" data-message="{{translate('messages.you_want_to_approve_this_application')}}"
                                             href="javascript:"><i class="tio-done font-weight-bold"></i> </a>
+                                            <a class="btn action-btn btn--primary btn-outline-primary"  data-toggle="tooltip" data-placement="top" data-original-title="{{ translate('messages.edit') }}" href="{{route('admin.users.delivery-man.edit',[$dm['id']])}}" ><i class="tio-edit"></i>
+                                            </a>
                                         @if($dm->application_status !='denied')
                                         <a class="btn action-btn btn--danger btn-outline-danger request-alert" data-toggle="tooltip" data-placement="top"
                                         data-original-title="{{ translate('messages.deny') }}" data-url="{{route('admin.users.delivery-man.application',[$dm['id'],'denied'])}}" data-message="{{translate('messages.you_want_to_deny_this_application')}}"
@@ -162,6 +148,7 @@
                     @endforeach
                     </tbody>
                 </table>
+            </div>
                 @if(count($deliveryMen) !== 0)
                 <hr>
                 @endif
@@ -176,7 +163,6 @@
                     </h5>
                 </div>
                 @endif
-            </div>
             <!-- End Table -->
         </div>
         <!-- End Card -->
@@ -206,9 +192,5 @@
             })
         }
 
-        $('#search-form').on('submit', function () {
-            let formData = new FormData(this);
-            set_filter('{!! url()->full() !!}',formData.get('search'),'search_by')
-        });
     </script>
 @endpush

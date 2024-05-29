@@ -1986,8 +1986,9 @@
                                     <div class="col-12">
                                         <div class="learn-feature-item">
                                             <div class="learn-feature-icon">
-                                                <img src="{{ asset('storage/app/public/admin_feature')}}/{{ $item['image'] }}"
-                                                 alt="{{$item['title'] ?? ''}}">
+                                                <img
+                                                src="{{\App\CentralLogics\Helpers::onerror_image_helper(data_get($item,'image'), asset('storage/app/public/admin_feature/').'/' .data_get($item,'image'), asset('public/assets/admin/img/100x100/2.jpg'),'admin_feature/')}}"
+                                                alt="{{$item['title'] ?? ''}}">
                                             </div>
                                             <div class="learn-feature-item-content">
                                                 <h5 class="subttle">{{$item['title'] ?? ''}}</h5>
@@ -2008,7 +2009,9 @@
                                     <div class="col-12">
                                         <div class="learn-feature-item">
                                             <div class="learn-feature-icon">
-                                                <img src="{{ asset('storage/app/public/admin_feature')}}/{{ $item['image'] }}" alt="{{$item['title']}}">
+                                                <img
+                                                src="{{\App\CentralLogics\Helpers::onerror_image_helper(data_get($item,'image'), asset('storage/app/public/admin_feature/').'/' .data_get($item,'image'), asset('public/assets/admin/img/100x100/2.jpg'),'admin_feature/')}}"
+                                                alt="{{$item['title'] ?? ''}}">
                                             </div>
                                             <div class="learn-feature-item-content">
                                                 <h5 class="subttle">{{$item['title'] ?? ''}}</h5>

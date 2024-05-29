@@ -1,7 +1,7 @@
 "use strict";
 
 let element = "";
-let count = 0;
+let count =   $('.count_div').length;
 let countRow = 0;
 let mod_type="";
 let removedImageKeys = [];

@@ -7,8 +7,8 @@
 
     <style type="text/css" media="print">
         @page {
-            size: auto;   /* auto is the initial value */
-            margin: 0;  /* this affects the margin in the printer settings */
+            size: auto;
+            margin: 0;
         }
 
     </style>
@@ -24,16 +24,14 @@
                     <div class="card h-100">
                         <div class="card-header bg-light border-0">
                             <h5 class="card-title">
-                                <span class="card-header-icon">
-                                    <i class="tio-incognito"></i>
-                                </span>
                                 <span>
                                     {{translate('product_section')}}
                                 </span>
                             </h5>
                         </div>
-                        <div class="card-header">
-                            <div class="w-100">
+
+                        <div class="card-body d-flex flex-column" id="items">
+                            <div class="mb-4">
                                 <div class="row g-2 justify-content-around">
                                     <div class="col-sm-6 col-12">
                                         <select name="store_id" id="store_select"
@@ -59,35 +57,41 @@
                                     <div class="col-sm-12 col-12">
                                         <form id="search-form" class="search-form">
                                             <!-- Search -->
-                                            <div class="input-group input--group">
-                                                <input id="datatableSearch" type="search" value="{{$keyword??''}}" name="search" class="form-control h--45px" placeholder="{{translate('messages.ex_:_search_here')}}" aria-label="{{translate('messages.search_here')}}" disabled>
-                                                <button type="submit" class="btn btn--secondary h--45px">
-                                                    <i class="tio-search"></i>
-                                                </button>
+                                            <div class="input-group input--group input-group--merge">
+                                                <input id="datatableSearch" type="search" value="{{$keyword??''}}" name="search" class="form-control h--45px" placeholder="{{translate('messages.Search_by_product_name')}}" aria-label="{{translate('messages.search_here')}}" disabled>
+                                                <img width="16" height="16" src="{{asset('public/assets/admin/img/icons/search-icon.png')}}" alt="" class="search-icon">
+
+                                                @if($keyword)
+                                                    <button type="reset" class="btn btn--primary ml-2 location-reload-to-base-pos" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
+                                                @endif
                                             </div>
                                             <!-- End Search -->
                                         </form>
+
                                     </div>
                                 </div>
                             </div>
-
-
-                        </div>
-                        <div class="card-body d-flex flex-column" id="items">
-                            <div class="row g-3 mb-auto">
+                            <div class="row g-3 mb-auto" id="single-list">
+                            <?php
+                            if(session()->get('cart_product_ids') && count(session()->get('cart_product_ids'))>0){
+                                $cart_product_ids = session()->get('cart_product_ids');
+                            }else{
+                                $cart_product_ids = [];
+                            }
+                            ?>
                                 @foreach($products as $product)
                                     <div class="order--item-box item-box">
-                                        @include('admin-views.pos._single_product',['product'=>$product, 'store_data'=>$store])
+                                        @include('admin-views.pos._single_product',['product'=>$product, 'store_data'=>$store, 'cart_product_ids'=>$cart_product_ids])
                                     </div>
                                 @endforeach
                             </div>
                             @if(count($products)===0)
-                            <div class="search--no-found">
-                                <img src="{{asset('public/assets/admin/img/search-icon.png')}}" alt="img">
-                                <p>
-                                    {{translate('messages.no_products_on_pos_search')}}
-                                </p>
-                            </div>
+                                <div class="search--no-found">
+                                    <img src="{{asset('public/assets/admin/img/search-icon.png')}}" alt="img">
+                                    <p>
+                                        {{translate('messages.no_products_on_pos_search')}}
+                                    </p>
+                                </div>
                             @endif
                         </div>
                         <div class="card-footer border-0">
@@ -97,31 +101,28 @@
 				</div>
 				<div class="order--pos-right">
                     <div class="card h-100">
-                        <div class="card-header bg-light border-0 m-1">
+                        <div class="card-header bg-light border-0">
                             <h5 class="card-title">
-                                <span class="card-header-icon">
-                                    <i class="tio-money-vs"></i>
-                                </span>
                                 <span>
                                     {{translate('billing_section')}}
                                 </span>
                             </h5>
                         </div>
                         <div class="card-body p-0">
-                            <div class="d-flex flex-wrap flex-row p-2 add--customer-btn">
+                            <div class="d-flex flex-wrap p-3 add--customer-btn">
                                 <select id="customer" name="customer_id"
-                                        data-placeholder="{{ translate('messages.select_customer') }}"
-                                        class="js-data-example-ajax form-control">
-                                    </select>
+                                    data-placeholder="{{ translate('messages.select_customer') }}"
+                                    class="js-data-example-ajax form-control">
+                                </select>
                                 <button class="btn btn--primary rounded font-regular" id="add_new_customer"
                                     type="button" data-toggle="modal" data-target="#add-customer"
                                     title="Add Customer">
-                                    <i class="tio-add-circle-outlined"></i> {{ translate('Add new customer') }}
+                                    {{ translate('Add new customer') }}
                                 </button>
                             </div>
                             <div class="pos--delivery-options">
-                                <div class="d-flex justify-content-between">
-                                    <h5 class="card-title">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <h5 class="card-title d-flex align-items-center gap-2">
                                         <span class="card-title-icon">
                                             <i class="tio-user"></i>
                                         </span>
@@ -129,9 +130,9 @@
                                     </h5>
                                     <span class="delivery--edit-icon text-primary" id="delivery_address" data-toggle="modal" data-target="#deliveryAddrModal"><i class="tio-edit"></i></span>
                                 </div>
-                                    <div class="pos--delivery-options-info d-flex flex-wrap" id="del-add">
-                                        @include('admin-views.pos._address')
-                                    </div>
+                                <div class="pos--delivery-options-info d-flex flex-wrap" id="del-add">
+                                    @include('admin-views.pos._address')
+                                </div>
                             </div>
                             <div class='w-100' id="cart">
                                 @include('admin-views.pos._cart',['store'=>$store])
@@ -140,10 +141,10 @@
                     </div>
 				</div>
 			</div>
-		</div><!-- container //  -->
+		</div>
 	</section>
 
-    <!-- End Content -->
+    <!-- Quick View Modal -->
     <div class="modal fade" id="quick-view" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content" id="quick-view-modal">
@@ -153,7 +154,7 @@
     </div>
 
 
-
+    {{-- Print Invoice Modal --}}
     <div class="modal fade" id="print-invoice" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -165,23 +166,21 @@
                 </div>
                 <div class="modal-body row ff-emoji">
                     <div class="col-md-12">
-                        <div class="text-center"> 
+                        <div class="text-center">
                             <input type="button" class="btn btn--primary non-printable text-white print-Div"
                                 value="{{ translate('Proceed, If thermal printer is ready.') }}"/>
                             <a href="{{url()->previous()}}" class="btn btn-danger non-printable">{{ translate('messages.back') }}</a>
                         </div>
                         <hr class="non-printable">
                     </div>
-                    <div class="row m-auto" id="print-modal-content">
-
-                    </div>
-
+                    <div class="row m-auto" id="print-modal-content"></div>
                 </div>
             </div>
         </div>
     </div>
 
 
+    {{-- Add Customer Modal --}}
     <div class="modal fade" id="add-customer" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -223,7 +222,7 @@
                                 <div class="form-group">
                                     <label for="phone" class="input-label" >{{translate('phone')}} ({{translate('with_country_code')}})<span
                                         class="input-label-secondary text-danger">*</span></label>
-                                    <input id="phone" type="text" name="phone" class="form-control" value="{{ old('phone') }}"  placeholder="{{translate('phone')}}" required>
+                                    <input id="phone" type="tel" name="phone" class="form-control" value="{{ old('phone') }}"  placeholder="{{translate('phone')}}" required>
                                 </div>
                             </div>
                         </div>
@@ -533,13 +532,14 @@
                 $('#loading').show();
             },
             success: function (data) {
-                $('#quick-view').modal('show');
+                // $('#quick-view').modal('show');
                 $('#quick-view-modal').empty().html(data.view);
             },
             complete: function () {
-                $('#loading').hide();
+                // $('#loading').hide();
             },
         });
+        // check_stock();
     });
 
 
@@ -581,23 +581,20 @@
         return true;
     }
 
-
-
-
-
-        function checkStore() {
-            let module_id = {{Config::get('module.current_module_id')}};
-            let store_id = getUrlParameter('store_id');
-            if(module_id && store_id){
-                $('#category').prop("disabled", false);
-                $('#datatableSearch').prop("disabled", false);
-            }
+    function checkStore() {
+        let module_id = {{Config::get('module.current_module_id')}};
+        let store_id = getUrlParameter('store_id');
+        if(module_id && store_id){
+            $('#category').prop("disabled", false);
+            $('#datatableSearch').prop("disabled", false);
         }
+    }
 
-        checkStore();
+    checkStore();
 
     function getVariantPrice() {
         if ($('#add-to-cart-form input[name=quantity]').val() > 0 && checkAddToCartValidity()) {
+            // alert(1);
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
@@ -703,6 +700,68 @@
     });
 
 
+
+    $(document).on('click', '.check-stock', function () {
+        check_stock();
+    });
+
+
+    function check_stock(){
+        $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
+                }
+            });
+           let form_id = 'add-to-cart-form'
+            $.post({
+                url: '{{ route('admin.pos.item_stock_view') }}',
+                data: $('#' + form_id).serializeArray(),
+                beforeSend: function () {
+                    // $('#loading').show();
+                },
+                success: function (data) {
+
+
+                    $('#add-to-cart-form input[name=quantity]').empty()
+                    $('#quick-view').modal('show');
+                    $('#quick-view-modal').empty().html(data.view);
+            },
+                complete: function () {
+                    $('#loading').hide();
+                }
+            });
+    }
+
+
+
+    $(document).on('click', '.item-stock-view-update', function () {
+        item_stock_view_update();
+    });
+
+
+    function item_stock_view_update(){
+        $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
+                }
+            });
+           let form_id = 'add-to-cart-form'
+            $.post({
+                url: '{{ route('admin.pos.item_stock_view_update') }}',
+                data: $('#' + form_id).serializeArray(),
+                beforeSend: function () {
+                    // $('#loading').show();
+                },
+                success: function (data) {
+                    $('#quick-view').modal('show');
+                $('#quick-view-modal').empty().html(data.view);
+            },
+                complete: function () {
+                    $('#loading').hide();
+                }
+            });
+    }
+
     $(document).on('click', '.delivery-Address-Store', function () {
 
         $.ajaxSetup({
@@ -780,7 +839,11 @@
         $.post('<?php echo e(route('admin.pos.cart_items')); ?>?store_id={{request()?->store_id}}', {_token: '<?php echo e(csrf_token()); ?>'}, function (data) {
             $('#cart').empty().html(data);
         });
+        $.post('<?php echo e(route('admin.pos.single_items')); ?>?store_id={{request()?->store_id}}&&category_id={{request()?->category_id}}&&keyword={{request()?->keyword}}', {_token: '<?php echo e(csrf_token()); ?>'}, function (data) {
+            $('#single-list').empty().html(data);
+        });
     }
+
 
    $(function(){
         $(document).on('click','input[type=number]',function(){ this.select(); });
@@ -796,8 +859,8 @@
 
         let key = element.data('key');
 
-        if (valueCurrent >= minValue && valueCurrent <= maxValue) {
-            $.post('{{ route('admin.pos.updateQuantity') }}', {_token: '{{ csrf_token() }}', key: key, quantity:valueCurrent}, function () {
+    if (valueCurrent >= minValue && valueCurrent <= maxValue) {
+    $.post('{{ route('admin.pos.updateQuantity') }}', {_token: '{{ csrf_token() }}', key: key, quantity:valueCurrent}, function () {
                 updateCart();
             });
         } else if(valueCurrent > maxValue){
@@ -806,7 +869,7 @@
                 title: 'Cart',
                 text: 'Sorry, cart limit exceeded.'
             });
-            element.val(element.data('oldValue'));
+            element.val(element.data('oldvalue'));
         }
         else {
             Swal.fire({
@@ -814,7 +877,7 @@
                 title: 'Cart',
                 text: '{{ translate('Sorry, the minimum value was reached') }}'
             });
-            element.val(element.data('oldValue'));
+            element.val(element.data('oldvalue'));
         }
 
 
@@ -886,5 +949,12 @@
     print_invoice("{{session('last_order')}}")
     @php(session(['last_order'=> false]))
     @endif
+
+    $('.location-reload-to-base-pos').on('click', function() {
+    const url = $(this).data('url');
+    let nurl = new URL(url);
+    nurl.searchParams.delete('keyword');
+    location.href = nurl;
+});
 </script>
 @endpush

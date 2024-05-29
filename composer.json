@@ -16,6 +16,7 @@
         "gregwar/captcha": "^1.1",
         "guzzlehttp/guzzle": "^7.0.1",
         "intervention/image": "^2.5",
+        "iyzico/iyzipay-php": "^2.0",
         "laravel/framework": "^10.0",
         "laravel/passport": "^11.0",
         "laravel/tinker": "^2.5",
@@ -36,12 +37,12 @@
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.5",
-        "spatie/laravel-ignition": "^2.0",
         "fakerphp/faker": "^1.9.1",
         "laravel/sail": "^1.0.1",
         "mockery/mockery": "^1.4.2",
         "nunomaduro/collision": "^6.1",
-        "phpunit/phpunit": "^10.0"
+        "phpunit/phpunit": "^10.0",
+        "spatie/laravel-ignition": "^2.0"
     },
     "autoload": {
         "files": [

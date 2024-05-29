@@ -38,6 +38,11 @@
                             </div>
                             <!-- End Search -->
                         </form>
+
+                        @if(request()->get('search'))
+                        <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
+                        @endif
+
                                             <!-- Unfold -->
                     <div class="hs-unfold mr-2">
                         <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle h--45px min-height-40" href="javascript:;"

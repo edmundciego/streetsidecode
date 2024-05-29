@@ -81,26 +81,26 @@
             display: block;
         }
         .privacy {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-}
-.privacy a {
-    text-decoration: none;
-    color: #334257;
-    position: relative;
-    margin-left: auto;
-    margin-right: auto;
-}
-.privacy a span {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #334257;
-    display: inline-block;
-    margin: 0 7px;
-}
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+        .privacy a {
+            text-decoration: none;
+            color: #334257;
+            position: relative;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .privacy a span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #334257;
+            display: inline-block;
+            margin: 0 7px;
+        }
         .social {
             margin: 15px 0 8px;
             display: block;
@@ -117,7 +117,7 @@
         }
         .text-base {
             color: var(--base);
-font-weight: 700
+            font-weight: 700
         }
         .mail-img-1 {
             width: 140px;
@@ -134,9 +134,9 @@ font-weight: 700
             height: 172px;
             object-fit: cover
         }
-.social img {
-width: 24px;    
-}
+        .social img {
+        width: 24px;
+        }
     </style>
 
 </head>
@@ -149,16 +149,13 @@ width: 24px;
             <tr>
                 <td class="main-table-td">
                     <img class="mail-img-1"
-                    @if ($data?->logo)
-                    src="{{ asset('storage/app/public/email_template/') }}/{{ $data['logo']??'' }}"
-                    @else
-                    src='{{ asset('/public/assets/admin/img/blank1.png') }}'
-                    @endif
+                    src="{{\App\CentralLogics\Helpers::onerror_image_helper( data_get($data, 'logo'), asset('storage/app/public/email_template/').'/'.data_get($data, 'logo'), asset('public/assets/admin/img/emai_demo_template_2.png'), 'email_template/') }}"
                     id="logoViewer" alt="">
                     <h2 id="mail-title" class="mt-2">{{ $title?? translate('Main_Title_or_Subject_of_the_Mail') }}</h2>
                     <div class="mb-1" id="mail-body">{!! $body?? translate('Hi_Sabrina,') !!}</div>
-                    <img class="mb-2 mail-img-3" id="bannerViewer" onerror="this.src='{{ asset('/public/assets/admin/img/blank2.png') }}'"
-                    src="{{ asset('storage/app/public/email_template/') }}/{{ $data['image']??'' }}" alt="">
+                    <img class="mb-2 mail-img-3" id="bannerViewer"
+                    src="{{\App\CentralLogics\Helpers::onerror_image_helper( data_get($data, 'image'), asset('storage/app/public/email_template/').'/'.data_get($data, 'image'), asset('public/assets/admin/img/emai_demo_template_1.png'), 'email_template/') }}"
+                    alt="image">
                     @if ($data?->button_url)
                     <span class="d-block text-center" style="margin-top: 16px">
                     <a href="{{ $data['button_url']??'#' }}" class="cmn-btn" id="mail-button">{{ $data['button_name']??'Submit' }}</a>

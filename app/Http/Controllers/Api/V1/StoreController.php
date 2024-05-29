@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\CentralLogics\Helpers;
 use App\CentralLogics\StoreLogic;
+use App\CentralLogics\CategoryLogic;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Item;
@@ -255,4 +256,66 @@ class StoreController extends Controller
 
         return response()->json($stores, 200);
     }
+
+    public function get_combined_data(Request $request)
+    {
+        if (!$request->hasHeader('zoneId')) {
+            $errors = [['code' => 'zoneId', 'message' => translate('messages.zone_id_required')]];
+            return response()->json(['errors' => $errors], 403);
+        }
+
+        $zone_id = $request->header('zoneId');
+        $data_type = $request->query('data_type', 'all');
+        $type = $request->query('type', 'all');
+        $limit = $request->query('limit', 10);
+        $offset = $request->query('offset', 1);
+        $longitude = (float) $request->header('longitude') ?? 0;
+        $latitude = (float) $request->header('latitude') ?? 0;
+        $filter = $request->query('filter', '');
+        $filter = $filter?(is_array($filter)?$filter:str_getcsv(trim($filter, "[]"), ',')):'';
+        $rating_count = $request->query('rating_count');
+
+        switch ($data_type) {
+            case 'searched':
+                $validator = Validator::make($request->all(), ['name' => 'required']);
+                if ($validator->fails()) {
+                    return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+                }
+                $name = $request->input('name');
+
+                $paginator = StoreLogic::search_stores($name, $zone_id, $request->category_id, $limit, $offset, $type, $longitude, $latitude, $filter, $rating_count);
+                break;
+
+            case 'discounted':
+
+                $paginator = StoreLogic::get_discounted_stores($zone_id, $limit, $offset, $type, $longitude, $latitude, $filter, $rating_count);
+                break;
+
+            case 'category':
+                $validator = Validator::make($request->all(), [
+                    'category_ids' => 'required|array',
+                    'category_ids.*' => 'integer'
+                ]);
+
+                if ($validator->fails()) {
+                    return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+                }
+
+                $category_ids = $request->input('category_ids');
+
+                $paginator = CategoryLogic::category_stores($category_ids, $zone_id, $limit, $offset, $type, $longitude, $latitude, $filter, $rating_count);
+                break;
+
+            default:
+                $filter_data = $request->query('filter_data', 'all');
+                $store_type = $request->query('store_type', 'all');
+                $featured = $request->query('featured');
+                $paginator = StoreLogic::get_stores($zone_id, $filter_data, $type, $store_type, $limit, $offset, $featured, $longitude, $latitude, $filter, $rating_count);
+                break;
+        }
+
+        $paginator['stores'] = Helpers::store_data_formatting($paginator['stores'], true);
+        return response()->json($paginator, 200);
+    }
+
 }

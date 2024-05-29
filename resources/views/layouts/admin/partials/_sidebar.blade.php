@@ -161,6 +161,14 @@
                 </li>
                 @endif
                 <!-- End Coupon -->
+                 {{-- @if (\App\CentralLogics\Helpers::module_permission_check('cashback')) --}}
+                 <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/cashback*') ? 'active' : '' }}">
+                    <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.cashback.add-new') }}" title="{{ translate('messages.cashback') }}">
+                        <i class="tio-settings-back nav-icon"></i>
+                        <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.cashback') }}</span>
+                    </a>
+                </li>
+                {{-- @endif --}}
                 <!-- Notification -->
                 @if (\App\CentralLogics\Helpers::module_permission_check('notification'))
                 <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/notification*') ? 'active' : '' }}">
@@ -451,14 +459,14 @@
                             <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.categories') }}</span>
                         </a>
                         <ul class="js-navbar-vertical-aside-submenu nav nav-sub"  style="display:{{ Request::is('admin/category*') ? 'block' : 'none' }}">
-                            <li class="nav-item {{ Request::is('admin/category/add') ? 'active' : '' }}">
+                            <li class="nav-item @yield('main_category') {{ Request::is('admin/category/add') ? 'active' : '' }}">
                                 <a class="nav-link " href="{{ route('admin.category.add') }}" title="{{ translate('messages.category') }}">
                                     <span class="tio-circle nav-indicator-icon"></span>
                                     <span class="text-truncate">{{ translate('messages.category') }}</span>
                                 </a>
                             </li>
 
-                            <li class="nav-item {{ Request::is('admin/category/add-sub-category') ? 'active' : '' }}">
+                            <li class="nav-item @yield('sub_category') {{ Request::is('admin/category/add-sub-category') ? 'active' : '' }}">
                                 <a class="nav-link " href="{{ route('admin.category.add-sub-category') }}" title="{{ translate('messages.sub_category') }}">
                                     <span class="tio-circle nav-indicator-icon"></span>
                                     <span class="text-truncate">{{ translate('messages.sub_category') }}</span>
@@ -626,7 +634,7 @@
                                 </a>
                             </li>
 
-                            <li class="navbar-item {{ Request::is('admin/store/list') ? 'active' : '' }}">
+                            <li class="navbar-item {{ Request::is('admin/store/list') ||  Request::is('admin/store/view/*')  ? 'active' : '' }}">
                                 <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.store.list') }}" title="{{ translate('messages.stores_list') }}">
                                     <span class="tio-circle nav-indicator-icon"></span>
                                     <span class="text-truncate">{{ translate('messages.stores') }}

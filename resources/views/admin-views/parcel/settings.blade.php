@@ -101,7 +101,9 @@
 
 
                         <div class="col-md-10 lang_form1 default-form1">
-                            <label class="form-label">{{translate('Instruction')}} ({{ translate('Default') }})</label>
+                            <label class="form-label">{{translate('Instruction')}} ({{ translate('Default') }})<span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('Write_the_short_description_within_191_characters') }}">
+                                                    <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
+                                                </span></label>
                             <input type="text" class="form-control h--45px" maxlength="191" name="instruction[]"
                                    placeholder="{{ translate('Ex:_parcel_contains_document') }}">
                             <input type="hidden" name="lang[]" value="default">
@@ -110,7 +112,9 @@
                         @if ($language)
                             @foreach(json_decode($language) as $lang)
                                 <div class="col-md-10 d-none lang_form1" id="{{$lang}}-form1">
-                                    <label class="form-label">{{translate('Instruction')}} ({{strtoupper($lang)}})</label>
+                                    <label class="form-label">{{translate('Instruction')}} ({{strtoupper($lang)}})<span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('Write_the_short_description_within_191_characters') }}">
+                                                    <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
+                                                </span></label>
                                     <input type="text" class="form-control h--45px" maxlength="191" name="instruction[]"
                                            placeholder="{{ translate('Ex:_parcel_contains_document') }}">
                                     <input type="hidden" name="lang[]" value="{{$lang}}">
@@ -178,7 +182,7 @@
 
                                     <td>
                                         <div class="btn--container justify-content-center">
-                                            <a class="btn btn-sm btn--primary btn-outline-primary action-btn"
+                                            <a class="btn btn-sm btn--primary btn-outline-primary action-btn edit-instruction"
                                                title="{{ translate('messages.edit') }}" data-id="{{$instruction['id']}}"
                                                data-toggle="modal"   data-target="#add_update_instruction_{{$instruction->id}}"
                                             ><i class="tio-edit"></i>
@@ -219,15 +223,16 @@
                                                     @php($default_lang = str_replace('_', '-', app()->getLocale()))
                                                     <ul class="nav nav-tabs nav--tabs mb-3 border-0">
                                                         <li class="nav-item">
-                                                            <a class="nav-link lang_link add_active active"
+                                                            <a class="nav-link update-lang_link add_active active"
                                                                href="#"
                                                                id="default-link">{{ translate('Default') }}</a>
                                                         </li>
                                                         @if($language)
                                                             @foreach (json_decode($language) as $lang)
                                                                 <li class="nav-item">
-                                                                    <a class="nav-link lang_link"
+                                                                    <a class="nav-link update-lang_link"
                                                                        href="#"
+                                                                       data-reason-id="{{$instruction->id}}"
                                                                        id="{{ $lang }}-link">{{ \App\CentralLogics\Helpers::get_language_name($lang) . '(' . strtoupper($lang) . ')' }}</a>
                                                                 </li>
                                                             @endforeach
@@ -235,7 +240,7 @@
                                                     </ul>
                                                     <input type="hidden" name="instruction_id"  value="{{$instruction->id}}" />
 
-                                                    <div class="form-group mb-3 add_active_2  lang_form" id="default-form_{{$instruction->id}}">
+                                                    <div class="form-group mb-3 add_active_2  update-lang_form" id="default-form_{{$instruction->id}}">
                                                         <label class="form-label">{{translate('Instruction')}} ({{translate('messages.default')}}) </label>
                                                         <input class="form-control" name='instruction[]' maxlength="191" value="{{$instruction?->getRawOriginal('instruction')}}" type="text">
                                                         <input type="hidden" name="lang1[]" value="default">
@@ -253,7 +258,7 @@
                                                                     }
                                                                 }
                                                                 ?>
-                                                            <div class="form-group mb-3 d-none lang_form" id="{{$lang}}-form_{{$instruction->id}}">
+                                                            <div class="form-group mb-3 d-none update-lang_form" id="{{$lang}}-langform_{{$instruction->id}}">
                                                                 <label class="form-label">{{translate('Instruction')}} ({{strtoupper($lang)}})</label>
                                                                 <input class="form-control" name='instruction[]' maxlength="191" value="{{ $translate[$lang]['instruction'] ?? null }}"  type="text">
                                                                 <input type="hidden" name="lang1[]" value="{{$lang}}">
@@ -303,47 +308,5 @@
 @endsection
 
 @push('script_2')
-    <script>
-        "use strict";
-        $('.module-change').on('click', function (){
-            let id = $(this).val();
-            edit_instruction()
-        })
-        function edit_instruction(){
-            $(".lang_link").removeClass('active');
-            $(".add_active").addClass('active');
-            $(".lang_form").addClass('d-none');
-            $(".add_active_2").removeClass('d-none');
-        }
-
-        $(".lang_link").click(function(e){
-            e.preventDefault();
-            $(".lang_link").removeClass('active');
-            $(".lang_form").addClass('d-none');
-            $(".add_active").removeClass('active');
-            $(this).addClass('active');
-
-            let form_id = this.id;
-            let lang = form_id.substring(0, form_id.length - 5);
-
-            @foreach ( $instructions as $instruction )
-            $("#"+lang+"-form_{{ $instruction->id }}").removeClass('d-none');
-            @endforeach
-            if(lang == '{{$default_lang}}')
-            {
-                $(".from_part_2").removeClass('d-none');
-            }
-        });
-
-        $(".lang_link1").click(function(e){
-            e.preventDefault();
-            $(".lang_link1").removeClass('active');
-            $(".lang_form1").addClass('d-none');
-            $(this).addClass('active');
-            let form_id = this.id;
-            let lang = form_id.substring(0, form_id.length - 6);
-            $("#"+lang+"-form1").removeClass('d-none');
-        })
-    </script>
-
+<script src="{{asset('public/assets/admin/js/view-pages/parcel_delivery_setup.js')}}"></script>
 @endpush

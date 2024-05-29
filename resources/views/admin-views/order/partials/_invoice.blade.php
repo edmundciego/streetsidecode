@@ -7,7 +7,7 @@
                 <a href="{{ url()->previous() }}"
                     class="btn btn-danger non-printable mt-3">{{ translate('messages.back') }}</a>
             </div>
-        
+
             <hr class="non-printable">
             <div class="print--invoice initial-38-1">
                 @if ($order->store)
@@ -217,13 +217,22 @@
                             <dt class="col-6">{{ translate('messages.discount') }}:</dt>
                             <dd class="col-6">
                                 -
-                                {{ \App\CentralLogics\Helpers::format_currency($order['store_discount_amount'] + $order['flash_admin_discount_amount'] + $order['flash_store_discount_amount']) }}
+                                {{ \App\CentralLogics\Helpers::format_currency($order['store_discount_amount'] + $order['flash_admin_discount_amount']  + $order['flash_store_discount_amount']) }}
                             </dd>
+
+
                             <dt class="col-6">{{ translate('messages.coupon_discount') }}:</dt>
                             <dd class="col-6">
                                 -
                                 {{ \App\CentralLogics\Helpers::format_currency($order['coupon_discount_amount']) }}
                             </dd>
+                            @if ($order['ref_bonus_amount'] > 0)
+                            <dt class="col-6">{{ translate('messages.Referral_Discount') }}:</dt>
+                            <dd class="col-6">
+                                -
+                                {{ \App\CentralLogics\Helpers::format_currency($order['ref_bonus_amount']) }}
+                            </dd>
+                            @endif
                             @if ($order->tax_status == 'excluded' || $order->tax_status == null  )
                             <dt class="col-6">{{ translate('messages.vat/tax') }}:</dt>
                             <dd class="col-6">+
@@ -251,6 +260,14 @@
                                 @php($additional_charge = $order['additional_charge'])
                                 + {{ \App\CentralLogics\Helpers::format_currency($additional_charge) }}
                             </dd>
+
+                            @if ($order['extra_packaging_amount'] > 0)
+                            <dt class="col-6">{{ translate('messages.Extra_Packaging_Amount') }}:</dt>
+                            <dd class="col-6">
+                                +
+                                {{ \App\CentralLogics\Helpers::format_currency($order['extra_packaging_amount']) }}
+                            </dd>
+                            @endif
                         <dt class="col-6 total">{{ translate('messages.total') }}:</dt>
                         <dd class="col-6 total">
                             {{ \App\CentralLogics\Helpers::format_currency($order->order_amount) }}</dd>

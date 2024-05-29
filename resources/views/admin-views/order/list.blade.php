@@ -30,7 +30,6 @@
             <!-- End Row -->
         </div>
         <!-- End Page Header -->
-
         <!-- Card -->
         <div class="card">
             <!-- Header -->
@@ -40,15 +39,19 @@
                         <!-- Search -->
                         <div class="input-group input--group">
                             <input id="datatableSearch_" type="search" name="search" class="form-control h--40px"
-                                    placeholder="{{ translate('messages.Ex:') }} 10010" value="{{ request()?->search ?? null}}" aria-label="{{translate('messages.search')}}" required>
+                                    placeholder="{{ translate('messages.Ex:') }} 10010" value="{{ request()?->search ?? null}}" aria-label="{{translate('messages.search')}}">
                                     @if($parcel_order)
                                     <input type="hidden" name="parcel_order" value="{{$parcel_order}}">
                                     @endif
                             <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
-
                         </div>
                         <!-- End Search -->
                     </form>
+
+                    @if(request()->get('search'))
+                        <button type="reset" class="btn btn--primary ml-2 location-reload-to-base" data-url="{{url()->full()}}">{{translate('messages.reset')}}</button>
+                    @endif
+
                     <!-- Datatable Info -->
                     <div id="datatableCounterInfo" class="mr-2 mb-2 mb-sm-0 initial-hidden">
                         <div class="d-flex align-items-center">
@@ -58,9 +61,7 @@
                                 </span>
                         </div>
                     </div>
-                    <!-- End Datatable Info -->
 
-                    <!-- Unfold -->
                     <div class="hs-unfold mr-2">
                         <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle h--40px" href="javascript:;"
                             data-hs-unfold-options='{
@@ -70,22 +71,7 @@
                             <i class="tio-download-to mr-1"></i> {{translate('messages.export')}}
                         </a>
 
-                        <div id="usersExportDropdown"
-                                class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
-                            <span class="dropdown-header">{{translate('messages.options')}}</span>
-                            <a id="export-copy" class="dropdown-item" href="javascript:;" title="{{translate('messages.current_page_only')}}">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                        src="{{asset('public/assets/admin')}}/svg/illustrations/copy.svg"
-                                        alt="Image Description">
-                                {{translate('messages.copy')}}
-                            </a>
-                            <a id="export-print" class="dropdown-item" href="javascript:;" title="{{translate('messages.current_page_only')}}">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                        src="{{asset('public/assets/admin')}}/svg/illustrations/print.svg"
-                                        alt="Image Description">
-                                {{translate('messages.print')}}
-                            </a>
-                            <div class="dropdown-divider"></div>
+                        <div id="usersExportDropdown" class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
                             <span class="dropdown-header">{{translate('messages.download_options')}}</span>
                             <a id="export-excel" class="dropdown-item" href="javascript:;">
                                 <img class="avatar avatar-xss avatar-4by3 mr-2"
@@ -101,7 +87,7 @@
                             </a>
                         </div>
                     </div>
-                    <!-- End Unfold -->
+
                     @if(Request::is('admin/refund/*'))
                     <div class="select-item">
                         <select name="slist" class="form-control js-select2-custom refund-filter" >
@@ -111,14 +97,14 @@
                         </select>
                     </div>
                     @endif
-                    <!-- Unfold -->
+
                     <div class="hs-unfold mr-2">
                         <a class="js-hs-unfold-invoker btn btn-sm btn-white h--40px filter-button-show" href="javascript:;">
                             <i class="tio-filter-list mr-1"></i> {{ translate('messages.filter') }} <span class="badge badge-success badge-pill ml-1" id="filter_count"></span>
                         </a>
                     </div>
-                    <!-- End Unfold -->
-                    <!-- Unfold -->
+
+                    @if ($status != 'scheduled')
                     <div class="hs-unfold">
                         <a class="js-hs-unfold-invoker btn btn-sm btn-white h--40px" href="javascript:;"
                             data-hs-unfold-options='{
@@ -132,19 +118,6 @@
                                 class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-right dropdown-card min--240">
                             <div class="card card-sm">
                                 <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <span class="mr-2">{{translate('messages.order')}}</span>
-
-                                        <!-- Checkbox Switch -->
-                                        <label class="toggle-switch toggle-switch-sm" for="toggleColumn_order">
-                                            <input type="checkbox" class="toggle-switch-input"
-                                                    id="toggleColumn_order" checked>
-                                            <span class="toggle-switch-label">
-                                            <span class="toggle-switch-indicator"></span>
-                                            </span>
-                                        </label>
-                                        <!-- End Checkbox Switch -->
-                                    </div>
 
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <span class="mr-2">{{translate('messages.date')}}</span>
@@ -188,6 +161,21 @@
                                         </label>
                                         <!-- End Checkbox Switch -->
                                     </div>
+                                    @if (!$parcel_order)
+
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="mr-2">{{translate('messages.item_quantity')}}</span>
+                                        <!-- Checkbox Switch -->
+                                        <label class="toggle-switch toggle-switch-sm" for="toggleColumn_item_quantity">
+                                            <input type="checkbox" class="toggle-switch-input"
+                                            id="toggleColumn_item_quantity"   checked>
+                                            <span class="toggle-switch-label">
+                                            <span class="toggle-switch-indicator"></span>
+                                            </span>
+                                        </label>
+                                        <!-- End Checkbox Switch -->
+                                    </div>
+                                    @endif
 
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <span class="mr-2">{{translate('messages.total')}}</span>
@@ -234,6 +222,8 @@
                             </div>
                         </div>
                     </div>
+
+                    @endif
                     <!-- End Unfold -->
                 </div>
             </div>
@@ -265,14 +255,23 @@
                         </th>
                         <th class="table-column-pl-0 border-0">{{translate('messages.order_id')}}</th>
                         <th class="border-0">{{translate('messages.order_date')}}</th>
+                        @if ($status == 'scheduled')
+                        <th class="border-0">{{translate('messages.scheduled_at')}}</th>
+                        @endif
                         <th class="border-0">{{translate('messages.customer_information')}}</th>
                         @if ($parcel_order)
                             <th class="border-0">{{translate('messages.parcel_category')}}</th>
                         @else
                             <th class="border-0">{{translate('messages.store')}}</th>
+                            <th class="text-center border-0">{{translate('messages.Item_Quantity')}}</th>
                         @endif
                         <th class="border-0">{{translate('messages.total_amount')}}</th>
-                        <th class="text-center border-0">{{translate('messages.order_status')}}</th>
+
+                        @if ($status == 'refunded')
+                            <th class="text-center border-0">{{translate('messages.Refunded_order_status')}}</th>
+                        @else
+                            <th class="text-center border-0">{{translate('messages.order_status')}}</th>
+                        @endif
                         <th class="text-center border-0">{{translate('messages.actions')}}</th>
                     </tr>
                     </thead>
@@ -290,30 +289,47 @@
                             <td>
                                 <div>
                                     <div>
-                                        {{date('d M Y',strtotime($order['created_at']))}}
+                                        {{ \App\CentralLogics\Helpers::date_format($order->created_at) }}
                                     </div>
                                     <div class="d-block text-uppercase">
-                                        {{date(config('timeformat'),strtotime($order['created_at']))}}
+                                        {{ \App\CentralLogics\Helpers::time_format($order->created_at) }}
                                     </div>
                                 </div>
                             </td>
+                            @if ($status == 'scheduled')
+                            <td>
+                                <div>
+                                    <div>
+                                        {{ \App\CentralLogics\Helpers::date_format($order->schedule_at) }}
+                                    </div>
+                                    <div class="d-block text-uppercase">
+                                        {{ \App\CentralLogics\Helpers::time_format($order->schedule_at) }}
+                                    </div>
+                                </div>
+                            </td>
+                            @endif
                             <td>
                                 @if($order->is_guest)
-                                @php($customer_details = json_decode($order['delivery_address'],true))
-                                <strong>{{$customer_details['contact_person_name']}}</strong>
-                                <div>{{$customer_details['contact_person_number']}}</div>
+                                    @php($customer_details = json_decode($order['delivery_address'],true))
+                                    <strong>{{$customer_details['contact_person_name']}}</strong>
+                                    <a href="tel:{{$customer_details['contact_person_number']}}">
+                                        <div>{{$customer_details['contact_person_number']}}</div>
+                                    </a>
                                 @elseif($order->customer)
-                                <a class="text-body text-capitalize" href="{{route('admin.customer.view',[$order['user_id']])}}">
-                                    <strong>{{$order->customer['f_name'].' '.$order->customer['l_name']}}</strong>
-                                    <div>{{$order->customer['phone']}}</div>
-                                </a>
+
+                                    <a class="text-body" href="{{route('admin.customer.view',[$order['user_id']])}}">
+                                        <strong>
+                                            <div> {{$order->customer['f_name'].' '.$order->customer['l_name']}}</div>
+                                        </strong>
+                                    </a>
+                                    <a href="tel:{{$order->customer['phone']}}">
+                                        <div>{{$order->customer['phone']}}</div>
+                                    </a>
                                 @else
-                                    <label class="badge badge-danger">{{translate('messages.invalid_customer_data')}}</label>
+                                    <label
+                                        class="badge badge-danger">{{translate('messages.invalid_customer_data')}}</label>
                                 @endif
                             </td>
-                            @if ($parcel_order)
-
-                            @endif
                             <td>
                                 @if ($parcel_order)
                                     <div>{{Str::limit($order->parcel_category?$order->parcel_category->name:translate('messages.not_found'),20,'...')}}</div>
@@ -323,6 +339,14 @@
                                     <div>{{Str::limit(translate('messages.not_found'),20,'...')}}</div>
                                 @endif
                             </td>
+
+
+                            @if (!$parcel_order)
+                                <td class="text-center border-0">
+                                    {{ $order?->details()?->count() }}
+                                </td>
+                            @endif
+
                             <td>
                                 <div class="text-right mw--85px">
                                     <div>
@@ -441,7 +465,7 @@
                     <h4 class="card-header-title">{{translate('messages.order_filter')}}</h4>
 
                     <!-- Toggle Button -->
-                    <a class="js-hs-unfold-invoker_ btn btn-icon btn-xs btn-ghost-dark ml-2 filter-button-hide" href="javascript:;">
+                    <a class="js-hs-unfold-invoker_ btn btn-icon btn-sm btn-ghost-dark ml-2 filter-button-hide" href="javascript:;">
                         <i class="tio-clear tio-lg"></i>
                     </a>
                     <!-- End Toggle Button -->
@@ -703,9 +727,9 @@
                 }, 1);
             });
 
-            $('#toggleColumn_order').change(function (e) {
-                datatable.columns(1).visible(e.target.checked)
-            })
+            // $('#toggleColumn_order').change(function (e) {
+            //     datatable.columns(1).visible(e.target.checked)
+            // })
 
             $('#toggleColumn_date').change(function (e) {
                 datatable.columns(2).visible(e.target.checked)
@@ -717,15 +741,21 @@
             $('#toggleColumn_store').change(function (e) {
                 datatable.columns(4).visible(e.target.checked)
             })
-            $('#toggleColumn_total').change(function (e) {
+
+            $('#toggleColumn_item_quantity').change(function (e) {
                 datatable.columns(5).visible(e.target.checked)
             })
+
+
+            $('#toggleColumn_total').change(function (e) {
+                datatable.columns({{$parcel_order ? '5': '6'  }}).visible(e.target.checked)
+            })
             $('#toggleColumn_order_status').change(function (e) {
-                datatable.columns(6).visible(e.target.checked)
+                datatable.columns({{$parcel_order ? '6': '7'  }} ).visible(e.target.checked)
             })
 
             $('#toggleColumn_actions').change(function (e) {
-                datatable.columns(7).visible(e.target.checked)
+                datatable.columns({{$parcel_order ? '7': '8'  }}).visible(e.target.checked)
             })
         });
 

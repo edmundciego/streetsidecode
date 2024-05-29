@@ -30,7 +30,7 @@
                     'product/'
                 ) }}"  data-onerror-image="{{asset('public/assets/admin/img/placeholder-2.png')}}"
                         alt="{{$item->name}} image">
-                <div class="cont pt-2">
+                <div class="cont pt-2" title="{{ $item?->name }}">
                     <span class="fz--13">{{Str::limit($item['name'],20,'...')}}</span>
                 </div>
                 <div class="ml-auto">

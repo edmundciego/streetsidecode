@@ -139,7 +139,7 @@ class ReportController extends Controller
                 return $query->whereBetween('created_at', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
             })->orderBy('created_at', 'desc')
             ->notRefunded()
-            ->sum(DB::raw('admin_commission - admin_expense'));
+            ->sum(DB::raw('admin_commission'));
 
         $admin_earned_delivery_commission = OrderTransaction::with('order', 'order.details', 'order.customer', 'order.store')->when(isset($zone), function ($query) use ($zone) {
             return $query->where('zone_id', $zone->id);
@@ -2608,8 +2608,9 @@ class ReportController extends Controller
         $customer = is_numeric($customer_id) ? User::findOrFail($customer_id) : null;
         $filter = $request->query('filter', 'all_time');
         $module = request()->module;
+             $type = $request->query('type', 'all');
 
-        $expense = Expense::with('order', 'order.customer:id,f_name,l_name')->where('created_by', 'admin')
+        $expense = Expense::with('order', 'order.customer:id,f_name,l_name')->where('created_by', 'admin')->where('amount', '>' ,0)
             ->when($zone || $module || $customer || $store, function ($query) use ($zone, $module, $customer, $store) {
                 $query->whereHas('order', function ($query) use ($zone, $store, $customer, $module) {
                     $query->when($module, function ($query) use ($module) {
@@ -2625,6 +2626,9 @@ class ReportController extends Controller
                         return $query->where('user_id', $customer->id);
                     });
                 });
+            })
+                   ->when(isset($type) &&  $type != 'all', function ($query) use ($type) {
+                return $query->where('type',$type);
             })
             ->when(isset($from) && isset($to) && $from != null && $to != null && $filter == 'custom', function ($query) use ($from, $to) {
                 return $query->whereBetween('created_at', [$from . " 00:00:00", $to . " 23:59:59"]);
@@ -2665,9 +2669,9 @@ class ReportController extends Controller
             'filter'=>$filter,
         ];
 
-        if ($request->type == 'excel') {
+        if ($request->export_type == 'excel') {
             return Excel::download(new ExpenseReportExport($data), 'ExpenseReport.xlsx');
-        } else if ($request->type == 'csv') {
+        } else if ($request->export_type == 'csv') {
             return Excel::download(new ExpenseReportExport($data), 'ExpenseReport.csv');
         }
     }
@@ -2689,8 +2693,9 @@ class ReportController extends Controller
         $customer_id = $request->query('customer_id', 'all');
         $customer = is_numeric($customer_id) ? User::findOrFail($customer_id) : null;
         $filter = $request->query('filter', 'all_time');
+             $type = $request->query('type', 'all');
 
-        $expense = Expense::with('order')
+        $expense = Expense::with('order')->where('amount', '>' ,0)
             ->whereHas('order', function ($query) use ($zone, $store, $customer) {
                 $query->when(request('module_id'), function ($query) {
                     return $query->module(request('module_id'));
@@ -2704,6 +2709,9 @@ class ReportController extends Controller
                 $query->when($customer, function ($query) use ($customer) {
                     return $query->where('user_id', $customer->id);
                 });
+            })
+                   ->when(isset($type) &&  $type != 'all', function ($query) use ($type) {
+                return $query->where('type',$type);
             })
             ->when(isset($from) && isset($to) && $from != null && $to != null && $filter == 'custom', function ($query) use ($from, $to) {
                 return $query->whereBetween('created_at', [$from . " 00:00:00", $to . " 23:59:59"]);
@@ -3016,8 +3024,9 @@ class ReportController extends Controller
         $module_id = $request->query('module_id', 'all');
         $customer = is_numeric($customer_id) ? User::findOrFail($customer_id) : null;
         $filter = $request->query('filter', 'all_time');
+        $type = $request->query('type', 'all');
 
-        $expense = Expense::with('order', 'order.customer:id,f_name,l_name')
+        $expense = Expense::with('user','order', 'order.customer:id,f_name,l_name')->where('amount', '>' ,0)
             ->when(isset($zone) || isset($store) || isset($customer), function ($query) use ($zone, $store, $customer) {
                 return $query->whereHas('order', function ($query) use ($zone, $store, $customer) {
                     $query->when($zone, function ($query) use ($zone) {
@@ -3030,6 +3039,9 @@ class ReportController extends Controller
                         return $query->where('user_id', $customer->id);
                     });
                 });
+            })
+            ->when(isset($type) &&  $type != 'all', function ($query) use ($type) {
+                return $query->where('type',$type);
             })
             ->when(isset($module_id) &&  is_numeric($module_id), function ($query) use ($module_id) {
                 return $query->whereHas('order', function ($query) use ($module_id) {
@@ -3068,7 +3080,7 @@ class ReportController extends Controller
             ->paginate(config('default_pagination'))->withQueryString();
 
 
-        return view('admin-views.report.expense-report', compact('expense', 'zone', 'store', 'filter', 'customer'));
+        return view('admin-views.report.expense-report', compact('expense', 'zone', 'store', 'filter', 'customer','type'));
     }
 
     public function generate_statement($id)
@@ -3276,11 +3288,14 @@ class ReportController extends Controller
             ->when(isset($filter) , function ($query) use ($filter,$from, $to) {
                 return $query->applyDateFilter($filter, $from, $to);
             })
-            ->when(isset($key), function ($q) use ($key){
-                $q->where(function ($q) use ($key) {
+            ->when(isset($key), function ($q) use ($key) {
+                $q->where(function ($query) use ($key) {
                     foreach ($key as $value) {
-                        $q->orWhere('disbursement_id', 'like', "%{$value}%")
-                            ->orWhere('status', 'like', "%{$value}%");
+                        $query->orWhere('disbursement_id', 'like', "%{$value}%")
+                              ->orWhere('status', 'like', "%{$value}%")
+                              ->orWhereHas('withdraw_method', function ($subQuery) use ($value) {
+                                  $subQuery->where('method_name','like', "%{$value}%");
+                              });
                     }
                 });
             })
@@ -3357,11 +3372,14 @@ class ReportController extends Controller
             ->when(isset($filter) , function ($query) use ($filter,$from, $to) {
                 return $query->applyDateFilter($filter, $from, $to);
             })
-            ->when(isset($key), function ($q) use ($key){
-                $q->where(function ($q) use ($key) {
+            ->when(isset($key), function ($q) use ($key) {
+                $q->where(function ($query) use ($key) {
                     foreach ($key as $value) {
-                        $q->orWhere('disbursement_id', 'like', "%{$value}%")
-                            ->orWhere('status', 'like', "%{$value}%");
+                        $query->orWhere('disbursement_id', 'like', "%{$value}%")
+                              ->orWhere('status', 'like', "%{$value}%")
+                              ->orWhereHas('withdraw_method', function ($subQuery) use ($value) {
+                                  $subQuery->where('method_name','like', "%{$value}%");
+                              });
                     }
                 });
             })

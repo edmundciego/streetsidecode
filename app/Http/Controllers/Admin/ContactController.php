@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\BusinessSetting;
 use App\Models\Contact;
-use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
+use App\Models\BusinessSetting;
+use App\Http\Controllers\Controller;
+use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ContactMessageExport;
 
 class ContactController extends Controller
 {
@@ -37,9 +39,40 @@ class ContactController extends Controller
 
     public function list(Request $request)
     {
-        $contacts = Contact::orderBy('name')->paginate(config('default_pagination'));
+        $key = explode(' ', $request['search']);
+        $contacts = Contact::orderBy('name')
+        ->when(isset($key), function($query) use($key) {
+            $query->where(function ($q) use ($key) {
+                foreach ($key as $value) {
+                    $q->orWhere('name', 'like', "%{$value}%")
+                    ->orWhere('subject', 'like', "%{$value}%")
+                    ->orWhere('email', 'like', "%{$value}%");
+                }
+            });
+        })
+
+        ->paginate(config('default_pagination'));
         return view('admin-views.contacts.list', compact('contacts'));
 
+    }
+    public function exportList(Request $request)
+    {
+        $key = explode(' ', $request['search']);
+        $contacts = Contact::orderBy('name')
+        ->when(isset($key), function($query) use($key) {
+            $query->where(function ($q) use ($key) {
+                foreach ($key as $value) {
+                    $q->orWhere('name', 'like', "%{$value}%")
+                    ->orWhere('subject', 'like', "%{$value}%")
+                    ->orWhere('email', 'like', "%{$value}%");
+                }
+            });
+        })
+        ->get();
+        if($request->type == 'csv'){
+            return Excel::download(new ContactMessageExport($contacts,$request['search']), 'Contacts.csv');
+        }
+        return Excel::download(new ContactMessageExport($contacts,$request['search']), 'Contacts.xlsx');
     }
 
     public function view($id)
@@ -55,7 +88,7 @@ class ContactController extends Controller
         $contact->seen = 1;
         $contact->update();
         Toastr::success('Feedback  Update successfully!');
-        return redirect()->route('admin.contact.contact-list');
+        return redirect()->route('admin.users.contact.contact-list');
     }
 
     public function destroy(Request $request)
@@ -92,17 +125,5 @@ class ContactController extends Controller
         return back();
     }
 
-    public function search(Request $request){
-        $key = explode(' ', $request['search']);
-        $contacts=Contact::where(function ($q) use ($key) {
-            foreach ($key as $value) {
-                $q->orWhere('name', 'like', "%{$value}%")
-                    ->orWhere('email', 'like', "%{$value}%");
-            }
-        })->limit(50)->get();
-        return response()->json([
-            'view'=>view('admin-views.contacts.partials._table',compact('contacts'))->render(),
-            'count'=>$contacts->count()
-        ]);
-    }
+
 }

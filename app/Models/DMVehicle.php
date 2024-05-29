@@ -25,7 +25,7 @@ class DMVehicle extends Model
 
     public function delivery_man()
     {
-        return $this->hasOne(DeliveryMan::class);
+        return $this->hasOne(DeliveryMan::class,'vehicle_id');
     }
 
     public function scopeActive($query)

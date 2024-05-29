@@ -1,6 +1,6 @@
 
 
-<div class="__bg-F8F9FC-card view_new_option mb-2">
+<div class="__bg-F8F9FC-card count_div view_new_option mb-2">
     <div>
         <div class="d-flex align-items-center justify-content-between mb-3">
             <label class="form-check form--check">

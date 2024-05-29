@@ -404,7 +404,7 @@
                                         </div>
                                     </td>
                                     <td class="text-center mw--85px">
-                                        {{ \App\CentralLogics\Helpers::number_format_short($order['coupon_discount_amount'] + $order['store_discount_amount']) }}
+                                        {{ \App\CentralLogics\Helpers::number_format_short($order['coupon_discount_amount'] + $order['store_discount_amount']  + $order['ref_bonus_amount']) }}
                                     </td>
                                     <td class="text-center mw--85px">
                                         {{ \App\CentralLogics\Helpers::number_format_short($order['total_tax_amount']) }}
