@@ -50,29 +50,13 @@
             $(".learn-feature-item-group").removeClass("stop-animation");
         });
 
-        // $(".section-header .title").each(function () {
-        //     var $this = $(this);
-        //     function getWords(text) {
-        //         $this.html("");
-        //         let x = text.replace(/[^A-Za-z0-9]+/g, " ");
-        //         let newArr = x.trim().split(" ");
-
-        //         for (var i = 0; i <= newArr.length; i++) {
-        //             if (newArr[i] != undefined) {
-        //                 if (i + 1 < newArr.length) {
-        //                     $this.append(`<span>${newArr[i]} ${" "}</span>`);
-        //                 } else {
-        //                     $this.append(
-        //                         `<span class="text--base">${
-        //                             newArr[i]
-        //                         } ${" "}</span>`
-        //                     );
-        //                 }
-        //             }
-        //         }
-        //     }
-
-        //     getWords($(this).text());
-        // });
+        $(".show-password").on("click", function () {
+            var input = $(this).closest("label").find("input");
+            if (input.attr("type") === "password") {
+                input.attr("type", "text");
+            } else {
+                input.attr("type", "password");
+            }
+        });
     });
 })(jQuery);

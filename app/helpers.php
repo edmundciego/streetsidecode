@@ -14,6 +14,8 @@ use App\Mail\OrderVerificationMail;
 use Illuminate\Support\Facades\App;
 use App\CentralLogics\CustomerLogic;
 use Illuminate\Support\Facades\Mail;
+use App\Models\SubscriptionTransaction;
+use App\Models\SubscriptionBillingAndRefundHistory;
 
 if (! function_exists('translate')) {
     function translate($key, $replace = [])
@@ -121,6 +123,14 @@ if (! function_exists('order_place')) {
         $order->payment_status='paid';
         $order->confirmed=now();
         $order->save();
+
+
+
+        if( $order?->store?->is_valid_subscription == 1 && $order?->store?->store_sub?->max_order != "unlimited" && $order?->store?->store_sub?->max_order > 0){
+            $order?->store?->store_sub?->decrement('max_order' , 1);
+        }
+
+
         OrderLogic::update_unpaid_order_payment(order_id:$order->id, payment_method:$data->payment_method);
         try {
             Helpers::send_order_notification($order);
@@ -210,4 +220,31 @@ if (!function_exists('config_settings')) {
         }
         return (isset($config)) ? $config : null;
     }
+
+
+    if (! function_exists('sub_success')) {
+        function sub_success($data){
+            $type='renew';
+            if($data->attribute == 'store_subscription_payment'){
+                $type='new_plan';
+                }
+                elseif($data->attribute == 'store_subscription_new_join'){
+                    $type='new_join';
+                }
+
+                $pending_bill= SubscriptionBillingAndRefundHistory::where(['store_id'=>$data->payer_id,
+                'transaction_type'=>'pending_bill', 'is_success' =>0])?->sum('amount')?? 0;
+                Helpers::subscription_plan_chosen(store_id:$data->payer_id,package_id:$data->attribute_id,payment_method:$data->payment_method,discount:0,pending_bill:$pending_bill,reference:$data->attribute,type: $type);
+
+
+            return true;
+        }
+    }
+
+    if (! function_exists('sub_fail')) {
+        function sub_fail($data){
+            return true;
+        }
+    }
+
 }

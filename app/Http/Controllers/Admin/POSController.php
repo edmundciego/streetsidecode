@@ -34,7 +34,7 @@ class POSController extends Controller
         $module_id = Config::get('module.current_module_id');
         $store_id = $request->query('store_id', null);
         $categories = Category::active()->module(Config::get('module.current_module_id'))->get();
-        $store = Store::active()->find($store_id);
+        $store = Store::active()->with('store_sub')->find($store_id);
         $keyword = $request->query('keyword', false);
         $key = explode(' ', $keyword);
 
@@ -290,6 +290,7 @@ class POSController extends Controller
             $data['name'] = $product->name;
             $data['discount'] = Helpers::product_discount_calculate($product, $price, $product->store)['discount_amount'];
             $data['image'] = $product->image;
+            $data['storage'] = $product->storage?->toArray();
             $data['add_ons'] = [];
             $data['add_on_qtys'] = [];
             $data['maximum_cart_quantity'] = $product->maximum_cart_quantity;
@@ -380,6 +381,7 @@ class POSController extends Controller
             $data['name'] = $product->name;
             $data['discount'] = Helpers::product_discount_calculate($product, $price,$product->store)['discount_amount'];
             $data['image'] = $product->image;
+            $data['storage'] = $product->storage?->toArray();
             $data['add_ons'] = [];
             $data['add_on_qtys'] = [];
             $data['maximum_cart_quantity'] = $product->maximum_cart_quantity;
@@ -594,18 +596,49 @@ class POSController extends Controller
 
         $distance_data = isset($address) ? $address['distance'] : 0;
 
-        $data =  DMVehicle::active()->where(function ($query) use ($distance_data) {
-            $query->where('starting_coverage_area', '<=', $distance_data)->where('maximum_coverage_area', '>=', $distance_data)
-            ->orWhere(function ($query) use ($distance_data) {
-                $query->where('starting_coverage_area', '>=', $distance_data);
-            });
-        })
-            ->orderBy('starting_coverage_area')->first();
+        $store = Store::with('store_sub')->find($request->store_id);
 
-        $extra_charges = (float) (isset($data) ? $data->extra_charges  : 0);
-        $vehicle_id = (isset($data) ? $data->id  : null);
 
-        $store = Store::find($request->store_id);
+        if(!$store){
+            Toastr::error(translate('messages.Sorry_the_store_is_not_available'));
+            return back();
+        }
+
+
+        $self_delivery_status = $store->self_delivery_system;
+        $store_sub=$store?->store_sub;
+        if ($store->is_valid_subscription) {
+
+            $self_delivery_status = $store_sub->self_delivery;
+
+            if($store_sub->max_order != "unlimited" && $store_sub->max_order <= 0){
+                Toastr::error(translate('messages.The_store_has_reached_the_maximum_number_of_orders'));
+                return back();
+            }
+        } elseif($store->store_business_model == 'unsubscribed'){
+            Toastr::error(translate('messages.The_store_is_not_subscribed_or_subscription_has_expired'));
+            return back();
+        }
+
+        $extra_charges = 0;
+        $vehicle_id = null;
+
+        if($self_delivery_status != 1){
+
+            $data =  DMVehicle::active()->where(function ($query) use ($distance_data) {
+                $query->where('starting_coverage_area', '<=', $distance_data)->where('maximum_coverage_area', '>=', $distance_data)
+                ->orWhere(function ($query) use ($distance_data) {
+                    $query->where('starting_coverage_area', '>=', $distance_data);
+                });
+            })
+                ->orderBy('starting_coverage_area')->first();
+
+            $extra_charges = (float) (isset($data) ? $data->extra_charges  : 0);
+            $vehicle_id = (isset($data) ? $data->id  : null);
+        }
+
+
+
         $cart = $request->session()->get('cart');
 
         $total_addon_price = 0;
@@ -754,7 +787,7 @@ class POSController extends Controller
             $order->tax_percentage = $tax;
             $order->total_tax_amount= $total_tax_amount;
             $order->order_amount = $total_price + $tax_a + $order->delivery_charge;
-            $order->adjusment = $request->amount - ($total_price + $total_tax_amount + $order->delivery_charge);
+            $order->adjusment = $request->amount - ($total_price + $tax_a + $order->delivery_charge);
             $order->payment_method = $request->type == 'wallet'?'wallet':'cash_on_delivery';
 
             $max_cod_order_amount = BusinessSetting::where('key', 'max_cod_order_amount')->first();
@@ -813,6 +846,9 @@ class POSController extends Controller
             }
             //PlaceOrderMail end
             Toastr::success(translate('messages.order_placed_successfully'));
+            if ($store?->is_valid_subscription && $store_sub->max_order != "unlimited" && $store_sub->max_order > 0 ) {
+                $store_sub->decrement('max_order' , 1);
+            }
             return back();
         } catch (\Exception $e) {
             info(['Admin pos order error_____',$e]);
@@ -869,15 +905,21 @@ class POSController extends Controller
     public function extra_charge(Request $request)
     {
         $distance_data = $request->distancMileResult ?? 1;
-        $data=  DMVehicle::active()->where(function($query)use($distance_data) {
-                $query->where('starting_coverage_area','<=' , $distance_data )->where('maximum_coverage_area','>=', $distance_data);
-            })
-            ->orWhere(function ($query) use ($distance_data) {
-                $query->where('starting_coverage_area', '>=', $distance_data);
-            })
-            ->orderBy('starting_coverage_area')->first();
+        $self_delivery_status = $request->self_delivery_status;
+        $extra_charges = 0;
 
-            $extra_charges = (float) (isset($data) ? $data->extra_charges  : 0);
+        if($self_delivery_status != 1){
+
+            $data=  DMVehicle::active()->where(function($query)use($distance_data) {
+                    $query->where('starting_coverage_area','<=' , $distance_data )->where('maximum_coverage_area','>=', $distance_data);
+                })
+                ->orWhere(function ($query) use ($distance_data) {
+                    $query->where('starting_coverage_area', '>=', $distance_data);
+                })
+                ->orderBy('starting_coverage_area')->first();
+
+                $extra_charges = (float) (isset($data) ? $data->extra_charges  : 0);
+        }
             return response()->json($extra_charges,200);
     }
 }

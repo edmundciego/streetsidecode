@@ -8,6 +8,8 @@
 
 @section('content')
     <div class="content container-fluid">
+
+
         @if(auth('vendor')->check())
         <!-- Page Header -->
         <div class="page-header">
@@ -198,6 +200,9 @@
         <!-- End Page Header -->
         @endif
     </div>
+
+
+
 @endsection
 
 @push('script')
@@ -210,6 +215,9 @@
 
 @push('script_2')
     <script>
+
+        $('#free-trial-modal').modal('show');
+
         // INITIALIZATION OF CHARTJS
         // =======================================================
         Chart.plugins.unregister(ChartDataLabels);

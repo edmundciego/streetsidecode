@@ -49,7 +49,7 @@
                             <div class="form-group">
                                 <label class="input-label text-capitalize"
                                     for="phone">{{ translate('messages.phone') }}</label>
-                                <input type="number" name="phone" value="{{ old('phone') }}" class="form-control"
+                                <input type="tel" name="phone" value="{{ old('phone') }}" class="form-control"
                                     id="phone" placeholder="{{ translate('messages.Ex:') }} +88017********" required>
                             </div>
                             <div class="form-group mb-0">

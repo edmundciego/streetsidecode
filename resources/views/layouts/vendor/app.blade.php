@@ -7,8 +7,8 @@
     }
     $country=\App\Models\BusinessSetting::where('key','country')->first();
 $countryCode= strtolower($country?$country->value:'auto');
-
 ?>
+{{-- {{ dd($countryCode) }} --}}
 <html dir="{{ $site_direction }}" lang="{{ str_replace('_', '-', app()->getLocale()) }}"  class="{{ $site_direction === 'rtl'?'active':'' }}">
 <head>
     <meta charset="utf-8">
@@ -18,9 +18,9 @@ $countryCode= strtolower($country?$country->value:'auto');
     <!-- Title -->
     <title>@yield('title')</title>
     <!-- Favicon -->
-    @php($logo=\App\Models\BusinessSetting::where(['key'=>'icon'])->first()->value)
+    @php($logo=\App\Models\BusinessSetting::where(['key'=>'icon'])->first())
     <link rel="shortcut icon" href="">
-    <link rel="icon" type="image/x-icon" href="{{asset('storage/app/public/business/'.$logo??'')}}">
+    <link rel="icon" type="image/x-icon" href="{{\App\CentralLogics\Helpers::get_image_helper($logo,'value', asset('storage/app/public/business/').'/' . $logo?->value, asset('public/assets/admin/img/160x160/img1.jpg') ,'business/' )}}">
     <!-- Font -->
     <link href="{{asset('public/assets/admin/css/fonts.css')}}" rel="stylesheet">
     <!-- CSS Implementing Plugins -->
@@ -32,6 +32,7 @@ $countryCode= strtolower($country?$country->value:'auto');
     <link rel="stylesheet" href="{{asset('public/assets/admin/css/emogi-area.css')}}">
     <link rel="stylesheet" href="{{asset('public/assets/admin/css/style.css')}}">
     <link rel="stylesheet" href="{{asset('public/assets/admin/intltelinput/css/intlTelInput.css')}}">
+    <link rel="stylesheet" href="{{asset('public/assets/admin/css/owl.min.css')}}">
     @stack('css_or_js')
 
     <script src="{{asset('public/assets/admin')}}/vendor/hs-navbar-vertical-aside/hs-navbar-vertical-aside-mini-cache.js"></script>
@@ -45,7 +46,6 @@ $countryCode= strtolower($country?$country->value:'auto');
         <span></span>
     </div>
     @endif
-{{--loader--}}
 <div class="container">
     <div class="row">
         <div class="col-md-12">
@@ -71,6 +71,7 @@ $countryCode= strtolower($country?$country->value:'auto');
 <main id="content" role="main" class="main pointer-event">
     <!-- Content -->
 @yield('content')
+
 <!-- End Content -->
 
     <!-- Footer -->
@@ -173,7 +174,7 @@ $countryCode= strtolower($country?$country->value:'auto');
 <script src="{{asset('public/assets/admin')}}/js/sweet_alert.js"></script>
 <script src="{{asset('public/assets/admin')}}/js/toastr.js"></script>
 <script src="{{asset('public/assets/admin')}}/js/emogi-area.js"></script>
-
+<script src="{{asset('public/assets/admin/js/owl.min.js')}}"></script>
 <script src="{{asset('public/assets/admin/js/app-blade/vendor.js')}}"></script>
 {!! Toastr::message() !!}
 <script src="{{asset('public/assets/admin/intltelinput/js/intlTelInput.min.js')}}"></script>
@@ -210,6 +211,9 @@ $countryCode= strtolower($country?$country->value:'auto');
 "use strict";
 
 
+    $(window).on('load', function(){
+        $('main > .container-fluid.content').prepend($('#renew-badge'));
+    })
 
 
 
@@ -309,37 +313,72 @@ $countryCode= strtolower($country?$country->value:'auto');
     };
     firebase.initializeApp(firebaseConfig);
     const messaging = firebase.messaging();
+{{--    function startFCM() {--}}
+
+{{--messaging--}}
+{{--    .requestPermission()--}}
+{{--    .then(function () {--}}
+{{--        return messaging.getToken()--}}
+
+{{--    }).then(function (response) {--}}
+{{--        @php($store_id=\App\CentralLogics\Helpers::get_store_id())--}}
+{{--        subscribeTokenToTopic(response, "store_panel_{{$store_id}}_message");--}}
+{{--    }).catch(function (error) {--}}
+{{--        console.log(error);--}}
+{{--    });--}}
+{{--}--}}
+
+{{--@php($key = \App\Models\BusinessSetting::where('key', 'push_notification_key')->first())--}}
+{{--function subscribeTokenToTopic(token, topic) {--}}
+{{--fetch('https://iid.googleapis.com/iid/v1/' + token + '/rel/topics/' + topic, {--}}
+{{--    method: 'POST',--}}
+{{--    headers: new Headers({--}}
+{{--        'Authorization': 'key={{ $key ? $key->value : '' }}'--}}
+{{--    })--}}
+{{--}).then(response => {--}}
+{{--    if (response.status < 200 || response.status >= 400) {--}}
+{{--        throw 'Error subscribing to topic: ' + response.status + ' - ' + response.text();--}}
+{{--    }--}}
+{{--    console.log('Subscribed to "' + topic + '"');--}}
+{{--}).catch(error => {--}}
+{{--    console.error(error);--}}
+{{--})--}}
+{{--}--}}
+
     function startFCM() {
-
-messaging
-    .requestPermission()
-    .then(function () {
-        return messaging.getToken()
-
-    }).then(function (response) {
-        @php($store_id=\App\CentralLogics\Helpers::get_store_id())
-        subscribeTokenToTopic(response, "store_panel_{{$store_id}}_message");
-    }).catch(function (error) {
-        console.log(error);
-    });
-}
-
-@php($key = \App\Models\BusinessSetting::where('key', 'push_notification_key')->first())
-function subscribeTokenToTopic(token, topic) {
-fetch('https://iid.googleapis.com/iid/v1/' + token + '/rel/topics/' + topic, {
-    method: 'POST',
-    headers: new Headers({
-        'Authorization': 'key={{ $key ? $key->value : '' }}'
-    })
-}).then(response => {
-    if (response.status < 200 || response.status >= 400) {
-        throw 'Error subscribing to topic: ' + response.status + ' - ' + response.text();
+        messaging
+            .requestPermission()
+            .then(function() {
+                return messaging.getToken();
+            })
+            .then(function(token) {
+                @php($store_id=\App\CentralLogics\Helpers::get_store_id())
+                // Send the token to your backend to subscribe to topic
+                subscribeTokenToBackend(token, 'store_panel_{{$store_id}}_message');
+            }).catch(function(error) {
+            console.error('Error getting permission or token:', error);
+        });
     }
-    console.log('Subscribed to "' + topic + '"');
-}).catch(error => {
-    console.error(error);
-})
-}
+
+    function subscribeTokenToBackend(token, topic) {
+        fetch('{{url('/')}}/subscribeToTopic', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ token: token, topic: topic })
+        }).then(response => {
+            if (response.status < 200 || response.status >= 400) {
+                return response.text().then(text => {
+                    throw new Error(`Error subscribing to topic: ${response.status} - ${text}`);
+                });
+            }
+            console.log(`Subscribed to "${topic}"`);
+        }).catch(error => {
+            console.error('Subscription error:', error);
+        });
+    }
     function getUrlParameter(sParam) {
             let sPageURL = window.location.search.substring(1);
             let sURLletiables = sPageURL.split('&');
@@ -386,24 +425,25 @@ fetch('https://iid.googleapis.com/iid/v1/' + token + '/rel/topics/' + topic, {
                     $('#popup-modal').appendTo("body").modal('show');
                 @endif
             }else if(payload.data.type === 'message'){
-            let conversation_id = getUrlParameter('conversation');
-            let user_id = getUrlParameter('user');
-            let url= '{{url('/')}}/store-panel/message/view/'+conversation_id+'/' + user_id;
-            $.ajax({
-                url: url,
-                success: function(data) {
-                    $('#view-conversation').html(data.view);
+                if (window.location.href.includes('message/list?conversation')) {
+                    let conversation_id = getUrlParameter('conversation');
+                    let user_id = getUrlParameter('user');
+                    let url = '{{url('/')}}/store-panel/message/view/' + conversation_id + '/' + user_id;
+                    $.ajax({
+                        url: url,
+                        success: function (data) {
+                            $('#view-conversation').html(data.view);
+                        }
+                    })
                 }
-            })
-            toastr.success('{{ translate('messages.New message arrived') }}', {
-                        CloseButton: true,
-                        ProgressBar: true
-                    });
-
-            if($('#conversation-list').scrollTop() === 0){
-                conversationList();
+                toastr.success('{{ translate('messages.New message arrived') }}', {
+                    CloseButton: true,
+                    ProgressBar: true
+                });
+                if($('#conversation-list').scrollTop() === 0){
+                    conversationList();
+                }
             }
-        }
         });
 
         @if(\App\CentralLogics\Helpers::employee_module_permission_check('order') && $order_notification_type == 'manual')
@@ -441,33 +481,27 @@ fetch('https://iid.googleapis.com/iid/v1/' + token + '/rel/topics/' + topic, {
         }
 
 
+    const inputs = document.querySelectorAll('input[type="tel"]');
+            inputs.forEach(input => {
+                window.intlTelInput(input, {
+                    initialCountry: "{{$countryCode}}",
+                    utilsScript: "{{ asset('public/assets/admin/intltelinput/js/utils.js') }}",
+                    autoInsertDialCode: true,
+                    nationalMode: false,
+                    formatOnDisplay: false,
+                });
+            });
 
 
-</script>
+            function keepNumbersAndPlus(inputString) {
+                let regex = /[0-9+]/g;
+                let filteredString = inputString.match(regex);
+            return filteredString ? filteredString.join('') : '';
+            }
 
-<script>
-    "use strict";
-
-    const input = document.querySelector('input[type="tel"]');
-    window.intlTelInput(input, {
-    initialCountry: "{{$countryCode}}",
-    utilsScript: "{{ asset('public/assets/admin/intltelinput/js/utils.js') }}",
-    autoInsertDialCode: true,
-    nationalMode: false,
-    formatOnDisplay: false,
-    });
-
-
-    function keepNumbersAndPlus(inputString) {
-    let regex = /[0-9+]/g;
-    let filteredString = inputString.match(regex);
-    let result = filteredString ? filteredString.join('') : '';
-    return result;
-}
-$(document).on('keyup', 'input[type="tel"]', function () {
-        let input = $(this).val();
-        $(this).val(keepNumbersAndPlus(input));
-        });
+            $(document).on('keyup', 'input[type="tel"]', function () {
+                $(this).val(keepNumbersAndPlus($(this).val()));
+                });
 
 
 </script>

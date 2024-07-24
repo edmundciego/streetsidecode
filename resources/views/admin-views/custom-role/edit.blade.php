@@ -141,6 +141,13 @@
                                     <label class="form-check-label qcont text-dark" for="coupon">{{translate('messages.coupon')}}</label>
                                 </div>
                             </div>
+                            <div class="check-item">
+                                <div class="form-group form-check form--check">
+                                    <input type="checkbox" name="modules[]" value="cashback" class="form-check-input"
+                                           id="cashback"  {{in_array('cashback',(array)json_decode($role['modules']))?'checked':''}}>
+                                    <label class="form-check-label qcont text-dark" for="cashback">{{translate('messages.cashback')}}</label>
+                                </div>
+                            </div>
 
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
@@ -253,6 +260,13 @@
                                     <input type="checkbox" name="modules[]" value="unit" class="form-check-input"
                                            id="unit"  {{in_array('unit',(array)json_decode($role['modules']))?'checked':''}}>
                                     <label class="form-check-label qcont text-dark" for="unit">{{translate('messages.unit')}}</label>
+                                </div>
+                            </div>
+                            <div class="check-item">
+                                <div class="form-group form-check form--check">
+                                    <input type="checkbox" name="modules[]" value="subscription" class="form-check-input"
+                                           id="subscription"  {{in_array('subscription',(array)json_decode($role['modules']))?'checked':''}}>
+                                    <label class="form-check-label qcont text-dark" for="subscription">{{translate('messages.subscription')}}</label>
                                 </div>
                             </div>
                         </div>

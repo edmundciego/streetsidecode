@@ -24,9 +24,8 @@ class ConversationController extends Controller
             $image_name=[];
             foreach($request->file('image') as $key=>$img)
             {
-
                 $name = Helpers::upload('conversation/', 'png', $img);
-                array_push($image_name,$name);
+                $image_name[] = ['img'=>$name, 'storage'=> Helpers::getDisk()];
             }
         } else {
             $image_name = null;
@@ -137,9 +136,11 @@ class ConversationController extends Controller
         $message->conversation_id = $conversation->id;
         $message->sender_id = $sender->id;
         $message->message = $request->message;
-        $message->file = $image_name?json_encode($image_name, JSON_UNESCAPED_SLASHES):null;
+        if($image_name && count($image_name)>0){
+            $message->file = json_encode($image_name, JSON_UNESCAPED_SLASHES);
+        }
         try {
-            if($message->save())
+            $message->save();
             $conversation->unread_message_count = $conversation->unread_message_count? $conversation->unread_message_count+1:1;
             $conversation->last_message_id=$message->id;
             $conversation->last_message_time = Carbon::now()->toDateTimeString();
@@ -430,7 +431,7 @@ class ConversationController extends Controller
             {
 
                 $name = Helpers::upload('conversation/', 'png', $img);
-                array_push($image_name,$name);
+                array_push($image_name,['img'=>$name, 'storage'=> Helpers::getDisk()]);
             }
         } else {
             $image_name = null;
@@ -537,7 +538,9 @@ class ConversationController extends Controller
         $message->conversation_id = $conversation->id;
         $message->sender_id = $sender->id;
         $message->message = $request->message;
-        $message->file = $image_name?json_encode($image_name, JSON_UNESCAPED_SLASHES):null;
+        if($image_name && count($image_name)>0){
+            $message->file = json_encode($image_name, JSON_UNESCAPED_SLASHES);
+        }
         try {
             if($message->save())
             $conversation->unread_message_count = $conversation->unread_message_count? $conversation->unread_message_count+1:1;

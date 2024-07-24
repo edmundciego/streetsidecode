@@ -1,40 +1,41 @@
 <?php
 
+use App\Enums\ViewPaths\Admin\Unit;
+use App\Enums\ViewPaths\Admin\Zone;
 use App\Enums\ViewPaths\Admin\Addon;
-use App\Enums\ViewPaths\Admin\Banner;
 use App\Enums\ViewPaths\Admin\Brand;
-use App\Enums\ViewPaths\Admin\Category;
-use App\Enums\ViewPaths\Admin\Attribute;
-use App\Enums\ViewPaths\Admin\CommonCondition;
+use App\Enums\ViewPaths\Admin\Banner;
 use App\Enums\ViewPaths\Admin\Coupon;
+use App\Enums\ViewPaths\Admin\Module;
+use Illuminate\Support\Facades\Route;
+use App\Enums\ViewPaths\Admin\CashBack;
+use App\Enums\ViewPaths\Admin\Category;
+use App\Enums\ViewPaths\Admin\Employee;
+use App\Enums\ViewPaths\Admin\Attribute;
+use App\Enums\ViewPaths\Admin\DmVehicle;
 use App\Enums\ViewPaths\Admin\CustomRole;
 use App\Enums\ViewPaths\Admin\DeliveryMan;
-use App\Enums\ViewPaths\Admin\DmVehicle;
-use App\Enums\ViewPaths\Admin\Employee;
-use App\Enums\ViewPaths\Admin\Module;
-use App\Enums\ViewPaths\Admin\Notification;
-use App\Enums\ViewPaths\Admin\Unit;
 use App\Enums\ViewPaths\Admin\WalletBonus;
-use App\Enums\ViewPaths\Admin\CashBack;
-use App\Enums\ViewPaths\Admin\Zone;
+use App\Enums\ViewPaths\Admin\Notification;
+use App\Enums\ViewPaths\Admin\CommonCondition;
+use App\Http\Controllers\Admin\Item\UnitController;
+use App\Http\Controllers\Admin\Zone\ZoneController;
+use App\Http\Controllers\Admin\Item\AddonController;
+use App\Http\Controllers\Admin\Item\BrandController;
 use App\Http\Controllers\Admin\Banner\BannerController;
 use App\Http\Controllers\Admin\Coupon\CouponController;
-use App\Http\Controllers\Admin\Customer\WalletBonusController;
-use App\Http\Controllers\Admin\Item\BrandController;
-use App\Http\Controllers\Admin\Promotion\CashBackController;
-use App\Http\Controllers\Admin\DeliveryMan\DeliveryManController;
-use App\Http\Controllers\Admin\DeliveryMan\DmVehicleController;
-use App\Http\Controllers\Admin\Employee\CustomRoleController;
-use App\Http\Controllers\Admin\Employee\EmployeeController;
-use App\Http\Controllers\Admin\Item\AddonController;
-use App\Http\Controllers\Admin\Item\AttributeController;
 use App\Http\Controllers\Admin\Item\CategoryController;
-use App\Http\Controllers\Admin\Item\CommonConditionController;
-use App\Http\Controllers\Admin\Item\UnitController;
 use App\Http\Controllers\Admin\Module\ModuleController;
+use App\Http\Controllers\Admin\Item\AttributeController;
+use App\Http\Controllers\Admin\Employee\EmployeeController;
+use App\Http\Controllers\Admin\Promotion\CashBackController;
+use App\Http\Controllers\Admin\Employee\CustomRoleController;
+use App\Http\Controllers\Admin\Customer\WalletBonusController;
+use App\Http\Controllers\Admin\Item\CommonConditionController;
+use App\Http\Controllers\Admin\DeliveryMan\DmVehicleController;
+use App\Http\Controllers\Admin\DeliveryMan\DeliveryManController;
 use App\Http\Controllers\Admin\Notification\NotificationController;
-use App\Http\Controllers\Admin\Zone\ZoneController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\Subscription\SubscriptionController;
 
 Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
 
@@ -42,6 +43,7 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
     Route::get(Zone::GET_ALL_ZONE_COORDINATES[URI].'/{id?}', [ZoneController::class, 'getAllZoneCoordinates'])->name('zone.zoneCoordinates');
 
     Route::group(['middleware' => ['admin', 'current-module']], function () {
+
         Route::group(['prefix' => 'category', 'as' => 'category.'], function () {
             Route::get(Category::NAME_LIST[URI], [CategoryController::class, 'getNameList'])->name('get-all');
             Route::group(['middleware' => ['module:category']], function () {
@@ -121,7 +123,7 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::get(Coupon::EXPORT[URI], [CouponController::class, 'exportList'])->name('coupon_export');
         });
 
-        Route::group(['prefix' => 'cashback', 'as' => 'cashback.'], function () {
+        Route::group(['prefix' => 'cashback', 'as' => 'cashback.' , 'middleware' => ['module:cashback']], function () {
             Route::get(CashBack::INDEX[URI], [CashBackController::class,'index'])->name('add-new');
             Route::post(CashBack::ADD[URI], [CashBackController::class,'add'])->name('store');
             Route::get(CashBack::UPDATE[URI].'/{id}', [CashBackController::class,'getUpdateView'])->name('edit');
@@ -162,6 +164,37 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
         });
 
         Route::group(['prefix' => 'business-settings', 'as' => 'business-settings.'], function () {
+
+            Route::group(['prefix' => 'subscription' ,'middleware' => ['module:subscription']], function () {
+
+                Route::resource('subscriptionackage', SubscriptionController::class);
+                Route::get('/status/{subscriptionackage}',  [SubscriptionController::class, 'statusChange'])->name('subscriptionackage.status');
+                Route::get('/overView/{subscriptionackage}',  [SubscriptionController::class, 'overView'])->name('subscriptionackage.overView');
+                Route::get('/transaction/{subscriptionackage}',  [SubscriptionController::class, 'transaction'])->name('subscriptionackage.transaction');
+                Route::get('/settings',  [SubscriptionController::class, 'settings'])->name('subscriptionackage.settings');
+                Route::get('/trial-status',  [SubscriptionController::class, 'trialStatus'])->name('subscriptionackage.trialStatus');
+                Route::post('/setting-update',  [SubscriptionController::class, 'settingUpdate'])->name('subscriptionackage.settingUpdate');
+                Route::get('/invoice/{id}',  [SubscriptionController::class, 'invoice'])->name('subscriptionackage.invoice');
+                Route::post('/switch-plan',  [SubscriptionController::class, 'switchPlan'])->name('subscriptionackage.switchPlan');
+                Route::get('/package-export',  [SubscriptionController::class, 'packageExport'])->name('subscriptionackage.packageExport');
+                Route::get('/transaction-export',  [SubscriptionController::class, 'TransactionExport'])->name('subscriptionackage.TransactionExport');
+
+                Route::get('/subscriber-list',  [SubscriptionController::class, 'subscriberList'])->name('subscriptionackage.subscriberList');
+                Route::get('/subscriber-list-export',  [SubscriptionController::class, 'subscriberListExport'])->name('subscriptionackage.subscriberListExport');
+                Route::get('/subscriber-transaction-export',  [SubscriptionController::class, 'subscriberTransactionExport'])->name('subscriptionackage.subscriberTransactionExport');
+                Route::post('/cancel-subscription/{id}',  [SubscriptionController::class, 'cancelSubscription'])->name('subscriptionackage.cancelSubscription');
+                Route::post('/switch-to-commission/{id}',  [SubscriptionController::class, 'switchToCommission'])->name('subscriptionackage.switchToCommission');
+                Route::get('/subscriber-detail/{id}',  [SubscriptionController::class, 'subscriberDetail'])->name('subscriptionackage.subscriberDetail');
+                Route::get('/package-view/{id}/{store_id}',  [SubscriptionController::class, 'packageView'])->name('subscriptionackage.packageView');
+                Route::get('/subscriber-transactions/{id}',  [SubscriptionController::class, 'subscriberTransactions'])->name('subscriptionackage.subscriberTransactions');
+                Route::get('/subscriber-wallet-transactions/{id}',  [SubscriptionController::class, 'subscriberWalletTransactions'])->name('subscriptionackage.subscriberWalletTransactions');
+
+                Route::post('/package-buy',  [SubscriptionController::class, 'packageBuy'])->name('subscriptionackage.packageBuy');
+            });
+
+
+
+
             Route::group(['prefix' => 'zone', 'as' => 'zone.', 'middleware' => ['module:zone']], function () {
                 Route::get(Zone::INDEX[URI], [ZoneController::class, 'index'])->name('home');
                 Route::post(Zone::ADD[URI], [ZoneController::class, 'add'])->name('store');

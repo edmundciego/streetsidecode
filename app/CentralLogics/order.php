@@ -51,7 +51,11 @@ class OrderLogic
         $flash_store_discount_amount=0;
         $comission_on_store_amount=0;
         $ref_bonus_amount=0;
+        $subscription_mode = 0;
+        $commission_percentage = 0;
 
+        $store= $order?->store;
+        $store_sub = $order?->store?->store_sub;
         // free delivery by admin
         if($order->free_delivery_by == 'admin')
         {
@@ -104,10 +108,17 @@ class OrderLogic
 
             if($order->store_discount_amount > 0  && $order->discount_on_product_by == 'vendor')
             {
-                $amount_admin = $comission?($order->store_discount_amount/ 100) * $comission:0;
-                $store_d_amount=  $order->store_discount_amount- $amount_admin;
-                Helpers::expenseCreate(amount:$store_d_amount,type:'discount_on_product',datetime:now(),created_by:'vendor',order_id:$order->id,store_id:$order->store->id);
-                Helpers::expenseCreate(amount:$amount_admin,type:'discount_on_product',datetime:now(),created_by:'admin',order_id:$order->id);
+                if($store->store_business_model == 'subscription' && isset($store_sub)){
+                    $store_d_amount=  $order->store_discount_amount;
+                    Helpers::expenseCreate(amount:$store_d_amount,type:'discount_on_product',datetime:now(),created_by:'vendor',order_id:$order->id,store_id:$order->store->id);
+                }
+                else{
+                    $amount_admin = $comission?($order->store_discount_amount/ 100) * $comission:0;
+                    $store_d_amount=  $order->store_discount_amount- $amount_admin;
+                    Helpers::expenseCreate(amount:$store_d_amount,type:'discount_on_product',datetime:now(),created_by:'vendor',order_id:$order->id,store_id:$order->store->id);
+                    Helpers::expenseCreate(amount:$amount_admin,type:'discount_on_product',datetime:now(),created_by:'admin',order_id:$order->id);
+                }
+
             }
 
             if($order->store_discount_amount > 0  && $order->discount_on_product_by == 'admin')
@@ -135,7 +146,7 @@ class OrderLogic
             $delivery_charge_comission_percentage = $delivery_charge_comission ? $delivery_charge_comission->value : 0;
             $comission_on_delivery = $delivery_charge_comission_percentage * ( $order->original_delivery_charge / 100 );
 
-            if($order->store->self_delivery_system)
+            if($order->store->sub_self_delivery)
             {
                 $comission_on_actual_delivery_fee = 0;
             }else{
@@ -143,28 +154,31 @@ class OrderLogic
                 $comission_on_actual_delivery_fee = ($order->delivery_charge > 0) ? $comission_on_delivery : 0;
             }
 
-            //final comission
-            $comission_on_store_amount = ($comission?($order_amount/ 100) * $comission:0);
-            $comission_amount = $comission_on_store_amount + $comission_on_actual_delivery_fee;
-            $dm_commission = $order->original_delivery_charge - $comission_on_actual_delivery_fee;
-
             if($order->free_delivery_by == 'admin')
             {
-                if($order->store->self_delivery_system)
+                if($order->store->sub_self_delivery)
                 {
                     $comission_on_actual_delivery_fee = 0;
                 }else{
-
                     $comission_on_actual_delivery_fee = ($order->original_delivery_charge > 0) ? $comission_on_delivery : 0;
                 }
-
-                //final comission
-                $comission_on_store_amount = ($comission?($order_amount/ 100) * $comission:0);
-                $comission_amount = $comission_on_store_amount + $comission_on_actual_delivery_fee;
-                $dm_commission = $order->original_delivery_charge - $comission_on_actual_delivery_fee;
             }
+
+            //final comission
+            if($store->store_business_model == 'subscription' && isset($store_sub)){
+                $comission_on_store_amount =0;
+                $subscription_mode= 1;
+                $commission_percentage= 0;
+            } else{
+                $comission_on_store_amount = ($comission?($order_amount/ 100) * $comission:0);
+                $subscription_mode= 0;
+                $commission_percentage= $comission;
+            }
+
+            $comission_amount = $comission_on_store_amount + $comission_on_actual_delivery_fee;
+            $dm_commission = $order->original_delivery_charge - $comission_on_actual_delivery_fee;
         }
-        $store_amount =$order_amount + $order->total_tax_amount + $order->extra_packaging_amount - $comission_on_store_amount - $store_coupon_discount_subsidy - $flash_store_discount_amount;
+        $store_amount = $order_amount + $order->total_tax_amount + $order->extra_packaging_amount - $comission_on_store_amount - $store_coupon_discount_subsidy - $flash_store_discount_amount;
         try{
             OrderTransaction::insert([
                 'vendor_id' =>$type=='parcel'?null:$order->store->vendor->id,
@@ -191,6 +205,9 @@ class OrderLogic
                 'additional_charge' => $order->additional_charge,
                 'extra_packaging_amount' => $order->extra_packaging_amount,
                 'ref_bonus_amount' => $order->ref_bonus_amount,
+                 // for store business model
+                'is_subscribed'=> $subscription_mode,
+                'commission_percentage'=> $commission_percentage,
             ]);
             $adminWallet = AdminWallet::firstOrNew(
                 ['admin_id' => Admin::where('role_id', 1)->first()->id]
@@ -203,7 +220,7 @@ class OrderLogic
                 $vendorWallet = StoreWallet::firstOrNew(
                     ['vendor_id' => $order->store->vendor->id]
                 );
-                if($order->store->self_delivery_system)
+                if($order->store->sub_self_delivery)
                 {
                     $vendorWallet->total_earning = $vendorWallet->total_earning + $order->delivery_charge + $dm_tips;
                 }
@@ -213,7 +230,7 @@ class OrderLogic
                 // $vendorWallet->total_earning = $vendorWallet->total_earning+($order_amount + $order->total_tax_amount - $comission_on_store_amount);
                 $vendorWallet->total_earning = $vendorWallet->total_earning+$store_amount;
             }
-            if($order->delivery_man && ($type == 'parcel' || ($order->store && !$order->store->self_delivery_system))){
+            if($order->delivery_man && ($type == 'parcel' || ($order->store && !$order->store->sub_self_delivery))){
                 $dmWallet = DeliveryManWallet::firstOrNew(
                     ['delivery_man_id' => $order->delivery_man_id]
                 );

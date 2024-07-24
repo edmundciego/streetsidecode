@@ -222,6 +222,7 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::get('message/list', 'VendorController@conversation_list')->name('message-list');
         });
 
+
         Route::get('addon/system-addons', function (){
             return to_route('admin.system-addon.index');
         })->name('addon.index');
@@ -377,8 +378,8 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::resource('pages/social-media', 'SocialMediaController');
 
             Route::group(['prefix' => 'file-manager', 'as' => 'file-manager.'], function () {
-                Route::get('/download/{file_name}', 'FileManagerController@download')->name('download');
-                Route::get('/index/{folder_path?}', 'FileManagerController@index')->name('index');
+                Route::get('/download/{file_name}/{storage?}', 'FileManagerController@download')->name('download');
+                Route::get('/index/{folder_path?}/{storage?}', 'FileManagerController@index')->name('index');
                 Route::post('/image-upload', 'FileManagerController@upload')->name('image-upload');
                 Route::delete('/delete/{file_path}', 'FileManagerController@destroy')->name('destroy');
             });
@@ -404,6 +405,9 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
                 //recaptcha
                 Route::get('recaptcha', 'BusinessSettingsController@recaptcha_index')->name('recaptcha_index');
                 Route::post('recaptcha-update', 'BusinessSettingsController@recaptcha_update')->name('recaptcha_update');
+                //file_system
+                Route::get('storage-connection', 'BusinessSettingsController@storage_connection_index')->name('storage_connection_index');
+                Route::post('storage-connection-update/{name}', 'BusinessSettingsController@storage_connection_update')->name('storage_connection_update');
             });
             // Offline payment Methods
             Route::get('/offline-payment', 'OfflinePaymentMethodController@index')->name('offline');
@@ -548,8 +552,8 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
 
 
         Route::group(['prefix' => 'file-manager', 'as' => 'file-manager.'], function () {
-            Route::get('/download/{file_name}', 'FileManagerController@download')->name('download');
-            Route::get('/index/{folder_path?}', 'FileManagerController@index')->name('index');
+            Route::get('/download/{file_name}/{storage?}', 'FileManagerController@download')->name('download');
+            Route::get('/index/{folder_path?}//{storage?}', 'FileManagerController@index')->name('index');
             Route::post('/image-upload', 'FileManagerController@upload')->name('image-upload');
             Route::delete('/delete/{file_path}', 'FileManagerController@destroy')->name('destroy');
         });

@@ -221,7 +221,7 @@ width: 24px;
                                 <td class="p-10">
                                     <span class="d-block text-center">
                                         <img class="mb-2 mail-img-2"
-                                        src="{{\App\CentralLogics\Helpers::onerror_image_helper( data_get($data, 'logo'), asset('storage/app/public/email_template/').'/'.data_get($data, 'logo'), asset('public/assets/admin/img/emai_demo_template_2.png'), 'email_template/') }}"
+                                        src="{{\App\CentralLogics\Helpers::get_image_helper( $data, 'logo', asset('storage/app/public/email_template/').'/'.data_get($data, 'logo'), asset('public/assets/admin/img/emai_demo_template_2.png'), 'email_template/') }}"
 
                                         alt="">
                                         <h3 class="mb-3 mt-0">{{ translate('Order_Info') }}</h3>

@@ -31,7 +31,7 @@
             <div class="card-body">
                 <div class="row align-items-md-center">
                     <div class="col-md-6 col-lg-4 mb-3 mb-md-0">
-                            <img class="rounded img--ratio-3 onerror-image" src="{{\App\CentralLogics\Helpers::onerror_image_helper($campaign['image'], asset('storage/app/public/campaign/').'/'.$campaign['image'], asset('public/assets/admin/img/900x400/img1.jpg'), 'campaign/') }}"
+                            <img class="rounded img--ratio-3 onerror-image" src="{{\App\CentralLogics\Helpers::get_image_helper($campaign,'image', asset('storage/app/public/campaign/').'/'.$campaign['image'], asset('public/assets/admin/img/900x400/img1.jpg'), 'campaign/') }}"
                             data-onerror-image="{{asset('/public/assets/admin/img/900x400/img1.jpg')}}" alt="Image Description">
                     </div>
                     <div class="col-md-6">
@@ -69,7 +69,7 @@
                                     <img
                                         class="img--70 circle onerror-image"
                                         data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
-                                        src="{{\App\CentralLogics\Helpers::onerror_image_helper($campaign->store->logo, asset('storage/app/public/store/').'/'.$campaign->store->logo, asset('public/assets/admin/img/160x160/img1.jpg'), 'store/') }}"
+                                        src="{{\App\CentralLogics\Helpers::get_image_helper($campaign->store,'logo', asset('storage/app/public/store/').'/'.$campaign->store->logo, asset('public/assets/admin/img/160x160/img1.jpg'), 'store/') }}"
                                         alt="Image Description">
                                     <h5 class="input-label mt-2">{{$campaign->store['name']}}</h5>
                                 </a>

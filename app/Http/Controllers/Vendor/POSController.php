@@ -218,6 +218,7 @@ class POSController extends Controller
         $data['name'] = $product->name;
         $data['discount'] = Helpers::product_discount_calculate($product, $price,Helpers::get_store_data())['discount_amount'];
         $data['image'] = $product->image;
+        $data['storage'] = $product->storage?->toArray();
         $data['add_ons'] = [];
         $data['add_on_qtys'] = [];
         $data['maximum_cart_quantity'] = $product->maximum_cart_quantity;
@@ -301,6 +302,7 @@ class POSController extends Controller
         $data['name'] = $product->name;
         $data['discount'] = Helpers::product_discount_calculate($product, $price,Helpers::get_store_data())['discount_amount'];
         $data['image'] = $product->image;
+        $data['storage'] = $product->storage?->toArray();
         $data['add_ons'] = [];
         $data['add_on_qtys'] = [];
         $data['maximum_cart_quantity'] = $product->maximum_cart_quantity;
@@ -457,17 +459,43 @@ class POSController extends Controller
         }
         $distance_data = isset($address) ? $address['distance'] : 0;
 
-        $data =  DMVehicle::active()->where(function ($query) use ($distance_data) {
-            $query->where('starting_coverage_area', '<=', $distance_data)->where('maximum_coverage_area', '>=', $distance_data)
-            ->orWhere(function ($query) use ($distance_data) {
-                $query->where('starting_coverage_area', '>=', $distance_data);
-            });
-        })
-            ->orderBy('starting_coverage_area')->first();
-
-        $extra_charges = (float) (isset($data) ? $data->extra_charges  : 0);
-        $vehicle_id = (isset($data) ? $data->id  : null);
         $store = Helpers::get_store_data();
+
+        $self_delivery_status = $store->self_delivery_system;
+        $store_sub=$store?->store_sub;
+        if ($store->is_valid_subscription) {
+
+            $self_delivery_status = $store_sub->self_delivery;
+
+            if($store_sub->max_order != "unlimited" && $store_sub->max_order <= 0){
+                Toastr::error(translate('messages.you_have_reached_the_maximum_number_of_orders'));
+                return back();
+            }
+        } elseif($store->store_business_model == 'unsubscribed'){
+            Toastr::error(translate('messages.you_are_not_subscribed_or_subscription_has_expired'));
+            return back();
+        }
+
+
+        $extra_charges = 0;
+        $vehicle_id = null;
+
+
+        if($self_delivery_status != 1){
+
+            $data =  DMVehicle::active()->where(function ($query) use ($distance_data) {
+                $query->where('starting_coverage_area', '<=', $distance_data)->where('maximum_coverage_area', '>=', $distance_data)
+                ->orWhere(function ($query) use ($distance_data) {
+                    $query->where('starting_coverage_area', '>=', $distance_data);
+                });
+            })
+                ->orderBy('starting_coverage_area')->first();
+
+            $extra_charges = (float) (isset($data) ? $data->extra_charges  : 0);
+            $vehicle_id = (isset($data) ? $data->id  : null);
+        }
+
+
         $cart = $request->session()->get('cart');
 
         $total_addon_price = 0;
@@ -635,7 +663,7 @@ class POSController extends Controller
 
                 $order->adjusment = 0;
             }else{
-                $order->adjusment = $request->amount - ($total_price + $total_tax_amount + $order->delivery_charge);
+                $order->adjusment = $request->amount - ($total_price + $tax_a + $order->delivery_charge);
 
             }
             $order->payment_method = $request->type;
@@ -667,6 +695,11 @@ class POSController extends Controller
                     info($ex->getMessage());
                 }
             }
+
+            if ($store?->is_valid_subscription && $store_sub->max_order != "unlimited" && $store_sub->max_order > 0 ) {
+                $store_sub->decrement('max_order' , 1);
+            }
+
             Toastr::success(translate('messages.order_placed_successfully'));
             return back();
         } catch (\Exception $e) {
@@ -708,7 +741,9 @@ class POSController extends Controller
     public function extra_charge(Request $request)
     {
         $distance_data = $request->distancMileResult ?? 1;
-
+        $self_delivery_status = $request->self_delivery_status;
+        $extra_charges = 0;
+        if($self_delivery_status != 1){
         $data=  DMVehicle::active()->where(function($query)use($distance_data) {
                 $query->where('starting_coverage_area','<=' , $distance_data )->where('maximum_coverage_area','>=', $distance_data);
             })
@@ -716,7 +751,7 @@ class POSController extends Controller
                 $query->where('starting_coverage_area', '>=', $distance_data);
             })
             ->orderBy('starting_coverage_area')->first();
-
+        }
             $extra_charges = (float) (isset($data) ? $data->extra_charges  : 0);
             return response()->json($extra_charges,200);
     }

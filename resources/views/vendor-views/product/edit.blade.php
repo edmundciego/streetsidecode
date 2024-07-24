@@ -158,8 +158,9 @@
                                 <label class="input-label" for="exampleFormControlInput1">{{translate('messages.item_images')}}</label>
                                 <div class="row" id="coba">
                                     @foreach ($product->images as $key => $photo)
+                                    @php($photo = is_array($photo)?$photo:['img'=>$photo,'storage'=>'public'])
                                         <div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-6 spartan_item_wrapper" id="product_images_{{ $key }}">
-                                            <img class="img--square onerror-image" src="{{\App\CentralLogics\Helpers::onerror_image_helper($photo, asset('storage/app/public/product/').'/'.$photo, asset('public/assets/admin/img/400x400/img2.jpg'), 'product/') }}"
+                                            <img class="img--square onerror-image" src="{{\App\CentralLogics\Helpers::onerror_image_helper($photo['img'], asset('storage/app/public/product/').'/'.$photo['img'], asset('public/assets/admin/img/400x400/img2.jpg'), 'product/',$photo['storage'] ?? 'public') }}"
                                             data-onerror-image ="{{asset('/public/assets/admin/img/400x400/img2.jpg')}}" alt="Product image">
 
 
@@ -179,7 +180,7 @@
                                 <label class="text-dark">{{translate('messages.item_thumbnail')}} <small class="text-danger">* ( {{translate('messages.ratio')}} 1:1 )</small></label>
                                 <div class="text-center d-block" id="image-viewer-section" class="pt-2">
                                     <img class="img--100 onerror-image" id="viewer"
-                                    src="{{\App\CentralLogics\Helpers::onerror_image_helper($product['image'], asset('storage/app/public/product/').'/'.$product['image'], asset('public/assets/admin/img/400x400/img2.jpg'), 'product/') }}"
+                                    src="{{\App\CentralLogics\Helpers::get_image_helper($product,'image', asset('storage/app/public/product/').'/'.$product['image'], asset('public/assets/admin/img/400x400/img2.jpg'), 'product/') }}"
                                             data-onerror-image ="{{asset('/public/assets/admin/img/400x400/img2.jpg')}}"
                                             alt="product image"/>
                                 </div>

@@ -217,6 +217,7 @@ class StoreController extends Controller
             {
                 $temp['item_name'] = $temp->item->name;
                 $temp['item_image'] = $temp->item->image;
+                $temp['item_image_full_url'] = $temp->item->image_full_url;
                 if(count($temp->item->translations)>0)
                 {
                     $translate = array_column($temp->item->translations->toArray(), 'value', 'key');

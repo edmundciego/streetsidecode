@@ -384,14 +384,13 @@
                                     <div class="d-flex __gap-12px mt-4">
                                         <div class="__custom-upload-img mr-lg-5">
                                             @php($logo = \App\Models\BusinessSetting::where('key', 'logo')->first())
-                                            @php($logo = $logo->value ?? '')
                                             <label class="form-label">
                                                 {{ translate('logo') }} <span class="text--primary">( {{ translate('3:1') }} )</span>
                                             </label>
                                             <label class="text-center position-relative">
                                                 <img class="img--vertical onerror-image image--border" id="viewer"
                                                     data-onerror-image="{{ asset('public/assets/admin/img/upload-img.png') }}"
-                                                    src="{{ \App\CentralLogics\Helpers::onerror_image_helper($logo, asset('storage/app/public/business/').'/'.$logo, asset('public/assets/admin/img/upload-img.png'),'business/') }}"
+                                                    src="{{ \App\CentralLogics\Helpers::get_image_helper($logo,'value', asset('storage/app/public/business/').'/'.$logo->value??'', asset('public/assets/admin/img/upload-img.png'),'business/') }}"
                                                     alt="logo image" />
                                                 <div class="icon-file-group">
                                                     <div class="icon-file">
@@ -406,14 +405,13 @@
 
                                         <div class="__custom-upload-img">
                                             @php($icon = \App\Models\BusinessSetting::where('key', 'icon')->first())
-                                            @php($icon = $icon->value ?? '')
                                             <label class="form-label">
                                                 {{ translate('Favicon') }}  <span class="text--primary">( {{ translate('1:1') }} )</span>
                                             </label>
                                             <label class="text-center position-relative">
                                                 <img class="img--133 onerror-image image--border" id="iconViewer"
                                                     data-onerror-image="{{ asset('public/assets/admin/img/upload-img.png') }}"
-                                                    src="{{ \App\CentralLogics\Helpers::onerror_image_helper($icon, asset('storage/app/public/business/').'/'.$icon, asset('public/assets/admin/img/upload-img.png') , 'business/')}}"
+                                                    src="{{ \App\CentralLogics\Helpers::get_image_helper($icon,'value', asset('storage/app/public/business/').'/'.$icon->value??'', asset('public/assets/admin/img/upload-img.png') , 'business/')}}"
                                                     alt="Fav icon" />
                                                 <div class="icon-file-group">
                                                     <div class="icon-file">
@@ -422,9 +420,9 @@
                                                             accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
                                                             <i class="tio-edit"></i>
                                                     </div>
-                                                    <button class="btn action-btn btn-outline-danger">
+                                                    {{-- <button class="btn action-btn btn-outline-danger">
                                                         <i class="tio-delete-outlined"></i>
-                                                    </button>
+                                                    </button> --}}
                                                 </div>
                                             </label>
                                         </div>
@@ -1264,6 +1262,91 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="__bg-F8F9FC-card p-0 mt-4">
+                                <div class="border-bottom p-3">
+                                    <h4 class="card-title m-0 text--title">{{translate('Business_Plan')}}</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-sm-6 col-lg-4">
+                                            @php($subscription_business_model = \App\Models\BusinessSetting::where('key', 'subscription_business_model')->first())
+                                            @php($subscription_business_model = $subscription_business_model ? $subscription_business_model->value : 0)
+                                            <div class="form-group mb-0">
+                                                <label
+                                                    class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
+                                                    <span class="pr-1 d-flex align-items-center switch--label">
+                                                        <span class="line--limit-1">
+                                                            {{ translate('Subscription') }}
+                                                        </span>
+                                                        <span class="form-label-secondary text-danger d-flex"
+                                                            data-toggle="tooltip" data-placement="right"
+                                                            data-original-title="{{ translate('If_enabled,_the_package_based_subscription_business_model_option_will_be_available_for_stores')}}"><img
+                                                                src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
+                                                                alt="{{ translate('messages.customer_varification_toggle') }}"> *
+                                                        </span>
+                                                    </span>
+                                                    <input type="checkbox"
+                                                    data-id="subscription_business_model"
+                                                    data-type="toggle"
+                                                    data-image-on="{{ asset('/public/assets/admin/img/modal/mail-success.png') }}"
+                                                    data-image-off="{{ asset('/public/assets/admin/img/modal/mail-warning.png') }}"
+                                                    data-title-on="{{ translate('Want_to_enable_the') }} <strong>{{ translate('Subscription_Base') }}</strong> {{ translate('Business_Model') }} ?"
+                                                    data-title-off="{{ translate('Want_to_disable_the') }} <strong>{{ translate('Subscription_Base') }} {{ translate('Business_Model') }}</strong> ?"
+                                                    data-text-on="<p>{{ translate('If_enabled,_the_subscription_based_store_business_model_option_will_be_available_in_this_store') }}</p>"
+                                                    data-text-off="<p>{{ translate('If_disabled,_the_subscription_based_store_business_model_option_will_be_hidden_from_this_store_panel._The_existing_subscribed_stores’_subscriptions_will_be_valid_till_the_packages_expire') }}</p>"
+                                                    class="status toggle-switch-input dynamic-checkbox-toggle"
+                                                        value="1"
+                                                        name="subscription_business_model" id="subscription_business_model"
+                                                        {{ $subscription_business_model == 1 ? 'checked' : '' }}>
+                                                    <span class="toggle-switch-label text">
+                                                        <span class="toggle-switch-indicator"></span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 col-lg-4">
+                                            @php($commission_business_model = \App\Models\BusinessSetting::where('key', 'commission_business_model')->first())
+                                            @php($commission_business_model = $commission_business_model ? $commission_business_model->value : 0)
+                                            {{-- {{ dd($commission_business_model) }} --}}
+                                            <div class="form-group mb-0">
+                                                <label
+                                                    class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
+                                                    <span class="pr-1 d-flex align-items-center switch--label">
+                                                        <span class="line--limit-1">
+                                                            {{ translate('Commission') }}
+                                                        </span>
+                                                        <span class="form-label-secondary text-danger d-flex"
+                                                            data-toggle="tooltip" data-placement="right"
+                                                            data-original-title="{{ translate('If_enabled,_the_commission_based_business_model_option_will_be_available_for_stores.')}}"><img
+                                                                src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
+                                                                alt="{{ translate('messages.customer_varification_toggle') }}"> *
+                                                        </span>
+                                                    </span>
+                                                    <input type="checkbox"
+                                                    data-id="commission_business_model"
+                                                    data-type="toggle"
+                                                    data-image-on="{{ asset('/public/assets/admin/img/modal/mail-success.png') }}"
+                                                    data-image-off="{{ asset('/public/assets/admin/img/modal/mail-warning.png') }}"
+                                                    data-title-on="{{ translate('Want_to_enable_the') }} <strong>{{ translate('Commission_Base') }}</strong> {{ translate('Business_Model') }} ?"
+                                                    data-title-off="{{ translate('Want_to_disable_the') }} <strong>{{ translate('Commission_Base') }} {{ translate('Business_Model') }}</strong> ?"
+                                                    data-text-on="<p>{{ translate('If_enabled,_the_commission_based_store_business_model_option_will_be_available_for_this_store') }}</p>"
+                                                    data-text-off="<p>{{ translate('If_disabled,_the_commission_based_store_business_model_option_will_be_hidden_from_this_store_panel._And_it_can_only_use_the_subscription_based_business_model') }}</p>"
+                                                    class="status toggle-switch-input dynamic-checkbox-toggle"
+                                                        value="1"
+                                                        name="commission_business_model" id="commission_business_model"
+                                                        {{ $commission_business_model == 1 ? 'checked' : '' }}>
+                                                    <span class="toggle-switch-label text">
+                                                        <span class="toggle-switch-indicator"></span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="btn--container justify-content-end mt-3">
                                 <button type="reset" class="btn btn--reset">{{ translate('messages.reset') }}</button>
                                 <button type="{{ env('APP_MODE') != 'demo' ? 'submit' : 'button' }}"

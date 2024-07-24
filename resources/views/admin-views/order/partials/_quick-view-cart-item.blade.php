@@ -10,8 +10,8 @@
         <!-- Product gallery-->
         <div class="d-flex align-items-center justify-content-center active">
             <img class="img-responsive initial--20 onerror-image"
-            src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                $product['image'],
+            src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                $product,'image',
                 asset($item_type == 'item' ? 'storage/app/public/product/' : 'storage/app/public/campaign/') .'/'.$product['image'],
                 asset('public/assets/admin/img/160x160/img2.jpg'),
                 $item_type == 'item' ? 'product/' : 'campaign/' ) }}"

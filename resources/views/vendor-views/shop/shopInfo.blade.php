@@ -23,7 +23,7 @@
         <div class="card-body p-0">
             @if($shop->cover_photo)
             <div>
-                <img class="my-restaurant-img onerror-image" src="{{\App\CentralLogics\Helpers::onerror_image_helper($shop->cover_photo, asset('storage/app/public/store/cover/').'/'.$shop->cover_photo, asset('public/assets/admin/img/900x400/img1.jpg'), 'store/cover/') }}"
+                <img class="my-restaurant-img onerror-image" src="{{\App\CentralLogics\Helpers::get_image_helper($shop,'cover_photo', asset('storage/app/public/store/cover/').'/'.$shop->cover_photo, asset('public/assets/admin/img/900x400/img1.jpg'), 'store/cover/') }}"
                 data-onerror-image="{{asset('public/assets/admin/img/900x400/img1.jpg')}}">
             </div>
             @endif
@@ -37,7 +37,7 @@
                 </div>
                 @else
                     <div class="my-resturant--avatar onerror-image">
-                        <img src="{{\App\CentralLogics\Helpers::onerror_image_helper($shop->logo, asset('storage/app/public/store/').'/'.$shop->logo, asset('public/assets/admin/img/160x160/img1.jpg'), 'store/') }}"
+                        <img src="{{\App\CentralLogics\Helpers::get_image_helper($shop,'logo', asset('storage/app/public/store/').'/'.$shop->logo, asset('public/assets/admin/img/160x160/img1.jpg'), 'store/') }}"
                         class="border" data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}" alt="">
                     </div>
                 @endif
@@ -53,7 +53,17 @@
                         <strong>{{translate('messages.address')}} : </strong> {{$shop->address}}
                     </span>
                     <span class="d-block mb-1 pb-1">
+                        <strong>{{translate('messages.Business_Plan')}} : </strong> {{translate($shop->store_business_model)}}
+                    </span>
+                    <span class="d-block mb-1 pb-1">
+                        @if ($shop->store_business_model == 'commission')
+
                         <strong>{{translate('messages.admin_commission')}} : </strong> {{(isset($shop->comission)? $shop->comission:\App\Models\BusinessSetting::where('key','admin_commission')->first()->value)}}%
+                        @elseif(in_array($shop->store_business_model ,['subscription','unsubscribed']))
+
+                        <strong>{{translate('Subscription_plan')}} : </strong> {{ $shop?->store_sub_update_application?->package?->package_name}}
+                        @endif
+
                     </span>
                     <span class="d-block mb-1 pb-1">
                         <strong>{{translate('messages.vat/tax')}} : </strong> {{$shop->tax}}%</span>

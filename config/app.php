@@ -181,7 +181,8 @@ return [
         Laravelpkg\Laravelchk\LaravelchkServiceProvider::class,
         // FruitCake\Cors\CorsServiceProvider::class,
         Maatwebsite\Excel\ExcelServiceProvider::class,
-        InterfaceServiceProvider::class
+        InterfaceServiceProvider::class,
+        App\Providers\FirebaseServiceProvider::class,
     ],
 
     /*

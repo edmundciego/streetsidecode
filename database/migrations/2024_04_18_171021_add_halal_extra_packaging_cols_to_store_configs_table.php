@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('store_configs', function (Blueprint $table) {
+        Schema::table( Schema::hasTable('store_configs')?  'store_configs' : 'storeConfigs', function (Blueprint $table) {
             $table->boolean('halal_tag_status')->default(0);
             $table->boolean('extra_packaging_status')->default(0);
             $table->double('extra_packaging_amount', 23, 3)->default(0);
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('store_configs', function (Blueprint $table) {
+        Schema::table(Schema::hasTable('store_configs')?  'store_configs' : 'storeConfigs', function (Blueprint $table) {
             $table->dropColumn('halal_tag_status');
             $table->dropColumn('extra_packaging_status');
             $table->dropColumn('extra_packaging_amount');

@@ -222,7 +222,6 @@ $(".set-filter").on("change", function () {
     nurl.searchParams.delete("page");
     nurl.searchParams.set(filter_by, id);
     location.href = nurl;
-    tour.next();
 });
 $(document).ready(function () {
     $(".onerror-image").on("error", function () {
@@ -349,28 +348,54 @@ $(document).on("click", ".confirm-Toggle", function () {
     }
     if (toggle_id === "new_customer_discount_status") {
         if ($("#new_customer_discount_status").is(":checked")) {
-            $("#new_customer_discount_amount").removeAttr("readonly").attr("required", true);
-            $("#new_customer_discount_amount_validity").removeAttr("readonly").attr("required", true);
-            $("#new_customer_discount_amount_type").removeAttr("disabled").attr("required", true);
-            $("#new_customer_discount_validity_type").removeAttr("disabled").attr("required", true);
+            $("#new_customer_discount_amount")
+                .removeAttr("readonly")
+                .attr("required", true);
+            $("#new_customer_discount_amount_validity")
+                .removeAttr("readonly")
+                .attr("required", true);
+            $("#new_customer_discount_amount_type")
+                .removeAttr("disabled")
+                .attr("required", true);
+            $("#new_customer_discount_validity_type")
+                .removeAttr("disabled")
+                .attr("required", true);
         } else {
-            $("#new_customer_discount_amount").attr("readonly", true).removeAttr("required");
-            $("#new_customer_discount_amount_validity").attr("readonly", true).removeAttr("required");
-            $("#new_customer_discount_amount_type").attr("disabled", true).removeAttr("required");
-            $("#new_customer_discount_validity_type").attr("disabled", true).removeAttr("required");
+            $("#new_customer_discount_amount")
+                .attr("readonly", true)
+                .removeAttr("required");
+            $("#new_customer_discount_amount_validity")
+                .attr("readonly", true)
+                .removeAttr("required");
+            $("#new_customer_discount_amount_type")
+                .attr("disabled", true)
+                .removeAttr("required");
+            $("#new_customer_discount_validity_type")
+                .attr("disabled", true)
+                .removeAttr("required");
         }
     }
     if (toggle_id === "customer_loyalty_point") {
         if ($("#customer_loyalty_point").is(":checked")) {
-            $("#loyalty_point_exchange_rate").removeAttr("readonly").attr("required", true);
-            $("#item_purchase_point").removeAttr("readonly").attr("required", true);
-            $("#minimum_transfer_point").removeAttr("readonly").attr("required", true);
-
+            $("#loyalty_point_exchange_rate")
+                .removeAttr("readonly")
+                .attr("required", true);
+            $("#item_purchase_point")
+                .removeAttr("readonly")
+                .attr("required", true);
+            $("#minimum_transfer_point")
+                .removeAttr("readonly")
+                .attr("required", true);
         } else {
-            $("#loyalty_point_exchange_rate").attr("readonly", true).removeAttr("required");
-            $("#item_purchase_point").attr("readonly", true).removeAttr("required");
-            $("#minimum_transfer_point").attr("readonly", true).removeAttr("required");
-
+            $("#loyalty_point_exchange_rate")
+                .attr("readonly", true)
+                .removeAttr("required");
+            $("#item_purchase_point")
+                .attr("readonly", true)
+                .removeAttr("required");
+            $("#minimum_transfer_point")
+                .attr("readonly", true)
+                .removeAttr("required");
         }
     }
     if (toggle_id === "wallet_status") {
@@ -381,30 +406,66 @@ $(document).on("click", ".confirm-Toggle", function () {
             $("#ref_earning_status").removeAttr("disabled");
             $("#refund_to_wallet").removeAttr("disabled");
 
-            $("#ref_earning_exchange_rate").removeAttr("readonly").attr("required", true);
-            $("#new_customer_discount_amount").removeAttr("readonly").attr("required", true);
-            $("#new_customer_discount_amount_validity").removeAttr("readonly").attr("required", true);
-            $("#new_customer_discount_amount_type").removeAttr("disabled").attr("required", true);
-            $("#new_customer_discount_validity_type").removeAttr("disabled").attr("required", true);
+            $("#ref_earning_exchange_rate")
+                .removeAttr("readonly")
+                .attr("required", true);
+            $("#new_customer_discount_amount")
+                .removeAttr("readonly")
+                .attr("required", true);
+            $("#new_customer_discount_amount_validity")
+                .removeAttr("readonly")
+                .attr("required", true);
+            $("#new_customer_discount_amount_type")
+                .removeAttr("disabled")
+                .attr("required", true);
+            $("#new_customer_discount_validity_type")
+                .removeAttr("disabled")
+                .attr("required", true);
         } else {
-            $("#new_customer_discount_status").attr("disabled", true).parent("label").addClass("text-muted");
-            $("#add_fund_status").attr("disabled", true).parent("label").addClass("text-muted");
-            $("#ref_earning_status").attr("disabled", true).parent("label").addClass("text-muted");
-            $("#refund_to_wallet").attr("disabled", true).parent("label").addClass("text-muted");
+            $("#new_customer_discount_status")
+                .attr("disabled", true)
+                .parent("label")
+                .addClass("text-muted");
+            $("#add_fund_status")
+                .attr("disabled", true)
+                .parent("label")
+                .addClass("text-muted");
+            $("#ref_earning_status")
+                .attr("disabled", true)
+                .parent("label")
+                .addClass("text-muted");
+            $("#refund_to_wallet")
+                .attr("disabled", true)
+                .parent("label")
+                .addClass("text-muted");
 
-            $("#ref_earning_exchange_rate").attr("readonly", true).removeAttr("required");
-            $("#new_customer_discount_amount").attr("readonly", true).removeAttr("required");
-            $("#new_customer_discount_amount_validity").attr("readonly", true).removeAttr("required");
-            $("#new_customer_discount_amount_type").attr("disabled", true).removeAttr("required");
-            $("#new_customer_discount_validity_type").attr("disabled", true).removeAttr("required");
+            $("#ref_earning_exchange_rate")
+                .attr("readonly", true)
+                .removeAttr("required");
+            $("#new_customer_discount_amount")
+                .attr("readonly", true)
+                .removeAttr("required");
+            $("#new_customer_discount_amount_validity")
+                .attr("readonly", true)
+                .removeAttr("required");
+            $("#new_customer_discount_amount_type")
+                .attr("disabled", true)
+                .removeAttr("required");
+            $("#new_customer_discount_validity_type")
+                .attr("disabled", true)
+                .removeAttr("required");
         }
     }
 
     if (toggle_id === "extra_packaging_status") {
         if ($("#extra_packaging_status").is(":checked")) {
-            $("#extra_packaging_amount").removeAttr("readonly").attr("required", true);
+            $("#extra_packaging_amount")
+                .removeAttr("readonly")
+                .attr("required", true);
         } else {
-            $("#extra_packaging_amount").attr("readonly", true).removeAttr("required");
+            $("#extra_packaging_amount")
+                .attr("readonly", true)
+                .removeAttr("required");
         }
     }
 });
@@ -414,4 +475,24 @@ $(document).on("click", ".location-reload-to-base", function () {
     let nurl = new URL(url);
     nurl.searchParams.delete("search");
     location.href = nurl;
+});
+document.querySelectorAll('[name="search"]').forEach(function (element) {
+    element.addEventListener("input", function (event) {
+        if (this.value === "" && window.location.search !== "") {
+            let baseUrl = window.location.origin + window.location.pathname;
+            window.location.href = baseUrl;
+        }
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const activeLink = document.querySelector(".nav-link.active");
+
+    if (activeLink) {
+        activeLink.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+            inline: "center",
+        });
+    }
 });

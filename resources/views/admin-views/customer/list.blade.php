@@ -317,7 +317,7 @@
             <hr>
             @endif
             <div class="page-area">
-                {!! $customers->links() !!}
+                {!! $customers->withQueryString()->links() !!}
             </div>
             @if(count($customers) === 0)
             <div class="empty--data">

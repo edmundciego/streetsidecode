@@ -34,20 +34,17 @@ class EmployeeController extends Controller
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|max:20|unique:vendor_employees',
             'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
         ]);
-
-        DB::table('vendor_employees')->insert([
-            'f_name' => $request->f_name,
-            'l_name' => $request->l_name,
-            'phone' => $request->phone,
-            'email' => $request->email,
-            'employee_role_id' => $request->role_id,
-            'password' => bcrypt($request->password),
-            'vendor_id'=> Helpers::get_vendor_id(),
-            'store_id'=>Helpers::get_store_id(),
-            'image' => Helpers::upload('vendor/', 'png', $request->file('image')),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $vendor = new VendorEmployee();
+        $vendor->f_name = $request->f_name;
+        $vendor->l_name = $request->l_name;
+        $vendor->phone = $request->phone;
+        $vendor->email = $request->email;
+        $vendor->employee_role_id = $request->role_id;
+        $vendor->password = bcrypt($request->password);
+        $vendor->vendor_id = Helpers::get_vendor_id();
+        $vendor->store_id =Helpers::get_store_id();
+        $vendor->image = Helpers::upload('vendor/', 'png', $request->file('image'));
+        $vendor->save();
 
         Toastr::success('Employee added successfully!');
         return redirect()->route('vendor.employee.list');

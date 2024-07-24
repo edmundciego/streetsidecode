@@ -80,7 +80,7 @@
                             <div class="form-group">
                                 <label class="input-label" for="coupon_type">{{translate('messages.coupon_type')}}</label>
                                 <select id="coupon_type" name="coupon_type" class="form-control" >
-                                    @if ($store_data->self_delivery_system == 1)
+                                    @if ($store_data->sub_self_delivery == 1)
                                     <option value="free_delivery" {{$coupon['coupon_type']=='free_delivery'?'selected':''}}>{{translate('messages.free_delivery')}}</option>
                                     @endif
                                     <option value="default" {{$coupon['coupon_type']=='default'?'selected':''}}>{{translate('messages.default')}}</option>

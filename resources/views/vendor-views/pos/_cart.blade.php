@@ -43,7 +43,7 @@
                                 data-product-id="{{$cartItem['id']}}" data-item-key="{{$key}}">
                                 <img class="avatar avatar-sm mr-1 onerror-image"
                                      data-onerror-image="{{ asset('public/assets/admin/img/100x100/2.png') }}"
-                                     src="{{\App\CentralLogics\Helpers::onerror_image_helper($cartItem['image'], asset('storage/app/public/product/').'/'.$cartItem['image'], asset('public/assets/admin/img/100x100/2.png'), 'product/') }}"
+                                     src="{{\App\CentralLogics\Helpers::get_image_helper($cartItem,'image', asset('storage/app/public/product/').'/'.$cartItem['image'], asset('public/assets/admin/img/100x100/2.png'), 'product/') }}"
 
                                     alt="{{ $cartItem['name'] }} image">
                                 <div class="media-body">
@@ -219,7 +219,7 @@ if (isset($cart['paid'])) {
                         <div class="form-group col-12">
                             <label class="input-label"
                                 for="paid">{{ translate('messages.amount') }}({{ \App\CentralLogics\Helpers::currency_symbol() }})</label>
-                            <input type="number" class="form-control" id="paid" name="paid" min="0" step="0.01"
+                            <input type="number" class="form-control"  id="paid" name="paid" min="0" step="0.01"
                                 value="{{ $paid }}">
                         </div>
                     </div>

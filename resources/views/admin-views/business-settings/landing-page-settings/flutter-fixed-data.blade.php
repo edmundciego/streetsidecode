@@ -152,8 +152,8 @@
                                     <div class="img">
                                         <img
 
-                                        src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                            $fixed_header_image['value'] ?? '',
+                                        src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                            $fixed_header_image,'value',
                                             asset('storage/app/public/fixed_header_image').'/'.$fixed_header_image['value'] ?? '',
                                             asset('/public/assets/admin/img/aspect-1.png'),
                                             'fixed_header_image/'

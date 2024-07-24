@@ -16,7 +16,7 @@ class DeliveryManController extends Controller
     public function __construct(Request $request)
     {
         $this->middleware(function ($request, $next) {
-            if(!$request->vendor->stores[0]->self_delivery_system)
+            if(!$request->vendor->stores[0]->sub_self_delivery)
             {
                 return response()->json([
                     'errors'=>[
@@ -115,7 +115,7 @@ class DeliveryManController extends Controller
         if (!empty($request->file('identity_image'))) {
             foreach ($request->identity_image as $img) {
                 $identity_image = Helpers::upload('delivery-man/', 'png', $img);
-                array_push($id_img_names, $identity_image);
+                array_push($id_img_names, ['img'=>$identity_image, 'storage'=> Helpers::getDisk()]);
             }
             $identity_image = json_encode($id_img_names);
         } else {
@@ -230,14 +230,14 @@ class DeliveryManController extends Controller
 
         if ($request->has('identity_image')){
             foreach (json_decode($delivery_man['identity_image'], true) as $img) {
-                if (Storage::disk('public')->exists('delivery-man/' . $img)) {
-                    Storage::disk('public')->delete('delivery-man/' . $img);
-                }
+
+                Helpers::check_and_delete('delivery-man/' , $img);
+
             }
             $img_keeper = [];
             foreach ($request->identity_image as $img) {
                 $identity_image = Helpers::upload('delivery-man/', 'png', $img);
-                array_push($img_keeper, $identity_image);
+                array_push($img_keeper, ['img'=>$identity_image, 'storage'=> Helpers::getDisk()]);
             }
             $identity_image = json_encode($img_keeper);
         } else {
@@ -281,14 +281,14 @@ class DeliveryManController extends Controller
                 ]
             ],404);
         }
-        if (Storage::disk('public')->exists('delivery-man/' . $delivery_man['image'])) {
-            Storage::disk('public')->delete('delivery-man/' . $delivery_man['image']);
-        }
+
+        Helpers::check_and_delete('delivery-man/' , $delivery_man['image']);
+
 
         foreach (json_decode($delivery_man['identity_image'], true) as $img) {
-            if (Storage::disk('public')->exists('delivery-man/' . $img)) {
-                Storage::disk('public')->delete('delivery-man/' . $img);
-            }
+
+            Helpers::check_and_delete('delivery-man/' , $img);
+
         }
 
         $delivery_man->delete();

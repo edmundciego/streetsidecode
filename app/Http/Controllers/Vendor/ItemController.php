@@ -34,9 +34,13 @@ class ItemController extends Controller
 {
     public function index()
     {
-        if(!Helpers::get_store_data()->item_section)
+        if(!Helpers::get_store_data()->item_section && Helpers::get_store_data()->store_business_model == 'commission')
         {
             Toastr::warning(translate('messages.permission_denied'));
+            return back();
+        }
+        elseif (!Helpers::get_store_data()->item_section &&  in_array(Helpers::get_store_data()->store_business_model ,['subscription','unsubscribed'])) {
+            Toastr::warning(translate('You_have_reached_the_maximum_limit_of_item_uploads_allowed_in_your_subscription_package'));
             return back();
         }
         $categories = Category::where(['position' => 0])->module(Helpers::get_store_data()->module_id)->get();
@@ -91,6 +95,36 @@ class ItemController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)]);
         }
 
+
+
+
+        $store= Helpers::get_store_data();
+        if ( $store->store_business_model == 'subscription' ) {
+            $store_sub = $store?->store_sub;
+            if (isset($store_sub)) {
+                if ($store_sub->max_product != "unlimited" && $store_sub->max_product > 0 ) {
+                    $total_item= Item::where('store_id', $store->id)->count()+1;
+                    if ( $total_item >= $store_sub->max_product){
+                        $store->item_section = 0;
+                        $store->save();
+                    }
+                }
+            } else{
+                return response()->json([
+                    'errors'=>[
+                        ['code'=>'unauthorized', 'message'=>translate('messages.you_are_not_subscribed_to_any_package')]
+                    ]
+                ]);
+            }
+        }elseif( $store->store_business_model == 'unsubscribed'){
+            return response()->json([
+                'errors'=>[
+                    ['code'=>'unauthorized', 'message'=>translate('messages.you_are_not_subscribed_to_any_package')]
+                ]
+            ]);
+        }
+
+
         $tag_ids = [];
         if ($request->tags != null) {
             $tags = explode(",", $request->tags);
@@ -112,24 +146,55 @@ class ItemController extends Controller
             $item_data= Item::withoutGlobalScope(StoreScope::class)->select(['image','images'])->findOrfail($request->item_id);
 
             if(!$request->has('image')){
-                $oldPath = storage_path("app/public/product/{$item_data->image}");
-                $newFileName =\Carbon\Carbon::now()->toDateString() . "-" . uniqid() . ".png" ;
-                $newPath = storage_path("app/public/product/{$newFileName}");
-                if (File::exists($oldPath)) {
-                    File::copy($oldPath, $newPath);
+
+                $oldDisk = 'public';
+                if ($item_data->storage && count($item_data->storage) > 0) {
+                    foreach ($item_data->storage as $value) {
+                        if ($value['key'] == 'image') {
+                            $oldDisk = $value['value'];
+                        }
+                    }
+                }
+                $oldPath = "product/{$item_data->image}";
+                $newFileName = Carbon::now()->toDateString() . "-" . uniqid() . ".png";
+                $newPath = "product/{$newFileName}";
+                $dir = 'product/';
+                $newDisk = Helpers::getDisk();
+
+                try{
+                    if (Storage::disk($oldDisk)->exists($oldPath)) {
+                        if (!Storage::disk($newDisk)->exists($dir)) {
+                            Storage::disk($newDisk)->makeDirectory($dir);
+                        }
+                        $fileContents = Storage::disk($oldDisk)->get($oldPath);
+                        Storage::disk($newDisk)->put($newPath, $fileContents);
+                    }
+                } catch (\Exception $e) {
                 }
             }
 
             $uniqueValues = array_diff($item_data->images, explode(",", $request->removedImageKeys));
 
             foreach($uniqueValues as$key=> $value){
-                $oldPath = storage_path("app/public/product/{$value}");
-                $newFileName =\Carbon\Carbon::now()->toDateString() . "-" . uniqid() . ".png" ;
-                $newPath = storage_path("app/public/product/{$newFileName}");
-                if (File::exists($oldPath)) {
-                    File::copy($oldPath, $newPath);
+                $value = is_array($value)?$value:['img' => $value, 'storage' => 'public'];
+                $oldDisk = $value['storage'];
+                $oldPath = "product/{$value['img']}";
+                $newFileName = Carbon::now()->toDateString() . "-" . uniqid() . ".png";
+                $newPath = "product/{$newFileName}";
+                $dir = 'product/';
+                $newDisk = Helpers::getDisk();
+
+                try{
+                    if (Storage::disk($oldDisk)->exists($oldPath)) {
+                        if (!Storage::disk($newDisk)->exists($dir)) {
+                            Storage::disk($newDisk)->makeDirectory($dir);
+                        }
+                        $fileContents = Storage::disk($oldDisk)->get($oldPath);
+                        Storage::disk($newDisk)->put($newPath, $fileContents);
+                    }
+                } catch (\Exception $e) {
                 }
-                $images[]=$newFileName;
+                $images[]=['img'=>$newFileName, 'storage'=> Helpers::getDisk()];
             }
         }
 
@@ -219,7 +284,7 @@ class ItemController extends Controller
         if (!empty($request->file('item_images'))) {
             foreach ($request->item_images as $img) {
                 $image_name = Helpers::upload('product/', 'png', $img);
-                $images[]=$image_name;
+                $images[]=['img'=>$image_name, 'storage'=> Helpers::getDisk()];
             }
         }
 
@@ -327,11 +392,19 @@ class ItemController extends Controller
 
     public function edit(Request $request,$id)
     {
-        if(!Helpers::get_store_data()->item_section)
+
+        if(!Helpers::get_store_data()->item_section && Helpers::get_store_data()->product_uploaad_check == 'commission')
         {
             Toastr::warning(translate('messages.permission_denied'));
             return back();
         }
+
+        if(Helpers::get_store_data()->product_uploaad_check !== null && Helpers::get_store_data()->product_uploaad_check >= 0 && $request->status == 1 ){
+            Toastr::warning(translate('Your_current_package_doesnot_allow_to_activate_more_then_allocated_items_in_your_package') );
+            return back();
+        }
+
+
         $temp_product= false;
         if($request->temp_product){
             $product = TempProduct::withoutGlobalScope('translate')->findOrFail($id);
@@ -354,11 +427,17 @@ class ItemController extends Controller
 
     public function status(Request $request)
     {
-        if(!Helpers::get_store_data()->item_section)
+        if(!Helpers::get_store_data()->item_section && Helpers::get_store_data()->product_uploaad_check == 'commission')
         {
             Toastr::warning(translate('messages.permission_denied'));
             return back();
         }
+
+        if(Helpers::get_store_data()->product_uploaad_check !== null && Helpers::get_store_data()->product_uploaad_check >= 0 && $request->status == 1 ){
+            Toastr::warning(translate('Your_current_package_doesnot_allow_to_activate_more_then_allocated_items_in_your_package') );
+            return back();
+        }
+
         $product = Item::find($request->id);
         $product->status = $request->status;
         $product->save();
@@ -382,7 +461,7 @@ class ItemController extends Controller
 
     public function update(Request $request, $id)
     {
-        if(!Helpers::get_store_data()->item_section)
+        if(!Helpers::get_store_data()->item_section && Helpers::get_store_data()->product_uploaad_check == 'commission')
         {
             return response()->json([
                 'errors'=>[
@@ -390,6 +469,17 @@ class ItemController extends Controller
                 ]
             ]);
         }
+
+        if(Helpers::get_store_data()->product_uploaad_check !== null && Helpers::get_store_data()->product_uploaad_check >= 0 && $request->status == 1 ){
+            return response()->json([
+                'errors'=>[
+                    ['code'=>'unauthorized', 'message'=>translate('messages.Your_current_package_doesnot_allow_to_activate_more_then_allocated_items_in_your_package')]
+                ]
+            ]);
+        }
+
+
+
         $validator = Validator::make($request->all(), [
             'name' => 'array',
             'name.0' => 'required',
@@ -583,7 +673,7 @@ class ItemController extends Controller
             if ($request->has('item_images')){
                 foreach ($request->item_images as $img) {
                     $image = Helpers::upload('product/', 'png', $img);
-                    array_push($images, $image);
+                    array_push($images, ['img'=>$image, 'storage'=> Helpers::getDisk()]);
                 }
             }
             $p->images = $images;
@@ -640,9 +730,9 @@ class ItemController extends Controller
 
         if($product->image)
         {
-            if (Storage::disk('public')->exists('product/' . $product['image'])) {
-                Storage::disk('public')->delete('product/' . $product['image']);
-            }
+
+            Helpers::check_and_delete('product/' , $product['image']);
+
         }
         $product->translations()->delete();
         $product->delete();
@@ -755,9 +845,8 @@ class ItemController extends Controller
 
     public function remove_image(Request $request)
     {
-        if (Storage::disk('public')->exists('product/' . $request['name'])) {
-            Storage::disk('public')->delete('product/' . $request['name']);
-        }
+
+
         if($request?->temp_product){
             $item = TempProduct::find($request['id']);
         }
@@ -770,11 +859,19 @@ class ItemController extends Controller
             Toastr::warning('You cannot delete all images!');
             return back();
         }
+        Helpers::check_and_delete('product/' , $request['name']);
         foreach ($item['images'] as $image) {
-            if ($image != $request['name']) {
-                array_push($array, $image);
+            if(is_array($image)) {
+                if ($image['img'] != $request['name']) {
+                    array_push($array, $image);
+                }
+            } else{
+                if ($image != $request['name']) {
+                    array_push($array, $image);
+                }
             }
         }
+
         if($request?->temp_product){
             TempProduct::where('id', $request['id'])->update([
                 'images' => json_encode($array),
@@ -931,6 +1028,44 @@ class ItemController extends Controller
             }
             try{
                 DB::beginTransaction();
+
+
+                $total_item= count($data);
+
+                $store= Helpers::get_store_data();
+                if ( $store->store_business_model == 'subscription' ) {
+                    $store_sub=$store?->store_sub;
+                    if (isset($store_sub)) {
+                        if ($store_sub->max_product != "unlimited" && $store_sub->max_product > 0  &&  $store_sub->max_product >= $total_item ) {
+                            $store_sub->decrement('max_product' , $total_item);
+                            if (  $store_sub->max_product <= 0 ){
+                                $store->update(['item_section' => 0]);
+                            }
+                        } else{
+                            Toastr::error(translate('messages.you_have_reached_the_maximum_limit_of_item'));
+                            return back();
+                        }
+
+
+                        if ($store_sub->max_product != "unlimited" && $store_sub->max_product > 0 ) {
+                            $total_all_items= Item::where('store_id', $store->id)->count();
+
+                            $available_item_uploads= $total_all_items + $total_item;
+                            if ($available_item_uploads > $store_sub->max_product){
+                                Toastr::error(translate('messages.you_have_reached_the_maximum_limit_of_item'));
+                                return back();
+                            }
+                        }
+
+                    } else{
+                        return response()->json([
+                            'errors'=>[
+                                ['code'=>'unauthorized', 'message'=>translate('messages.you_are_not_subscribed_to_any_package')]
+                            ]
+                        ]);
+                    }
+                }
+
 
                 $chunkSize = 100;
                 $chunk_items= array_chunk($data,$chunkSize);
@@ -1394,13 +1529,34 @@ class ItemController extends Controller
             $temp_item->image = $temp_image_name;
         }
         else{
-            $oldPath = storage_path("app/public/product/{$data->image}");
-            $temp_image_name =\Carbon\Carbon::now()->toDateString() . "-" . uniqid() . ".png" ;
-            $newPath = storage_path("app/public/product/{$temp_image_name}");
-            if (File::exists($oldPath)) {
-                File::copy($oldPath, $newPath);
+            $oldDisk = 'public';
+            if ($data->storage && count($data->storage) > 0) {
+                foreach ($data->storage as $value) {
+                    if ($value['key'] == 'image') {
+                        $oldDisk = $value['value'];
+                    }
+                }
             }
-            $temp_item->image = $temp_image_name;
+            $oldPath = "product/{$data->image}";
+            $newFileName = Carbon::now()->toDateString() . "-" . uniqid() . ".png";
+            $newPath = "product/{$newFileName}";
+            $dir = 'product/';
+            $newDisk = Helpers::getDisk();
+
+            if (Storage::disk($oldDisk)->exists($oldPath)) {
+                if (!Storage::disk($newDisk)->exists($dir)) {
+                    Storage::disk($newDisk)->makeDirectory($dir);
+                }
+                $fileContents = Storage::disk($oldDisk)->get($oldPath);
+                Storage::disk($newDisk)->put($newPath, $fileContents);
+            }
+//            $oldPath = storage_path("app/public/product/{$data->image}");
+//            $temp_image_name =\Carbon\Carbon::now()->toDateString() . "-" . uniqid() . ".png" ;
+//            $newPath = storage_path("app/public/product/{$temp_image_name}");
+//            if (File::exists($oldPath)) {
+//                File::copy($oldPath, $newPath);
+//            }
+            $temp_item->image = $newFileName;
         }
 
 

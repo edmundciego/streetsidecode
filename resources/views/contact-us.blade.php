@@ -12,14 +12,14 @@
                 @php($contact_us_sub_title = \App\Models\DataSetting::where(['key' => 'contact_us_sub_title'])->first())
                 @php($contact_us_sub_title = isset($contact_us_sub_title->value) ? $contact_us_sub_title->value : null)
                 @php($contact_us_image = \App\Models\DataSetting::where(['key' => 'contact_us_image'])->first())
-                @php($contact_us_image = isset($contact_us_image->value) ? $contact_us_image->value : null)
+{{--                @php($contact_us_image = isset($contact_us_image->value) ? $contact_us_image->value : null)--}}
                 <h2 class="title mb-2">{{$contact_us_title}}</h2>
                 <div class="text">{{$contact_us_sub_title}}</div>
             </div>
             @php($landing_page_images = \app\CentralLogics\Helpers::get_business_settings('landing_page_images'))
             @php($landing_page_images_value = isset($landing_page_images) ? $landing_page_images :null)
             <div class="contact-img">
-                <img src="{{ asset('storage/app/public/contact_us_image') }}/{{ $contact_us_image }}" alt="">
+                <img src="{{\App\CentralLogics\Helpers::get_image_helper($contact_us_image,'value', asset('storage/app/public/contact_us_image').'/'. isset($contact_us_image->value) ? $contact_us_image->value : null, asset('public/assets/admin/img/100x100/2.jpg'),'contact_us_image/')}}" alt="">
             </div>
             <div class="row gy-5 mt-0">
                 <div class="col-lg-6">

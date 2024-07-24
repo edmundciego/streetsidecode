@@ -722,9 +722,9 @@ class CampaignController extends Controller
 
     public function delete(Campaign $campaign)
     {
-        if (Storage::disk('public')->exists('campaign/' . $campaign->image)) {
-            Storage::disk('public')->delete('campaign/' . $campaign->image);
-        }
+     
+        Helpers::check_and_delete('campaign/' , $campaign->image);
+        
         $campaign->translations()->delete();
         $campaign->delete();
         Toastr::success(translate('messages.campaign_deleted_successfully'));
@@ -732,9 +732,9 @@ class CampaignController extends Controller
     }
     public function delete_item(ItemCampaign $campaign)
     {
-        if (Storage::disk('public')->exists('campaign/' . $campaign->image)) {
-            Storage::disk('public')->delete('campaign/' . $campaign->image);
-        }
+      
+        Helpers::check_and_delete('campaign/' , $campaign->image);
+        
         $campaign->translations()->delete();
         $campaign?->carts()?->delete();
         $campaign->delete();

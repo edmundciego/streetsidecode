@@ -65,8 +65,8 @@
                                         <label class="upload-img-3 m-0 d-block">
                                             <div class="position-relative">
                                             <div class="img">
-                                                <img  src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                                    $review->reviewer_image ?? '',
+                                                <img  src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                                    $review,'reviewer_image',
                                                     asset('storage/app/public/reviewer_image').'/'.$review->reviewer_image ?? '',
                                                     asset('/public/assets/admin/img/aspect-1.png'),
                                                     'reviewer_image/'

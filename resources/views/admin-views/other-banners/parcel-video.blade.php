@@ -30,6 +30,9 @@
     @php($banner_video = \App\Models\ModuleWiseBanner::withoutGlobalScope('translate')->where('module_id',Config::get('module.current_module_id'))->where('type','video_banner_content')->where('key', 'banner_video')->first())
     @php($banner_video_content = \App\Models\ModuleWiseBanner::withoutGlobalScope('translate')->where('module_id',Config::get('module.current_module_id'))->where('type','video_banner_content')->where('key', 'banner_video_content')->first())
     @php($banner_image = \App\Models\ModuleWiseBanner::withoutGlobalScope('translate')->where('module_id',Config::get('module.current_module_id'))->where('type','video_banner_content')->where('key', 'banner_image')->first())
+    @php($awsUrl = config('filesystems.disks.s3.url'))
+    @php($awsBucket = config('filesystems.disks.s3.bucket'))
+    @php($awsBaseURL = rtrim($awsUrl, '/').'/'.ltrim($awsBucket.'/'))
         @php($language = \App\Models\BusinessSetting::where('key', 'language')->first())
         @php($language = $language->value ?? null)
         @if ($language)
@@ -141,8 +144,8 @@
                                         <div class="img">
                                             <img class="onerror-image"
 
-                                            src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                                $banner_image?->value ?? '',
+                                            src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                                $banner_image,'value',
                                                 asset('storage/app/public/promotional_banner').'/'.$banner_image?->value ?? '',
                                                 asset('/public/assets/admin/img/upload-placeholder.png'),
                                                 'promotional_banner/'
@@ -212,13 +215,14 @@
                                                             </div>
 
                                                         </div>
+{{--                                                        {{dd($banner_video_content)}}--}}
                                                         @if ($banner_video_content?->value)
 
                                                         <div class="col-6">
                                                             <h4 class="mb-3  ml-4 text-capitalize d-flex align-items-center">{{translate('Video')}}</h4>
                                                             @php($extention =explode('.', $banner_video_content?->value))
                                                             <video width="320" height="140" id="video-preview" controls>
-                                                                <source src="{{asset('storage/app/public/promotional_banner/video')}}/{{$banner_video_content?->value}}" type="video/{{ data_get($extention,1,'mp4') }}">
+                                                                <source src="{{(count($banner_video_content?->storage)>0 && $banner_video_content?->storage[0]?->value == 's3')?$awsBaseURL.'promotional_banner/video/'.$banner_video_content?->value :asset('storage/app/public/promotional_banner/video').'/'.$banner_video_content?->value}}" type="video/{{ data_get($extention,1,'mp4') }}">
                                                             </video>
                                                         </div>
                                                         @endif

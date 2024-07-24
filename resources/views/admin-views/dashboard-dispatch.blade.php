@@ -223,7 +223,7 @@
                     google.maps.event.addListener(marker, 'click', function() {
                         infowindow.setContent(`
                 <div style='float:left'>
-                    <img style='max-height:40px;wide:auto;' onerror="this.src='{{ asset('public/assets/admin/img/160x160/img1.jpg') }}'"  src='{{ asset('storage/app/public/delivery-man') }}/${dm.image}'>
+                    <img style='max-height:40px;wide:auto;'  src='${dm.image_link}'>
                 </div>
                 <div style='float:right; padding: 10px;'>
                     <b>${dm.name}</b><br/>
@@ -275,7 +275,7 @@
                             map.setZoom(20);
                             let dmViewContent = `
                 <div style='float:left'>
-                    <img style='max-height:40px;wide:auto;' onerror="this.src='{{ asset('public/assets/admin/img/160x160/img1.jpg') }}'"  src='{{ asset('storage/app/public/delivery-man') }}/${item.image}'>
+                    <img style='max-height:40px;wide:auto;'  src='${item.image_link}'>
                 </div>
                 <div style='float:right; padding: 10px;'>
                     <b>${item.name}</b><br/>

@@ -94,7 +94,7 @@
                         <div class="d-flex align-items-center justify-content-center">
                             <img class="avatar avatar-xxl avatar-4by3 mr-4 img--120 onerror-image"
                                  data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
-                                 src="{{\App\CentralLogics\Helpers::onerror_image_helper($dm['image'], asset('storage/app/public/delivery-man').'/'.$dm['image'], asset('public/assets/admin/img/160x160/img1.jpg'), 'delivery-man/') }}"
+                                 src="{{\App\CentralLogics\Helpers::get_image_helper($dm,'image', asset('storage/app/public/delivery-man').'/'.$dm['image'], asset('public/assets/admin/img/160x160/img1.jpg'), 'delivery-man/') }}"
                                  alt="Image Description">
                                  <div class="d-block">
                                     <div class="rating--review">
@@ -288,7 +288,10 @@
             <!-- End Body -->
         </div>
         <!-- End Card -->
+        @php($store=\App\CentralLogics\Helpers::get_store_data())
 
+
+        @if ($store->review_permission)
 
         <!-- Card -->
         <div class="card">
@@ -330,7 +333,7 @@
                                         <div class="avatar avatar-circle">
                                             <img class="avatar-img onerror-image" width="75" height="75"
                                                  data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
-                                                 src="{{\App\CentralLogics\Helpers::onerror_image_helper($review->customer->image, asset('storage/app/public/profile/').'/'.$review->customer->image, asset('public/assets/admin/img/160x160/img1.jpg'), 'profile/') }}"
+                                                 src="{{\App\CentralLogics\Helpers::get_image_helper($review->customer,'image', asset('storage/app/public/profile/').'/'.$review->customer->image, asset('public/assets/admin/img/160x160/img1.jpg'), 'profile/') }}"
                                                 alt="Image Description">
                                         </div>
                                         <div class="ml-3">
@@ -358,7 +361,8 @@
                             </td>
                             <td>
                                 @foreach(json_decode($review['attachment'],true) as $attachment)
-                                    <img width="100" class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}"  src="{{\App\CentralLogics\Helpers::onerror_image_helper($attachment, asset('storage/app/public').'/'.$attachment, asset('public/assets/admin/img/160x160/img2.jpg'), $attachment.'/') }}"
+                                @php($attachment = is_array($attachment)?$attachment:['img'=>$attachment,'storage'=>'public'])
+                                    <img width="100" class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}"  src="{{\App\CentralLogics\Helpers::onerror_image_helper($attachment['img'], asset('storage/app/public').'/'.$attachment['img'], asset('public/assets/admin/img/160x160/img2.jpg'), $attachment['img'].'/',$attachment['storage'] ?? 'public') }}"
                                     alt="image">
                                 @endforeach
                             </td>
@@ -396,6 +400,8 @@
             <!-- End Footer -->
         </div>
         <!-- End Card -->
+
+        @endif
     </div>
 @endsection
 

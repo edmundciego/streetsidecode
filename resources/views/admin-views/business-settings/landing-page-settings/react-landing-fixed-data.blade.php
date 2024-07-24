@@ -69,8 +69,8 @@
                                     <div class="position-relative">
                                     <div class="img">
                                         <img
-                                        src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                            $fixed_promotional_banner['value'] ?? '',
+                                        src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                            $fixed_promotional_banner,'value',
                                             asset('storage/app/public/promotional_banner').'/'.$fixed_promotional_banner['value'] ?? '',
                                             asset('/public/assets/admin/img/upload-4.png'),
                                             'promotional_banner/'

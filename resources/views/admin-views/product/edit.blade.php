@@ -166,22 +166,23 @@
 
                                         <input type="hidden" id="removedImageKeysInput" name="removedImageKeys" value="">
                                         @foreach($product->images as $key => $photo)
+                                            @php($photo = is_array($photo)?$photo:['img'=>$photo,'storage'=>'public'])
                                             <div id="product_images_{{ $key }}" class="spartan_item_wrapper min-w-176px max-w-176px">
                                                 <img class="img--square onerror-image"
                                                 src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                                    $photo ?? '',
-                                                    asset('storage/app/public/product').'/'.$photo ?? '',
+                                                    $photo['img'] ?? '',
+                                                    asset('storage/app/public/product').'/'.$photo['img'] ?? '',
                                                     asset('public/assets/admin/img/upload-img.png'),
-                                                    'product/'
+                                                    'product/',$photo['storage']
                                                 ) }}"
                                                     data-onerror-image="{{ asset('public/assets/admin/img/upload-img.png') }}"
                                                     alt="Product image">
-                                                    <div class="pen spartan_remove_row"><i class="tio-edit"></i></div>
+                                                    {{-- <div class="pen spartan_remove_row"><i class="tio-edit"></i></div> --}}
                                                     @if (request()->product_gellary  == 1)
-                                                        <a href="#" data-key={{ $key }} data-photo="{{ $photo }}"
+                                                        <a href="#" data-key={{ $key }} data-photo="{{ $photo['img'] }}"
                                                         class="spartan_remove_row function_remove_img"><i class="tio-add-to-trash"></i></a>
                                                     @else
-                                                        <a href="{{ route('admin.item.remove-image', ['id' => $product['id'], 'name' => $photo ,'temp_product' => $temp_product]) }}"
+                                                        <a href="{{ route('admin.item.remove-image', ['id' => $product['id'], 'name' => $photo['img'] ,'temp_product' => $temp_product]) }}"
                                                             class="spartan_remove_row"><i class="tio-add-to-trash"></i></a>
                                                     @endif
                                             </div>
@@ -195,8 +196,8 @@
                                     </label>
                                     <label class="d-inline-block m-0 position-relative">
                                         <img class="img--176 border onerror-image" id="viewer"
-                                        src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                            $product['image'] ?? '',
+                                        src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                            $product,'image',
                                             asset('storage/app/public/product').'/'.$product['image'] ?? '',
                                             asset('public/assets/admin/img/upload-img.png'),
                                             'product/'

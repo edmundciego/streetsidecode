@@ -2,159 +2,106 @@
 
 namespace Modules\Gateways\Traits;
 
-use SimpleXMLElement;
-use Twilio\Rest\Client;
-use Illuminate\Support\Facades\Http;
-use GuzzleHttp\Client as HpptClient;
-use Modules\Gateways\Entities\Setting;
+use GuzzleHttp\Client as HttpClient;
+use Illuminate\Support\Facades\Log;
 
-trait  SmsGateway
+trait SmsGateway
 {
-    public static function send($receiver, $otp): string
+    public static function send($receiver, $message): string
     {
-        $config = self::get_settings('twilio');
-        if (isset($config) && $config['status'] == 1) {
-            return self::twilio($receiver, $otp);
+        $config = self::get_settings('httpsms');
+        Log::info('SMS Gateway configuration', ['config' => $config]);
+
+        // Validate configuration
+        if (!self::validate_config($config)) {
+            Log::error("Invalid SMS gateway configuration.", ['config' => $config]);
+            return 'not_found';
         }
 
-        $config = self::get_settings('nexmo');
-        if (isset($config) && $config['status'] == 1) {
-            return self::nexmo($receiver, $otp);
+        // Validate phone number
+        $receiver = self::format_phone_number($receiver);
+        if (!$receiver) {
+            Log::error("Invalid phone number format: $receiver");
+            return 'invalid_number';
         }
 
-        $config = self::get_settings('2factor');
-        if (isset($config) && $config['status'] == 1) {
-            return self::two_factor($receiver, $otp);
-        }
-
-        $config = self::get_settings('msg91');
-        if (isset($config) && $config['status'] == 1) {
-            return self::msg_91($receiver, $otp);
-        }
-        return 'not_found';
+        return self::httpsms($receiver, $message);
     }
 
-    public static function twilio($receiver, $otp): string
+    private static function validate_config($config): bool
     {
-        $config = self::get_settings('twilio');
+        return is_array($config) && isset($config['status']) && $config['status'] == 1 && isset($config['api_key']) && isset($config['from']);
+    }
+
+    private static function format_phone_number($phone_number): ?string
+    {
+        // Basic validation and formatting for the phone number
+        // Ensure it starts with a '+' and contains only digits thereafter
+        $phone_number = preg_replace('/[^0-9]/', '', $phone_number);
+        if (strlen($phone_number) > 0) {
+            return '+' . $phone_number;
+        }
+        return null;
+    }
+
+    public static function httpsms($receiver, $message): string
+    {
+        $config = self::get_settings('httpsms');
         $response = 'error';
-        if (isset($config) && $config['status'] == 1) {
-            $message = str_replace("#OTP#", $otp, $config['otp_template']);
-            $sid = $config['sid'];
-            $token = $config['token'];
+
+        if (self::validate_config($config)) {
             try {
-                $twilio = new Client($sid, $token);
-                $twilio->messages
-                    ->create($receiver, // to
-                        array(
-                            "messagingServiceSid" => $config['messaging_service_sid'],
-                            "body" => $message
-                        )
-                    );
+                $client = new HttpClient();
+                $apiKey = $config['api_key'];
+                $from = $config['from'];
+
+                $result = $client->request('POST', 'https://api.httpsms.com/v1/messages/send', [
+                    'headers' => [
+                        'x-api-key' => $apiKey,
+                        'Content-Type' => 'application/json',
+                    ],
+                    'json' => [
+                        'content' => $message,
+                        'from' => $from,
+                        'to' => $receiver
+                    ]
+                ]);
+
+                Log::info("HTTP SMS sent to $receiver", ['response' => $result->getBody()]);
+
                 $response = 'success';
             } catch (\Exception $exception) {
+                Log::error("HTTP SMS error", ['message' => $exception->getMessage()]);
                 $response = 'error';
             }
+        } else {
+            Log::error("HTTP SMS Error: Configuration is missing or disabled", ['config' => $config]);
         }
+
         return $response;
     }
 
-    public static function nexmo($receiver, $otp): string
-    {
-        $config = self::get_settings('nexmo');
-        $response = 'error';
-        if (isset($config) && $config['status'] == 1) {
-            $message = str_replace("#OTP#", $otp, $config['otp_template']);
-            try {
-                $ch = curl_init();
-
-                curl_setopt($ch, CURLOPT_URL, 'https://rest.nexmo.com/sms/json');
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                curl_setopt($ch, CURLOPT_POST, 1);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, "from=" . $config['from'] . "&text=" . $message . "&to=" . $receiver . "&api_key=" . $config['api_key'] . "&api_secret=" . $config['api_secret']);
-
-                $headers = array();
-                $headers[] = 'Content-Type: application/x-www-form-urlencoded';
-                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-                $result = curl_exec($ch);
-                if (curl_errno($ch)) {
-                    echo 'Error:' . curl_error($ch);
-                }
-                curl_close($ch);
-                $response = 'success';
-            } catch (\Exception $exception) {
-                $response = 'error';
-            }
-        }
-        return $response;
-    }
-
-    public static function two_factor($receiver, $otp): string
-    {
-        $config = self::get_settings('2factor');
-        $response = 'error';
-        if (isset($config) && $config['status'] == 1) {
-            $api_key = $config['api_key'];
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => "https://2factor.in/API/V1/" . $api_key . "/SMS/" . $receiver . "/" . $otp . "",
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => "",
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 30,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => "GET",
-            ));
-            $response = curl_exec($curl);
-            $err = curl_error($curl);
-            curl_close($curl);
-
-            if (!$err) {
-                $response = 'success';
-            } else {
-                $response = 'error';
-            }
-        }
-        return $response;
-    }
-
-    public static function msg_91($receiver, $otp): string
-    {
-        $config = self::get_settings('msg91');
-        $response = 'error';
-        if (isset($config) && $config['status'] == 1) {
-            $receiver = str_replace("+", "", $receiver);
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => "https://api.msg91.com/api/v5/otp?template_id=" . $config['template_id'] . "&mobile=" . $receiver . "&authkey=" . $config['auth_key'] . "",
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => "",
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 30,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => "GET",
-                CURLOPT_POSTFIELDS => "{\"OTP\":\"$otp\"}",
-                CURLOPT_HTTPHEADER => array(
-                    "content-type: application/json"
-                ),
-            ));
-            $response = curl_exec($curl);
-            $err = curl_error($curl);
-            curl_close($curl);
-            if (!$err) {
-                $response = 'success';
-            } else {
-                $response = 'error';
-            }
-        }
-        return $response;
-    }
     public static function get_settings($name)
     {
         $data = config_settings($name, 'sms_config');
         if (isset($data) && !is_null($data->live_values)) {
-            return json_decode($data->live_values, true);
+            Log::info('Raw live_values retrieved from database', ['live_values' => $data->live_values]);
+
+            $live_values = $data->live_values;
+
+            // Ensure $live_values is decoded correctly
+            if (is_string($live_values)) {
+                $live_values = json_decode($live_values, true);
+                Log::info('Decoded live_values', ['live_values' => $live_values]);
+            }
+
+            if (is_array($live_values)) {
+                return $live_values;
+            } else {
+                Log::error('Failed to decode live_values', ['live_values' => $data->live_values]);
+            }
+        } else {
+            Log::error('No live_values found or live_values is null', ['data' => $data]);
         }
         return null;
     }

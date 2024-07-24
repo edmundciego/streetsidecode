@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        
+
         try
         {
             Config::set('addon_admin_routes',$this->get_addon_admin_routes());
@@ -43,6 +43,6 @@ class AppServiceProvider extends ServiceProvider
         {
 
         }
-        
+
     }
 }

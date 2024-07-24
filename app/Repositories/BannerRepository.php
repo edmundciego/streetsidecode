@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\CentralLogics\Helpers;
 use App\Contracts\Repositories\BannerRepositoryInterface;
 use App\Models\Banner;
 use Illuminate\Database\Eloquent\Collection;
@@ -63,9 +64,7 @@ class BannerRepository implements BannerRepositoryInterface
     public function delete(string $id): bool
     {
         $banner = $this->banner->find($id);
-        if (Storage::disk('public')->exists('banner/' . $banner['image'])) {
-            Storage::disk('public')->delete('banner/' . $banner['image']);
-        }
+        Helpers::check_and_delete('banner/' , $banner['image']);
         $banner->translations()->delete();
         $banner->delete();
 

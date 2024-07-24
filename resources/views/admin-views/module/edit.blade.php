@@ -142,7 +142,7 @@
                                                     <small class="text-danger">* ( {{translate('messages.ratio')}} 1:1)</small>
                                                 </label>
                                                 <label class="text-center my-auto position-relative">
-                                                    <img class="img--176 h-unset aspect-ratio-1 image--border" id="viewer" data-onerror-image="{{asset('public/assets/admin/img/upload-img.png')}}" src="{{\App\CentralLogics\Helpers::onerror_image_helper($module['icon'], asset('storage/app/public/module/').'/'.$module['icon'], asset('public/assets/admin/img/upload-img.png'), 'module/') }}"
+                                                    <img class="img--176 h-unset aspect-ratio-1 image--border" id="viewer" data-onerror-image="{{asset('public/assets/admin/img/upload-img.png')}}" src="{{\App\CentralLogics\Helpers::get_image_helper($module,'icon', asset('storage/app/public/module/').'/'.$module['icon'], asset('public/assets/admin/img/upload-img.png'), 'module/') }}"
                                                     alt="image" />
                                                     <div class="icon-file-group">
                                                         <div class="icon-file">
@@ -160,7 +160,7 @@
                                                     <small class="text-danger">* ( {{translate('messages.ratio')}} 1:1)</small>
                                                 </label>
                                                 <label class="text-center my-auto position-relative">
-                                                    <img class="img--176 h-unset aspect-ratio-1 image--border" id="viewer2" data-onerror-image="{{asset('public/assets/admin/img/upload-img.png')}}" src="{{\App\CentralLogics\Helpers::onerror_image_helper($module['thumbnail'], asset('storage/app/public/module/').'/'.$module['thumbnail'], asset('public/assets/admin/img/upload-img.png'), 'module/') }}"
+                                                    <img class="img--176 h-unset aspect-ratio-1 image--border" id="viewer2" data-onerror-image="{{asset('public/assets/admin/img/upload-img.png')}}" src="{{\App\CentralLogics\Helpers::get_image_helper($module,'thumbnail', asset('storage/app/public/module/').'/'.$module['thumbnail'], asset('public/assets/admin/img/upload-img.png'), 'module/') }}"
                                                     alt="image" />
                                                     <div class="icon-file-group">
                                                         <div class="icon-file">
@@ -267,8 +267,8 @@
                 CKEDITOR.instances[$(this).attr('id')].setData($(this).data('value'));
             });
 
-            $('#viewer').attr('src','{{\App\CentralLogics\Helpers::onerror_image_helper($module['icon'], asset('storage/app/public/module/').'/'.$module['icon'], asset('public/assets/admin/img/upload-img.png'), 'module/') }}');
-            $('#viewer2').attr('src','{{\App\CentralLogics\Helpers::onerror_image_helper($module['thumbnail'], asset('storage/app/public/module/').'/'.$module['thumbnail'], asset('public/assets/admin/img/upload-img.png'), 'module/') }}');
+            $('#viewer').attr('src','{{\App\CentralLogics\Helpers::get_image_helper($module,'icon', asset('storage/app/public/module/').'/'.$module['icon'], asset('public/assets/admin/img/upload-img.png'), 'module/') }}');
+            $('#viewer2').attr('src','{{\App\CentralLogics\Helpers::get_image_helper($module,'thumbnail', asset('storage/app/public/module/').'/'.$module['thumbnail'], asset('public/assets/admin/img/upload-img.png'), 'module/') }}');
         })
 </script>
 @endpush

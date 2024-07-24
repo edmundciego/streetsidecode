@@ -253,119 +253,132 @@
                     <!-- End Unfold -->
                 </div>
             </div>
-            <!-- End Header -->
-                <div class="card-body p-0">
+           
+
+                            @php($reviews = $store->reviews()->with('item',function($query){
+                                $query->withoutGlobalScope(\App\Scopes\StoreScope::class);
+                            })->with('customer')
+                            ->latest()->paginate(25))
+                <div class="card-body p-0 verticle-align-middle-table">
                     <div class="table-responsive datatable-custom">
                         <table id="columnSearchDatatable"
-                                class="table table-borderless table-thead-bordered table-nowrap table-align-middle card-table"
-                                data-hs-datatables-options='{
-                                    "order": [],
-                                    "orderCellsTop": true,
-                                    "paging":false
-                                }'>
+                               class="table table-borderless table-thead-bordered table-nowrap table-align-middle card-table"
+                               data-hs-datatables-options='{
+                            "order": [],
+                            "orderCellsTop": true,
+                            "paging":false
+                        }'>
                             <thead class="thead-light">
-                                <tr>
-                                    <th class="border-0">{{translate('sl')}}</th>
-                                    <th class="border-0">{{translate('messages.item')}}</th>
-                                    <th class="border-0">{{translate('messages.reviewer')}}</th>
-                                    <th class="border-0">{{translate('messages.review')}}</th>
-                                    <th class="border-0">{{translate('messages.rating')}}</th>
-                                    <th class="border-0">{{translate('messages.date')}}</th>
-                                </tr>
+                            <tr>
+                                <th class="text-center max-90px">{{translate('messages.sl')}}</th>
+                                <th>{{translate('messages.Review_Id')}}</th>
+                                <th>{{translate('messages.item')}}</th>
+                                <th class="pl-4">{{translate('messages.reviewer_info')}}</th>
+                                <th>{{translate('messages.review')}}</th>
+                                <th>{{translate('messages.date')}}</th>
+                                <th class="w-30p text-center">{{translate('messages.store_reply')}}</th>
+                                <th class="text-center w-100px">{{translate('messages.status')}}</th>
+                            </tr>
                             </thead>
 
                             <tbody id="set-rows">
-                            @php($reviews = $store->reviews()->with('item',function($query){
-                                $query->withoutGlobalScope(\App\Scopes\StoreScope::class);
-                            })->latest()->paginate(25))
 
                             @foreach($reviews as $key=>$review)
                                 <tr>
-                                    <td>{{$key+$reviews->firstItem()}}</td>
+                                    <td class="text-center">{{$key+$reviews->firstItem()}}</td>
+                                    <td>{{$review->review_id}}</td>
                                     <td>
-                                    @if ($review->item)
-                                        <a class="media align-items-center" href="{{route('admin.item.view',[$review->item['id']])}}">
-                                            <img class="avatar avatar-lg mr-3 onerror-image"
-                                            src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                                $review->item['image'] ?? '',
-                                                asset('storage/app/public/product').'/'.$review->item['image'] ?? '',
-                                                asset('public/assets/admin/img/160x160/img2.jpg'),
+                                        @if ($review->item)
+                                            <a class="media align-items-center" href="{{route('admin.item.view',[$review->item['id']])}}">
+                                                <img class="avatar avatar-lg mr-3 onerror-image"
+
+                                                     src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                                $review?->item,'image',
+                                                asset('storage/app/public/product').'/'.$review?->item['image'] ?? '',
+                                                asset('public/assets/admin/img/160x160/img1.jpg'),
                                                 'product/'
                                             ) }}"
-                                            data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}" alt="{{$review->item->name}} image">
-                                            <div class="media-body">
-                                                <h5 class="text-hover-primary mb-0">{{Str::limit($review->item['name'],10)}}</h5>
-                                            </div>
-                                        </a>
-                                        <span class="ml-10"><a href="{{route('admin.order.details',['id'=>$review->order_id])}}">{{ translate('messages.order_id') }}: {{$review->order_id}}</a></span>
-                                    @else
-                                        {{translate('messages.Item deleted!')}}
-                                    @endif
+
+
+                                                     data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}" alt="{{$review->item->name}} image">
+                                                <div class="media-body">
+                                                    <h5 class="text-hover-primary mb-0">{{Str::limit($review->item['name'],10)}}</h5>
+                                                    <!-- Static Order ID -->
+                                                    <a class="text-body" href="{{route('admin.order.details',['id'=>$review->order_id])}}">Order ID: {{$review->order_id}}</a>
+                                                    <!-- Static Order ID -->
+                                                </div>
+                                            </a>
+                                        @else
+                                            {{translate('messages.Food_deleted!')}}
+                                        @endif
                                     </td>
                                     <td>
-                                    @if($review->customer)
-                                        <a class="d-flex align-items-center"
-                                        href="{{route('admin.customer.view',[$review['user_id']])}}">
-                                            <div class="avatar avatar-circle">
-                                                <img class="avatar-img onerror-image" width="75" height="75"
-                                                    data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
-                                                    src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                                        $review->customer->image ?? '',
-                                                        asset('storage/app/public/profile').'/'.$review->customer->image ?? '',
-                                                        asset('public/assets/admin/img/160x160/img1.jpg'),
-                                                        'profile/'
-                                                    ) }}"
-                                                    alt="Image Description">
-                                            </div>
-                                            <div class="ml-3">
-                                            <span class="d-block h5 text-hover-primary mb-0">{{Str::limit($review->customer['f_name']." ".$review->customer['l_name'], 15)}} <i
-                                                    class="tio-verified text-primary" data-toggle="tooltip" data-placement="top"
-                                                    title="Verified Customer"></i></span>
-                                                <span class="d-block font-size-sm text-body">{{Str::limit($review->customer->email, 20)}}</span>
-                                            </div>
-                                        </a>
-                                    @else
-                                        {{translate('messages.customer_not_found')}}
-                                    @endif
+                                        @if($review->customer)
+                                            <a
+                                                href="{{route('admin.customer.view',[$review['user_id']])}}">
+                                                <div>
+                                    <span class="d-block h5 text-hover-primary mb-0">{{Str::limit($review->customer['f_name']." ".$review->customer['l_name'], 15)}} <i
+                                            class="tio-verified text-primary" data-toggle="tooltip" data-placement="top"
+                                            title="Verified Customer"></i></span>
+                                                    <span class="d-block font-size-sm text-body">{{Str::limit($review->customer->phone)}}</span>
+                                                </div>
+                                            </a>
+                                        @else
+                                            {{translate('messages.customer_not_found')}}
+                                        @endif
                                     </td>
                                     <td>
-                                        <div class="text-wrap">
-                                            <p>
+                                        <div class="text-wrap w-18rem">
+                                    <span class="d-block rating">
+                                        {{$review->rating}} <i class="tio-star"></i>
+                                    </span>
+                                            <small class="d-block" data-toggle="tooltip" data-placement="left"
+                                                   data-original-title="{{ $review['comment']}}" >
                                                 {{Str::limit($review['comment'], 80)}}
-                                            </p>
+                                            </small>
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="text-wrap">
-                                            <div class="d-flex mb-2">
-                                                <label class="badge badge-soft-info">
-                                                    {{$review->rating}} <i class="tio-star"></i>
-                                                </label>
-                                            </div>
-                                        </div>
+                                        {{ \App\CentralLogics\Helpers::time_date_format($review->created_at)  }}
                                     </td>
                                     <td>
-                                        {{date('d M Y '.config('timeformat'),strtotime($review['created_at']))}}
+                                        <p class="text-wrap text-center" data-toggle="tooltip" data-placement="top"
+                                           data-original-title="{{ $review?->reply }}">{!! $review->reply?Str::limit($review->reply, 50, '...'): translate('messages.Not_replied_Yet') !!}</p>
+                                    </td>
+
+                                    <td>
+                                        <label class="toggle-switch toggle-switch-sm" for="reviewCheckbox{{$review->id}}">
+                                            <input type="checkbox" data-id="status-{{$review['id']}}" data-message="{{$review->status?translate('messages.you_want_to_hide_this_review_for_customer'):translate('messages.you_want_to_show_this_review_for_customer')}}" class="toggle-switch-input status_form_alert" id="reviewCheckbox{{$review->id}}" {{$review->status?'checked':''}}>
+                                            <span class="toggle-switch-label">
+                                        <span class="toggle-switch-indicator"></span>
+                                    </span>
+                                        </label>
+                                        <form action="{{route('admin.item.reviews.status',[$review['id'],$review->status?0:1])}}" method="get" id="status-{{$review['id']}}">
+                                        </form>
                                     </td>
                                 </tr>
                             @endforeach
                             </tbody>
                         </table>
+                        @if(count($reviews) !== 0)
+                            <hr>
+                        @endif
+                        <div class="page-area px-4 pb-3">
+                            <div class="d-flex align-items-center justify-content-end">
+                                <div>
+                                    {!! $reviews->links() !!}
+                                </div>
+                            </div>
+                        </div>
+                        @if(count($reviews) === 0)
+                        <div class="empty--data">
+                            <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
+                            <h5>
+                                {{translate('no_data_found')}}
+                            </h5>
+                        </div>
+                        @endif
                     </div>
-                    @if(count($reviews) !== 0)
-                    <hr>
-                    @endif
-                    <div class="page-area">
-                        {!! $reviews->links() !!}
-                    </div>
-                    @if(count($reviews) === 0)
-                    <div class="empty--data">
-                        <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
-                        <h5>
-                            {{translate('no_data_found')}}
-                        </h5>
-                    </div>
-                    @endif
                 </div>
             </div>
         </div>
@@ -445,5 +458,26 @@
                 },
             });
         });
+
+        $(".status_form_alert").on("click", function (e) {
+            const id = $(this).data('id');
+            const message = $(this).data('message');
+            e.preventDefault();
+            Swal.fire({
+                title: '{{ translate('messages.are_you_sure') }}',
+                text: message,
+                type: 'warning',
+                showCancelButton: true,
+                cancelButtonColor: 'default',
+                confirmButtonColor: '#FC6A57',
+                cancelButtonText: '{{translate('messages.no')}}',
+                confirmButtonText: '{{translate('messages.yes')}}',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.value) {
+                    $('#' + id).submit()
+                }
+            })
+        })
     </script>
 @endpush

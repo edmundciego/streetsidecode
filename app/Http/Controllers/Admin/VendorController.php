@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Exports\DisbursementHistoryExport;
-use App\Models\DisbursementDetails;
 use App\Models\Item;
 use App\Models\Zone;
 use App\Models\AddOn;
@@ -24,12 +22,16 @@ use App\Models\Conversation;
 use Illuminate\Http\Request;
 use App\Models\StoreSchedule;
 use App\CentralLogics\Helpers;
+use Illuminate\Support\Carbon;
+use App\Models\BusinessSetting;
 use App\Models\WithdrawRequest;
 use App\Exports\StoreListExport;
 use App\Models\OrderTransaction;
 use App\CentralLogics\StoreLogic;
 use App\Models\AccountTransaction;
 use Illuminate\Support\Facades\DB;
+use App\Models\DisbursementDetails;
+use App\Models\SubscriptionPackage;
 use App\Http\Controllers\Controller;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Mail;
@@ -39,6 +41,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
+use App\Exports\DisbursementHistoryExport;
 use App\Exports\StoreWiseItemReviewExport;
 use App\Exports\StoreCashTransactionExport;
 use App\Exports\StoreOrderTransactionExport;
@@ -355,25 +358,24 @@ class VendorController extends Controller
             return back();
         }
 
-        if (Storage::disk('public')->exists('vendor/' . $store->vendor['image'])) {
-            Storage::disk('public')->delete('vendor/' . $store->vendor['image']);
-        }
-        if (Storage::disk('public')->exists('store/' . $store->logo)) {
-            Storage::disk('public')->delete('store/' . $store->logo);
-        }
 
-        if (Storage::disk('public')->exists('store/cover/' . $store->cover_photo)) {
-            Storage::disk('public')->delete('store/cover/' . $store->cover_photo);
-        }
+        Helpers::check_and_delete('vendor/' , $store->vendor['image']);
+
+
+        Helpers::check_and_delete('store/' , $store->logo);
+
+
+        Helpers::check_and_delete('store/cover/' , $store->cover_photo);
+
         foreach($store->deliverymen as $dm) {
-            if (Storage::disk('public')->exists('delivery-man/' . $dm['image'])) {
-                Storage::disk('public')->delete('delivery-man/' . $dm['image']);
-            }
+
+            Helpers::check_and_delete('delivery-man/' , $dm['image']);
+
 
             foreach (json_decode($dm['identity_image'], true) as $img) {
-                if (Storage::disk('public')->exists('delivery-man/' . $img)) {
-                    Storage::disk('public')->delete('delivery-man/' . $img);
-                }
+
+                Helpers::check_and_delete('delivery-man/' , $img);
+
             }
         }
 
@@ -518,6 +520,24 @@ class VendorController extends Controller
                 })
                 ->latest()->paginate(config('default_pagination'));
             return view('admin-views.vendor.view.disbursement', compact('store','disbursements'));
+        } else if ($tab == 'business_plan') {
+
+
+            $store= Store::where('id',$store->id)->with([
+                'store_sub_update_application.package','vendor','store_sub_update_application.last_transcations'
+            ])->withcount('items')
+            ->first();
+            $packages = SubscriptionPackage::where('status',1)->latest()->get();
+            $admin_commission=BusinessSetting::where('key', 'admin_commission')->first()?->value ;
+            $business_name=BusinessSetting::where('key', 'business_name')->first()?->value ;
+            try {
+                $index=  $store->store_business_model == 'commission' ? 0 : 1+ array_search($store?->store_sub_update_application?->package_id??1 ,array_column($packages->toArray() ,'id') );
+            } catch (\Throwable $th) {
+                $index= 2;
+            }
+            return view('admin-views.vendor.view.subscription',compact('store','packages','business_name','admin_commission','index'));
+
+
 
         }
         return view('admin-views.vendor.view.index', compact('store', 'wallet'));
@@ -883,21 +903,20 @@ class VendorController extends Controller
 
     public function updateStoreSettings(Store $store, Request $request)
     {
+        if($request?->tab == 'business_plan'){
+            $store->comission = $request->comission_status ?  $request->comission : null;
+            $store->save();
+            Toastr::success(translate('messages.Commission_updated'));
+            return back();
+        }
         $request->validate([
             'minimum_order'=>'required',
-            'comission'=>'required',
+            // 'comission'=>'required',
             'tax'=>'required',
             'minimum_delivery_time' => 'required|min:1|max:2',
             'maximum_delivery_time' => 'required|min:1|max:2|gt:minimum_delivery_time',
         ]);
 
-        if($request->comission_status)
-        {
-            $store->comission = $request->comission;
-        }
-        else{
-            $store->comission = null;
-        }
 
         $store->minimum_order = $request->minimum_order;
         $store->tax = $request->tax;
@@ -989,6 +1008,20 @@ class VendorController extends Controller
         $store->vendor->status = $request->status;
         $store->vendor->save();
         if($request->status) $store->status = 1;
+
+        $add_days= 1;
+        if($store?->store_sub_update_application){
+            if($store?->store_sub_update_application && $store?->store_sub_update_application->is_trial == 1){
+                $add_days= BusinessSetting::where(['key' => 'subscription_free_trial_days'])->first()?->value ?? 1;
+            }elseif($store?->store_sub_update_application && $store?->store_sub_update_application->is_trial == 0){
+                $add_days=$store?->store_sub_update_application->validity;
+            }
+                $store?->store_sub_update_application->update([
+                    'expiry_date'=> Carbon::now()->addDays($add_days)->format('Y-m-d'),
+                    'status'=>1
+                ]);
+            $store->store_business_model= 'subscription';
+        }
         $store->save();
         try{
             if($request->status==1){

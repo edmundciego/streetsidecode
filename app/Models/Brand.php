@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\CentralLogics\Helpers;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -43,6 +46,8 @@ class Brand extends Model
         'status',
     ];
 
+    protected $appends = ['image_full_url'];
+
     /**
      * @return MorphMany
      */
@@ -68,6 +73,25 @@ class Brand extends Model
         return $query->where('status', '=', 1);
     }
 
+    public function getImageFullUrlAttribute(){
+        $value = $this->image;
+        if (count($this->storage) > 0) {
+            foreach ($this->storage as $storage) {
+                if ($storage['key'] == 'image') {
+                 
+                    if($storage['value'] == 's3'){
+
+                        return Helpers::s3_storage_link('brand',$value);
+                    }else{
+                        return Helpers::local_storage_link('brand',$value);
+                    }
+                }
+            }
+        }
+
+        return Helpers::local_storage_link('brand',$value);
+    }
+
     /**
      * @return void
      */
@@ -77,6 +101,21 @@ class Brand extends Model
         static::created(function ($category) {
             $category->slug = $category->generateSlug($category->name);
             $category->save();
+        });
+        static::saved(function ($model) {
+            if($model->isDirty('image')){
+                $value = Helpers::getDisk();
+
+                DB::table('storages')->updateOrInsert([
+                    'data_type' => get_class($model),
+                    'data_id' => $model->id,
+                    'key' => 'image',
+                ], [
+                    'value' => $value,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
         });
     }
 
@@ -117,14 +156,17 @@ class Brand extends Model
 
         return $value;
     }
-
-    /**
-     * @return void
-     */
-    protected static function booted(): void
+    public function storage()
     {
+        return $this->morphMany(Storage::class, 'data');
+    }
+    protected static function booted()
+    {
+        static::addGlobalScope('storage', function ($builder) {
+            $builder->with('storage');
+        });
         static::addGlobalScope('translate', function (Builder $builder) {
-            $builder->with(['translations' => function ($query) {
+            $builder->with(['translations' => function($query){
                 return $query->where('locale', app()->getLocale());
             }]);
         });

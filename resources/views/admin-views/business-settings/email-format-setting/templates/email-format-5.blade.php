@@ -6,8 +6,8 @@ $company_name = App\Models\BusinessSetting::where('key', 'business_name')->first
         <td class="email-template-table-td-style">
             <img class="mail-img-2 onerror-image" data-onerror-image="{{ asset('/public/assets/admin/img/blank3.png') }}"
 
-            src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                data_get($data, 'icon' , null),
+            src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                $data, 'icon',
                 asset('storage/app/public/email_template').'/'.data_get($data, 'icon' , null),
                 asset('/public/assets/admin/img/blank3.png'),
                 'email_template/'
@@ -34,15 +34,21 @@ $company_name = App\Models\BusinessSetting::where('key', 'business_name')->first
             <span class="d-block" id="mail-footer" class="email-template-table-td-span-3  mail-footer">{{ $data['footer_text'] ?? translate('Please_contact_us_for_any_queries,_we’re_always_happy_to_help.') }}</span>
             <span class="d-block">{{ translate('Thanks_&_Regards') }},</span>
             <span class="d-block" class="email-template-table-td-span-4">{{ $company_name }}</span>
-            @php($store_logo = \App\Models\BusinessSetting::where(['key' => 'logo'])->first()->value)
-            <img class="email-template-img onerror-image" data-onerror-image="{{ asset('storage/app/public/business/' . $store_logo) }}"
+            @php($store_logo = \App\Models\BusinessSetting::where(['key' => 'logo'])->first())
+            <img class="email-template-img onerror-image"
 
-            src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                data_get($data, 'logo' , null),
+            @if ($data?->logo)
+            src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                $data, 'logo',
                 asset('storage/app/public/email_template').'/'.data_get($data, 'logo' , null),
-                asset('storage/app/public/business/' . $store_logo),
+                asset('public/assets/admin/img/160x160/img2.jpg'),
                 'email_template/'
-            ) }}"
+                ) }}"
+
+            @else
+                src="{{\App\CentralLogics\Helpers::get_image_helper($store_logo,'value', asset('storage/app/public/business/').'/' . $store_logo?->value, asset('public/assets/admin/img/160x160/img2.jpg') ,'business/')}}"
+            @endif
+
 
             alt="public/img">
 

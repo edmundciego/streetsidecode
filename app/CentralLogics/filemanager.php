@@ -51,5 +51,5 @@ class FileManagerLogic
         }
         return $data;
     }
-    
+
 }

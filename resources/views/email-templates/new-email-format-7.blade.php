@@ -148,13 +148,13 @@ width: 24px;
             <tr>
                 <td class="main-table-td">
                     <img class="mail-img-1"
-                    src="{{\App\CentralLogics\Helpers::onerror_image_helper( data_get($data, 'logo'), asset('storage/app/public/email_template/').'/'.data_get($data, 'logo'), asset('public/assets/admin/img/emai_demo_template_2.png'), 'email_template/') }}"
+                    src="{{\App\CentralLogics\Helpers::get_image_helper( $data, 'logo', asset('storage/app/public/email_template/').'/'.data_get($data, 'logo'), asset('public/assets/admin/img/emai_demo_template_2.png'), 'email_template/') }}"
 
                     id="logoViewer" alt="">
                     <h2 id="mail-title" class="mt-2">{{ $title?? translate('Main_Title_or_Subject_of_the_Mail') }}</h2>
                     <div class="mb-1" id="mail-body">{!! $body?? translate('Hi_Sabrina,') !!}</div>
                     <img class="mb-2 mail-img-3" id="bannerViewer"
-                    src="{{\App\CentralLogics\Helpers::onerror_image_helper( data_get($data, 'image'), asset('storage/app/public/email_template/').'/'.data_get($data, 'image'), asset('public/assets/admin/img/emai_demo_template_1.png'), 'email_template/') }}"
+                    src="{{\App\CentralLogics\Helpers::get_image_helper( $data, 'image', asset('storage/app/public/email_template/').'/'.data_get($data, 'image'), asset('public/assets/admin/img/emai_demo_template_1.png'), 'email_template/') }}"
                     alt="">
                     <hr>
                     <div class="mb-2" id="mail-footer">

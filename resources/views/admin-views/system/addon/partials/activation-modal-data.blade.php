@@ -8,12 +8,12 @@
 </div>
 <div class="modal-body px-4 px-sm-5">
     <div class="mb-4 text-center">
-        @php($logo=\App\Models\BusinessSetting::where('key','logo')->first()->value)
+        @php($logo=\App\Models\BusinessSetting::where('key','logo')->first())
         <img
             width="200"
-            src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                $logo ?? '',
-                asset('storage/app/public/restaurant').'/'.$logo ?? '',
+            src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                $logo ,'value',
+                asset('storage/app/public/restaurant').'/'.$logo->value ?? '',
                 asset('public/assets/admin/img/img1.jpg'),
                 'restaurant/'
             ) }}"

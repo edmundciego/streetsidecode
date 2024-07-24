@@ -97,8 +97,8 @@
                                     <a href="{{route('admin.store.view', $store->id)}}" class="table-rest-info" alt="view store">
                                         <img class="img--60 circle onerror-image" data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
 
-                                        src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                            $store['logo'] ?? '',
+                                        src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                            $store,'logo',
                                             asset('storage/app/public/store').'/'.$store['logo'] ?? '',
                                             asset('public/assets/admin/img/160x160/img1.jpg'),
                                             'store/'

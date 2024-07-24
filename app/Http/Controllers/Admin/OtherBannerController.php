@@ -41,27 +41,23 @@ class OtherBannerController extends Controller
 
         if($module_type == 'parcel'){
 
-            ModuleWiseBanner::insert(
-                [
-                    'module_id' => $module_id,
-                    'key' => $request->key,
-                    'type' => 'promotional_banner',
-                    'value' => Helpers::upload('promotional_banner/', 'png', $request->file('image'))
-                ]
-            );
+            $banner = new ModuleWiseBanner();
+            $banner->module_id = $module_id;
+            $banner->key = $request->key;
+            $banner->type = 'promotional_banner';
+            $banner->value = Helpers::upload('promotional_banner/', 'png', $request->file('image'));
+            $banner->save();
 
             Toastr::success(translate('messages.banner_setup_updated'));
             return back();
         }
-
-        ModuleWiseBanner::updateOrInsert(
-            [
-                'module_id' => $module_id,
-                'key' => $request->key,
-                'type' => 'promotional_banner',
-            ],
-            ['value' => Helpers::upload('promotional_banner/', 'png', $request->file('image'))]
-        );
+        $banner = ModuleWiseBanner::firstOrNew([
+            'module_id' => $module_id,
+            'key' => $request->key,
+            'type' => 'promotional_banner',
+        ]);
+        $banner->value = Helpers::upload('promotional_banner/', 'png', $request->file('image'));
+        $banner->save();
 
         Toastr::success(translate('messages.banner_setup_updated'));
         return back();

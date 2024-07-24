@@ -20,8 +20,8 @@
         <a href="{{route('admin.store.view', $item->id)}}">
             <div class="position-relative overflow-hidden">
                 <img class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/100x100/1.png')}}"
-                src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                    $item['logo'] ?? '',
+                src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                    $item,'logo',
                     asset('storage/app/public/store').'/'.$item['logo'] ?? '',
                     asset('public/assets/admin/img/100x100/1.png'),
                     'store/'

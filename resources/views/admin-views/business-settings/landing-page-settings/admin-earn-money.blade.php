@@ -180,8 +180,8 @@
                                 <label class="upload-img-3 m-0 d-block">
                                     <div class="position-relative">
                                     <div class="img">
-                                        <img  src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                            $earning_seller_image['value'] ?? '',
+                                        <img  src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                            $earning_seller_image,'value',
                                             asset('storage/app/public/earning').'/'.$earning_seller_image['value'] ?? '',
                                             asset('/public/assets/admin/img/upload-4.png'),
                                             'earning/'
@@ -310,8 +310,8 @@
                                     <div class="position-relative">
                                     <div class="img">
 
-                                        <img src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                            $earning_delivery_image['value'] ?? '',
+                                        <img src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                            $earning_delivery_image,'value',
                                             asset('storage/app/public/earning/').'/'.$earning_delivery_image['value'],
                                             asset('/public/assets/admin/img/upload-4.png'),
                                             'earning/'

@@ -35,14 +35,16 @@ class BusinessSettingsController extends Controller
             'gst.required_if' => translate('messages.gst_can_not_be_empty'),
         ]);
         $store = $request['vendor']->stores[0];
+
+
         $validator->sometimes('per_km_delivery_charge', 'required_with:minimum_delivery_charge', function ($request) use($store) {
-            return ($store->self_delivery_system);
+            return ($store->sub_self_delivery);
         });
         $validator->sometimes('minimum_delivery_charge', 'required_with:per_km_delivery_charge', function ($request) use($store) {
-            return ($store->self_delivery_system);
+            return ($store->sub_self_delivery);
         });
         // $validator->sometimes('delivery_charge', 'required', function ($request) use($store) {
-        //     return ($store->self_delivery_system);
+        //     return ($store->sub_self_delivery);
         // });
 
         $data = json_decode($request->translations, true);
@@ -82,9 +84,9 @@ class BusinessSettingsController extends Controller
         $store->free_delivery = $request->free_delivery??0;
         $store->minimum_order = $request->minimum_order;
         $store->gst = json_encode(['status'=>$request->gst_status, 'code'=>$request->gst]);
-        // $store->delivery_charge = $store->self_delivery_system?$request->delivery_charge: $store->delivery_charge;
-        $store->minimum_shipping_charge = $store->self_delivery_system?$request->minimum_delivery_charge??0: $store->minimum_shipping_charge;
-        $store->per_km_shipping_charge = $store->self_delivery_system?$request->per_km_delivery_charge??0: $store->per_km_shipping_charge;
+        // $store->delivery_charge = $store->sub_self_delivery?$request->delivery_charge: $store->delivery_charge;
+        $store->minimum_shipping_charge = $store->sub_self_delivery?$request->minimum_delivery_charge??0: $store->minimum_shipping_charge;
+        $store->per_km_shipping_charge = $store->sub_self_delivery?$request->per_km_delivery_charge??0: $store->per_km_shipping_charge;
         $store->maximum_shipping_charge = $store?$request->maximum_delivery_charge??0: $store->maximum_delivery_charge;
         $store->delivery_time = $request->minimum_delivery_time .'-'. $request->maximum_delivery_time.' '.$request->delivery_time_type;
         $store->name = $data[0]['value'];

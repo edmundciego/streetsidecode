@@ -130,7 +130,7 @@
                                             <small class="text-danger">* ( {{translate('messages.ratio')}} 900x300 )</small>
                                         </label>
                                         <div class="text-center py-3 my-auto">
-                                            <img class="img--vertical onerror-image" id="viewer" data-onerror-image="{{asset('public/assets/admin/img/900x400/img1.jpg')}}" src="{{\App\CentralLogics\Helpers::onerror_image_helper($banner['image'], asset('storage/app/public/banner/').'/'.$banner['image'], asset('public/assets/admin/img/900x400/img1.jpg'), 'banner/') }}"
+                                            <img class="img--vertical onerror-image" id="viewer" data-onerror-image="{{asset('public/assets/admin/img/900x400/img1.jpg')}}" src="{{\App\CentralLogics\Helpers::get_image_helper($banner,'image', asset('storage/app/public/banner/').'/'.$banner['image'], asset('public/assets/admin/img/900x400/img1.jpg'), 'banner/') }}"
                                             alt="banner image"/>
                                         </div>
                                         <div class="custom-file">

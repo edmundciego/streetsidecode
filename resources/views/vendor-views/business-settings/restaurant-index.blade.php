@@ -101,7 +101,7 @@
                             </div>
                         @endif
                     @endif
-                    @if ($store->self_delivery_system == 1)
+                    @if ($store->sub_self_delivery == 1)
                     <div class="col-lg-4 col-sm-6">
                         <div class="form-group m-0">
                             <label class="toggle-switch toggle-switch-sm d-flex justify-content-between border rounded px-3 form-control" for="free_delivery">
@@ -239,7 +239,7 @@
                             </div>
                         </div>
 
-                        @if($store->self_delivery_system)
+                        @if($store->sub_self_delivery)
                         <div class="col-sm-4 col-12">
                             <div class="form-group">
                                 <label class="input-label text-capitalize" for="minimum_shipping_charge">{{translate('messages.minimum_shipping_charge')}} ({{\App\CentralLogics\Helpers::currency_symbol()}})
@@ -446,7 +446,7 @@
                                             <div class="text-center">
                                                 <img class="img--110 min-height-170px min-width-170px onerror-image" id="viewer"
                                                      data-onerror-image="{{ asset('public/assets/admin/img/upload.png') }}"
-                                                     src="{{\App\CentralLogics\Helpers::onerror_image_helper($store->meta_image, asset('storage/app/public/store').'/'.$store->meta_image, asset('public/assets/admin/img/upload.png'), 'store/') }}"
+                                                     src="{{\App\CentralLogics\Helpers::get_image_helper($store,'meta_image', asset('storage/app/public/store').'/'.$store->meta_image, asset('public/assets/admin/img/upload.png'), 'store/') }}"
                                                      alt="{{ translate('meta_image') }}" />
                                             </div>
                                             <input type="file" name="meta_image" id="customFileEg1" class="custom-file-input"

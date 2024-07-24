@@ -21,7 +21,11 @@ class ReviewsController extends Controller
                 $q->orWhere('name', 'like', "%{$value}%");
             }
         })->pluck('id')->toArray();
-        $reviews=Review::whereIn('item_id',$foods)->get();
+        $reviews=Review::whereIn('item_id',$foods)->where(function ($q) use ($key) {
+            foreach ($key as $value) {
+                $q->orWhere('review_id', 'like', "%{$value}%");
+            }
+        })->get();
         return response()->json([
             'view'=>view('admin-views.reviews.partials._table',compact('reviews'))->render()
         ]);

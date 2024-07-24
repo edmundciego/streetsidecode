@@ -4,7 +4,7 @@
         <div class="chat-user-info w-100 d-flex align-items-center">
             <div class="chat-user-info-img">
                 <img class="avatar-img onerror-image"
-                src="{{\App\CentralLogics\Helpers::onerror_image_helper($user['image'], asset('storage/app/public/profile/').'/'.$user['image'], asset('public/assets/admin/img/160x160/img1.jpg'), 'profile/') }}"
+                src="{{\App\CentralLogics\Helpers::get_image_helper($user,'image', asset('storage/app/public/profile/').'/'.$user['image'], asset('public/assets/admin/img/160x160/img1.jpg'), 'profile/') }}"
                     data-onerror-image="{{asset('public/assets/admin')}}/img/160x160/img1.jpg"
                     alt="Image Description">
             </div>
@@ -35,16 +35,22 @@
                 @if($con->sender_id == $user->id)
                     <div class="py-2 d-flex gap-2 align-items-end">
                         <div class="chat-user-conv-img">
-                            <img class="avatar-img onerror-image" width="28" height="28" src="{{\App\CentralLogics\Helpers::onerror_image_helper($user['image'], asset('storage/app/public/profile/').'/'.$user['image'], asset('public/assets/admin/img/160x160/img1.jpg'), 'profile/') }}" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img1.jpg') }}" alt="Image Description">
+                            <img class="avatar-img onerror-image" width="28" height="28" src="{{\App\CentralLogics\Helpers::get_image_helper($user,'image', asset('storage/app/public/profile/').'/'.$user['image'], asset('public/assets/admin/img/160x160/img1.jpg'), 'profile/') }}" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img1.jpg') }}" alt="Image Description">
                         </div>
 
                         <div class="conv-reply-1">
                             <h6 data-toggle="tooltip" data-placement="top" title="{{\App\CentralLogics\Helpers::time_date_format($con?->created_at)}}">{{$con->message}}</h6>
                             @if($con->file!=null)
-                            @foreach (json_decode($con->file) as $img)
+                            @foreach (json_decode($con->file,true) as $img)
+                            @php($img = is_array($img)?$img:['img'=>$img,'storage'=>'public'])
                             <br>
-                                <img  width="50" height="50"
-                                src="{{\App\CentralLogics\Helpers::onerror_image_helper($img, asset('storage/app/public/conversation/').'/'.$img, asset('public/assets/admin/img/160x160/img1.jpg'), 'conversation/') }}" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img1.jpg') }}" alt="Image Description">
+                                <img class="w-100 mb-3"
+                                     src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                                        $img['img'],
+                                        asset('storage/app/public/conversation').'/'.$img['img'],
+                                        asset('public/assets/admin/img/160x160/img1.jpg'),
+                                        'conversation/',$img['storage']
+                                    ) }}">
                                 @endforeach
                             @endif
                         </div>
@@ -54,10 +60,16 @@
                         <div class="conv-reply-2">
                             <h6 data-toggle="tooltip" data-placement="top" title="{{\App\CentralLogics\Helpers::time_date_format($con?->created_at)}}">{{$con->message}}</h6>
                             @if($con->file!=null)
-                            @foreach (json_decode($con->file) as $img)
+                            @foreach (json_decode($con->file,true) as $img)
+                            @php($img = is_array($img)?$img:['img'=>$img,'storage'=>'public'])
                             <br>
-                                <img  width="50" height="50"
-                                src="{{\App\CentralLogics\Helpers::onerror_image_helper($img, asset('storage/app/public/conversation/').'/'.$img, asset('public/assets/admin/img/160x160/img1.jpg'), 'conversation/') }}" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img1.jpg') }}" alt="Image Description">
+                                <img class="w-100 mb-3"
+                                     src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                                        $img['img'],
+                                        asset('storage/app/public/conversation').'/'.$img['img'],
+                                        asset('public/assets/admin/img/160x160/img1.jpg'),
+                                        'conversation/',$img['storage']
+                                    ) }}">
                                 @endforeach
                             @endif
                         </div>
