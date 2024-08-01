@@ -72,7 +72,8 @@
                                 <div class="folder-btn-item mx-auto">
                                 <button class="btn p-0 w-100" title="{{$file['name']}}">
                                     <div class="gallary-card">
-                                        <img src="{{$storage == 's3'? rtrim($awsUrl, '/').'/'.ltrim($awsBucket.'/'.$file['path'], '/') : asset('storage/app/'.$file['path'])}}" alt="{{$file['name']}}" class="w-100 rounded">
+                                        <img src="{{$storage == 's3'? Storage::disk($storage)->url($file['path']) : asset('storage/app/'.$file['path'])}}" alt="{{$file['name']}}" class="w-100 rounded">
+{{--                                        <img src="{{$storage == 's3'? rtrim($awsUrl, '/').'/'.ltrim($awsBucket.'/'.$file['path'], '/') : asset('storage/app/'.$file['path'])}}" alt="{{$file['name']}}" class="w-100 rounded">--}}
                                     </div>
                                     <small class="overflow-hidden text-title">{{Str::limit($file['name'],10)}}</small>
                                 </button>
@@ -109,7 +110,8 @@
                                             </div>
                                         </div>
                                         <div class="modal-body p-1 pt-0">
-                                            <img src="{{$storage == 's3'? rtrim($awsUrl, '/').'/'.ltrim($awsBucket.'/'.$file['path'], '/') : asset('storage/app/'.$file['path'])}}" class="w-100">
+                                            <img src="{{$storage == 's3'? Storage::disk($storage)->url($file['path']) : asset('storage/app/'.$file['path'])}}" class="w-100">
+{{--                                            <img src="{{$storage == 's3'? rtrim($awsUrl, '/').'/'.ltrim($awsBucket.'/'.$file['path'], '/') : asset('storage/app/'.$file['path'])}}" class="w-100">--}}
                                         </div>
                                     </div>
                                 </div>

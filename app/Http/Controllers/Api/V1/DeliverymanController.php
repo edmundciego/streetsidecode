@@ -332,15 +332,15 @@ class DeliverymanController extends Controller
     public function record_location_data(Request $request)
     {
         $dm = DeliveryMan::where(['auth_token' => $request['token']])->first();
-        DB::table('delivery_histories')->insert([
-            'delivery_man_id' => $dm['id'],
+        DeliveryHistory::updateOrCreate(['delivery_man_id' => $dm['id']], [
             'longitude' => $request['longitude'],
             'latitude' => $request['latitude'],
             'time' => now(),
             'location' => $request['location'],
             'created_at' => now(),
             'updated_at' => now()
-        ]);
+            ]);
+
         return response()->json(['message' => 'location recorded'], 200);
     }
 

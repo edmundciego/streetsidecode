@@ -4884,4 +4884,5 @@
   'If disabled, the store can’t get the experience without any business plan.' => 'If disabled, the store can’t get the experience without any business plan.',
   'You_have_received_new_message' => 'You have received new message',
   'extra_packaging_amount_can_not_be_empty' => 'Extra packaging amount can not be empty',
+  'If enabled, stores can actively engage with the customers by responding to the reviews left for their orders.' => 'If enabled, stores can actively engage with the customers by responding to the reviews left for their orders.',
 );

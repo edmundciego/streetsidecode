@@ -62,7 +62,11 @@
                 <!-- dispatch -->
                 @if (\App\CentralLogics\Helpers::module_permission_check('order'))
                     <!-- Order dispachment -->
-                    @php($modules = \App\Models\Module::Active()->get())
+                    @php($modules = \App\Models\Module::when(auth('admin')->user()->zone_id, function($query){
+                                $query->whereHas('zones',function($query){
+                                    $query->where('zone_id',auth('admin')->user()->zone_id);
+                                });
+                            })->Active()->get())
                     @foreach ($modules as $module)
                     @if ($module->module_type != 'parcel')
                     @php($unassigned = \App\Models\Order::whereHas('module', function($query) use($module){
