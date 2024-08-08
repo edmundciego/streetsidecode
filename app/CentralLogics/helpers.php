@@ -3343,20 +3343,20 @@ class Helpers
         return  Carbon::parse($data)->locale(app()->getLocale())->translatedFormat($time);
     }
 
-    public static function get_image_helper($data, $key, $src, $error_src, $path)
-    {
-        if (!$data) {
+    public static function get_image_helper($data, $key, $src, $error_src ,$path){
+
+        if(!$data){
             return $error_src;
         }
-        
         $image = '';
         $storage = 'public';
 
+
         if (!(is_array($data)) && (get_class($data) == 'stdClass' && property_exists($data, $key))) {
             $image = $data->$key;
-        } elseif ((is_array($data) && array_key_exists($key, $data))) {
+        }elseif ((is_array($data) && array_key_exists($key, $data))) {
             $image = $data[$key] ?? '';
-        } elseif (!(is_array($data)) && (get_class($data) != 'stdClass')) {
+        }elseif(!(is_array($data)) && (get_class($data) != 'stdClass')) {
             $image = (is_object($data) && ($data instanceof Collection)) ? $data->$key : ($data[$key] ?? '');
         }
 
@@ -3376,8 +3376,10 @@ class Helpers
                     }
                 }
             }
-        } elseif (!(is_array($data)) && (get_class($data) != 'stdClass')) {
-            if (is_object($data) && ($data instanceof Collection)) {
+        }
+        elseif(!(is_array($data)) && (get_class($data) != 'stdClass')) {
+
+            if(is_object($data) && ($data instanceof Collection)){
                 if ($data->storage && count($data->storage) > 0) {
                     foreach ($data->storage as $value) {
                         if ($value['key'] == $key || $value['data_type'] == 'App\Models\BusinessSetting' || $value['data_type'] == 'App\Models\DataSetting') {
@@ -3385,7 +3387,7 @@ class Helpers
                         }
                     }
                 }
-            } else {
+            }else{
                 if ($data['storage'] && count($data['storage']) > 0) {
                     foreach ($data['storage'] as $value) {
                         if ($value['key'] == $key || $value['data_type'] == 'App\Models\BusinessSetting' || $value['data_type'] == 'App\Models\DataSetting') {
@@ -3397,11 +3399,14 @@ class Helpers
         }
 
         try {
-            if (($storage == 'public') && isset($image) && strlen($image) > 1 && Storage::disk($storage)->exists($path . $image)) {
-                return asset('storage/' . trim($path, '/') . '/' . $image);
+            if(($storage  == 'public') && isset($image) && strlen($image) >1 && Storage::disk($storage)->exists($path.$image)){
+                return asset('storage/app/public') . '/' . $path . '/' . $image;
             }
-            if (($storage == 's3') && isset($image) && strlen($image) > 1 && Storage::disk($storage)->exists(trim($path, '/') . '/' . $image)) {
-                return Storage::disk('s3')->url(trim($path, '/') . '/' . $image);
+            if(($storage  == 's3') && isset($image) && strlen($image) >1 && Storage::disk($storage)->exists($path.$image)){
+                return Storage::disk($storage)->url($path . $image);
+//                $awsUrl = config('filesystems.disks.s3.url');
+//                $awsBucket = config('filesystems.disks.s3.bucket');
+//                return rtrim($awsUrl, '/').'/'.ltrim($awsBucket.'/'.$path.$image, '/');
             }
         } catch (\Exception $e) {
             return $error_src;
@@ -3409,16 +3414,18 @@ class Helpers
         return $error_src;
     }
 
+
     public static function onerror_image_helper($image, $src, $error_src ,$path, $storage = null){
 
         try {
             if(($storage  == 'public') && isset($image) && strlen($image) >1 && Storage::disk($storage)->exists($path.$image)){
-                return $src;
+                return asset('storage/app/public') . '/' . $path . '/' . $image;
             }
             if(($storage  == 's3') && isset($image) && strlen($image) >1 && Storage::disk($storage)->exists($path.$image)){
-                $awsUrl = config('filesystems.disks.s3.url');
-                $awsBucket = config('filesystems.disks.s3.bucket');
-                return rtrim($awsUrl, '/').'/'.ltrim($awsBucket.'/'.$path.$image, '/');
+                return Storage::disk($storage)->url($path . $image);
+//                $awsUrl = config('filesystems.disks.s3.url');
+//                $awsBucket = config('filesystems.disks.s3.bucket');
+//                return rtrim($awsUrl, '/').'/'.ltrim($awsBucket.'/'.$path.$image, '/');
             }
         } catch (\Exception $e) {
             return $error_src;
@@ -3436,9 +3443,10 @@ class Helpers
         try {
 
             if (Storage::disk('s3')->exists($path .'/'. $data)) {
-                $awsUrl = config('filesystems.disks.s3.url');
-                $awsBucket = config('filesystems.disks.s3.bucket');
-                return rtrim($awsUrl, '/') . '/' . ltrim($awsBucket . '/' . $path . '/' . $data, '/');
+                return Storage::disk('s3')->url($path .'/'. $data);
+//                $awsUrl = config('filesystems.disks.s3.url');
+//                $awsBucket = config('filesystems.disks.s3.bucket');
+//                return rtrim($awsUrl, '/') . '/' . ltrim($awsBucket . '/' . $path . '/' . $data, '/');
             }
         } catch (\Exception $e){
 
@@ -3450,9 +3458,10 @@ class Helpers
         try {
 
             if ($type == 's3' && Storage::disk('s3')->exists($path .'/'. $data)) {
-                $awsUrl = config('filesystems.disks.s3.url');
-                $awsBucket = config('filesystems.disks.s3.bucket');
-                return rtrim($awsUrl, '/') . '/' . ltrim($awsBucket . '/' . $path . '/' . $data, '/');
+                return Storage::disk('s3')->url($path .'/'. $data);
+//                $awsUrl = config('filesystems.disks.s3.url');
+//                $awsBucket = config('filesystems.disks.s3.bucket');
+//                return rtrim($awsUrl, '/') . '/' . ltrim($awsBucket . '/' . $path . '/' . $data, '/');
             }
         } catch (\Exception $e){
         }

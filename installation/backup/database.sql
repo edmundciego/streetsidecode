@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Mar 15, 2023 at 12:41 PM
+-- Generation Time: Jun 06, 2024 at 12:42 PM
 -- Server version: 10.4.27-MariaDB
--- PHP Version: 8.0.25
+-- PHP Version: 8.2.0
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `test`
+-- Database: `mart_install`
 --
 
 -- --------------------------------------------------------
@@ -36,8 +36,82 @@ CREATE TABLE `account_transactions` (
   `method` varchar(255) NOT NULL,
   `ref` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(20) NOT NULL DEFAULT 'collected',
+  `created_by` varchar(20) NOT NULL DEFAULT 'admin'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `addon_settings`
+--
+
+CREATE TABLE `addon_settings` (
+  `id` char(36) NOT NULL,
+  `key_name` varchar(191) DEFAULT NULL,
+  `live_values` longtext DEFAULT NULL,
+  `test_values` longtext DEFAULT NULL,
+  `settings_type` varchar(255) DEFAULT NULL,
+  `mode` varchar(20) NOT NULL DEFAULT 'live',
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `additional_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `addon_settings`
+--
+
+INSERT INTO `addon_settings` (`id`, `key_name`, `live_values`, `test_values`, `settings_type`, `mode`, `is_active`, `created_at`, `updated_at`, `additional_data`) VALUES
+('070c6bbd-d777-11ed-96f4-0c7a158e4469', 'twilio', '{\"gateway\":\"twilio\",\"mode\":\"live\",\"status\":0,\"sid\":\"\",\"messaging_service_sid\":\"\",\"token\":\"\",\"from\":\"\",\"otp_template\":\"\"}', '{\"gateway\":\"twilio\",\"mode\":\"live\",\"status\":0,\"sid\":\"\",\"messaging_service_sid\":\"\",\"token\":\"\",\"from\":\"\",\"otp_template\":\"\"}', 'sms_config', 'live', 0, NULL, '2023-04-10 02:14:44', NULL),
+('070c766c-d777-11ed-96f4-0c7a158e4469', '2factor', '{\"gateway\":\"2factor\",\"mode\":\"live\",\"status\":\"0\",\"api_key\":\"\"}', '{\"gateway\":\"2factor\",\"mode\":\"live\",\"status\":\"0\",\"api_key\":\"\"}', 'sms_config', 'live', 0, NULL, '2023-04-10 03:17:06', NULL),
+('0d8a9308-d6a5-11ed-962c-0c7a158e4469', 'mercadopago', '{\"gateway\":\"mercadopago\",\"mode\":\"live\",\"status\":1,\"access_token\":\"\",\"public_key\":\"\"}', '{\"gateway\":\"mercadopago\",\"mode\":\"live\",\"status\":1,\"access_token\":\"\",\"public_key\":\"\"}', 'payment_config', 'live', 0, NULL, '2023-04-12 03:37:50', '{\"gateway_title\":\"Mercadopago\",\"gateway_image\":null}'),
+('0d8a9e49-d6a5-11ed-962c-0c7a158e4469', 'liqpay', '{\"gateway\":\"liqpay\",\"mode\":\"live\",\"status\":\"1\",\"private_key\":null,\"public_key\":null}', '{\"gateway\":\"liqpay\",\"mode\":\"live\",\"status\":\"1\",\"private_key\":null,\"public_key\":null}', 'payment_config', 'live', 0, NULL, NULL, '{\"gateway_title\":\"Liqpay\",\"gateway_image\":null}'),
+('101befdf-d44b-11ed-8564-0c7a158e4469', 'paypal', '{\"gateway\":\"paypal\",\"mode\":\"live\",\"status\":\"0\",\"client_id\":null,\"client_secret\":null}', '{\"gateway\":\"paypal\",\"mode\":\"live\",\"status\":\"0\",\"client_id\":null,\"client_secret\":null}', 'payment_config', 'live', 0, NULL, NULL, '{\"gateway_title\":\"Paypal\",\"gateway_image\":null}'),
+('133d9647-cabb-11ed-8fec-0c7a158e4469', 'hyper_pay', '{\"gateway\":\"hyper_pay\",\"mode\":\"live\",\"status\":\"0\",\"entity_id\":\"\",\"access_code\":\"\"}', '{\"gateway\":\"hyper_pay\",\"mode\":\"live\",\"status\":\"0\",\"entity_id\":\"\",\"access_code\":\"\"}', 'payment_config', 'test', 0, NULL, '2023-04-08 22:59:22', NULL),
+('1821029f-d776-11ed-96f4-0c7a158e4469', 'msg91', '{\"gateway\":\"msg91\",\"mode\":\"live\",\"status\":0,\"template_id\":\"\",\"auth_key\":\"\"}', '{\"gateway\":\"msg91\",\"mode\":\"live\",\"status\":0,\"template_id\":\"\",\"auth_key\":\"\"}', 'sms_config', 'live', 0, NULL, '2023-04-10 02:14:44', NULL),
+('18210f2b-d776-11ed-96f4-0c7a158e4469', 'nexmo', '{\"gateway\":\"nexmo\",\"mode\":\"live\",\"status\":\"0\",\"api_key\":\"\",\"api_secret\":\"\",\"token\":\"\",\"from\":\"\",\"otp_template\":\"\"}', '{\"gateway\":\"nexmo\",\"mode\":\"live\",\"status\":\"0\",\"api_key\":\"\",\"api_secret\":\"\",\"token\":\"\",\"from\":\"\",\"otp_template\":\"\"}', 'sms_config', 'live', 0, NULL, '2023-04-10 02:14:44', NULL),
+('18fbb21f-d6ad-11ed-962c-0c7a158e4469', 'foloosi', '{\"gateway\":\"foloosi\",\"mode\":\"live\",\"status\":\"0\",\"merchant_key\":\"\"}', '{\"gateway\":\"foloosi\",\"mode\":\"test\",\"status\":\"0\",\"merchant_key\":\"\"}', 'payment_config', 'test', 0, NULL, NULL, NULL),
+('2767d142-d6a1-11ed-962c-0c7a158e4469', 'paytm', '{\"gateway\":\"paytm\",\"mode\":\"live\",\"status\":\"1\",\"merchant_key\":null,\"merchant_id\":null,\"merchant_website_link\":null}', '{\"gateway\":\"paytm\",\"mode\":\"live\",\"status\":\"1\",\"merchant_key\":null,\"merchant_id\":null,\"merchant_website_link\":null}', 'payment_config', 'live', 0, NULL, NULL, '{\"gateway_title\":\"Paytm\",\"gateway_image\":null}'),
+('3201d2e6-c937-11ed-a424-0c7a158e4469', 'amazon_pay', '{\"gateway\":\"amazon_pay\",\"mode\":\"test\",\"status\":\"0\",\"pass_phrase\": \"\",\"access_code\": \"\",\"merchant_identifier\": \"\"}', '{\"gateway\":\"amazon_pay\",\"mode\":\"test\",\"status\":\"0\",\"pass_phrase\": \"\",\"access_code\": \"\",\"merchant_identifier\": \"\"}', 'payment_config', 'test', 0, NULL, NULL, NULL),
+('4593b25c-d6a1-11ed-962c-0c7a158e4469', 'paytabs', '{\"gateway\":\"paytabs\",\"mode\":\"live\",\"status\":\"1\",\"profile_id\":null,\"server_key\":null,\"base_url\":null}', '{\"gateway\":\"paytabs\",\"mode\":\"live\",\"status\":\"1\",\"profile_id\":null,\"server_key\":null,\"base_url\":null}', 'payment_config', 'live', 0, NULL, '2023-04-09 02:23:25', '{\"gateway_title\":\"Paytabs\",\"gateway_image\":null}'),
+('4e9b8dfb-e7d1-11ed-a559-0c7a158e4469', 'bkash', '{\"gateway\":\"bkash\",\"mode\":\"live\",\"status\":\"1\",\"app_key\":\"5tunt4masn6pv2hnvte1sb5n3j\",\"app_secret\":\"1vggbqd4hqk9g96o9rrrp2jftvek578v7d2bnerim12a87dbrrka\",\"username\":\"sandboxTestUser\",\"password\":\"hWD@8vtzw0\"}', '{\"gateway\":\"bkash\",\"mode\":\"live\",\"status\":\"1\",\"app_key\":\"5tunt4masn6pv2hnvte1sb5n3j\",\"app_secret\":\"1vggbqd4hqk9g96o9rrrp2jftvek578v7d2bnerim12a87dbrrka\",\"username\":\"sandboxTestUser\",\"password\":\"hWD@8vtzw0\"}', 'payment_config', 'live', 0, NULL, '2023-04-08 23:08:40', '{\"gateway_title\":\"Bkash\",\"gateway_image\":null}'),
+('544a24a4-c872-11ed-ac7a-0c7a158e4469', 'fatoorah', '{\"gateway\":\"fatoorah\",\"mode\":\"live\",\"status\":\"0\",\"api_key\":\"\"}', '{\"gateway\":\"fatoorah\",\"mode\":\"test\",\"status\":\"0\",\"api_key\":\"\"}', 'payment_config', 'test', 0, NULL, NULL, NULL),
+('58c1bc8a-d6ac-11ed-962c-0c7a158e4469', 'ccavenue', '{\"gateway\":\"ccavenue\",\"mode\":\"test\",\"status\":\"0\",\"merchant_id\":\"\",\"working_key\":\"\",\"access_code\":\"\"}', '{\"gateway\":\"ccavenue\",\"mode\":\"test\",\"status\":\"0\",\"merchant_id\":\"\",\"working_key\":\"\",\"access_code\":\"\"}', 'payment_config', 'test', 0, NULL, '2023-04-12 22:24:16', '{\"gateway_title\":\"\",\"gateway_image\":\"\"}'),
+('5e2d2ef9-d6ab-11ed-962c-0c7a158e4469', 'thawani', '{\"gateway\":\"thawani\",\"mode\":\"live\",\"status\":\"0\",\"public_key\":\"\",\"private_key\":\"\"}', '{\"gateway\":\"thawani\",\"mode\":\"live\",\"status\":\"0\",\"public_key\":\"\",\"private_key\":\"\"}', 'payment_config', 'test', 0, NULL, '2023-04-12 23:14:00', '{\"gateway_title\":\"\",\"gateway_image\":\"\"}'),
+('60cc83cc-d5b9-11ed-b56f-0c7a158e4469', 'sixcash', '{\"gateway\":\"sixcash\",\"mode\":\"test\",\"status\":\"0\",\"public_key\":\"\",\"secret_key\":\"\",\"merchant_number\":\"\", \"base_url\":\"\"}', '{\"gateway\":\"sixcash\",\"mode\":\"test\",\"status\":\"0\",\"public_key\":\"\",\"secret_key\":\"\",\"merchant_number\":\"\", \"base_url\":\"\"}', 'payment_config', 'test', 0, NULL, '2023-04-12 03:18:06', '{\"gateway_title\":\"\",\"gateway_image\":\"\"}'),
+('68579846-d8e8-11ed-8249-0c7a158e4469', 'alphanet_sms', '{\"gateway\":\"alphanet_sms\",\"mode\":\"live\",\"status\":0,\"api_key\":\"\",\"otp_template\":\"\"}', '{\"gateway\":\"alphanet_sms\",\"mode\":\"live\",\"status\":0,\"api_key\":\"\",\"otp_template\":\"\"}', 'sms_config', 'live', 0, NULL, NULL, NULL),
+('6857a2e8-d8e8-11ed-8249-0c7a158e4469', 'sms_to', '{\"gateway\":\"sms_to\",\"mode\":\"live\",\"status\":0,\"api_key\":\"\",\"sender_id\":\"\",\"otp_template\":\"\"}', '{\"gateway\":\"sms_to\",\"mode\":\"live\",\"status\":0,\"api_key\":\"\",\"sender_id\":\"\",\"otp_template\":\"\"}', 'sms_config', 'live', 0, NULL, NULL, NULL),
+('74c30c00-d6a6-11ed-962c-0c7a158e4469', 'hubtel', '{\"gateway\":\"hubtel\",\"mode\":\"live\",\"status\":\"0\",\"account_number\":\"\",\"api_id\":\"\",\"api_key\":\"\"}', '{\"gateway\":\"hubtel\",\"mode\":\"test\",\"status\":\"0\",\"account_number\":\"\",\"api_id\":\"\",\"api_key\":\"\"}', 'payment_config', 'test', 0, NULL, NULL, NULL),
+('74e46b0a-d6aa-11ed-962c-0c7a158e4469', 'tap', '{\"gateway\":\"tap\",\"mode\":\"live\",\"status\":\"0\",\"secret_key\":\"\"}', '{\"gateway\":\"tap\",\"mode\":\"test\",\"status\":\"0\",\"secret_key\":\"\"}', 'payment_config', 'test', 0, NULL, NULL, NULL),
+('761ca96c-d1eb-11ed-87ca-0c7a158e4469', 'swish', '{\"gateway\":\"swish\",\"mode\":\"test\",\"status\":\"0\",\"number\": \"\"}', '{\"gateway\":\"swish\",\"mode\":\"test\",\"status\":\"0\",\"number\": \"\"}', 'payment_config', 'test', 0, NULL, NULL, NULL),
+('7b1c3c5f-d2bd-11ed-b485-0c7a158e4469', 'payfast', '{\"gateway\":\"payfast\",\"mode\":\"test\",\"status\":\"0\",\"merchant_id\":\"\",\"secured_key\":\"\"}', '{\"gateway\":\"payfast\",\"mode\":\"test\",\"status\":\"0\",\"merchant_id\":\"\",\"secured_key\":\"\"}', 'payment_config', 'test', 0, NULL, NULL, NULL),
+('8592417b-d1d1-11ed-a984-0c7a158e4469', 'esewa', '{\"gateway\":\"esewa\",\"mode\":\"test\",\"status\":\"0\",\"merchantCode\": \"\"}', '{\"gateway\":\"esewa\",\"mode\":\"test\",\"status\":\"0\",\"merchantCode\": \"EPAYTEST\"}', 'payment_config', 'test', 0, NULL, NULL, NULL),
+('9162a1dc-cdf1-11ed-affe-0c7a158e4469', 'viva_wallet', '{\"gateway\":\"viva_wallet\",\"mode\":\"test\",\"status\":\"0\",\"client_id\": \"\",\"client_secret\": \"\"}\n', '{\"gateway\":\"viva_wallet\",\"mode\":\"test\",\"status\":\"0\",\"client_id\": \"\",\"client_secret\": \"\"}', 'payment_config', 'test', 0, NULL, NULL, NULL),
+('998ccc62-d6a0-11ed-962c-0c7a158e4469', 'stripe', '{\"gateway\":\"stripe\",\"mode\":\"live\",\"status\":\"0\",\"api_key\":null,\"published_key\":null}', '{\"gateway\":\"stripe\",\"mode\":\"live\",\"status\":\"0\",\"api_key\":null,\"published_key\":null}', 'payment_config', 'live', 0, NULL, '2023-04-12 22:26:31', '{\"gateway_title\":\"Stripe\",\"gateway_image\":null}'),
+('a3313755-c95d-11ed-b1db-0c7a158e4469', 'iyzi_pay', '{\"gateway\":\"iyzi_pay\",\"mode\":\"test\",\"status\":\"0\",\"api_key\": \"\",\"secret_key\": \"\",\"base_url\": \"\"}', '{\"gateway\":\"iyzi_pay\",\"mode\":\"test\",\"status\":\"0\",\"api_key\": \"\",\"secret_key\": \"\",\"base_url\": \"\"}', 'payment_config', 'test', 0, NULL, NULL, NULL),
+('a76c8993-d299-11ed-b485-0c7a158e4469', 'momo', '{\"gateway\":\"momo\",\"mode\":\"live\",\"status\":\"0\",\"api_key\":\"\",\"api_user\":\"\",\"subscription_key\":\"\"}', '{\"gateway\":\"momo\",\"mode\":\"live\",\"status\":\"0\",\"api_key\":\"\",\"api_user\":\"\",\"subscription_key\":\"\"}', 'payment_config', 'test', 0, NULL, '2023-04-08 22:39:19', NULL),
+('a8608119-cc76-11ed-9bca-0c7a158e4469', 'moncash', '{\"gateway\":\"moncash\",\"mode\":\"test\",\"status\":\"0\",\"client_id\":\"\",\"secret_key\": \"\"}\n', '{\"gateway\":\"moncash\",\"mode\":\"test\",\"status\":\"0\",\"client_id\":\"\",\"secret_key\": \"\"}\n', 'payment_config', 'test', 0, NULL, NULL, NULL),
+('ad5af1c1-d6a2-11ed-962c-0c7a158e4469', 'razor_pay', '{\"gateway\":\"razor_pay\",\"mode\":\"live\",\"status\":\"0\",\"api_key\":null,\"api_secret\":null}', '{\"gateway\":\"razor_pay\",\"mode\":\"live\",\"status\":\"0\",\"api_key\":null,\"api_secret\":null}', 'payment_config', 'live', 0, NULL, NULL, '{\"gateway_title\":\"Razor pay\",\"gateway_image\":null}'),
+('ad5b02a0-d6a2-11ed-962c-0c7a158e4469', 'senang_pay', '{\"gateway\":\"senang_pay\",\"mode\":\"live\",\"status\":\"1\",\"callback_url\":null,\"secret_key\":null,\"merchant_id\":null}', '{\"gateway\":\"senang_pay\",\"mode\":\"live\",\"status\":\"1\",\"callback_url\":null,\"secret_key\":null,\"merchant_id\":null}', 'payment_config', 'live', 0, NULL, NULL, '{\"gateway_title\":\"Senang pay\",\"gateway_image\":null}'),
+('b6c333f6-d8e9-11ed-8249-0c7a158e4469', 'akandit_sms', '{\"gateway\":\"akandit_sms\",\"mode\":\"live\",\"status\":0,\"username\":\"\",\"password\":\"\",\"otp_template\":\"\"}', '{\"gateway\":\"akandit_sms\",\"mode\":\"live\",\"status\":0,\"username\":\"\",\"password\":\"\",\"otp_template\":\"\"}', 'sms_config', 'live', 0, NULL, NULL, NULL),
+('b6c33c87-d8e9-11ed-8249-0c7a158e4469', 'global_sms', '{\"gateway\":\"global_sms\",\"mode\":\"live\",\"status\":0,\"user_name\":\"\",\"password\":\"\",\"from\":\"\",\"otp_template\":\"\"}', '{\"gateway\":\"global_sms\",\"mode\":\"live\",\"status\":0,\"user_name\":\"\",\"password\":\"\",\"from\":\"\",\"otp_template\":\"\"}', 'sms_config', 'live', 0, NULL, NULL, NULL),
+('b8992bd4-d6a0-11ed-962c-0c7a158e4469', 'paymob_accept', '{\"gateway\":\"paymob_accept\",\"mode\":\"live\",\"status\":\"0\",\"callback_url\":null,\"api_key\":null,\"iframe_id\":null,\"integration_id\":null,\"hmac\":null}', '{\"gateway\":\"paymob_accept\",\"mode\":\"live\",\"status\":\"0\",\"callback_url\":null,\"api_key\":null,\"iframe_id\":null,\"integration_id\":null,\"hmac\":null}', 'payment_config', 'live', 0, NULL, NULL, '{\"gateway_title\":\"Paymob accept\",\"gateway_image\":null}'),
+('c41c0dcd-d119-11ed-9f67-0c7a158e4469', 'maxicash', '{\"gateway\":\"maxicash\",\"mode\":\"test\",\"status\":\"0\",\"merchantId\": \"\",\"merchantPassword\": \"\"}', '{\"gateway\":\"maxicash\",\"mode\":\"test\",\"status\":\"0\",\"merchantId\": \"\",\"merchantPassword\": \"\"}', 'payment_config', 'test', 0, NULL, NULL, NULL),
+('c9249d17-cd60-11ed-b879-0c7a158e4469', 'pvit', '{\"gateway\":\"pvit\",\"mode\":\"test\",\"status\":\"0\",\"mc_tel_merchant\": \"\",\"access_token\": \"\", \"mc_merchant_code\": \"\"}', '{\"gateway\":\"pvit\",\"mode\":\"test\",\"status\":\"0\",\"mc_tel_merchant\": \"\",\"access_token\": \"\", \"mc_merchant_code\": \"\"}', 'payment_config', 'test', 0, NULL, NULL, NULL),
+('cb0081ce-d775-11ed-96f4-0c7a158e4469', 'releans', '{\"gateway\":\"releans\",\"mode\":\"live\",\"status\":0,\"api_key\":\"\",\"from\":\"\",\"otp_template\":\"\"}', '{\"gateway\":\"releans\",\"mode\":\"live\",\"status\":0,\"api_key\":\"\",\"from\":\"\",\"otp_template\":\"\"}', 'sms_config', 'live', 0, NULL, '2023-04-10 02:14:44', NULL),
+('d4f3f5f1-d6a0-11ed-962c-0c7a158e4469', 'flutterwave', '{\"gateway\":\"flutterwave\",\"mode\":\"live\",\"status\":1,\"secret_key\":\"FLWSECK_TEST-ec27426eb062491500a9eb95723b5436-X\",\"public_key\":\"FLWPUBK_TEST-3f6a0b6c3d621c4ecbb9beeff516c92b-X\",\"hash\":\"FLWSECK_TEST951e36220f66\"}', '{\"gateway\":\"flutterwave\",\"mode\":\"live\",\"status\":1,\"secret_key\":\"FLWSECK_TEST-ec27426eb062491500a9eb95723b5436-X\",\"public_key\":\"FLWPUBK_TEST-3f6a0b6c3d621c4ecbb9beeff516c92b-X\",\"hash\":\"FLWSECK_TEST951e36220f66\"}', 'payment_config', 'live', 0, NULL, NULL, '{\"gateway_title\":\"Flutterwave\",\"gateway_image\":null}'),
+('d822f1a5-c864-11ed-ac7a-0c7a158e4469', 'paystack', '{\"gateway\":\"paystack\",\"mode\":\"live\",\"status\":\"0\",\"public_key\":null,\"secret_key\":null,\"merchant_email\":null}', '{\"gateway\":\"paystack\",\"mode\":\"live\",\"status\":\"0\",\"public_key\":null,\"secret_key\":null,\"merchant_email\":null}', 'payment_config', 'live', 0, NULL, NULL, '{\"gateway_title\":\"Paystack\",\"gateway_image\":null}'),
+('daec8d59-c893-11ed-ac7a-0c7a158e4469', 'xendit', '{\"gateway\":\"xendit\",\"mode\":\"test\",\"status\":\"0\",\"api_key\":\"\"}', '{\"gateway\":\"xendit\",\"mode\":\"test\",\"status\":\"0\",\"api_key\":\"\"}', 'payment_config', 'test', 0, NULL, NULL, NULL),
+('dc0f5fc9-d6a5-11ed-962c-0c7a158e4469', 'worldpay', '{\"gateway\":\"worldpay\",\"mode\":\"live\",\"status\":\"0\",\"OrgUnitId\":\"\",\"jwt_issuer\":\"\",\"mac\":\"\",\"merchantCode\":\"\",\"xml_password\":\"\"}', '{\"gateway\":\"worldpay\",\"mode\":\"test\",\"status\":\"0\",\"OrgUnitId\":\"\",\"jwt_issuer\":\"\",\"mac\":\"\",\"merchantCode\":\"\",\"xml_password\":\"\"}', 'payment_config', 'test', 0, NULL, NULL, NULL),
+('e0450278-d8eb-11ed-8249-0c7a158e4469', 'signal_wire', '{\"gateway\":\"signal_wire\",\"mode\":\"live\",\"status\":0,\"project_id\":\"\",\"token\":\"\",\"space_url\":\"\",\"from\":\"\",\"otp_template\":\"\"}', '{\"gateway\":\"signal_wire\",\"mode\":\"live\",\"status\":0,\"project_id\":\"\",\"token\":\"\",\"space_url\":\"\",\"from\":\"\",\"otp_template\":\"\"}', 'sms_config', 'live', 0, NULL, NULL, NULL),
+('e0450b40-d8eb-11ed-8249-0c7a158e4469', 'paradox', '{\"gateway\":\"paradox\",\"mode\":\"live\",\"status\":0,\"api_key\":\"\"}', '{\"gateway\":\"paradox\",\"mode\":\"live\",\"status\":0,\"api_key\":\"\"}', 'sms_config', 'live', 0, NULL, NULL, NULL),
+('ea346efe-cdda-11ed-affe-0c7a158e4469', 'ssl_commerz', '{\"gateway\":\"ssl_commerz\",\"mode\":\"live\",\"status\":\"0\",\"store_id\":null,\"store_password\":null}', '{\"gateway\":\"ssl_commerz\",\"mode\":\"live\",\"status\":\"0\",\"store_id\":null,\"store_password\":null}', 'payment_config', 'live', 0, NULL, '2023-07-31 13:14:48', '{\"gateway_title\":\"Ssl commerz\",\"gateway_image\":null}'),
+('eed88336-d8ec-11ed-8249-0c7a158e4469', 'hubtel', '{\"gateway\":\"hubtel\",\"mode\":\"live\",\"status\":0,\"sender_id\":\"\",\"client_id\":\"\",\"client_secret\":\"\",\"otp_template\":\"\"}', '{\"gateway\":\"hubtel\",\"mode\":\"live\",\"status\":0,\"sender_id\":\"\",\"client_id\":\"\",\"client_secret\":\"\",\"otp_template\":\"\"}', 'sms_config', 'live', 0, NULL, NULL, NULL),
+('f149c546-d8ea-11ed-8249-0c7a158e4469', 'viatech', '{\"gateway\":\"viatech\",\"mode\":\"live\",\"status\":0,\"api_url\":\"\",\"api_key\":\"\",\"sender_id\":\"\",\"otp_template\":\"\"}', '{\"gateway\":\"viatech\",\"mode\":\"live\",\"status\":0,\"api_url\":\"\",\"api_key\":\"\",\"sender_id\":\"\",\"otp_template\":\"\"}', 'sms_config', 'live', 0, NULL, NULL, NULL),
+('f149cd9c-d8ea-11ed-8249-0c7a158e4469', '019_sms', '{\"gateway\":\"019_sms\",\"mode\":\"live\",\"status\":0,\"password\":\"\",\"username\":\"\",\"username_for_token\":\"\",\"sender\":\"\",\"otp_template\":\"\"}', '{\"gateway\":\"019_sms\",\"mode\":\"live\",\"status\":0,\"password\":\"\",\"username\":\"\",\"username_for_token\":\"\",\"sender\":\"\",\"otp_template\":\"\"}', 'sms_config', 'live', 0, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -77,6 +151,62 @@ CREATE TABLE `admins` (
   `is_logged_in` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `admins`
+--
+
+INSERT INTO `admins` (`id`, `f_name`, `l_name`, `phone`, `email`, `image`, `password`, `remember_token`, `created_at`, `updated_at`, `role_id`, `zone_id`, `is_logged_in`) VALUES
+(1, 'Test', 'Admin', '01500000000', 'admin@admin.com', NULL, '$2y$10$VfktRD62HSKO2/wOHDFyKO04d0nFtE6UtMpb5o/l8QSWE0uC/WLni', NULL, '2023-08-16 23:34:18', '2023-08-16 23:34:18', 1, NULL, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `admin_features`
+--
+
+CREATE TABLE `admin_features` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  `sub_title` varchar(100) DEFAULT NULL,
+  `image` varchar(100) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `admin_features`
+--
+
+INSERT INTO `admin_features` (`id`, `title`, `sub_title`, `image`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Trusted', 'Trusted by customers and store owners', '2024-04-20-6623933f81d5b.png', 1, '2023-08-15 23:51:18', '2024-04-20 05:04:47'),
+(2, 'Delivery', 'Flexible delivery system', '2024-04-20-6623936914978.png', 1, '2024-04-20 05:05:29', '2024-04-20 05:05:29'),
+(3, 'Shopping', 'Best shopping experience', '2024-04-20-662393a8a1d27.png', 1, '2024-04-20 05:06:32', '2024-04-20 05:06:32'),
+(4, 'Location', 'Location tracking system', '2024-04-20-662393d85bae9.png', 1, '2024-04-20 05:07:20', '2024-04-20 05:07:20');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `admin_promotional_banners`
+--
+
+CREATE TABLE `admin_promotional_banners` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  `sub_title` varchar(100) DEFAULT NULL,
+  `image` varchar(100) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `admin_promotional_banners`
+--
+
+INSERT INTO `admin_promotional_banners` (`id`, `title`, `sub_title`, `image`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Find', 'Your daily grocery item', '2024-04-20-66239166962bd.png', 1, '2023-08-15 23:49:59', '2024-04-20 04:56:54');
+
 -- --------------------------------------------------------
 
 --
@@ -98,6 +228,57 @@ CREATE TABLE `admin_roles` (
 
 INSERT INTO `admin_roles` (`id`, `name`, `modules`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'Master admin', NULL, 1, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `admin_special_criterias`
+--
+
+CREATE TABLE `admin_special_criterias` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  `image` varchar(100) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `admin_special_criterias`
+--
+
+INSERT INTO `admin_special_criterias` (`id`, `title`, `image`, `status`, `created_at`, `updated_at`) VALUES
+(2, 'Easy to Manage Multiple Store', '2024-04-20-6623950467b0a.png', 1, '2024-04-20 05:12:20', '2024-04-20 05:12:20'),
+(3, 'Easy to Manage E-Commerce', '2024-04-20-662395134788d.png', 1, '2024-04-20 05:12:35', '2024-04-20 05:12:35'),
+(4, 'Easy to Manage Parcel Delivery', '2024-04-20-66239522279f6.png', 1, '2024-04-20 05:12:50', '2024-04-20 05:12:50'),
+(5, 'Easy to Manage Location Tracking', '2024-04-20-6623953ab1ccb.png', 1, '2024-04-20 05:13:14', '2024-04-20 05:13:14'),
+(6, 'Easy to Manage Grocery Business', '2024-04-20-6623954d187f8.png', 1, '2024-04-20 05:13:33', '2024-04-20 05:13:33');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `admin_testimonials`
+--
+
+CREATE TABLE `admin_testimonials` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `designation` varchar(100) DEFAULT NULL,
+  `review` text DEFAULT NULL,
+  `reviewer_image` varchar(255) DEFAULT NULL,
+  `company_image` varchar(255) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `admin_testimonials`
+--
+
+INSERT INTO `admin_testimonials` (`id`, `name`, `designation`, `review`, `reviewer_image`, `company_image`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'John Doe', 'CTO', 'Very good service.', '2024-04-20-662399c21315a.png', '2024-04-20-662399c213676.png', 1, '2023-08-15 23:54:26', '2024-04-20 05:32:34');
 
 -- --------------------------------------------------------
 
@@ -137,7 +318,7 @@ CREATE TABLE `attributes` (
 
 CREATE TABLE `banners` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(255) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
   `type` varchar(255) NOT NULL,
   `image` varchar(255) DEFAULT NULL,
   `status` tinyint(1) NOT NULL DEFAULT 1,
@@ -147,7 +328,24 @@ CREATE TABLE `banners` (
   `zone_id` bigint(20) UNSIGNED NOT NULL,
   `module_id` bigint(20) UNSIGNED NOT NULL,
   `featured` tinyint(1) NOT NULL DEFAULT 0,
-  `default_link` varchar(255) DEFAULT NULL
+  `default_link` varchar(255) DEFAULT NULL,
+  `created_by` varchar(255) NOT NULL DEFAULT 'admin'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `brands`
+--
+
+CREATE TABLE `brands` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(255) DEFAULT NULL,
+  `image` varchar(100) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -183,20 +381,20 @@ INSERT INTO `business_settings` (`id`, `key`, `value`, `created_at`, `updated_at
 (13, 'delivery_boy_start_message', '{\"status\":1,\"message\":\"Your order is picked up by delivery man\"}', NULL, NULL),
 (14, 'delivery_boy_delivered_message', '{\"status\":1,\"message\":\"Order delivered successfully\"}', NULL, NULL),
 (15, 'terms_and_conditions', '<p>This is a test Teams &amp; Conditions<br />\r\n<br />\r\nThese terms of use (the &quot;Terms of Use&quot;) govern your use of our website www.evaly.com.bd (the &quot;Website&quot;) and our &quot;StackFood&quot; application for mobile and handheld devices (the &quot;App&quot;). The Website and the App are jointly referred to as the &quot;Platform&quot;. Please read these Terms of Use carefully before you use the services. If you do not agree to these Terms of Use, you may not use the services on the Platform, and we request you to uninstall the App. By installing, downloading and/or even merely using the Platform, you shall be contracting with StackFood and you provide your acceptance to the Terms of Use and other StackFood policies (including but not limited to the Cancellation &amp; Refund Policy, Privacy Policy etc.) as posted on the Platform from time to time, which takes effect on the date on which you download, install or use the Services, and create a legally binding arrangement to abide by the same. The Platforms will be used by (i) natural persons who have reached 18 years of age and (ii) corporate legal entities, e.g companies. Where applicable, these Terms shall be subject to country-specific provisions as set out herein.</p>\r\n\r\n<h3>USE OF PLATFORM AND SERVICES</h3>\r\n\r\n<p>All commercial/contractual terms are offered by and agreed to between Buyers and Merchants alone. The commercial/contractual terms include without limitation to price, taxes, shipping costs, payment methods, payment terms, date, period and mode of delivery, warranties related to products and services and after sales services related to products and services. StackFood does not have any kind of control or does not determine or advise or in any way involve itself in the offering or acceptance of such commercial/contractual terms between the Buyers and Merchants. StackFood may, however, offer support services to Merchants in respect to order fulfilment, payment collection, call centre, and other services, pursuant to independent contracts executed by it with the Merchants. eFood is not responsible for any non-performance or breach of any contract entered into between Buyers and Merchants on the Platform. eFood cannot and does not guarantee that the concerned Buyers and/or Merchants shall perform any transaction concluded on the Platform. eFood is not responsible for unsatisfactory services or non-performance of services or damages or delays as a result of products which are out of stock, unavailable or back ordered.</p>\r\n\r\n<p>StackFood&nbsp;is operating an e-commerce platform and assumes and operates the role of facilitator, and does not at any point of time during any transaction between Buyer and Merchant on the Platform come into or take possession of any of the products or services offered by Merchant. At no time shall StackFood hold any right, title or interest over the products nor shall StackFood have any obligations or liabilities in respect of such contract entered into between Buyer and Merchant. You agree and acknowledge that we shall not be responsible for:</p>\r\n\r\n<ul>\r\n	<li>The goods provided by the shops or restaurants including, but not limited, serving of food orders suiting your requirements and needs;</li>\r\n	<li>The Merchant&quot;s goods not being up to your expectations or leading to any loss, harm or damage to you;</li>\r\n	<li>The availability or unavailability of certain items on the menu;</li>\r\n	<li>The Merchant serving the incorrect orders.</li>\r\n</ul>\r\n\r\n<p>The details of the menu and price list available on the Platform are based on the information provided by the Merchants and we shall not be responsible for any change or cancellation or unavailability. All Menu &amp; Food Images used on our platforms are only representative and shall/might not match with the actual Menu/Food Ordered, StackFood shall not be responsible or Liable for any discrepancies or variations on this aspect.</p>\r\n\r\n<h3>Personal Information that you provide</h3>\r\n\r\n<p>If you want to use our service, you must create an account on our Site. To establish your account, we will ask for personally identifiable information that can be used to contact or identify you, which may include your name, phone number, and e-mail address. We may also collect demographic information about you, such as your zip code, and allow you to submit additional information that will be part of your profile. Other than basic information that we need to establish your account, it will be up to you to decide how much information to share as part of your profile. We encourage you to think carefully about the information that you share and we recommend that you guard your identity and your sensitive information. Of course, you can review and revise your profile at any time.</p>\r\n\r\n<p>You understand that delivery periods quoted to you at the time of confirming the order is an approximate estimate and may vary. We shall not be responsible for any delay in the delivery of your order due to the delay at seller/merchant end for order processing or any other unavoidable circumstances.</p>\r\n\r\n<p>Your order shall be only delivered to the address designated by you at the time of placing the order on the Platform. We reserve the right to cancel the order, in our sole discretion, in the event of any change to the place of delivery and you shall not be entitled to any refund for the same. Delivery in the event of change of the delivery location shall be at our sole discretion and reserve the right to charge with additional delivery fee if required.</p>\r\n\r\n<p>You shall undertake to provide adequate directions, information and authorizations to accept delivery. In the event of any failure to accept delivery, failure to deliver within the estimated time due to your failure to provide appropriate instructions, or authorizations, then such goods shall be deemed to have been delivered to you and all risk and responsibility in relation to such goods shall pass to you and you shall not be entitled to any refund for the same. Our decision in relation to this shall be final and binding. You understand that our liability ends once your order has been delivered to you.</p>\r\n\r\n<p>You might be required to provide your credit or debit card details to the approved payment gateways while making the payment. In this regard, you agree to provide correct and accurate credit/ debit card details to the approved payment gateways for availing the Services. You shall not use the credit/ debit card which is not lawfully owned by you, i.e. in any transaction, you must use your own credit/ debit card. The information provided by you shall not be utilized or shared with any third party unless required in relation to fraud verifications or by law, regulation or court order. You shall be solely responsible for the security and confidentiality of your credit/ debit card details. We expressly disclaim all liabilities that may arise as a consequence of any unauthorized use of your credit/ debit card. You agree that the Services shall be provided by us only during the working hours of the relevant Merchants.</p>\r\n\r\n<h3>ACTIVITIES PROHIBITED ON THE PLATFORM</h3>\r\n\r\n<p>The following is a partial list of the kinds of conduct that are illegal or prohibited on the Websites. StackFood reserves the right to investigate and take appropriate legal action/s against anyone who, in StackFood sole discretion, engages in any of the prohibited activities. Prohibited activities include &mdash; but are not limited to &mdash; the following:</p>\r\n\r\n<ul>\r\n	<li>Using the Websites for any purpose in violation of laws or regulations;</li>\r\n	<li>Posting Content that infringes the intellectual property rights, privacy rights, publicity rights, trade secret rights, or any other rights of any party;</li>\r\n	<li>Posting Content that is unlawful, obscene, defamatory, threatening, harassing, abusive, slanderous, hateful, or embarrassing to any other person or entity as determined by StackFood in its sole discretion or pursuant to local community standards;</li>\r\n	<li>Posting Content that constitutes cyber-bullying, as determined by StackFood in its sole discretion;</li>\r\n	<li>Posting Content that depicts any dangerous, life-threatening, or otherwise risky behavior;</li>\r\n	<li>Posting telephone numbers, street addresses, or last names of any person;</li>\r\n	<li>Posting URLs to external websites or any form of HTML or programming code;</li>\r\n	<li>Posting anything that may be &quot;spam,&quot; as determined by StackFood in its sole discretion;</li>\r\n	<li>Impersonating another person when posting Content;</li>\r\n	<li>Harvesting or otherwise collecting information about others, including email addresses, without their consent;</li>\r\n	<li>Allowing any other person or entity to use your identification for posting or viewing comments;</li>\r\n	<li>Harassing, threatening, stalking, or abusing any person;</li>\r\n	<li>Engaging in any other conduct that restricts or inhibits any other person from using or enjoying the Websites, or which, in the sole discretion of StackFood , exposes eFood or any of its customers, suppliers, or any other parties to any liability or detriment of any type; or</li>\r\n	<li>Encouraging other people to engage in any prohibited activities as described herein.</li>\r\n</ul>\r\n\r\n<p>StackFood&nbsp;reserves the right but is not obligated to do any or all of the following:</p>\r\n\r\n<ul>\r\n	<li>Investigate an allegation that any Content posted on the Websites does not conform to these Terms of Use and determine in its sole discretion to remove or request the removal of the Content;</li>\r\n	<li>Remove Content which is abusive, illegal, or disruptive, or that otherwise fails to conform with these Terms of Use;</li>\r\n	<li>Terminate a user&#39;s access to the Websites upon any breach of these Terms of Use;</li>\r\n	<li>Monitor, edit, or disclose any Content on the Websites; and</li>\r\n	<li>Edit or delete any Content posted on the Websites, regardless of whether such Content violates these standards.</li>\r\n</ul>\r\n\r\n<h3>AMENDMENTS</h3>\r\n\r\n<p>StackFood&nbsp;reserves the right to change or modify these Terms (including our policies which are incorporated into these Terms) at any time by posting changes on the Platform. You are strongly recommended to read these Terms regularly. You will be deemed to have agreed to the amended Terms by your continued use of the Platforms following the date on which the amended Terms are posted.</p>\r\n\r\n<h3>PAYMENT</h3>\r\n\r\n<p>StackFood&nbsp;reserves the right to offer additional payment methods and/or remove existing payment methods at any time in its sole discretion. If you choose to pay using an online payment method, the payment shall be processed by our third party payment service provider(s). With your consent, your credit card / payment information will be stored with our third party payment service provider(s) for future orders. StackFood does not store your credit card or payment information. You must ensure that you have sufficient funds on your credit and debit card to fulfil payment of an Order. Insofar as required, StackFood takes responsibility for payments made on our Platforms including refunds, chargebacks, cancellations and dispute resolution, provided if reasonable and justifiable and in accordance with these Terms.</p>\r\n\r\n<h3>CANCELLATION</h3>\r\n\r\n<p>StackFood&nbsp;can cancel any order anytime due to the foods/products unavailability, out of coverage area and any other unavoidable circumstances.</p>', NULL, '2021-08-22 01:48:01'),
-(16, 'business_name', 'StackFood', NULL, NULL),
+(16, 'business_name', '6ammart', NULL, NULL),
 (17, 'currency', 'USD', NULL, NULL),
-(18, 'logo', '2022-02-28-621ca50ae6b65.png', NULL, NULL),
-(19, 'phone', '+880123456789', NULL, NULL),
-(20, 'email_address', 'admin@gmail.com', NULL, NULL),
-(21, 'address', NULL, NULL, NULL),
-(22, 'footer_text', 'Demo footer text @ 2021', NULL, NULL),
+(18, 'logo', '2023-08-16-64dca5f543996.png', NULL, NULL),
+(19, 'phone', '+8801500000000', NULL, NULL),
+(20, 'email_address', 'admin@admin.com', NULL, NULL),
+(21, 'address', '28HX+JM8, Bangladesh', NULL, NULL),
+(22, 'footer_text', 'Demo footer text @ 2024', NULL, NULL),
 (23, 'customer_verification', '0', NULL, NULL),
 (24, 'map_api_key', NULL, NULL, NULL),
 (25, 'about_us', '<p>Lorem <strong>ipsum </strong>dolor sit amet, <em><strong>consectetur </strong></em>adipiscing elit. <em>Cras </em>dictum massa et dolor porta, rhoncus faucibus magna elementum. Sed porta mattis mollis. Donec ut est pretium, pretium nibh porttitor, <a href=\"http://google.com\">suscipit </a>metus. Sed viverra felis sed elit vehicula sodales. Nullam ante ante, tristique vel tincidunt ac, egestas eget sem. Sed lorem nunc, pellentesque vel ipsum venenatis, pellentesque interdum orci. Suspendisse mauris dui, accumsan at dapibus sed, volutpat quis erat. Nam fringilla nisl eu nunc lobortis, feugiat posuere libero venenatis. Nunc risus lorem, ornare eget congue in, pretium quis enim. Pellentesque elit elit, pharetra eget nunc at, maximus pellentesque diam.</p>\r\n\r\n<p>Praesent fermentum finibus lacus. Nulla tincidunt lectus sed purus facilisis hendrerit. Maecenas volutpat elementum orci, tincidunt euismod ante facilisis ac. Integer dignissim iaculis varius. Mauris iaculis elit vel posuere pellentesque. Praesent a mi sed neque ullamcorper dignissim sed ut nibh. Sed purus dui, sodales in varius in, accumsan at libero. Vestibulum posuere dui et orci tincidunt, ac consequat felis venenatis.</p>\r\n\r\n<p>Morbi sodales, nisl iaculis fringilla imperdiet, metus tortor semper quam, a fringilla nulla dui nec dolor. Phasellus lacinia aliquam ligula sed porttitor. Cras feugiat eros ut arcu commodo dictum. Integer tincidunt nisl id nisl consequat molestie. Integer elit tortor, ultrices sit amet nunc vitae, feugiat tempus mauris. Morbi volutpat consectetur felis sed porttitor. Praesent in urna erat.</p>\r\n\r\n<p>Aenean mollis luctus dolor, eu interdum velit faucibus eu. Suspendisse vitae efficitur erat. In facilisis nisi id arcu scelerisque bibendum. Nunc a placerat enim. Donec pharetra, velit quis facilisis tempus, lectus est imperdiet nisl, in tempus tortor dolor iaculis dolor. Nunc vitae molestie turpis. Nam vitae lobortis massa. Nam pharetra non felis in porta.</p>\r\n\r\n<p>Vivamus pulvinar diam vel felis dignissim tincidunt. Donec hendrerit non est sed volutpat. In egestas ex tortor, at convallis nunc porttitor at. Fusce sed cursus risus. Nam metus sapien, viverra eget felis id, maximus convallis lacus. Donec nec lacus vitae ex hendrerit ultricies non vel risus. Morbi malesuada ipsum iaculis augue convallis vehicula. Proin eget dolor dignissim, volutpat purus ac, ultricies risus. Pellentesque semper, mauris et pharetra accumsan, ante velit faucibus ex, a mattis metus odio vel ligula. Pellentesque elementum suscipit laoreet. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Integer a turpis sed massa blandit iaculis. Sed aliquet, justo vestibulum euismod rhoncus, nisi dui fringilla sapien, non tempor nunc lectus vitae dolor. Suspendisse potenti.</p>\r\n\r\n<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras dictum massa et dolor porta, rhoncus faucibus magna elementum. Sed porta mattis mollis. Donec ut est pretium, pretium nibh porttitor, suscipit metus. Sed viverra felis sed elit vehicula sodales. Nullam ante ante, tristique vel tincidunt ac, egestas eget sem. Sed lorem nunc, pellentesque vel ipsum venenatis, pellentesque interdum orci. Suspendisse mauris dui, accumsan at dapibus sed, volutpat quis erat. Nam fringilla nisl eu nunc lobortis, feugiat posuere libero venenatis. Nunc risus lorem, ornare eget congue in, pretium quis enim. Pellentesque elit elit, pharetra eget nunc at, maximus pellentesque diam.</p>\r\n\r\n<p>Praesent fermentum finibus lacus. Nulla tincidunt lectus sed purus facilisis hendrerit. Maecenas volutpat elementum orci, tincidunt euismod ante facilisis ac. Integer dignissim iaculis varius. Mauris iaculis elit vel posuere pellentesque. Praesent a mi sed neque ullamcorper dignissim sed ut nibh. Sed purus dui, sodales in varius in, accumsan at libero. Vestibulum posuere dui et orci tincidunt, ac consequat felis venenatis.</p>\r\n\r\n<p>Morbi sodales, nisl iaculis fringilla imperdiet, metus tortor semper quam, a fringilla nulla dui nec dolor. Phasellus lacinia aliquam ligula sed porttitor. Cras feugiat eros ut arcu commodo dictum. Integer tincidunt nisl id nisl consequat molestie. Integer elit tortor, ultrices sit amet nunc vitae, feugiat tempus mauris. Morbi volutpat consectetur felis sed porttitor. Praesent in urna erat.</p>\r\n\r\n<p>Aenean mollis luctus dolor, eu interdum velit faucibus eu. Suspendisse vitae efficitur erat. In facilisis nisi id arcu scelerisque bibendum. Nunc a placerat enim. Donec pharetra, velit quis facilisis tempus, lectus est imperdiet nisl, in tempus tortor dolor iaculis dolor. Nunc vitae molestie turpis. Nam vitae lobortis massa. Nam pharetra non felis in porta.</p>\r\n\r\n<p>Vivamus pulvinar diam vel felis dignissim tincidunt. Donec hendrerit non est sed volutpat. In egestas ex tortor, at convallis nunc porttitor at. Fusce sed cursus risus. Nam metus sapien, viverra eget felis id, maximus convallis lacus. Donec nec lacus vitae ex hendrerit ultricies non vel risus. Morbi malesuada ipsum iaculis augue convallis vehicula. Proin eget dolor dignissim, volutpat purus ac, ultricies risus. Pellentesque semper, mauris et pharetra accumsan, ante velit faucibus ex, a mattis metus odio vel ligula. Pellentesque elementum suscipit laoreet. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Integer a turpis sed massa blandit iaculis. Sed aliquet, justo vestibulum euismod rhoncus, nisi dui fringilla sapien, non tempor nunc lectus vitae dolor. Suspendisse potenti.</p>\r\n\r\n<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras dictum massa et dolor porta, rhoncus faucibus magna elementum. Sed porta mattis mollis. Donec ut est pretium, pretium nibh porttitor, suscipit metus. Sed viverra felis sed elit vehicula sodales. Nullam ante ante, tristique vel tincidunt ac, egestas eget sem. Sed lorem nunc, pellentesque vel ipsum venenatis, pellentesque interdum orci. Suspendisse mauris dui, accumsan at dapibus sed, volutpat quis erat. Nam fringilla nisl eu nunc lobortis, feugiat posuere libero venenatis. Nunc risus lorem, ornare eget congue in, pretium quis enim. Pellentesque elit elit, pharetra eget nunc at, maximus pellentesque diam.</p>\r\n\r\n<p>Praesent fermentum finibus lacus. Nulla tincidunt lectus sed purus facilisis hendrerit. Maecenas volutpat elementum orci, tincidunt euismod ante facilisis ac. Integer dignissim iaculis varius. Mauris iaculis elit vel posuere pellentesque. Praesent a mi sed neque ullamcorper dignissim sed ut nibh. Sed purus dui, sodales in varius in, accumsan at libero. Vestibulum posuere dui et orci tincidunt, ac consequat felis venenatis.</p>\r\n\r\n<p>Morbi sodales, nisl iaculis fringilla imperdiet, metus tortor semper quam, a fringilla nulla dui nec dolor. Phasellus lacinia aliquam ligula sed porttitor. Cras feugiat eros ut arcu commodo dictum. Integer tincidunt nisl id nisl consequat molestie. Integer elit tortor, ultrices sit amet nunc vitae, feugiat tempus mauris. Morbi volutpat consectetur felis sed porttitor. Praesent in urna erat.</p>\r\n\r\n<p>Aenean mollis luctus dolor, eu interdum velit faucibus eu. Suspendisse vitae efficitur erat. In facilisis nisi id arcu scelerisque bibendum. Nunc a placerat enim. Donec pharetra, velit quis facilisis tempus, lectus est imperdiet nisl, in tempus tortor dolor iaculis dolor. Nunc vitae molestie turpis. Nam vitae lobortis massa. Nam pharetra non felis in porta.</p>\r\n\r\n<p>Vivamus pulvinar diam vel felis dignissim tincidunt. Donec hendrerit non est sed volutpat. In egestas ex tortor, at convallis nunc porttitor at. Fusce sed cursus risus. Nam metus sapien, viverra eget felis id, maximus convallis lacus. Donec nec lacus vitae ex hendrerit ultricies non vel risus. Morbi malesuada ipsum iaculis augue convallis vehicula. Proin eget dolor dignissim, volutpat purus ac, ultricies risus. Pellentesque semper, mauris et pharetra accumsan, ante velit faucibus ex, a mattis metus odio vel ligula. Pellentesque elementum suscipit laoreet. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Integer a turpis sed massa blandit iaculis. Sed aliquet, justo vestibulum euismod rhoncus, nisi dui fringilla sapien, non tempor nunc lectus vitae dolor. Suspendisse potenti.</p>\r\n\r\n<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras dictum massa et dolor porta, rhoncus faucibus magna elementum. Sed porta mattis mollis. Donec ut est pretium, pretium nibh porttitor, suscipit metus. Sed viverra felis sed elit vehicula sodales. Nullam ante ante, tristique vel tincidunt ac, egestas eget sem. Sed lorem nunc, pellentesque vel ipsum venenatis, pellentesque interdum orci. Suspendisse mauris dui, accumsan at dapibus sed, volutpat quis erat. Nam fringilla nisl eu nunc lobortis, feugiat posuere libero venenatis. Nunc risus lorem, ornare eget congue in, pretium quis enim. Pellentesque elit elit, pharetra eget nunc at, maximus pellentesque diam.</p>\r\n\r\n<p>Praesent fermentum finibus lacus. Nulla tincidunt lectus sed purus facilisis hendrerit. Maecenas volutpat elementum orci, tincidunt euismod ante facilisis ac. Integer dignissim iaculis varius. Mauris iaculis elit vel posuere pellentesque. Praesent a mi sed neque ullamcorper dignissim sed ut nibh. Sed purus dui, sodales in varius in, accumsan at libero. Vestibulum posuere dui et orci tincidunt, ac consequat felis venenatis.</p>\r\n\r\n<p>Morbi sodales, nisl iaculis fringilla imperdiet, metus tortor semper quam, a fringilla nulla dui nec dolor. Phasellus lacinia aliquam ligula sed porttitor. Cras feugiat eros ut arcu commodo dictum. Integer tincidunt nisl id nisl consequat molestie. Integer elit tortor, ultrices sit amet nunc vitae, feugiat tempus mauris. Morbi volutpat consectetur felis sed porttitor. Praesent in urna erat.</p>\r\n\r\n<p>Aenean mollis luctus dolor, eu interdum velit faucibus eu. Suspendisse vitae efficitur erat. In facilisis nisi id arcu scelerisque bibendum. Nunc a placerat enim. Donec pharetra, velit quis facilisis tempus, lectus est imperdiet nisl, in tempus tortor dolor iaculis dolor. Nunc vitae molestie turpis. Nam vitae lobortis massa. Nam pharetra non felis in porta.</p>\r\n\r\n<p>Vivamus pulvinar diam vel felis dignissim tincidunt. Donec hendrerit non est sed volutpat. In egestas ex tortor, at convallis nunc porttitor at. Fusce sed cursus risus. Nam metus sapien, viverra eget felis id, maximus convallis lacus. Donec nec lacus vitae ex hendrerit ultricies non vel risus. Morbi malesuada ipsum iaculis augue convallis vehicula. Proin eget dolor dignissim, volutpat purus ac, ultricies risus. Pellentesque semper, mauris et pharetra accumsan, ante velit faucibus ex, a mattis metus odio vel ligula. Pellentesque elementum suscipit laoreet. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Integer a turpis sed massa blandit iaculis. Sed aliquet, justo vestibulum euismod rhoncus, nisi dui fringilla sapien, non tempor nunc lectus vitae dolor. Suspendisse potenti.</p>', NULL, '2021-07-28 07:09:19'),
 (26, 'privacy_policy', '<h2>This is a Demo Privacy Policy</h2>\r\n\r\n<p>This policy explains how StackFood&nbsp;website and related applications (the &ldquo;Site&rdquo;, &ldquo;we&rdquo; or &ldquo;us&rdquo;) collects, uses, shares and protects the personal information that we collect through this site or different channels. StackFood has established the site to link up the users who need foods or grocery items to be shipped or delivered by the riders from the affiliated restaurants or shops to the desired location. This policy also applies to any mobile applications that we develop for use with our services on the Site, and references to this &ldquo;Site&rdquo;, &ldquo;we&rdquo; or &ldquo;us&rdquo; is intended to also include these mobile applications. Please read below to learn more about our information policies. By using this Site, you agree to these policies.</p>\r\n\r\n<h2>How the Information is collected</h2>\r\n\r\n<h3>Information provided by web browser</h3>\r\n\r\n<p>You have to provide us with personal information like your name, contact no, mailing address and email id, our app will also fetch your location information in order to give you the best service. Like many other websites, we may record information that your web browser routinely shares, such as your browser type, browser language, software and hardware attributes, the date and time of your visit, the web page from which you came, your Internet Protocol address and the geographic location associated with that address, the pages on this Site that you visit and the time you spent on those pages. This will generally be anonymous data that we collect on an aggregate basis.</p>\r\n\r\n<h3>Personal Information that you provide</h3>\r\n\r\n<p>If you want to use our service, you must create an account on our Site. To establish your account, we will ask for personally identifiable information that can be used to contact or identify you, which may include your name, phone number, and e-mail address. We may also collect demographic information about you, such as your zip code, and allow you to submit additional information that will be part of your profile. Other than basic information that we need to establish your account, it will be up to you to decide how much information to share as part of your profile. We encourage you to think carefully about the information that you share and we recommend that you guard your identity and your sensitive information. Of course, you can review and revise your profile at any time.</p>\r\n\r\n<h3>Payment Information</h3>\r\n\r\n<p>To make the payment online for availing our services, you have to provide the bank account, mobile financial service (MFS), debit card, credit card information to the StackFood platform.</p>\r\n\r\n<h2>How the Information is collected</h2>\r\n\r\n<h3>Session and Persistent Cookies</h3>\r\n\r\n<p>Cookies are small text files that are placed on your computer by websites that you visit. They are widely used in order to make websites work, or work more efficiently, as well as to provide information to the owners of the site. As is commonly done on websites, we may use cookies and similar technology to keep track of our users and the services they have elected. We use both &ldquo;session&rdquo; and &ldquo;persistent&rdquo; cookies. Session cookies are deleted after you leave our website and when you close your browser. We use data collected with session cookies to enable certain features on our Site, to help us understand how users interact with our Site, and to monitor at an aggregate level Site usage and web traffic routing. We may allow business partners who provide services to our Site to place cookies on your computer that assist us in analyzing usage data. We do not allow these business partners to collect your personal information from our website except as may be necessary for the services that they provide.</p>\r\n\r\n<h3>Web Beacons</h3>\r\n\r\n<p>We may also use web beacons or similar technology to help us track the effectiveness of our communications.</p>\r\n\r\n<h3>Advertising Cookies</h3>\r\n\r\n<p>We may use third parties, such as Google, to serve ads about our website over the internet. These third parties may use cookies to identify ads that may be relevant to your interest (for example, based on your recent visit to our website), to limit the number of times that you see an ad, and to measure the effectiveness of the ads.</p>\r\n\r\n<h3>Google Analytics</h3>\r\n\r\n<p>We may also use Google Analytics or a similar service to gather statistical information about the visitors to this Site and how they use the Site. This, also, is done on an anonymous basis. We will not try to associate anonymous data with your personally identifiable data. If you would like to learn more about Google Analytics, please click here.</p>', NULL, '2021-08-22 01:49:58'),
 (27, 'minimum_shipping_charge', '10', NULL, NULL),
 (28, 'per_km_shipping_charge', '2', NULL, NULL),
-(29, 'digital_payment', '{\"status\":\"1\"}', '2021-07-01 14:27:38', '2021-08-22 00:47:42'),
+(29, 'digital_payment', '{\"status\":null}', '2021-07-01 14:27:38', '2023-10-16 19:12:15'),
 (30, 'ssl_commerz_payment', '{\"status\":\"0\",\"store_id\":null,\"store_password\":null}', '2021-07-04 15:41:24', '2022-03-23 04:21:28'),
 (31, 'razor_pay', '{\"status\":\"0\",\"razor_key\":null,\"razor_secret\":null}', '2021-07-04 15:41:28', '2022-03-23 04:21:38'),
 (32, 'paypal', '{\"status\":\"0\",\"paypal_client_id\":null,\"paypal_secret\":null}', '2021-07-04 15:41:34', '2022-03-23 04:21:49'),
@@ -205,20 +403,20 @@ INSERT INTO `business_settings` (`id`, `key`, `value`, `created_at`, `updated_at
 (35, 'order_handover_message', '{\"status\":1,\"message\":\"Delivery man is on the way\"}', NULL, NULL),
 (36, 'order_cancled_message', '{\"status\":1,\"message\":\"Order is canceled by your request\"}', NULL, NULL),
 (37, 'timezone', 'US/Central', NULL, NULL),
-(38, 'order_delivery_verification', '0', NULL, NULL),
+(38, 'order_delivery_verification', NULL, NULL, NULL),
 (39, 'currency_symbol_position', 'left', NULL, NULL),
-(40, 'schedule_order', '1', NULL, NULL),
+(40, 'schedule_order', NULL, NULL, NULL),
 (41, 'app_minimum_version', '0', NULL, NULL),
 (42, 'tax', NULL, NULL, NULL),
 (43, 'admin_commission', '10', NULL, NULL),
 (44, 'country', 'US', NULL, NULL),
 (45, 'app_url', 'https://www.google.com', NULL, NULL),
-(46, 'default_location', '{\"lat\":\"0\",\"lng\":\"0\"}', NULL, NULL),
+(46, 'default_location', '{\"lat\":\"23.02918734674459\",\"lng\":\"90.3515625\"}', NULL, NULL),
 (47, 'twilio_sms', '{\"status\":\"0\",\"sid\":null,\"messaging_service_id\":null,\"token\":null,\"from\":null,\"otp_template\":\"Your otp is #OTP#.\"}', '2022-03-23 15:16:08', '2022-03-23 15:16:08'),
 (48, 'nexmo_sms', '{\"status\":\"0\",\"api_key\":null,\"api_secret\":null,\"signature_secret\":\"\",\"private_key\":\"\",\"application_id\":\"\",\"from\":null,\"otp_template\":\"Your otp is #OTP#.\"}', '2022-03-23 15:16:18', '2022-03-23 15:16:18'),
 (49, '2factor_sms', '{\"status\":\"0\",\"api_key\":null}', '2022-03-23 15:16:26', '2022-03-23 15:16:26'),
 (50, 'msg91_sms', '{\"status\":\"0\",\"template_id\":null,\"authkey\":null}', '2022-03-23 15:16:33', '2022-03-23 15:16:33'),
-(51, 'free_delivery_over', '1000', NULL, NULL),
+(51, 'free_delivery_over', NULL, NULL, NULL),
 (52, 'maintenance_mode', '0', '2021-09-08 15:44:28', '2021-09-08 15:44:28'),
 (53, 'app_minimum_version_ios', NULL, '2021-09-21 22:54:10', '2021-09-21 22:54:10'),
 (54, 'app_minimum_version_android', NULL, '2021-09-21 22:54:10', '2021-09-21 22:54:10'),
@@ -239,15 +437,15 @@ INSERT INTO `business_settings` (`id`, `key`, `value`, `created_at`, `updated_at
 (70, 'testimonial', '[{\"img\":\"img-1.png\",\"name\":\"Barry Allen\",\"position\":\"Web Designer\",\"detail\":\"Lorem ipsum dolor sit amet, consectetur adipisicing elit. A\\r\\n                    aliquam amet animi blanditiis consequatur debitis dicta\\r\\n                    distinctio, enim error eum iste libero modi nam natus\\r\\n                    perferendis possimus quasi sint sit tempora voluptatem. Est,\\r\\n                    exercitationem id ipsa ipsum laboriosam perferendis temporibus!\"},{\"img\":\"img-2.png\",\"name\":\"Sophia Martino\",\"position\":\"Web Designer\",\"detail\":\"Lorem ipsum dolor sit amet, consectetur adipisicing elit. A aliquam amet animi blanditiis consequatur debitis dicta distinctio, enim error eum iste libero modi nam natus perferendis possimus quasi sint sit tempora voluptatem. Est, exercitationem id ipsa ipsum laboriosam perferendis temporibus!\"},{\"img\":\"img-3.png\",\"name\":\"Alan Turing\",\"position\":\"Web Designer\",\"detail\":\"Lorem ipsum dolor sit amet, consectetur adipisicing elit. A aliquam amet animi blanditiis consequatur debitis dicta distinctio, enim error eum iste libero modi nam natus perferendis possimus quasi sint sit tempora voluptatem. Est, exercitationem id ipsa ipsum laboriosam perferendis temporibus!\"},{\"img\":\"img-4.png\",\"name\":\"Ann Marie\",\"position\":\"Web Designer\",\"detail\":\"Lorem ipsum dolor sit amet, consectetur adipisicing elit. A aliquam amet animi blanditiis consequatur debitis dicta distinctio, enim error eum iste libero modi nam natus perferendis possimus quasi sint sit tempora voluptatem. Est, exercitationem id ipsa ipsum laboriosam perferendis temporibus!\"}]', '2021-11-15 15:55:37', '2021-11-15 15:55:37'),
 (71, 'landing_page_images', '{\"top_content_image\":\"double_screen_image.png\",\"about_us_image\":\"about_us_image.png\"}', '2021-11-15 15:55:37', '2021-11-15 15:55:37'),
 (72, 'paymob_accept', '{\"status\":\"0\",\"api_key\":null,\"iframe_id\":null,\"integration_id\":null,\"hmac\":null}', '2021-11-15 15:55:37', '2021-11-15 15:55:37'),
-(73, 'admin_order_notification', '0', NULL, NULL),
+(73, 'admin_order_notification', NULL, NULL, NULL),
 (74, 'swish_payment', '{\"status\":\"1\"}', NULL, '2021-12-28 12:02:40'),
 (76, 'service_charge', '12', NULL, NULL),
 (77, 'social_login', '[{\"login_medium\":\"google\",\"client_id\":null,\"client_secret\":null,\"status\":\"0\"},{\"login_medium\":\"facebook\",\"client_id\":null,\"client_secret\":null,\"status\":\"0\"}]', NULL, '2022-01-04 13:09:23'),
-(78, 'language', '[\"en\",\"ar\"]', NULL, NULL),
+(78, 'language', '[\"en\"]', NULL, NULL),
 (79, 'timeformat', '24', NULL, NULL),
 (80, 'canceled_by_restaurant', '0', NULL, NULL),
 (81, 'canceled_by_deliveryman', '0', NULL, NULL),
-(82, 'show_dm_earning', '0', NULL, NULL),
+(82, 'show_dm_earning', NULL, NULL, NULL),
 (83, 'recaptcha', '{\"status\":\"0\",\"site_key\":null,\"secret_key\":null}', '2022-03-23 15:17:39', '2022-03-23 15:17:39'),
 (84, 'toggle_veg_non_veg', '1', NULL, NULL),
 (85, 'toggle_dm_registration', '1', NULL, NULL),
@@ -259,9 +457,9 @@ INSERT INTO `business_settings` (`id`, `key`, `value`, `created_at`, `updated_at
 (91, 'bkash', '{\"status\":\"1\",\"api_key\":\"5tunt4masn6pv2hnvte1sb5n3j\",\"api_secret\":\"1vggbqd4hqk9g96o9rrrp2jftvek578v7d2bnerim12a87dbrrka\",\"username\":\"sandboxTestUser\",\"password\":\"hWD@8vtzw0\"}', NULL, '2022-02-27 04:37:26'),
 (92, 'paytabs', '{\"status\":\"1\",\"profile_id\":null,\"server_key\":null,\"base_url\":null}', NULL, '2022-02-27 06:06:19'),
 (93, 'paytm', '{\"status\":\"1\",\"paytm_merchant_key\":null,\"paytm_merchant_mid\":null,\"paytm_merchant_website\":null,\"paytm_refund_url\":null}', NULL, '2022-02-27 06:06:37'),
-(94, 'schedule_order_slot_duration', '0', NULL, NULL),
+(94, 'schedule_order_slot_duration', NULL, NULL, NULL),
 (95, 'digit_after_decimal_point', '0', NULL, NULL),
-(96, 'icon', '2022-02-28-621ca59d1c816.png', NULL, NULL),
+(96, 'icon', '2023-08-16-64dca5f544de1.png', NULL, NULL),
 (97, 'toggle_store_registration', '1', NULL, NULL),
 (98, 'canceled_by_store', '0', NULL, NULL),
 (99, 'parcel_per_km_shipping_charge', '0', NULL, NULL),
@@ -277,7 +475,43 @@ INSERT INTO `business_settings` (`id`, `key`, `value`, `created_at`, `updated_at
 (109, 'loyalty_point_item_purchase_point', '0', '2022-07-05 03:26:20', '2022-07-05 03:26:20'),
 (110, 'loyalty_point_minimum_point', '0', '2022-07-05 03:26:20', '2022-07-05 03:26:20'),
 (111, 'refund_active_status', '0', '2022-07-05 03:26:20', '2022-07-05 03:26:20'),
-(112, 'dm_tips_status', '0', '2022-07-05 03:26:20', '2022-07-05 03:26:20');
+(112, 'dm_tips_status', NULL, '2022-07-05 03:26:20', '2022-07-05 03:26:20'),
+(113, 'system_language', '[{\"id\":1,\"direction\":\"ltr\",\"code\":\"en\",\"status\":1,\"default\":true}]', '2023-08-15 23:29:41', '2023-08-15 23:29:41'),
+(114, 'site_direction', NULL, NULL, NULL),
+(115, 'cookies_text', 'Demo cookie text', NULL, NULL),
+(116, 'tax_included', NULL, NULL, NULL),
+(117, 'partial_payment_status', NULL, NULL, NULL),
+(118, 'partial_payment_method', 'both', NULL, NULL),
+(119, 'order_notification_type', 'firebase', NULL, NULL),
+(120, 'free_delivery_over_status', NULL, NULL, NULL),
+(121, 'additional_charge_status', NULL, NULL, NULL),
+(122, 'additional_charge_name', 'Additional Charge', NULL, NULL),
+(123, 'additional_charge', NULL, NULL, NULL),
+(124, 'prescription_order_status', NULL, NULL, NULL),
+(125, 'delivery_charge_comission', '0', NULL, NULL),
+(126, 'opening_time', NULL, NULL, NULL),
+(127, 'closing_time', NULL, NULL, NULL),
+(128, 'landing_page', '1', '2023-08-15 23:56:24', '2023-08-15 23:56:24'),
+(129, 'landing_integration_type', 'file_upload', '2023-08-15 23:56:24', '2023-08-15 23:56:24'),
+(130, 'mobile_app_section_heading', 'Download the App for Enjoy Best Restaurant Test', '2023-08-17 00:26:56', '2023-08-17 00:26:56'),
+(131, 'mobile_app_section_text', 'Default Text Mobile App Section', '2023-08-17 00:26:56', '2023-08-17 00:26:56'),
+(132, 'feature_section_description', 'Feature section description', '2023-08-17 00:26:56', '2023-08-17 00:26:56'),
+(133, 'Feature section description', '{\"app_url_android_status\":\"0\",\"app_url_android\":\"https:\\/\\/play.google.com\",\"app_url_ios_status\":\"0\",\"app_url_ios\":\"https:\\/\\/www.apple.com\\/app-store\",\"web_app_url_status\":\"0\",\"web_app_url\":\"https:\\/\\/6ammart-web.6amtech.com\\/\"}', '2023-08-17 00:26:56', '2023-08-17 00:26:56'),
+(134, 'home_delivery_status', '1', '2023-08-17 00:26:56', '2023-08-17 00:26:56'),
+(135, 'takeaway_status', '1', '2023-08-17 00:26:56', '2023-08-17 00:26:56'),
+(136, 'dm_picture_upload_status', '1', NULL, NULL),
+(137, 'offline_payment_status', NULL, NULL, '2023-10-16 20:16:58'),
+(138, 'guest_checkout_status', '0', NULL, NULL),
+(139, 'check_daily_subscription_validity_check', '2024-06-06', '2024-06-05 20:15:07', '2024-06-05 20:15:07'),
+(140, 'commission_business_model', '1', '2024-06-05 20:16:14', '2024-06-05 20:16:14'),
+(141, 'subscription_business_model', '0', '2024-06-05 20:16:14', '2024-06-05 20:16:14'),
+(142, 'subscription_free_trial_days', '7', '2024-06-05 23:23:50', '2024-06-05 23:23:50'),
+(143, 'subscription_free_trial_type', 'day', '2024-06-05 23:23:50', '2024-06-05 23:23:50'),
+(144, 'subscription_free_trial_status', '1', '2024-06-05 23:23:55', '2024-06-05 23:23:55'),
+(145, 'subscription_deadline_warning_days', '7', '2024-06-05 23:24:02', '2024-06-05 23:24:02'),
+(146, 'subscription_deadline_warning_message', 'Your subscription ending soon. Please renew to continue access.', '2024-06-05 23:24:02', '2024-06-05 23:27:22'),
+(147, 'subscription_usage_max_time', '80', '2024-06-05 23:24:14', '2024-06-05 23:24:14'),
+(148, 'apple_login', '[{\"login_medium\":\"apple\",\"client_id\":\"\",\"client_secret\":\"\",\"team_id\":\"\",\"key_id\":\"\",\"service_file\":\"\",\"redirect_url\":\"\",\"status\":\"\"}]', '2024-06-05 23:39:00', '2024-06-05 23:39:00');
 
 -- --------------------------------------------------------
 
@@ -316,6 +550,71 @@ CREATE TABLE `campaign_store` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `carts`
+--
+
+CREATE TABLE `carts` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `module_id` bigint(20) UNSIGNED NOT NULL,
+  `item_id` bigint(20) UNSIGNED NOT NULL,
+  `is_guest` tinyint(1) NOT NULL DEFAULT 0,
+  `add_on_ids` text DEFAULT NULL,
+  `add_on_qtys` text DEFAULT NULL,
+  `item_type` varchar(255) NOT NULL,
+  `price` double(24,3) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `variation` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cash_backs`
+--
+
+CREATE TABLE `cash_backs` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `customer_id` varchar(255) DEFAULT '["all"]',
+  `cashback_type` varchar(255) NOT NULL,
+  `same_user_limit` int(11) NOT NULL DEFAULT 1,
+  `total_used` int(11) NOT NULL DEFAULT 0,
+  `cashback_amount` double(23,3) NOT NULL DEFAULT 0.000,
+  `min_purchase` double(23,3) NOT NULL DEFAULT 0.000,
+  `max_discount` double(23,3) NOT NULL DEFAULT 0.000,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cash_back_histories`
+--
+
+CREATE TABLE `cash_back_histories` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `cash_back_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `order_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `cashback_type` varchar(255) NOT NULL,
+  `calculated_amount` double(23,3) NOT NULL DEFAULT 0.000,
+  `cashback_amount` double(23,3) NOT NULL DEFAULT 0.000,
+  `min_purchase` double(23,3) NOT NULL DEFAULT 0.000,
+  `max_discount` double(23,3) NOT NULL DEFAULT 0.000,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `categories`
 --
 
@@ -330,7 +629,31 @@ CREATE TABLE `categories` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `priority` int(11) NOT NULL DEFAULT 0,
   `module_id` bigint(20) UNSIGNED NOT NULL,
-  `slug` varchar(255) DEFAULT NULL
+  `slug` varchar(255) DEFAULT NULL,
+  `featured` tinyint(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `categories`
+--
+
+INSERT INTO `categories` (`id`, `name`, `image`, `parent_id`, `position`, `status`, `created_at`, `updated_at`, `priority`, `module_id`, `slug`, `featured`) VALUES
+(1, 'Demo category', '2023-08-16-64dca78f6ba7b.png', 0, 0, 1, '2023-08-15 23:40:15', '2023-08-15 23:40:30', 0, 1, 'demo-category', 1),
+(2, 'Demo sub category', 'def.png', 1, 1, 1, '2023-08-15 23:40:51', '2023-08-15 23:40:51', 0, 1, 'demo-sub-category', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `common_conditions`
+--
+
+CREATE TABLE `common_conditions` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(255) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -568,6 +891,112 @@ CREATE TABLE `customer_addresses` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `data_settings`
+--
+
+CREATE TABLE `data_settings` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `key` varchar(255) DEFAULT NULL,
+  `value` text DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `data_settings`
+--
+
+INSERT INTO `data_settings` (`id`, `key`, `value`, `type`, `created_at`, `updated_at`) VALUES
+(1, 'admin_login_url', 'admin', 'login_admin', '2023-06-11 14:34:59', '2023-06-11 14:34:59'),
+(2, 'admin_employee_login_url', 'admin-employee', 'login_admin_employee', '2023-06-11 14:34:59', '2023-06-11 14:34:59'),
+(3, 'store_login_url', 'store', 'login_store', '2023-06-11 14:34:59', '2023-06-11 14:34:59'),
+(4, 'store_employee_login_url', 'store-employee', 'login_store_employee', '2023-06-11 14:34:59', '2023-06-11 14:34:59'),
+(5, 'fixed_header_title', 'Manage Your  Daily Life in one platform', 'admin_landing_page', '2023-06-11 15:06:27', '2023-06-11 15:06:27'),
+(6, 'fixed_header_sub_title', 'More than just a reliable  eCommerce platform', 'admin_landing_page', '2023-06-11 15:06:27', '2023-06-11 15:06:27'),
+(7, 'fixed_module_title', 'Your eCommerce venture starts here !', 'admin_landing_page', '2023-06-11 15:06:27', '2023-06-11 15:06:27'),
+(8, 'fixed_module_sub_title', 'Enjoy all services in one platform', 'admin_landing_page', '2023-06-11 15:06:27', '2023-06-11 15:06:27'),
+(9, 'fixed_referal_title', 'Earn point by', 'admin_landing_page', '2023-06-11 15:06:27', '2023-06-11 15:06:27'),
+(10, 'fixed_referal_sub_title', 'Refer Your Friend', 'admin_landing_page', '2023-06-11 15:06:27', '2023-06-11 15:06:27'),
+(11, 'fixed_newsletter_title', 'Sign Up to Our Newsletter', 'admin_landing_page', '2023-06-11 15:06:27', '2023-06-11 15:06:27'),
+(12, 'fixed_newsletter_sub_title', 'Receive Latest News, Updates and Many Other News Every Week', 'admin_landing_page', '2023-06-11 15:06:27', '2023-06-11 15:06:27'),
+(13, 'fixed_footer_article_title', '6amMart is a complete package!  It\'s time to empower your multivendor online business with  powerful features!', 'admin_landing_page', '2023-06-11 15:06:27', '2023-06-11 15:06:27'),
+(14, 'feature_title', 'Remarkable Features that You Can Count!', 'admin_landing_page', '2023-06-11 15:14:25', '2023-06-11 15:14:25'),
+(15, 'feature_short_description', 'Jam-packed with outstanding features to elevate your online ordering and delivery easier, and smarter than ever before. It\'s time to empower your multivendor online business with 6amMart\'s powerful features!', 'admin_landing_page', '2023-06-11 15:14:25', '2023-06-11 15:14:25'),
+(16, 'earning_title', 'Earn Money', 'admin_landing_page', '2023-06-11 15:26:01', '2023-06-11 15:26:01'),
+(17, 'earning_sub_title', 'Earn money  by using different platform', 'admin_landing_page', '2023-06-11 15:26:01', '2023-06-11 15:26:01'),
+(18, 'earning_seller_image', '2024-04-20-66239442684d3.png', 'admin_landing_page', '2023-06-11 15:27:29', '2024-04-20 05:09:06'),
+(19, 'seller_app_earning_links', '{\"playstore_url_status\":null,\"playstore_url\":null,\"apple_store_url_status\":null,\"apple_store_url\":null}', 'admin_landing_page', NULL, NULL),
+(20, 'earning_delivery_image', '2024-04-20-66239451975d2.png', 'admin_landing_page', '2023-06-11 15:28:48', '2024-04-20 05:09:21'),
+(21, 'dm_app_earning_links', '{\"playstore_url_status\":null,\"playstore_url\":null,\"apple_store_url_status\":null,\"apple_store_url\":null}', 'admin_landing_page', NULL, NULL),
+(22, 'why_choose_title', 'What so Special About 6amMart ?', 'admin_landing_page', '2023-06-11 15:30:30', '2023-06-11 15:32:08'),
+(23, 'counter_section', '{\"app_download_count_numbers\":\"300\",\"seller_count_numbers\":\"85\",\"deliveryman_count_numbers\":\"150\",\"customer_count_numbers\":\"10000\",\"status\":\"1\"}', 'admin_landing_page', NULL, NULL),
+(24, 'download_user_app_title', 'Let’s  Manage', 'admin_landing_page', '2023-06-11 15:38:17', '2023-06-11 15:38:17'),
+(25, 'download_user_app_sub_title', 'Your business  Smartly or Earn.', 'admin_landing_page', '2023-06-11 15:38:17', '2023-06-11 15:38:17'),
+(26, 'download_user_app_image', '2023-08-16-64dcaab460ac2.png', 'admin_landing_page', '2023-06-11 15:38:17', '2023-08-15 23:53:40'),
+(27, 'download_user_app_links', '{\"playstore_url_status\":\"1\",\"playstore_url\":\"https:\\/\\/play.google.com\\/store\\/apps\\/details?id=com.sixamtech.sixam_mart_store_app\",\"apple_store_url_status\":\"1\",\"apple_store_url\":\"https:\\/\\/www.apple.com\\/app-store\"}', 'admin_landing_page', NULL, NULL),
+(28, 'testimonial_title', 'People Who Shared Love with us?', 'admin_landing_page', '2023-06-11 15:42:04', '2023-06-11 15:42:04'),
+(29, 'contact_us_title', 'Contact Us', 'admin_landing_page', '2023-06-11 15:53:22', '2023-06-11 15:53:22'),
+(30, 'contact_us_sub_title', 'Any question or remarks? Just write us a message!', 'admin_landing_page', '2023-06-11 15:53:22', '2023-06-11 15:53:22'),
+(31, 'contact_us_image', '2023-08-16-64dcab0c7b434.png', 'admin_landing_page', '2023-06-11 15:53:23', '2023-08-15 23:55:08'),
+(32, 'refund_policy_status', '1', 'admin_landing_page', '2023-06-11 20:10:58', '2023-06-11 20:10:58'),
+(33, 'refund_policy', NULL, 'admin_landing_page', '2023-06-11 20:10:59', '2023-06-11 20:10:59'),
+(34, 'header_title', '$Your e-Commerce!$', 'react_landing_page', '2023-06-12 16:30:53', '2023-06-12 19:41:19'),
+(35, 'header_sub_title', 'Venture Starts Here', 'react_landing_page', '2023-06-12 16:30:53', '2023-06-12 17:55:14'),
+(36, 'header_tag_line', 'More than just a reliable $eCommerce$ platform', 'react_landing_page', '2023-06-12 16:30:53', '2023-06-12 17:45:24'),
+(37, 'header_icon', '2024-04-20-66239402e2913.png', 'react_landing_page', '2023-06-12 16:30:53', '2024-04-20 05:08:02'),
+(38, 'header_banner', '2024-04-20-66239402e5470.png', 'react_landing_page', '2023-06-12 16:30:53', '2024-04-20 05:08:02'),
+(39, 'company_title', '$6amMart$', 'react_landing_page', '2023-06-12 16:35:07', '2023-06-12 17:46:19'),
+(40, 'company_sub_title', 'is Best Delivery Service Near You', 'react_landing_page', '2023-06-12 16:35:07', '2023-06-12 16:35:07'),
+(41, 'company_description', '6amMart is a one-stop shop for all your daily necessities. You can shop for groceries, and pharmacy items, order food, and send important parcels from one place to another from the comfort of your home.', 'react_landing_page', '2023-06-12 16:35:07', '2023-06-12 16:35:07'),
+(42, 'company_button_name', 'Order Now', 'react_landing_page', '2023-06-12 16:35:07', '2023-06-12 17:46:52'),
+(43, 'company_button_url', 'https://6ammart-react.6amtech.com/', 'react_landing_page', '2023-06-12 16:35:07', '2023-06-12 16:35:07'),
+(44, 'download_user_app_title', 'Complete Multipurpose eBusiness Solution', 'react_landing_page', '2023-06-12 16:40:30', '2023-06-12 16:40:30'),
+(45, 'download_user_app_sub_title', '6amMart is a Laravel and Flutter Framework-based multi-vendor food, grocery, eCommerce, parcel, and pharmacy delivery system. It has six modules to cover all your business function', 'react_landing_page', '2023-06-12 16:40:30', '2023-06-12 16:40:30'),
+(46, 'download_user_app_image', NULL, 'react_landing_page', '2023-06-12 16:40:30', '2023-06-12 16:40:30'),
+(47, 'download_user_app_links', '{\"playstore_url_status\":\"1\",\"playstore_url\":\"https:\\/\\/play.google.com\\/store\\/\",\"apple_store_url_status\":\"1\",\"apple_store_url\":\"https:\\/\\/www.apple.com\\/app-store\\/\"}', 'react_landing_page', NULL, NULL),
+(48, 'earning_title', 'Let’s Start Earning with $6amMart$', 'react_landing_page', '2023-06-12 16:43:22', '2023-06-12 16:43:22'),
+(49, 'earning_sub_title', 'Join our online marketplace revolution and boost your income.', 'react_landing_page', '2023-06-12 16:43:22', '2023-06-12 16:43:22'),
+(50, 'earning_seller_title', 'Become a Seller', 'react_landing_page', '2023-06-12 16:45:07', '2023-06-12 16:45:07'),
+(51, 'earning_seller_sub_title', 'Register as seller & open shop in 6amMart to start your business', 'react_landing_page', '2023-06-12 16:45:07', '2023-06-12 16:45:07'),
+(52, 'earning_seller_button_name', 'Register', 'react_landing_page', '2023-06-12 16:45:07', '2023-06-12 16:45:07'),
+(53, 'earning_seller_button_url', 'https://6ammart-admin.6amtech.com/store/apply', 'react_landing_page', '2023-06-12 16:45:07', '2023-06-12 16:45:07'),
+(54, 'earning_dm_title', 'Become a $Delivery Man$', 'react_landing_page', '2023-06-12 16:45:55', '2023-06-12 17:53:01'),
+(55, 'earning_dm_sub_title', 'Register as delivery man and earn money', 'react_landing_page', '2023-06-12 16:45:55', '2023-06-12 16:45:55'),
+(56, 'earning_dm_button_name', 'Register', 'react_landing_page', '2023-06-12 16:45:55', '2023-06-12 16:45:55'),
+(57, 'earning_dm_button_url', 'https://6ammart-admin.6amtech.com/deliveryman/apply', 'react_landing_page', '2023-06-12 16:45:55', '2023-06-12 16:45:55'),
+(58, 'promotion_banner', '[{\"img\":\"2023-08-16-64dcac89cd0fa.png\"},{\"img\":\"2023-08-16-64dcac93a324a.png\"},{\"img\":\"2023-08-16-64dcad5a24940.png\"},{\"img\":\"2024-04-20-6623944c31c97.png\"}]', 'react_landing_page', NULL, '2023-08-16 00:01:02'),
+(59, 'business_title', '$Let’s$', 'react_landing_page', '2023-06-12 16:52:29', '2023-06-12 16:52:29'),
+(60, 'business_sub_title', 'Manage your business  Smartly', 'react_landing_page', '2023-06-12 16:52:29', '2023-06-12 17:54:18'),
+(61, 'business_image', '2023-08-16-64dcad66585e9.png', 'react_landing_page', '2023-06-12 16:52:29', '2023-08-16 00:05:10'),
+(62, 'download_business_app_links', '{\"seller_playstore_url_status\":\"1\",\"seller_playstore_url\":\"https:\\/\\/play.google.com\\/store\",\"seller_appstore_url_status\":\"1\",\"seller_appstore_url\":\"https:\\/\\/www.apple.com\\/app-store\\/\",\"dm_playstore_url_status\":\"1\",\"dm_playstore_url\":\"https:\\/\\/play.google.com\\/store\",\"dm_appstore_url_status\":\"1\",\"dm_appstore_url\":\"https:\\/\\/www.apple.com\\/app-store\\/\"}', 'react_landing_page', NULL, NULL),
+(63, 'testimonial_title', 'We $satisfied$ some Customer & Restaurant Owners', 'react_landing_page', '2023-06-12 16:53:04', '2023-06-12 16:53:04'),
+(64, 'fixed_promotional_banner', '2024-04-20-662394ec1e6b7.png', 'react_landing_page', '2023-06-12 17:18:24', '2024-04-20 05:11:56'),
+(65, 'fixed_footer_description', 'Connect with our social media and other sites to keep up to date', 'react_landing_page', '2023-06-12 17:21:12', '2023-06-12 17:21:12'),
+(66, 'fixed_newsletter_title', 'Join Us!', 'react_landing_page', '2023-06-12 17:23:45', '2023-06-12 17:23:45'),
+(67, 'fixed_newsletter_sub_title', 'Subscribe to our weekly newsletter and be a part of our journey to self discovery and love.', 'react_landing_page', '2023-06-12 17:23:45', '2023-06-12 17:23:45'),
+(68, 'fixed_header_title', '6amMart', 'flutter_landing_page', '2023-06-12 17:31:35', '2023-06-12 17:31:35'),
+(69, 'fixed_header_sub_title', 'More than just reliable eCommerce platform', 'flutter_landing_page', '2023-06-12 17:31:35', '2023-06-12 17:32:30'),
+(70, 'fixed_header_image', '2024-04-20-6623929a88ded.png', 'flutter_landing_page', '2023-06-12 17:31:35', '2024-04-20 05:02:02'),
+(71, 'fixed_location_title', 'Choose your location', 'flutter_landing_page', '2023-06-12 17:35:02', '2023-06-12 17:35:02'),
+(72, 'fixed_module_title', 'Your eCommerce venture starts here !', 'flutter_landing_page', '2023-06-12 17:37:29', '2023-06-12 17:37:29'),
+(73, 'fixed_module_sub_title', 'Enjoy all services in one platform', 'flutter_landing_page', '2023-06-12 17:37:29', '2023-06-12 17:37:29'),
+(74, 'join_seller_title', 'Become a Seller', 'flutter_landing_page', '2023-06-12 18:12:56', '2023-06-12 18:12:56'),
+(75, 'join_seller_sub_title', 'Registered as a seller and open shop for start your business', 'flutter_landing_page', '2023-06-12 18:12:56', '2023-06-12 18:12:56'),
+(76, 'join_seller_button_name', 'Register', 'flutter_landing_page', '2023-06-12 18:12:56', '2023-06-12 18:12:56'),
+(77, 'join_seller_button_url', 'https://6ammart-admin.6amtech.com/store/apply', 'flutter_landing_page', '2023-06-12 18:12:56', '2023-06-12 18:12:56'),
+(78, 'join_delivery_man_title', 'Join as  Deliveryman', 'flutter_landing_page', '2023-06-12 18:16:03', '2023-06-12 18:16:03'),
+(79, 'join_delivery_man_sub_title', 'Registered as a deliveryman and earn money', 'flutter_landing_page', '2023-06-12 18:16:03', '2023-06-12 18:16:03'),
+(80, 'join_delivery_man_button_name', 'Register', 'flutter_landing_page', '2023-06-12 18:16:03', '2023-06-12 18:16:03'),
+(81, 'join_delivery_man_button_url', 'https://6ammart-admin.6amtech.com/deliveryman/apply', 'flutter_landing_page', '2023-06-12 18:16:03', '2023-06-12 18:16:03'),
+(82, 'download_user_app_title', 'Download app and enjoy more!', 'flutter_landing_page', '2023-06-12 18:17:56', '2023-06-12 18:17:56'),
+(83, 'download_user_app_sub_title', 'Download app from', 'flutter_landing_page', '2023-06-12 18:17:56', '2023-06-12 18:17:56'),
+(84, 'download_user_app_image', '2024-04-20-6623936184033.png', 'flutter_landing_page', '2023-06-12 18:17:56', '2024-04-20 05:05:21'),
+(85, 'download_user_app_links', '{\"playstore_url_status\":\"1\",\"playstore_url\":\"https:\\/\\/play.google.com\\/store\\/\",\"apple_store_url_status\":\"1\",\"apple_store_url\":\"https:\\/\\/www.apple.com\\/app-store\\/\"}', 'flutter_landing_page', NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `delivery_histories`
 --
 
@@ -637,6 +1066,59 @@ CREATE TABLE `delivery_men` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `disbursements`
+--
+
+CREATE TABLE `disbursements` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `total_amount` double(23,3) NOT NULL DEFAULT 0.000,
+  `status` varchar(255) NOT NULL DEFAULT 'pending',
+  `created_for` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `disbursement_details`
+--
+
+CREATE TABLE `disbursement_details` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `disbursement_id` bigint(20) UNSIGNED NOT NULL,
+  `store_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `delivery_man_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `disbursement_amount` double(23,3) NOT NULL DEFAULT 0.000,
+  `payment_method` bigint(20) UNSIGNED NOT NULL,
+  `status` varchar(255) NOT NULL DEFAULT 'pending',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `disbursement_withdrawal_methods`
+--
+
+CREATE TABLE `disbursement_withdrawal_methods` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `store_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `delivery_man_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `withdrawal_method_id` bigint(20) UNSIGNED NOT NULL,
+  `method_name` varchar(255) NOT NULL,
+  `method_fields` text NOT NULL,
+  `is_default` tinyint(4) NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `discounts`
 --
 
@@ -694,6 +1176,92 @@ CREATE TABLE `d_m_vehicles` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `ecommerce_item_details`
+--
+
+CREATE TABLE `ecommerce_item_details` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `item_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `brand_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `email_templates`
+--
+
+CREATE TABLE `email_templates` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  `body` text DEFAULT NULL,
+  `background_image` varchar(100) DEFAULT NULL,
+  `image` varchar(100) DEFAULT NULL,
+  `logo` varchar(100) DEFAULT NULL,
+  `icon` varchar(100) DEFAULT NULL,
+  `button_name` varchar(100) DEFAULT NULL,
+  `button_url` varchar(255) DEFAULT NULL,
+  `footer_text` varchar(255) DEFAULT NULL,
+  `copyright_text` varchar(255) DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `email_type` varchar(255) DEFAULT NULL,
+  `email_template` varchar(255) DEFAULT NULL,
+  `privacy` tinyint(1) NOT NULL DEFAULT 0,
+  `refund` tinyint(1) NOT NULL DEFAULT 0,
+  `cancelation` tinyint(1) NOT NULL DEFAULT 0,
+  `contact` tinyint(1) NOT NULL DEFAULT 0,
+  `facebook` tinyint(1) NOT NULL DEFAULT 0,
+  `instagram` tinyint(1) NOT NULL DEFAULT 0,
+  `twitter` tinyint(1) NOT NULL DEFAULT 0,
+  `linkedin` tinyint(1) NOT NULL DEFAULT 0,
+  `pinterest` tinyint(1) NOT NULL DEFAULT 0,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `body_2` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `email_templates`
+--
+
+INSERT INTO `email_templates` (`id`, `title`, `body`, `background_image`, `image`, `logo`, `icon`, `button_name`, `button_url`, `footer_text`, `copyright_text`, `type`, `email_type`, `email_template`, `privacy`, `refund`, `cancelation`, `contact`, `facebook`, `instagram`, `twitter`, `linkedin`, `pinterest`, `status`, `created_at`, `updated_at`, `body_2`) VALUES
+(1, 'Change Password Request', '<p>The following user has forgotten his password &amp; requested to change/reset their password.&nbsp;</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p><strong>User Name: {userName}</strong></p>', NULL, NULL, NULL, '2023-06-12-6486f303174e0.png', '', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'admin', 'forget_password', '5', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 16:26:24', '2023-06-12 19:40:28', NULL),
+(2, 'New Store Registration Request', '<p>Please find below the details of the new Store registration:</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p><strong>Store Name: {storeName}</strong></p>\r\n\r\n<p>To review the store from the respective Module, go to:&nbsp;</p>\r\n\r\n<p><strong>Module Section</strong><strong>&rarr;Store Management&rarr;New Stores</strong></p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>Or you can directly review the store here &rarr;</p>\r\n\r\n<p>&nbsp;</p>', NULL, '2023-06-12-6486f4420b5c1.png', '2023-06-12-6486f4420d61d.png', NULL, 'Review Request', 'https://www.facebook.com/', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'admin', 'store_registration', '1', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 16:32:34', '2023-06-12 19:59:26', NULL),
+(3, 'New Deliveryman Registration Request', '<p>Please find below the details of the new Deliveryman registration:</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p><strong>Deliveryman Name: {deliveryManName}</strong></p>\r\n\r\n<p>To review the store from the respective Module, go to:&nbsp;</p>\r\n\r\n<p><strong>Users</strong><strong>&rarr;Deliveryman Management&rarr;New Deliveryman</strong></p>\r\n\r\n<p>&nbsp;</p>', NULL, '2023-06-12-6486f4fe20b2c.png', '2023-06-12-6486f528877fe.png', NULL, 'Review Request', 'https://www.facebook.com/', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'admin', 'dm_registration', '1', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 16:35:42', '2023-06-12 20:04:49', NULL),
+(4, 'New Withdraw Request', '<p>Please find below the details of the new Withdraw Request:</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p><strong>Store Name: {storeName}</strong></p>\r\n\r\n<p>To review the Refund Request, go to:&nbsp;</p>\r\n\r\n<p><strong>Transactions &amp; Reports</strong><strong>&rarr;Withdraw Requests</strong></p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, NULL, '2023-06-12-6486f5b6a24a4.png', 'Review Request', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'admin', 'withdraw_request', '6', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 16:38:46', '2023-06-12 20:04:17', NULL),
+(5, '“BUY ONE GET ONE” Campaign Join Request', '<p>Please find below the details of the new Campaign Join Request:</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p><strong>Store Name: {storeName}</strong></p>\r\n\r\n<p>To review the Refund Request, go to:&nbsp;</p>\r\n\r\n<p><strong>Module Section</strong><strong>&rarr;Choose Module&rarr;Promotion Management&rarr;Campaigns&rarr;Basic Campaigns&rarr;Buy One Get One</strong></p>\r\n\r\n<p>&nbsp;</p>', NULL, '2023-06-12-6486f611cfb9b.png', '2023-06-12-6486f611cfdf0.png', NULL, 'Review Request', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'admin', 'campaign_request', '1', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 16:40:17', '2023-06-12 20:06:04', NULL),
+(6, 'You Have A Refund Request.', '<p>Please find below the details of the new Refund Request:</p>\r\n\r\n<p><strong>Customer Name: {userName}</strong></p>\r\n\r\n<p><strong>Order ID: {orderId}</strong></p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, '2023-06-12-6486fb27a6a00.png', NULL, 'Review Request', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'admin', 'refund_request', '2', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 17:01:59', '2023-06-12 20:14:43', NULL),
+(7, 'Mart Morning [ID 1234] Just Signed In', '<p>Mart Morning [ID 1234] just signed in from the Store Panel.&nbsp;</p>\r\n\r\n<p><br />\r\n<strong>Login Time:</strong> 12.00pm</p>', NULL, NULL, '2023-06-12-6486fbdeb92d6.png', NULL, 'Check Status', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'admin', 'login', '2', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 17:05:02', '2023-06-12 17:05:02', NULL),
+(8, 'Your Registration is Submitted Successfully!', '<p>Dear User,</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>We&rsquo;ve received your Store Registration Request.&nbsp;</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>Soon you&rsquo;ll know if your store registration is accepted or declined by the Admin.&nbsp;</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>Stay Tuned!</p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, NULL, '2023-06-12-6487024230762.png', '', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'store', 'registration', '5', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 17:32:18', '2023-06-12 17:32:18', NULL),
+(9, 'Congratulations! Your Registration is Approved!', '<p>Dear User,</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>Your registration is approved by the Admin.&nbsp;</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p><strong>First</strong>, you need to log in to your store panel.&nbsp;</p>\r\n\r\n<p><strong>After that,</strong> please set up your store and start selling!&nbsp;</p>\r\n\r\n<p><br />\r\n<strong>Click here</strong><strong> &rarr; </strong><a href=\"https://6ammart-admin.6amtech.com/store-panel/business-settings/store-setup\">https://6ammart-admin.6amtech.com/store-panel/business-settings/store-setup</a></p>', NULL, NULL, NULL, '2023-06-12-648702fb014dd.png', '', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'store', 'approve', '5', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 17:35:23', '2023-06-12 20:01:31', NULL),
+(10, 'Your Registration is Rejected', '<p>Dear User,&nbsp;</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>We&rsquo;re sorry to announce that your store registration was rejected by the Admin.&nbsp;</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>To find out more please contact us.</p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, NULL, '2023-06-12-648706ce4d5fb.png', '', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'store', 'deny', '5', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 17:47:03', '2023-06-12 17:51:42', NULL),
+(11, 'Congratulations! Your Withdrawal is Approved!', '<p>Dear User,</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>The amount you requested to withdraw is approved by the Admin and transferred to you bank account.</p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, NULL, '2023-06-12-64870788562d9.png', 'See details', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'store', 'withdraw_approve', '6', 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, '2023-06-12 17:54:48', '2023-06-12 17:54:48', NULL),
+(12, 'Your Withdraw Request was Rejected.', '<p>Dear User,</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>The amount you requested to withdraw is rejected by the Admin.</p>\r\n\r\n<p>Reason: Insufficient Balance.&nbsp;</p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, NULL, '2023-06-12-648708244930a.png', 'See Details', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'store', 'withdraw_deny', '6', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 17:57:24', '2023-06-12 17:57:24', NULL),
+(13, 'Your Request is Completed!', '<p>Dear User,</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>We&rsquo;ve received your Campaign Request.&nbsp;</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>Soon you&rsquo;ll know if your request is approved or rejected by the Admin.&nbsp;</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>Stay Tuned!</p>\r\n\r\n<p>&nbsp;</p>', NULL, '2023-06-12-648708d132665.png', '2023-06-12-6487088da18cb.png', NULL, 'See Status', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'store', 'campaign_request', '1', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 17:59:09', '2023-06-12 18:00:17', NULL),
+(14, 'Congratulations! Your Campaign Request is Approved!', '<p>Dear User,</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>Your request to join campaign is approved by the Admin.</p>\r\n\r\n<p>&nbsp;</p>', NULL, '2023-06-12-6487091d3ee5a.png', '2023-06-12-6487091d3f0b3.png', NULL, 'View Status', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'store', 'campaign_approve', '1', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 18:01:33', '2023-06-12 20:04:45', NULL),
+(15, 'Your Campaign Join Request Was Rejected.', '<p>Dear User,</p>\r\n\r\n<p>Your request to join the&nbsp;campaign was rejected by the admin.&nbsp;</p>\r\n\r\n<p>&nbsp;</p>', NULL, '2023-06-12-648709ce3e893.png', '2023-06-12-648709ce3ead2.png', NULL, '', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'store', 'campaign_deny', '7', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 18:04:30', '2023-06-12 20:06:55', NULL),
+(16, 'Your Registration is Completed!', '<p>Dear User,</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>We&rsquo;ve received your Deliveryman Registration Request.</p>\r\n\r\n<p>Soon you&rsquo;ll know if your Deliveryman registration is accepted or declined by the Admin.&nbsp;</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>Stay Tuned!</p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, NULL, '2023-06-12-64870c80bb7bb.png', '', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'dm', 'registration', '5', 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, '2023-06-12 18:16:00', '2023-06-12 18:16:00', NULL),
+(17, 'Congratulations! Your Registration is Approved!', '<p>Dear User,</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>Your registration is approved by the Admin.&nbsp;</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p><strong>Here&rsquo;s what to do next:&nbsp;</strong></p>\r\n\r\n<ol>\r\n	<li>Download the Deliveryman app</li>\r\n	<li>Login with below credentials.</li>\r\n</ol>\r\n\r\n<p><strong>After that,</strong> please set up your account and start delivery!&nbsp;</p>\r\n\r\n<p><br />\r\n<strong>Click here</strong><strong> to download the app&rarr; </strong><a href=\"https://play.google.com/store/apps/details?id=com.sixamtech.sixam_mart_delivery_app&amp;pli=1\">https://play.google.com/store/apps/details?id=com.sixamtech.sixam_mart_delivery_app&amp;pli=1</a></p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, NULL, '2023-06-12-64870cebc5fc6.png', '', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'dm', 'approve', '5', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 18:17:47', '2023-06-12 20:09:23', NULL),
+(18, 'Your Registration is Rejected', '<p>Dear User,&nbsp;</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>We&rsquo;re sorry to announce that your Deliveryman registration was rejected by the Admin.&nbsp;</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>To find out more please contact us.</p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, NULL, '2023-06-12-64870da0bf819.png', '', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'dm', 'deny', '5', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 18:20:48', '2023-06-12 18:20:48', NULL),
+(19, 'Your Account is Suspended.', '<p>Dear User,</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>Your Deliveryman account has been suspended by the Admin/Store.&nbsp;</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>Please contact related person to know more.</p>\r\n\r\n<p>&nbsp;</p>', NULL, '2023-06-12-64870e1ba4908.png', '2023-06-12-64870e1ba4cd1.png', NULL, '', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'dm', 'suspend', '7', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 18:22:51', '2023-06-12 18:22:51', NULL),
+(20, 'Cash Collected.', '<p>Dear User,</p>\r\n\r\n<p>The Admin has collected cash from you.&nbsp;</p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, NULL, '2023-06-12-64870ecf8ef10.png', 'See Details', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'dm', 'cash_collect', '6', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 18:25:51', '2023-06-12 20:11:22', NULL),
+(21, 'Reset Your Password', '<p>Please use this OTP to reset your Password&nbsp;&rarr;</p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, NULL, '2023-06-12-64870f8dcfcc5.png', '', '', 'Please contact us for any queries; we’re always happy to help.', 'Copyright 2023 6amMart. All right reserved.', 'dm', 'forget_password', '4', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 18:29:01', '2023-06-12 20:12:27', NULL),
+(22, 'Your Registration is Successful!', '<p>Congratulations!</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>You&rsquo;ve successfully registered.</p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, NULL, '2023-06-12-64871218e4c0e.png', '', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'user', 'registration', '5', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 18:39:52', '2023-06-12 18:39:52', NULL),
+(23, 'Please Register with The OTP', '<p>ONE MORE STEP:&nbsp;</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>Please copy the following OTP &amp; paste in on your sign-up page to complete your registration.</p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, NULL, '2023-06-12-648712f6a5196.png', '', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'user', 'registration_otp', '4', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 18:43:34', '2023-06-12 20:13:03', NULL),
+(24, 'Confirm Your Login.', '<p>Please copy the following OTP &amp; paste in on your Log in page to confirm your account.</p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, NULL, '2023-06-12-648713d7b9612.png', '', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'user', 'login_otp', '4', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 18:46:46', '2023-06-12 20:13:41', NULL),
+(25, 'Please Verify Your Delivery.', '<p>Please give the following OTP to your Deliveryman to ensure your order.</p>\r\n\r\n<p><strong>7 5 8 9 4 3 </strong></p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, NULL, '2023-06-12-648714cf7f15a.png', '', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'user', 'order_verification', '4', 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, '2023-06-12 18:51:27', '2023-06-12 18:51:27', NULL),
+(26, 'Your Order is Successful', '<p>Hi <strong>{userName}</strong>,</p>\r\n\r\n<p>Your order is successful. Please find your invoice below.</p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, NULL, NULL, 'Track Order', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'user', 'new_order', '3', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 18:52:36', '2023-06-12 20:16:37', NULL),
+(27, 'Refund Order', '<p>Hi <strong>{userName}</strong>,</p>\r\n\r\n<p>We&rsquo;ve refunded your requested amount. Please find your refund invoice below.</p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, NULL, NULL, '', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'user', 'refund_order', '9', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 18:53:40', '2023-06-12 20:18:12', NULL),
+(28, 'Reset Your Password', '<p>Please copy the following OTP &amp; paste in on your Log in page to&nbsp;reset your Password.</p>', NULL, NULL, NULL, '2023-06-12-64872af38ecfb.png', '', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved..', 'user', 'forget_password', '4', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 18:54:59', '2023-06-12 20:25:55', NULL),
+(29, 'Your Refund Request was Rejected.', '<p>Dear User,</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>The amount you request for a refund was rejected by the Admin.&nbsp;</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>To know more please contact us.</p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, '2023-06-12-648716141b3fd.png', NULL, '', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'user', 'refund_request_deny', '8', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 18:56:52', '2023-06-12 18:56:52', NULL),
+(30, 'Fund Added to your Wallet.', '<p>Dear <strong>{userName}</strong>,</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>The Admin has sent fund to your Wallet. Please check your wallet.</p>\r\n\r\n<p>&nbsp;</p>', NULL, NULL, NULL, '2023-06-12-64871653198e0.png', 'Check Status', '', 'Please contact us for any queries; we’re always happy to help.', '© 2023 6amMart. All rights reserved.', 'user', 'add_fund', '6', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, '2023-06-12 18:57:55', '2023-06-12 20:23:47', NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `email_verifications`
 --
 
@@ -737,7 +1305,8 @@ CREATE TABLE `expenses` (
   `description` text DEFAULT NULL,
   `created_by` varchar(50) DEFAULT 'admin',
   `store_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `delivery_man_id` bigint(20) UNSIGNED DEFAULT NULL
+  `delivery_man_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `user_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -755,6 +1324,100 @@ CREATE TABLE `failed_jobs` (
   `exception` longtext NOT NULL,
   `failed_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `flash_sales`
+--
+
+CREATE TABLE `flash_sales` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `module_id` bigint(20) UNSIGNED NOT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  `is_publish` tinyint(1) NOT NULL DEFAULT 1,
+  `admin_discount_percentage` double(24,3) NOT NULL,
+  `vendor_discount_percentage` double(24,3) NOT NULL,
+  `start_date` datetime DEFAULT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `flash_sale_items`
+--
+
+CREATE TABLE `flash_sale_items` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `flash_sale_id` bigint(20) UNSIGNED NOT NULL,
+  `item_id` bigint(20) UNSIGNED NOT NULL,
+  `stock` int(11) NOT NULL,
+  `sold` int(11) NOT NULL DEFAULT 0,
+  `available_stock` int(11) NOT NULL,
+  `discount_type` varchar(255) NOT NULL,
+  `discount` double(23,3) NOT NULL DEFAULT 0.000,
+  `discount_amount` double(23,3) NOT NULL DEFAULT 0.000,
+  `price` double(23,3) NOT NULL DEFAULT 0.000,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `flutter_special_criterias`
+--
+
+CREATE TABLE `flutter_special_criterias` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  `image` varchar(100) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `flutter_special_criterias`
+--
+
+INSERT INTO `flutter_special_criterias` (`id`, `title`, `image`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Easy Checkout & Payment system', '2024-04-20-662392f3a50ea.png', 1, '2023-08-16 00:09:00', '2024-04-20 05:44:06'),
+(2, 'Excellent Shopping Experience', '2024-04-20-66239c9904a21.png', 1, '2024-04-20 05:44:41', '2024-04-20 05:44:41'),
+(3, 'Thousands of stores', '2024-04-20-66239cb4406a9.png', 1, '2024-04-20 05:45:08', '2024-04-20 05:45:08');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `guests`
+--
+
+CREATE TABLE `guests` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `ip_address` varchar(255) DEFAULT NULL,
+  `fcm_token` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `guests`
+--
+
+INSERT INTO `guests` (`id`, `ip_address`, `fcm_token`, `created_at`, `updated_at`) VALUES
+(1, '66.249.80.99', 'BLACKLISTED', '2024-04-19 23:59:46', '2024-04-19 23:59:46'),
+(2, '61.247.177.142', NULL, '2024-04-20 00:16:22', '2024-04-20 00:16:22'),
+(3, '74.125.215.160', '@', '2024-04-20 00:30:17', '2024-04-20 00:30:17'),
+(4, '61.247.177.142', '@', '2024-04-20 00:35:00', '2024-04-20 00:35:00'),
+(5, '66.102.8.36', '@', '2024-04-20 00:38:01', '2024-04-20 00:38:01'),
+(6, '61.247.177.142', '@', '2024-04-20 00:39:09', '2024-04-20 00:39:09'),
+(7, '61.247.177.142', '@', '2024-04-20 01:26:20', '2024-04-20 01:26:20'),
+(8, '61.247.177.142', '@', '2024-04-20 01:26:20', '2024-04-20 01:26:20'),
+(9, '61.247.177.142', NULL, '2024-04-20 01:27:30', '2024-04-20 01:27:30');
 
 -- --------------------------------------------------------
 
@@ -795,8 +1458,19 @@ CREATE TABLE `items` (
   `images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `food_variations` text DEFAULT NULL,
   `slug` varchar(255) DEFAULT NULL,
-  `recommended` tinyint(1) NOT NULL DEFAULT 0
+  `recommended` tinyint(1) NOT NULL DEFAULT 0,
+  `organic` tinyint(1) NOT NULL DEFAULT 0,
+  `maximum_cart_quantity` int(11) DEFAULT NULL,
+  `is_approved` tinyint(1) NOT NULL DEFAULT 1,
+  `is_halal` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `items`
+--
+
+INSERT INTO `items` (`id`, `name`, `description`, `image`, `category_id`, `category_ids`, `variations`, `add_ons`, `attributes`, `choice_options`, `price`, `tax`, `tax_type`, `discount`, `discount_type`, `available_time_starts`, `available_time_ends`, `veg`, `status`, `store_id`, `created_at`, `updated_at`, `order_count`, `avg_rating`, `rating_count`, `rating`, `module_id`, `stock`, `unit_id`, `images`, `food_variations`, `slug`, `recommended`, `organic`, `maximum_cart_quantity`, `is_approved`, `is_halal`) VALUES
+(1, 'Demo Product', 'Demo Product Description', '2023-08-16-64dca91404b64.png', 2, '[{\"id\":\"1\",\"position\":1},{\"id\":\"2\",\"position\":2}]', '[]', '[]', '[]', '[]', '10.00', '0.00', 'percent', '0.00', 'percent', '00:00:00', '23:59:59', 0, 1, 1, '2023-08-15 23:46:44', '2023-08-16 00:00:05', 0, 0.00000000000000, 0, NULL, 1, 10, NULL, '[\"2023-08-16-64dca9140233e.png\",\"2023-08-16-64dcac358a7ea.png\"]', '[]', 'demo-product', 0, 1, 2, 1, 0);
 
 -- --------------------------------------------------------
 
@@ -834,7 +1508,8 @@ CREATE TABLE `item_campaigns` (
   `stock` int(11) DEFAULT 0,
   `unit_id` bigint(20) UNSIGNED DEFAULT NULL,
   `food_variations` text DEFAULT NULL,
-  `slug` varchar(255) DEFAULT NULL
+  `slug` varchar(255) DEFAULT NULL,
+  `maximum_cart_quantity` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -895,7 +1570,7 @@ CREATE TABLE `messages` (
   `conversation_id` bigint(20) UNSIGNED DEFAULT NULL,
   `sender_id` bigint(20) UNSIGNED DEFAULT NULL,
   `message` text DEFAULT NULL,
-  `file` varchar(100) DEFAULT NULL,
+  `file` text DEFAULT NULL,
   `is_seen` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -996,7 +1671,82 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (78, '2023_03_02_144258_add_discount_amount_by_store_col_to_order_transactions_table', 40),
 (79, '2023_03_11_120645_add_temp_block_time_col_to_phone_verifications_table', 41),
 (80, '2023_03_11_121000_add_temp_block_time_col_to_password_resets_table', 41),
-(81, '2023_03_13_181502_add_temp_token_column_to_users_table', 41);
+(81, '2023_03_13_181502_add_temp_token_column_to_users_table', 41),
+(82, '2023_04_05_112916_add_created_by_col_to_password_resets_table', 42),
+(83, '2023_05_04_100012_create_data_settings_table', 42),
+(84, '2023_05_04_100930_create_admin_promotional_banners_table', 42),
+(85, '2023_05_04_101825_create_admin_features_table', 42),
+(86, '2023_05_04_102015_create_admin_special_criterias_table', 42),
+(87, '2023_05_07_152523_create_admin_testimonials_table', 42),
+(88, '2023_05_07_173609_create_flutter_special_criterias_table', 42),
+(89, '2023_05_08_125811_create_react_testimonials_table', 42),
+(90, '2023_05_09_170006_create_email_templates_table', 42),
+(91, '2023_05_16_104129_add_cutlery_processing_time_unavailable_product_note_col_to_orders_table', 42),
+(92, '2023_05_18_093438_add_featured_col_to_categories_table', 42),
+(93, '2023_05_18_143530_add_delivery_instruction_col_to_orders_table', 42),
+(94, '2023_05_18_163841_add_organic_col_to_items_table', 42),
+(95, '2023_05_28_153920_add_tax_percentage_col_to_orders_table', 42),
+(96, '2023_06_11_172741_add_cutlery_col_to_stores_table', 42),
+(97, '2023_07_05_104537_add_maximum_cart_quantity_col_to_items_table', 43),
+(98, '2023_07_05_135741_add_service_charge_col_to_orders_table', 43),
+(99, '2023_07_05_145800_add_service_charge_col_to_order_transactions_table', 43),
+(100, '2023_07_05_155429_add_order_proof_col_to_orders_table', 43),
+(101, '2023_07_06_124530_add_partially_paid_amount_col_to_orders_table', 43),
+(102, '2023_07_06_144944_create_order_payments_table', 43),
+(103, '2023_07_09_120533_add_meta_cols_to_stores_table', 43),
+(104, '2023_07_09_143746_create_wallet_payments_table', 43),
+(105, '2023_07_10_121938_create_wallet_bonuses_table', 43),
+(106, '2023_07_10_153950_add_user_id_col_to_expenses_table', 43),
+(107, '2023_07_19_124016_add_maximum_cart_quantity_col_to_item_campaigns_table', 43),
+(108, '0000_00_00_000000_create_websockets_statistics_entries_table', 44),
+(109, '2023_08_10_131937_create_offline_payment_methods_table', 44),
+(110, '2023_08_10_132315_create_offline_payments_table', 44),
+(111, '2023_08_14_123526_create_temp_products_table', 44),
+(112, '2023_08_14_153229_add_is_approved_col_to_items_table', 44),
+(113, '2023_08_20_143852_add_created_by_col_to_banners_table', 44),
+(114, '2023_08_21_115610_add_announcement_cols_to_stores_table', 44),
+(115, '2023_08_21_173527_create_guests_table', 44),
+(116, '2023_08_22_102914_add_is_guest_col_to_orders_table', 44),
+(117, '2023_08_24_123045_create_common_conditions_table', 44),
+(118, '2023_08_24_151032_create_pharmacy_item_details_table', 44),
+(119, '2023_08_26_164947_create_module_wise_banners_table', 44),
+(120, '2023_08_27_123438_create_module_wise_why_chooses_table', 44),
+(121, '2023_08_28_114316_create_flash_sales_table', 44),
+(122, '2023_08_28_134428_create_flash_sale_items_table', 44),
+(123, '2023_09_07_131829_create_carts_table', 44),
+(124, '2023_09_20_122921_create_store_configs_table', 44),
+(125, '2023_09_23_184806_add_flash_sale_cols_to_orders_table', 44),
+(126, '2023_10_08_103818_add_increased_delivery_fee_in_zones_table', 44),
+(127, '2023_11_21_123038_create_withdrawal_methods_table', 45),
+(128, '2023_11_21_123229_create_disbursement_withdrawal_methods_table', 45),
+(129, '2023_11_21_123320_create_disbursements_table', 45),
+(130, '2023_11_21_123742_add_cols_to_withdraw_requests_table', 45),
+(131, '2023_11_21_124049_create_disbursement_details_table', 45),
+(132, '2023_11_21_160728_add_created_by_col_to_account_transactions_table', 45),
+(133, '2023_11_23_093859_create_parcel_delivery_instructions_table', 45),
+(134, '2024_01_17_105010_create_order_references_table', 46),
+(135, '2024_04_01_124630_create_cash_backs_table', 47),
+(136, '2024_04_01_130213_add_is_halal_col_to_items_table', 47),
+(137, '2024_04_01_130644_add_body_2_col_to_email_templates_table', 47),
+(138, '2024_04_01_142631_add_is_prescription_required_col_to_pharmacy_item_details_table', 47),
+(139, '2024_04_02_112611_create_brands_table', 47),
+(140, '2024_04_02_122002_create_ecommerce_item_details_table', 47),
+(141, '2024_04_02_133855_create_cash_back_histories_table', 47),
+(142, '2024_04_04_085842_add_interested_module_ids_col_to_users_table', 47),
+(143, '2024_04_18_171021_add_halal_extra_packaging_cols_to_store_configs_table', 47),
+(144, '2024_04_18_171206_add_halal_brand_cols_to_temp_products_table', 47),
+(145, '2024_04_18_171851_add_cashback_ref_amount_cols_to_temp_orders_table', 47),
+(146, '2024_04_18_172145_add_extrapackaging_ref_amount_cols_to_temp_order_transactions_table', 47),
+(147, '2024_05_13_102547_create_subscription_packages_table', 48),
+(148, '2024_05_13_102612_create_store_subscriptions_table', 48),
+(149, '2024_05_13_104250_create_subscription_transactions_table', 48),
+(150, '2024_05_13_170120_add_store_business_model_col_to_stores_table', 48),
+(151, '2024_05_14_175408_add_reply_col_to_reviews_table', 48),
+(152, '2024_05_16_113516_create_storages_table', 48),
+(153, '2024_05_22_115717_create_subscription_billing_and_refund_histories_table', 48),
+(154, '2024_05_26_120621_add_subscription_model_to_order_transaction_table', 48),
+(155, '2024_05_28_110550_add_change_file_column_to_messages_table', 48),
+(156, '2024_05_28_112559_add_change_order_attachment_column_to_orders_table', 48);
 
 -- --------------------------------------------------------
 
@@ -1019,6 +1769,13 @@ CREATE TABLE `modules` (
   `all_zone_service` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `modules`
+--
+
+INSERT INTO `modules` (`id`, `module_name`, `module_type`, `thumbnail`, `status`, `stores_count`, `created_at`, `updated_at`, `icon`, `theme_id`, `description`, `all_zone_service`) VALUES
+(1, 'Demo Module', 'grocery', '2024-04-20-662398cb7f5ef.png', 1, 1, '2023-08-15 23:31:17', '2024-04-20 05:28:27', '2024-04-20-662398cb7f2e7.png', 1, '<p><strong>We make grocery shopping more interesting.</strong><br />\r\nFind the greatest deals from the grocery stores near you.<br />\r\n<br />\r\n<strong>Nature &amp; Organic Products</strong><br />\r\nBring Nature into your home.<br />\r\n<br />\r\n<strong>Stay home &amp; get your daily needs from our shop</strong><br />\r\nStart You&#39;r Daily Shopping with 6amMart</p>', 0);
+
 -- --------------------------------------------------------
 
 --
@@ -1029,6 +1786,40 @@ CREATE TABLE `module_types` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `type` varchar(191) DEFAULT NULL,
   `description` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `module_wise_banners`
+--
+
+CREATE TABLE `module_wise_banners` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `module_id` bigint(20) UNSIGNED NOT NULL,
+  `key` varchar(255) DEFAULT NULL,
+  `value` text DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `module_wise_why_chooses`
+--
+
+CREATE TABLE `module_wise_why_chooses` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `module_id` bigint(20) UNSIGNED NOT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  `short_description` varchar(100) DEFAULT NULL,
+  `image` varchar(100) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1048,6 +1839,13 @@ CREATE TABLE `module_zone` (
   `maximum_cod_order_amount` double(23,2) DEFAULT NULL,
   `maximum_shipping_charge` double(23,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `module_zone`
+--
+
+INSERT INTO `module_zone` (`id`, `module_id`, `zone_id`, `per_km_shipping_charge`, `minimum_shipping_charge`, `maximum_cod_order_amount`, `maximum_shipping_charge`) VALUES
+(1, 1, 1, 10.00, 10.00, 10.00, 10.00);
 
 -- --------------------------------------------------------
 
@@ -1095,6 +1893,63 @@ CREATE TABLE `notification_messages` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `notification_messages`
+--
+
+INSERT INTO `notification_messages` (`id`, `module_type`, `key`, `message`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'grocery', 'order_pending_message', '{userName}, Your  order {orderId} is successfully placed', 1, '2023-01-17 16:53:45', '2023-06-12 18:33:40'),
+(2, 'grocery', 'order_confirmation_msg', '{userName}, Your order {orderId} is confirmed', 1, '2023-01-17 16:53:45', '2023-06-12 18:33:40'),
+(3, 'grocery', 'order_processing_message', '{userName}, Your order is Processing by {storeName}', 1, '2023-01-17 16:53:45', '2023-06-12 18:33:40'),
+(4, 'grocery', 'order_handover_message', 'Delivery man is on the way. For this order {orderId}', 1, '2023-01-17 16:53:45', '2023-06-12 18:33:40'),
+(5, 'grocery', 'order_refunded_message', 'Order {orderId} Refunded successfully', 1, '2023-01-17 16:53:45', '2023-06-12 18:33:40'),
+(6, 'grocery', 'refund_request_canceled', 'Order {orderId}  Refund request is canceled', 1, '2023-01-17 16:53:45', '2023-06-12 18:33:40'),
+(7, 'grocery', 'out_for_delivery_message', '{userName}, Your order {orderId} is ready for delivery', 1, '2023-01-17 16:53:45', '2023-06-12 18:33:41'),
+(8, 'grocery', 'order_delivered_message', 'Your order {orderId} is delivered', 1, '2023-01-17 16:53:45', '2023-06-12 18:33:41'),
+(9, 'grocery', 'delivery_boy_assign_message', 'Your order {orderId} has been assigned to a delivery man', 1, '2023-01-17 16:53:45', '2023-06-12 18:33:41'),
+(10, 'grocery', 'delivery_boy_delivered_message', 'Order {orderId} delivered successfully', 1, '2023-01-17 16:53:45', '2023-06-12 18:33:41'),
+(11, 'grocery', 'order_cancled_message', 'Order {orderId} is canceled by your request', 1, '2023-01-17 16:53:45', '2023-06-12 18:33:41'),
+(12, 'food', 'order_pending_message', '{userName}, Your  order {orderId} is successfully placed', 1, '2023-01-17 16:56:00', '2023-06-12 19:19:14'),
+(13, 'food', 'order_confirmation_msg', '{userName}, Your order {orderId} is confirmed', 1, '2023-01-17 16:56:00', '2023-06-12 19:19:14'),
+(14, 'food', 'order_processing_message', '{userName}, Your food is started for cooking by {storeName}', 1, '2023-01-17 16:56:00', '2023-06-12 19:19:14'),
+(15, 'food', 'order_handover_message', 'Delivery man is on the way. For this order {orderId}', 1, '2023-01-17 16:56:00', '2023-06-12 19:19:14'),
+(16, 'food', 'order_refunded_message', 'Order {orderId} Refunded successfully', 1, '2023-01-17 16:56:00', '2023-06-12 19:19:14'),
+(17, 'food', 'refund_request_canceled', 'Order {orderId}  Refund request is canceled', 1, '2023-01-17 16:56:00', '2023-06-12 19:19:14'),
+(18, 'food', 'out_for_delivery_message', '{userName}, Your order {orderId}  is ready for delivery', 1, '2023-01-17 16:56:00', '2023-06-12 19:19:14'),
+(19, 'food', 'order_delivered_message', 'Your order {orderId} is delivered', 1, '2023-01-17 16:56:00', '2023-06-12 19:19:15'),
+(20, 'food', 'delivery_boy_assign_message', 'Your order {orderId} has been assigned to a delivery man', 1, '2023-01-17 16:56:00', '2023-06-12 19:19:15'),
+(21, 'food', 'delivery_boy_delivered_message', 'Order {orderId} delivered successfully', 1, '2023-01-17 16:56:00', '2023-06-12 19:19:15'),
+(22, 'food', 'order_cancled_message', 'Order {orderId} is canceled by your request', 1, '2023-01-17 16:56:00', '2023-06-12 19:19:15'),
+(23, 'pharmacy', 'order_pending_message', '{userName}, Your  order {orderId} is successfully placed', 1, '2023-01-17 16:57:46', '2023-06-12 19:22:20'),
+(24, 'pharmacy', 'order_confirmation_msg', '{userName}, Your order {orderId} is confirmed', 1, '2023-01-17 16:57:46', '2023-06-12 19:22:20'),
+(25, 'pharmacy', 'order_processing_message', '{userName}, Your order is Processing by {storeName}', 1, '2023-01-17 16:57:46', '2023-06-12 19:22:20'),
+(26, 'pharmacy', 'order_handover_message', 'Delivery man is on the way. For this order {orderId}', 1, '2023-01-17 16:57:46', '2023-06-12 19:22:20'),
+(27, 'pharmacy', 'order_refunded_message', 'Order {orderId} Refunded successfully', 1, '2023-01-17 16:57:46', '2023-06-12 19:22:20'),
+(28, 'pharmacy', 'refund_request_canceled', 'Order {orderId}  Refund request is canceled', 1, '2023-01-17 16:57:46', '2023-06-12 19:22:20'),
+(29, 'pharmacy', 'out_for_delivery_message', '{userName}, Your order {orderId} is ready for delivery', 1, '2023-01-17 16:57:46', '2023-06-12 19:22:20'),
+(30, 'pharmacy', 'order_delivered_message', 'Your order {orderId} is delivered', 1, '2023-01-17 16:57:46', '2023-06-12 19:22:20'),
+(31, 'pharmacy', 'delivery_boy_assign_message', 'Your order {orderId} has been assigned to a delivery man', 1, '2023-01-17 16:57:46', '2023-06-12 19:22:20'),
+(32, 'pharmacy', 'delivery_boy_delivered_message', 'Order {orderId} delivered successfully', 1, '2023-01-17 16:57:46', '2023-06-12 19:22:20'),
+(33, 'pharmacy', 'order_cancled_message', 'Order {orderId} is canceled by your request', 1, '2023-01-17 16:57:46', '2023-06-12 19:22:20'),
+(34, 'ecommerce', 'order_pending_message', '{userName}, Your  order {orderId} is successfully placed', 1, '2023-01-17 16:59:24', '2023-06-12 19:25:02'),
+(35, 'ecommerce', 'order_confirmation_msg', '{userName}, Your order {orderId} is confirmed', 1, '2023-01-17 16:59:24', '2023-06-12 19:25:02'),
+(36, 'ecommerce', 'order_processing_message', '{userName}, Your order is Processing by {storeName}', 1, '2023-01-17 16:59:24', '2023-06-12 19:25:02'),
+(37, 'ecommerce', 'order_handover_message', 'Delivery man is on the way. For this order {orderId}', 1, '2023-01-17 16:59:24', '2023-06-12 19:25:02'),
+(38, 'ecommerce', 'order_refunded_message', 'Order {orderId} Refunded successfully', 1, '2023-01-17 16:59:24', '2023-06-12 19:25:02'),
+(39, 'ecommerce', 'refund_request_canceled', 'Order {orderId}  Refund request is canceled', 1, '2023-01-17 16:59:24', '2023-06-12 19:25:02'),
+(40, 'ecommerce', 'out_for_delivery_message', '{userName}, Your order {orderId} is ready for delivery', 1, '2023-01-17 16:59:24', '2023-06-12 19:25:02'),
+(41, 'ecommerce', 'order_delivered_message', 'Your order {orderId} is delivered', 1, '2023-01-17 16:59:24', '2023-06-12 19:25:02'),
+(42, 'ecommerce', 'delivery_boy_assign_message', 'Your order {orderId} has been assigned to a delivery man', 1, '2023-01-17 16:59:24', '2023-06-12 19:25:02'),
+(43, 'ecommerce', 'delivery_boy_delivered_message', 'Order {orderId} delivered successfully', 1, '2023-01-17 16:59:24', '2023-06-12 19:25:02'),
+(44, 'ecommerce', 'order_cancled_message', 'Order {orderId} is canceled by your request', 1, '2023-01-17 16:59:24', '2023-06-12 19:25:02'),
+(45, 'parcel', 'order_pending_message', '{userName}, Your parcel order is successfully placed', 1, '2023-01-17 17:01:02', '2023-06-12 19:29:42'),
+(46, 'parcel', 'order_confirmation_msg', 'Your order {orderId} is confirmed', 1, '2023-01-17 17:01:02', '2023-06-12 19:29:42'),
+(47, 'parcel', 'out_for_delivery_message', 'Your parcel order  {orderId}  is ready for delivery', 1, '2023-01-17 17:01:02', '2023-06-12 19:29:42'),
+(48, 'parcel', 'order_delivered_message', 'Your parcel id  {orderId}  is delivered', 1, '2023-01-17 17:01:02', '2023-06-12 19:29:42'),
+(49, 'parcel', 'delivery_boy_assign_message', 'Your order {orderId}  has been assigned to a delivery man', 1, '2023-01-17 17:01:02', '2023-06-12 19:29:42'),
+(50, 'parcel', 'delivery_boy_delivered_message', 'parcel id  {orderId}  delivered successfully', 1, '2023-01-17 17:01:02', '2023-06-12 19:29:42'),
+(51, 'parcel', 'order_cancled_message', 'Order is canceled by your request', 1, '2023-01-17 17:01:02', '2023-01-17 17:01:02');
 
 -- --------------------------------------------------------
 
@@ -1196,6 +2051,40 @@ CREATE TABLE `oauth_refresh_tokens` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `offline_payments`
+--
+
+CREATE TABLE `offline_payments` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `order_id` bigint(20) UNSIGNED NOT NULL,
+  `payment_info` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `status` varchar(10) NOT NULL DEFAULT 'pending',
+  `note` text DEFAULT NULL,
+  `customer_note` text DEFAULT NULL,
+  `method_fields` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `offline_payment_methods`
+--
+
+CREATE TABLE `offline_payment_methods` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `method_name` varchar(255) NOT NULL,
+  `method_fields` text NOT NULL,
+  `method_informations` text NOT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `orders`
 --
 
@@ -1243,7 +2132,7 @@ CREATE TABLE `orders` (
   `delivery_time` varchar(255) DEFAULT NULL,
   `zone_id` bigint(20) UNSIGNED DEFAULT NULL,
   `module_id` bigint(20) UNSIGNED NOT NULL,
-  `order_attachment` varchar(191) DEFAULT NULL,
+  `order_attachment` text DEFAULT NULL,
   `parcel_category_id` bigint(20) UNSIGNED DEFAULT NULL,
   `receiver_details` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `charge_payer` enum('sender','receiver') DEFAULT NULL,
@@ -1257,7 +2146,21 @@ CREATE TABLE `orders` (
   `cancellation_reason` varchar(255) DEFAULT NULL,
   `canceled_by` varchar(50) DEFAULT NULL,
   `coupon_created_by` varchar(50) DEFAULT NULL,
-  `discount_on_product_by` varchar(50) NOT NULL DEFAULT 'vendor'
+  `discount_on_product_by` varchar(50) NOT NULL DEFAULT 'vendor',
+  `processing_time` varchar(10) DEFAULT NULL,
+  `unavailable_item_note` varchar(255) DEFAULT NULL,
+  `cutlery` tinyint(1) NOT NULL DEFAULT 0,
+  `delivery_instruction` text DEFAULT NULL,
+  `tax_percentage` double(24,3) DEFAULT NULL,
+  `additional_charge` double(23,3) NOT NULL DEFAULT 0.000,
+  `order_proof` text DEFAULT NULL,
+  `partially_paid_amount` double(23,3) NOT NULL DEFAULT 0.000,
+  `is_guest` tinyint(1) NOT NULL DEFAULT 0,
+  `flash_admin_discount_amount` double(24,3) NOT NULL DEFAULT 0.000,
+  `flash_store_discount_amount` double(24,3) NOT NULL DEFAULT 0.000,
+  `cash_back_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `extra_packaging_amount` double(23,3) NOT NULL DEFAULT 0.000,
+  `ref_bonus_amount` double(23,3) NOT NULL DEFAULT 0.000
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1321,6 +2224,38 @@ CREATE TABLE `order_details` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `order_payments`
+--
+
+CREATE TABLE `order_payments` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `order_id` bigint(20) UNSIGNED NOT NULL,
+  `transaction_ref` varchar(255) DEFAULT NULL,
+  `amount` decimal(8,2) NOT NULL DEFAULT 0.00,
+  `payment_status` varchar(50) NOT NULL,
+  `payment_method` varchar(100) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_references`
+--
+
+CREATE TABLE `order_references` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `order_id` bigint(20) UNSIGNED NOT NULL,
+  `is_reviewed` tinyint(1) NOT NULL DEFAULT 0,
+  `is_review_canceled` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `order_transactions`
 --
 
@@ -1346,7 +2281,12 @@ CREATE TABLE `order_transactions` (
   `delivery_fee_comission` double(24,2) NOT NULL DEFAULT 0.00,
   `admin_expense` decimal(23,3) DEFAULT 0.000,
   `store_expense` double(23,3) DEFAULT 0.000,
-  `discount_amount_by_store` double(23,3) DEFAULT 0.000
+  `discount_amount_by_store` double(23,3) DEFAULT 0.000,
+  `additional_charge` double(23,3) NOT NULL DEFAULT 0.000,
+  `extra_packaging_amount` double(23,3) NOT NULL DEFAULT 0.000,
+  `ref_bonus_amount` double(23,3) NOT NULL DEFAULT 0.000,
+  `commission_percentage` double(16,3) DEFAULT 0.000,
+  `is_subscribed` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1372,6 +2312,20 @@ CREATE TABLE `parcel_categories` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `parcel_delivery_instructions`
+--
+
+CREATE TABLE `parcel_delivery_instructions` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `instruction` varchar(255) NOT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `password_resets`
 --
 
@@ -1382,7 +2336,54 @@ CREATE TABLE `password_resets` (
   `otp_hit_count` tinyint(4) NOT NULL DEFAULT 0,
   `is_blocked` tinyint(1) NOT NULL DEFAULT 0,
   `is_temp_blocked` tinyint(1) NOT NULL DEFAULT 0,
-  `temp_block_time` timestamp NULL DEFAULT NULL
+  `temp_block_time` timestamp NULL DEFAULT NULL,
+  `created_by` varchar(50) DEFAULT 'user'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `payment_requests`
+--
+
+CREATE TABLE `payment_requests` (
+  `id` char(36) NOT NULL,
+  `payer_id` varchar(64) DEFAULT NULL,
+  `receiver_id` varchar(64) DEFAULT NULL,
+  `payment_amount` decimal(24,2) NOT NULL DEFAULT 0.00,
+  `gateway_callback_url` varchar(191) DEFAULT NULL,
+  `success_hook` varchar(100) DEFAULT NULL,
+  `failure_hook` varchar(100) DEFAULT NULL,
+  `transaction_id` varchar(100) DEFAULT NULL,
+  `currency_code` varchar(20) NOT NULL DEFAULT 'USD',
+  `payment_method` varchar(50) DEFAULT NULL,
+  `additional_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `is_paid` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `payer_information` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `external_redirect_link` varchar(255) DEFAULT NULL,
+  `receiver_information` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `attribute_id` varchar(64) DEFAULT NULL,
+  `attribute` varchar(255) DEFAULT NULL,
+  `payment_platform` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pharmacy_item_details`
+--
+
+CREATE TABLE `pharmacy_item_details` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `item_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `common_condition_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `is_basic` tinyint(1) NOT NULL DEFAULT 0,
+  `temp_product_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `is_prescription_required` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1422,6 +2423,31 @@ CREATE TABLE `provide_d_m_earnings` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `react_testimonials`
+--
+
+CREATE TABLE `react_testimonials` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `designation` varchar(100) DEFAULT NULL,
+  `review` text DEFAULT NULL,
+  `reviewer_image` varchar(255) DEFAULT NULL,
+  `company_image` varchar(255) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `react_testimonials`
+--
+
+INSERT INTO `react_testimonials` (`id`, `name`, `designation`, `review`, `reviewer_image`, `company_image`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'John Doe', 'CTO', 'Very good Service.', '2024-04-20-6623949d88131.png', 'def.png', 1, '2023-08-16 00:05:42', '2024-04-20 05:10:37');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `refunds`
 --
 
@@ -1455,6 +2481,13 @@ CREATE TABLE `refund_reasons` (
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `refund_reasons`
+--
+
+INSERT INTO `refund_reasons` (`id`, `reason`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'I ordered the wrong food', 1, '2023-08-16 23:39:23', '2023-08-16 23:39:23');
+
 -- --------------------------------------------------------
 
 --
@@ -1473,7 +2506,10 @@ CREATE TABLE `reviews` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `item_campaign_id` bigint(20) UNSIGNED DEFAULT NULL,
   `status` tinyint(1) DEFAULT 1,
-  `module_id` bigint(20) UNSIGNED NOT NULL
+  `module_id` bigint(20) UNSIGNED NOT NULL,
+  `store_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `reply` text DEFAULT NULL,
+  `review_id` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1504,6 +2540,36 @@ CREATE TABLE `soft_credentials` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `storages`
+--
+
+CREATE TABLE `storages` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `data_type` varchar(255) NOT NULL,
+  `data_id` varchar(100) NOT NULL,
+  `key` varchar(255) DEFAULT NULL,
+  `value` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `storages`
+--
+
+INSERT INTO `storages` (`id`, `data_type`, `data_id`, `key`, `value`, `created_at`, `updated_at`) VALUES
+(1, 'App\\Models\\BusinessSetting', '18', NULL, 'public', '2024-06-05 23:30:13', '2024-06-05 23:30:13'),
+(2, 'App\\Models\\BusinessSetting', '96', NULL, 'public', '2024-06-05 23:30:13', '2024-06-05 23:30:13'),
+(3, 'App\\Models\\BusinessSetting', '142', NULL, 'public', '2024-06-05 23:23:50', '2024-06-05 23:23:50'),
+(4, 'App\\Models\\BusinessSetting', '143', NULL, 'public', '2024-06-05 23:23:50', '2024-06-05 23:23:50'),
+(5, 'App\\Models\\BusinessSetting', '144', NULL, 'public', '2024-06-05 23:23:55', '2024-06-05 23:23:55'),
+(6, 'App\\Models\\BusinessSetting', '145', NULL, 'public', '2024-06-05 23:27:22', '2024-06-05 23:27:22'),
+(7, 'App\\Models\\BusinessSetting', '146', NULL, 'public', '2024-06-05 23:27:22', '2024-06-05 23:27:22'),
+(8, 'App\\Models\\BusinessSetting', '147', NULL, 'public', '2024-06-05 23:24:14', '2024-06-05 23:24:14');
 
 -- --------------------------------------------------------
 
@@ -1554,7 +2620,39 @@ CREATE TABLE `stores` (
   `per_km_shipping_charge` double(16,3) UNSIGNED NOT NULL DEFAULT 0.000,
   `prescription_order` tinyint(1) NOT NULL DEFAULT 0,
   `slug` varchar(255) DEFAULT NULL,
-  `maximum_shipping_charge` double(23,3) DEFAULT NULL
+  `maximum_shipping_charge` double(23,3) DEFAULT NULL,
+  `cutlery` tinyint(1) NOT NULL DEFAULT 0,
+  `meta_title` varchar(100) DEFAULT NULL,
+  `meta_description` text DEFAULT NULL,
+  `meta_image` varchar(100) DEFAULT NULL,
+  `announcement` tinyint(1) NOT NULL DEFAULT 0,
+  `announcement_message` varchar(255) DEFAULT NULL,
+  `store_business_model` enum('none','commission','subscription','unsubscribed') NOT NULL DEFAULT 'commission'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `stores`
+--
+
+INSERT INTO `stores` (`id`, `name`, `phone`, `email`, `logo`, `latitude`, `longitude`, `address`, `footer_text`, `minimum_order`, `comission`, `schedule_order`, `status`, `vendor_id`, `created_at`, `updated_at`, `free_delivery`, `rating`, `cover_photo`, `delivery`, `take_away`, `item_section`, `tax`, `zone_id`, `reviews_section`, `active`, `off_day`, `gst`, `self_delivery_system`, `pos_system`, `minimum_shipping_charge`, `delivery_time`, `veg`, `non_veg`, `order_count`, `total_order`, `module_id`, `order_place_to_schedule_interval`, `featured`, `per_km_shipping_charge`, `prescription_order`, `slug`, `maximum_shipping_charge`, `cutlery`, `meta_title`, `meta_description`, `meta_image`, `announcement`, `announcement_message`, `store_business_model`) VALUES
+(1, 'Demo Store', '+101511111111', 'demo.store@gmail.com', '2023-08-16-64dca8ad238c4.png', '23.81695886557418', '90.36934144046135', 'House, road', NULL, '0.00', NULL, 0, 1, 1, '2023-08-15 23:45:01', '2024-06-05 23:30:13', 0, NULL, '2023-08-16-64dca8ad263f6.png', 1, 1, 1, '5.00', 1, 1, 1, ' ', NULL, 0, 0, '0.00', '30-40 min', 1, 1, 0, 0, 1, 0, 1, 0.000, 0, 'demo-store', NULL, 0, NULL, NULL, NULL, 0, NULL, 'commission');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `store_configs`
+--
+
+CREATE TABLE `store_configs` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `store_id` bigint(20) UNSIGNED NOT NULL,
+  `is_recommended` tinyint(1) NOT NULL DEFAULT 0,
+  `is_recommended_deleted` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `halal_tag_status` tinyint(1) NOT NULL DEFAULT 0,
+  `extra_packaging_status` tinyint(1) NOT NULL DEFAULT 0,
+  `extra_packaging_amount` double(23,3) NOT NULL DEFAULT 0.000
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1576,6 +2674,35 @@ CREATE TABLE `store_schedule` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `store_subscriptions`
+--
+
+CREATE TABLE `store_subscriptions` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `package_id` bigint(20) UNSIGNED NOT NULL,
+  `store_id` bigint(20) UNSIGNED NOT NULL,
+  `expiry_date` date NOT NULL,
+  `validity` int(11) NOT NULL DEFAULT 0,
+  `max_order` varchar(255) NOT NULL,
+  `max_product` varchar(255) NOT NULL,
+  `pos` tinyint(1) NOT NULL DEFAULT 0,
+  `mobile_app` tinyint(1) NOT NULL DEFAULT 0,
+  `chat` tinyint(1) NOT NULL DEFAULT 0,
+  `review` tinyint(1) NOT NULL DEFAULT 0,
+  `self_delivery` tinyint(1) NOT NULL DEFAULT 0,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `is_trial` tinyint(1) NOT NULL DEFAULT 0,
+  `total_package_renewed` tinyint(4) NOT NULL DEFAULT 0,
+  `renewed_at` datetime DEFAULT NULL,
+  `is_canceled` tinyint(1) NOT NULL DEFAULT 0,
+  `canceled_by` enum('none','admin','store') NOT NULL DEFAULT 'none',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `store_wallets`
 --
 
@@ -1586,6 +2713,86 @@ CREATE TABLE `store_wallets` (
   `total_withdrawn` decimal(24,2) NOT NULL DEFAULT 0.00,
   `pending_withdraw` decimal(24,2) NOT NULL DEFAULT 0.00,
   `collected_cash` decimal(24,2) NOT NULL DEFAULT 0.00,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `store_wallets`
+--
+
+INSERT INTO `store_wallets` (`id`, `vendor_id`, `total_earning`, `total_withdrawn`, `pending_withdraw`, `collected_cash`, `created_at`, `updated_at`) VALUES
+(1, 1, '0.00', '0.00', '0.00', '0.00', '2024-06-05 20:16:11', '2024-06-05 20:16:11');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `subscription_billing_and_refund_histories`
+--
+
+CREATE TABLE `subscription_billing_and_refund_histories` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `store_id` bigint(20) UNSIGNED NOT NULL,
+  `subscription_id` bigint(20) UNSIGNED NOT NULL,
+  `package_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `transaction_type` enum('pending_bill','refund') NOT NULL DEFAULT 'pending_bill',
+  `amount` double(24,3) NOT NULL,
+  `is_success` tinyint(1) NOT NULL DEFAULT 0,
+  `reference` varchar(191) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `subscription_packages`
+--
+
+CREATE TABLE `subscription_packages` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `package_name` varchar(191) NOT NULL,
+  `price` double(24,3) NOT NULL,
+  `validity` int(11) NOT NULL,
+  `max_order` varchar(255) NOT NULL DEFAULT 'unlimited',
+  `max_product` varchar(255) NOT NULL DEFAULT 'unlimited',
+  `pos` tinyint(1) NOT NULL DEFAULT 0,
+  `mobile_app` tinyint(1) NOT NULL DEFAULT 0,
+  `chat` tinyint(1) NOT NULL DEFAULT 0,
+  `review` tinyint(1) NOT NULL DEFAULT 0,
+  `self_delivery` tinyint(1) NOT NULL DEFAULT 0,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `default` tinyint(1) NOT NULL DEFAULT 0,
+  `colour` varchar(50) DEFAULT NULL,
+  `text` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `subscription_transactions`
+--
+
+CREATE TABLE `subscription_transactions` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `package_id` bigint(20) UNSIGNED NOT NULL,
+  `store_id` bigint(20) UNSIGNED NOT NULL,
+  `store_subscription_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `price` double(24,3) NOT NULL DEFAULT 0.000,
+  `previous_due` double(24,3) NOT NULL DEFAULT 0.000,
+  `validity` int(11) NOT NULL DEFAULT 0,
+  `payment_method` varchar(191) NOT NULL,
+  `payment_status` varchar(191) NOT NULL,
+  `reference` varchar(191) DEFAULT NULL,
+  `paid_amount` double(24,2) NOT NULL,
+  `discount` int(11) NOT NULL DEFAULT 0,
+  `package_details` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`package_details`)),
+  `created_by` varchar(50) NOT NULL,
+  `is_trial` tinyint(1) NOT NULL DEFAULT 0,
+  `transaction_status` tinyint(1) NOT NULL DEFAULT 1,
+  `plan_type` enum('renew','new_plan','first_purchased','free_trial') NOT NULL DEFAULT 'first_purchased',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1601,6 +2808,55 @@ CREATE TABLE `tags` (
   `tag` varchar(255) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `temp_products`
+--
+
+CREATE TABLE `temp_products` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `image` varchar(30) DEFAULT NULL,
+  `images` longtext DEFAULT NULL,
+  `store_id` bigint(20) UNSIGNED NOT NULL,
+  `module_id` bigint(20) UNSIGNED NOT NULL,
+  `unit_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `item_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `category_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `category_ids` varchar(255) DEFAULT NULL,
+  `tag_ids` varchar(255) DEFAULT NULL,
+  `slug` varchar(255) DEFAULT NULL,
+  `variations` text DEFAULT NULL,
+  `food_variations` text DEFAULT NULL,
+  `add_ons` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
+  `choice_options` text DEFAULT NULL,
+  `price` decimal(24,2) NOT NULL DEFAULT 0.00,
+  `tax` decimal(24,2) NOT NULL DEFAULT 0.00,
+  `tax_type` varchar(20) NOT NULL DEFAULT 'percent',
+  `discount` decimal(8,2) NOT NULL DEFAULT 0.00,
+  `discount_type` varchar(20) NOT NULL DEFAULT 'percent',
+  `veg` tinyint(1) NOT NULL DEFAULT 0,
+  `recommended` tinyint(1) NOT NULL DEFAULT 0,
+  `organic` tinyint(1) NOT NULL DEFAULT 0,
+  `common_condition_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `basic` tinyint(1) NOT NULL DEFAULT 0,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `stock` int(11) DEFAULT 0,
+  `maximum_cart_quantity` int(11) DEFAULT NULL,
+  `note` text DEFAULT NULL,
+  `is_rejected` tinyint(1) NOT NULL DEFAULT 0,
+  `available_time_ends` time DEFAULT NULL,
+  `available_time_starts` time DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `is_halal` tinyint(1) NOT NULL DEFAULT 0,
+  `brand_id` tinyint(1) NOT NULL DEFAULT 0,
+  `is_prescription_required` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1635,6 +2891,54 @@ CREATE TABLE `translations` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `translations`
+--
+
+INSERT INTO `translations` (`id`, `translationable_type`, `translationable_id`, `locale`, `key`, `value`, `created_at`, `updated_at`) VALUES
+(1, 'App\\Models\\Module', 1, 'en', 'module_name', 'Demo Module', NULL, NULL),
+(2, 'App\\Models\\Module', 1, 'en', 'description', '<p><strong>We make grocery shopping more interesting.</strong><br />\r\nFind the greatest deals from the grocery stores near you.<br />\r\n<br />\r\n<strong>Nature &amp; Organic Products</strong><br />\r\nBring Nature into your home.<br />\r\n<br />\r\n<strong>Stay home &amp; get your daily needs from our shop</strong><br />\r\nStart You&#39;r Daily Shopping with 6amMart</p>', NULL, NULL),
+(3, 'App\\Models\\Zone', 1, 'en', 'name', 'Demo Zone', NULL, NULL),
+(4, 'App\\Models\\Category', 1, 'en', 'name', 'Demo category', NULL, NULL),
+(5, 'App\\Models\\Category', 2, 'en', 'name', 'Demo sub category', NULL, NULL),
+(6, 'App\\Models\\Store', 1, 'en', 'name', 'Demo Store', NULL, NULL),
+(7, 'App\\Models\\Store', 1, 'en', 'address', 'House, road', NULL, NULL),
+(8, 'App\\Models\\Item', 1, 'en', 'name', 'Demo Product', NULL, NULL),
+(9, 'App\\Models\\Item', 1, 'en', 'description', 'Demo Product Description', NULL, NULL),
+(10, 'App\\Models\\AdminPromotionalBanner', 1, 'en', 'title', 'Find', NULL, NULL),
+(11, 'App\\Models\\AdminPromotionalBanner', 1, 'en', 'sub_title', 'Your daily grocery item', NULL, NULL),
+(12, 'App\\Models\\AdminFeature', 1, 'en', 'title', 'Trusted', NULL, NULL),
+(13, 'App\\Models\\AdminFeature', 1, 'en', 'sub_title', 'Trusted by customers and store owners', NULL, NULL),
+(14, 'App\\Models\\AdminSpecialCriteria', 1, 'en', 'title', 'Demo Title', NULL, NULL),
+(15, 'App\\Models\\DataSetting', 24, 'en', 'download_user_app_title', 'Let’s  Manage', NULL, NULL),
+(16, 'App\\Models\\DataSetting', 25, 'en', 'download_user_app_sub_title', 'Your business  Smartly or Earn.', NULL, NULL),
+(17, 'App\\Models\\DataSetting', 29, 'en', 'contact_us_title', 'Contact Us', NULL, NULL),
+(18, 'App\\Models\\DataSetting', 30, 'en', 'contact_us_sub_title', 'Any question or remarks? Just write us a message!', NULL, NULL),
+(19, 'App\\Models\\DataSetting', 34, 'en', 'header_title', '$Your e-Commerce!$', NULL, NULL),
+(20, 'App\\Models\\DataSetting', 35, 'en', 'header_sub_title', 'Venture Starts Here', NULL, NULL),
+(21, 'App\\Models\\DataSetting', 36, 'en', 'header_tag_line', 'More than just a reliable $eCommerce$ platform', NULL, NULL),
+(22, 'App\\Models\\DataSetting', 59, 'en', 'business_title', '$Let’s$', NULL, NULL),
+(23, 'App\\Models\\DataSetting', 60, 'en', 'business_sub_title', 'Manage your business  Smartly', NULL, NULL),
+(24, 'App\\Models\\DataSetting', 68, 'en', 'fixed_header_title', '6amMart', NULL, NULL),
+(25, 'App\\Models\\DataSetting', 69, 'en', 'fixed_header_sub_title', 'More than just reliable eCommerce platform', NULL, NULL),
+(26, 'App\\Models\\FlutterSpecialCriteria', 1, 'en', 'title', 'Easy Checkout & Payment system', NULL, NULL),
+(27, 'App\\Models\\DataSetting', 82, 'en', 'download_user_app_title', 'Download app and enjoy more!', NULL, NULL),
+(28, 'App\\Models\\DataSetting', 83, 'en', 'download_user_app_sub_title', 'Download app from', NULL, NULL),
+(29, 'App\\Models\\RefundReason', 1, 'en', 'reason', 'I ordered the wrong food', NULL, NULL),
+(30, 'App\\Models\\AdminFeature', 2, 'en', 'title', 'Delivery', NULL, NULL),
+(31, 'App\\Models\\AdminFeature', 2, 'en', 'sub_title', 'Flexible delivery system', NULL, NULL),
+(32, 'App\\Models\\AdminFeature', 3, 'en', 'title', 'Shopping', NULL, NULL),
+(33, 'App\\Models\\AdminFeature', 3, 'en', 'sub_title', 'Best shopping experience', NULL, NULL),
+(34, 'App\\Models\\AdminFeature', 4, 'en', 'title', 'Location', NULL, NULL),
+(35, 'App\\Models\\AdminFeature', 4, 'en', 'sub_title', 'Location tracking system', NULL, NULL),
+(36, 'App\\Models\\AdminSpecialCriteria', 2, 'en', 'title', 'Easy to Manage Multiple Store', NULL, NULL),
+(37, 'App\\Models\\AdminSpecialCriteria', 3, 'en', 'title', 'Easy to Manage E-Commerce', NULL, NULL),
+(38, 'App\\Models\\AdminSpecialCriteria', 4, 'en', 'title', 'Easy to Manage Parcel Delivery', NULL, NULL),
+(39, 'App\\Models\\AdminSpecialCriteria', 5, 'en', 'title', 'Easy to Manage Location Tracking', NULL, NULL),
+(40, 'App\\Models\\AdminSpecialCriteria', 6, 'en', 'title', 'Easy to Manage Grocery Business', NULL, NULL),
+(41, 'App\\Models\\FlutterSpecialCriteria', 2, 'en', 'title', 'Excellent Shopping Experience', NULL, NULL),
+(42, 'App\\Models\\FlutterSpecialCriteria', 3, 'en', 'title', 'Thousands of stores', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1680,7 +2984,8 @@ CREATE TABLE `users` (
   `ref_code` varchar(10) DEFAULT NULL,
   `current_language_key` varchar(255) DEFAULT 'en',
   `ref_by` bigint(20) UNSIGNED DEFAULT NULL,
-  `temp_token` varchar(255) DEFAULT NULL
+  `temp_token` varchar(255) DEFAULT NULL,
+  `module_ids` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1748,6 +3053,13 @@ CREATE TABLE `vendors` (
   `auth_token` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `vendors`
+--
+
+INSERT INTO `vendors` (`id`, `f_name`, `l_name`, `phone`, `email`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`, `bank_name`, `branch`, `holder_name`, `account_no`, `image`, `status`, `firebase_token`, `auth_token`) VALUES
+(1, 'Demo', 'Store', '+101511111111', 'demo.store@gmail.com', NULL, '$2y$10$Rtm/6/dNJwwRZcfUAjCNdezs3xCwTN1oTW/2mqrRBZkGqHHZAqcuW', NULL, '2023-08-15 23:45:01', '2023-08-15 23:45:01', NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -1777,6 +3089,44 @@ CREATE TABLE `vendor_employees` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `wallet_bonuses`
+--
+
+CREATE TABLE `wallet_bonuses` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `bonus_type` varchar(255) NOT NULL,
+  `bonus_amount` double(23,3) NOT NULL DEFAULT 0.000,
+  `minimum_add_amount` double(23,3) NOT NULL DEFAULT 0.000,
+  `maximum_bonus_amount` double(23,3) NOT NULL DEFAULT 0.000,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `wallet_payments`
+--
+
+CREATE TABLE `wallet_payments` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `transaction_ref` varchar(255) DEFAULT NULL,
+  `amount` decimal(8,2) NOT NULL DEFAULT 0.00,
+  `payment_status` varchar(50) NOT NULL,
+  `payment_method` varchar(100) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `wallet_transactions`
 --
 
@@ -1790,6 +3140,22 @@ CREATE TABLE `wallet_transactions` (
   `balance` decimal(24,3) NOT NULL DEFAULT 0.000,
   `transaction_type` varchar(191) DEFAULT NULL,
   `reference` varchar(191) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `websockets_statistics_entries`
+--
+
+CREATE TABLE `websockets_statistics_entries` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `app_id` varchar(255) NOT NULL,
+  `peak_connection_count` int(11) NOT NULL,
+  `websocket_message_count` int(11) NOT NULL,
+  `api_message_count` int(11) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1812,18 +3178,38 @@ CREATE TABLE `wishlists` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `withdrawal_methods`
+--
+
+CREATE TABLE `withdrawal_methods` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `method_name` varchar(255) NOT NULL,
+  `method_fields` text NOT NULL,
+  `is_default` tinyint(4) NOT NULL DEFAULT 0,
+  `is_active` tinyint(4) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `withdraw_requests`
 --
 
 CREATE TABLE `withdraw_requests` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `vendor_id` bigint(20) UNSIGNED NOT NULL,
+  `vendor_id` bigint(20) UNSIGNED DEFAULT NULL,
   `admin_id` bigint(20) UNSIGNED DEFAULT NULL,
   `transaction_note` varchar(255) DEFAULT NULL,
   `amount` decimal(23,3) NOT NULL DEFAULT 0.000,
   `approved` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `delivery_man_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `withdrawal_method_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `withdrawal_method_fields` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `type` varchar(20) NOT NULL DEFAULT 'manual'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1843,8 +3229,19 @@ CREATE TABLE `zones` (
   `customer_wise_topic` varchar(255) DEFAULT NULL,
   `deliveryman_wise_topic` varchar(255) DEFAULT NULL,
   `cash_on_delivery` tinyint(1) NOT NULL DEFAULT 0,
-  `digital_payment` tinyint(1) NOT NULL DEFAULT 0
+  `digital_payment` tinyint(1) NOT NULL DEFAULT 0,
+  `increased_delivery_fee` double(8,2) NOT NULL DEFAULT 0.00,
+  `increased_delivery_fee_status` tinyint(1) NOT NULL DEFAULT 0,
+  `increase_delivery_charge_message` varchar(255) DEFAULT NULL,
+  `offline_payment` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `zones`
+--
+
+INSERT INTO `zones` (`id`, `name`, `coordinates`, `status`, `created_at`, `updated_at`, `store_wise_topic`, `customer_wise_topic`, `deliveryman_wise_topic`, `cash_on_delivery`, `digital_payment`, `increased_delivery_fee`, `increased_delivery_fee_status`, `increase_delivery_charge_message`, `offline_payment`) VALUES
+(1, 'Demo Zone', 0x0000000001030000000100000006000000d8b95578f0965640804b97f820d6374014ba5508809556403a236f336ed2374017ba55d83696564031240701bacd3740d5b95598ce985640f47608c3f7cd374015ba55f87c995640ce86cbe863d23740d8b95578f0965640804b97f820d63740, 1, '2023-08-15 23:35:04', '2023-08-15 23:35:44', 'zone_1_store', 'zone_1_customer', 'zone_1_delivery_man', 1, 1, 0.00, 0, NULL, 0);
 
 --
 -- Indexes for dumped tables
@@ -1855,6 +3252,13 @@ CREATE TABLE `zones` (
 --
 ALTER TABLE `account_transactions`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `addon_settings`
+--
+ALTER TABLE `addon_settings`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `payment_settings_id_index` (`id`);
 
 --
 -- Indexes for table `add_ons`
@@ -1870,9 +3274,33 @@ ALTER TABLE `admins`
   ADD UNIQUE KEY `admins_email_unique` (`email`);
 
 --
+-- Indexes for table `admin_features`
+--
+ALTER TABLE `admin_features`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `admin_promotional_banners`
+--
+ALTER TABLE `admin_promotional_banners`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `admin_roles`
 --
 ALTER TABLE `admin_roles`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `admin_special_criterias`
+--
+ALTER TABLE `admin_special_criterias`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `admin_testimonials`
+--
+ALTER TABLE `admin_testimonials`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -1895,6 +3323,12 @@ ALTER TABLE `banners`
   ADD KEY `banners_module_id_foreign` (`module_id`);
 
 --
+-- Indexes for table `brands`
+--
+ALTER TABLE `brands`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `business_settings`
 --
 ALTER TABLE `business_settings`
@@ -1908,11 +3342,35 @@ ALTER TABLE `campaigns`
   ADD KEY `campaigns_module_id_foreign` (`module_id`);
 
 --
+-- Indexes for table `carts`
+--
+ALTER TABLE `carts`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `cash_backs`
+--
+ALTER TABLE `cash_backs`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `cash_back_histories`
+--
+ALTER TABLE `cash_back_histories`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `categories`
 --
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`),
   ADD KEY `categories_module_id_foreign` (`module_id`);
+
+--
+-- Indexes for table `common_conditions`
+--
+ALTER TABLE `common_conditions`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `contacts`
@@ -1947,6 +3405,12 @@ ALTER TABLE `customer_addresses`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `data_settings`
+--
+ALTER TABLE `data_settings`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `delivery_histories`
 --
 ALTER TABLE `delivery_histories`
@@ -1966,6 +3430,24 @@ ALTER TABLE `delivery_men`
   ADD UNIQUE KEY `delivery_men_phone_unique` (`phone`);
 
 --
+-- Indexes for table `disbursements`
+--
+ALTER TABLE `disbursements`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `disbursement_details`
+--
+ALTER TABLE `disbursement_details`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `disbursement_withdrawal_methods`
+--
+ALTER TABLE `disbursement_withdrawal_methods`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `discounts`
 --
 ALTER TABLE `discounts`
@@ -1981,6 +3463,18 @@ ALTER TABLE `d_m_reviews`
 -- Indexes for table `d_m_vehicles`
 --
 ALTER TABLE `d_m_vehicles`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `ecommerce_item_details`
+--
+ALTER TABLE `ecommerce_item_details`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `email_templates`
+--
+ALTER TABLE `email_templates`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -2007,6 +3501,30 @@ ALTER TABLE `expenses`
 ALTER TABLE `failed_jobs`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`);
+
+--
+-- Indexes for table `flash_sales`
+--
+ALTER TABLE `flash_sales`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `flash_sale_items`
+--
+ALTER TABLE `flash_sale_items`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `flutter_special_criterias`
+--
+ALTER TABLE `flutter_special_criterias`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `guests`
+--
+ALTER TABLE `guests`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `items`
@@ -2063,6 +3581,18 @@ ALTER TABLE `modules`
 -- Indexes for table `module_types`
 --
 ALTER TABLE `module_types`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `module_wise_banners`
+--
+ALTER TABLE `module_wise_banners`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `module_wise_why_chooses`
+--
+ALTER TABLE `module_wise_why_chooses`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -2125,6 +3655,18 @@ ALTER TABLE `oauth_refresh_tokens`
   ADD KEY `oauth_refresh_tokens_access_token_id_index` (`access_token_id`);
 
 --
+-- Indexes for table `offline_payments`
+--
+ALTER TABLE `offline_payments`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `offline_payment_methods`
+--
+ALTER TABLE `offline_payment_methods`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `orders`
 --
 ALTER TABLE `orders`
@@ -2151,6 +3693,18 @@ ALTER TABLE `order_details`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `order_payments`
+--
+ALTER TABLE `order_payments`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `order_references`
+--
+ALTER TABLE `order_references`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `order_transactions`
 --
 ALTER TABLE `order_transactions`
@@ -2167,10 +3721,22 @@ ALTER TABLE `parcel_categories`
   ADD KEY `parcel_categories_module_id_foreign` (`module_id`);
 
 --
+-- Indexes for table `parcel_delivery_instructions`
+--
+ALTER TABLE `parcel_delivery_instructions`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `password_resets`
 --
 ALTER TABLE `password_resets`
   ADD KEY `password_resets_email_index` (`email`);
+
+--
+-- Indexes for table `pharmacy_item_details`
+--
+ALTER TABLE `pharmacy_item_details`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `phone_verifications`
@@ -2183,6 +3749,12 @@ ALTER TABLE `phone_verifications`
 -- Indexes for table `provide_d_m_earnings`
 --
 ALTER TABLE `provide_d_m_earnings`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `react_testimonials`
+--
+ALTER TABLE `react_testimonials`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -2217,6 +3789,14 @@ ALTER TABLE `soft_credentials`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `storages`
+--
+ALTER TABLE `storages`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `storages_data_id_index` (`data_id`),
+  ADD KEY `storages_value_index` (`value`);
+
+--
 -- Indexes for table `stores`
 --
 ALTER TABLE `stores`
@@ -2225,9 +3805,21 @@ ALTER TABLE `stores`
   ADD KEY `stores_module_id_foreign` (`module_id`);
 
 --
+-- Indexes for table `store_configs`
+--
+ALTER TABLE `store_configs`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `store_schedule`
 --
 ALTER TABLE `store_schedule`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `store_subscriptions`
+--
+ALTER TABLE `store_subscriptions`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -2237,9 +3829,33 @@ ALTER TABLE `store_wallets`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `subscription_billing_and_refund_histories`
+--
+ALTER TABLE `subscription_billing_and_refund_histories`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `subscription_packages`
+--
+ALTER TABLE `subscription_packages`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `subscription_transactions`
+--
+ALTER TABLE `subscription_transactions`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `tags`
 --
 ALTER TABLE `tags`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `temp_products`
+--
+ALTER TABLE `temp_products`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -2299,15 +3915,39 @@ ALTER TABLE `vendor_employees`
   ADD UNIQUE KEY `vendor_employees_email_unique` (`email`);
 
 --
+-- Indexes for table `wallet_bonuses`
+--
+ALTER TABLE `wallet_bonuses`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `wallet_payments`
+--
+ALTER TABLE `wallet_payments`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `wallet_transactions`
 --
 ALTER TABLE `wallet_transactions`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `websockets_statistics_entries`
+--
+ALTER TABLE `websockets_statistics_entries`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `wishlists`
 --
 ALTER TABLE `wishlists`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `withdrawal_methods`
+--
+ALTER TABLE `withdrawal_methods`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -2343,12 +3983,36 @@ ALTER TABLE `add_ons`
 -- AUTO_INCREMENT for table `admins`
 --
 ALTER TABLE `admins`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `admin_features`
+--
+ALTER TABLE `admin_features`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `admin_promotional_banners`
+--
+ALTER TABLE `admin_promotional_banners`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `admin_roles`
 --
 ALTER TABLE `admin_roles`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `admin_special_criterias`
+--
+ALTER TABLE `admin_special_criterias`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `admin_testimonials`
+--
+ALTER TABLE `admin_testimonials`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
@@ -2370,10 +4034,16 @@ ALTER TABLE `banners`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `brands`
+--
+ALTER TABLE `brands`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `business_settings`
 --
 ALTER TABLE `business_settings`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=113;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=149;
 
 --
 -- AUTO_INCREMENT for table `campaigns`
@@ -2382,9 +4052,33 @@ ALTER TABLE `campaigns`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `carts`
+--
+ALTER TABLE `carts`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `cash_backs`
+--
+ALTER TABLE `cash_backs`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `cash_back_histories`
+--
+ALTER TABLE `cash_back_histories`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `common_conditions`
+--
+ALTER TABLE `common_conditions`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
@@ -2418,6 +4112,12 @@ ALTER TABLE `customer_addresses`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `data_settings`
+--
+ALTER TABLE `data_settings`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
+
+--
 -- AUTO_INCREMENT for table `delivery_histories`
 --
 ALTER TABLE `delivery_histories`
@@ -2433,6 +4133,24 @@ ALTER TABLE `delivery_man_wallets`
 -- AUTO_INCREMENT for table `delivery_men`
 --
 ALTER TABLE `delivery_men`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `disbursements`
+--
+ALTER TABLE `disbursements`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `disbursement_details`
+--
+ALTER TABLE `disbursement_details`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `disbursement_withdrawal_methods`
+--
+ALTER TABLE `disbursement_withdrawal_methods`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
@@ -2452,6 +4170,18 @@ ALTER TABLE `d_m_reviews`
 --
 ALTER TABLE `d_m_vehicles`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `ecommerce_item_details`
+--
+ALTER TABLE `ecommerce_item_details`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `email_templates`
+--
+ALTER TABLE `email_templates`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `email_verifications`
@@ -2478,10 +4208,34 @@ ALTER TABLE `failed_jobs`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `flash_sales`
+--
+ALTER TABLE `flash_sales`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `flash_sale_items`
+--
+ALTER TABLE `flash_sale_items`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `flutter_special_criterias`
+--
+ALTER TABLE `flutter_special_criterias`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `guests`
+--
+ALTER TABLE `guests`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
 -- AUTO_INCREMENT for table `items`
 --
 ALTER TABLE `items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `item_campaigns`
@@ -2517,13 +4271,13 @@ ALTER TABLE `messages`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=157;
 
 --
 -- AUTO_INCREMENT for table `modules`
 --
 ALTER TABLE `modules`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `module_types`
@@ -2532,10 +4286,22 @@ ALTER TABLE `module_types`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `module_wise_banners`
+--
+ALTER TABLE `module_wise_banners`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `module_wise_why_chooses`
+--
+ALTER TABLE `module_wise_why_chooses`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `module_zone`
 --
 ALTER TABLE `module_zone`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `newsletters`
@@ -2553,7 +4319,7 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT for table `notification_messages`
 --
 ALTER TABLE `notification_messages`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
 -- AUTO_INCREMENT for table `oauth_clients`
@@ -2566,6 +4332,18 @@ ALTER TABLE `oauth_clients`
 --
 ALTER TABLE `oauth_personal_access_clients`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `offline_payments`
+--
+ALTER TABLE `offline_payments`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `offline_payment_methods`
+--
+ALTER TABLE `offline_payment_methods`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `orders`
@@ -2592,6 +4370,18 @@ ALTER TABLE `order_details`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `order_payments`
+--
+ALTER TABLE `order_payments`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `order_references`
+--
+ALTER TABLE `order_references`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `order_transactions`
 --
 ALTER TABLE `order_transactions`
@@ -2601,6 +4391,18 @@ ALTER TABLE `order_transactions`
 -- AUTO_INCREMENT for table `parcel_categories`
 --
 ALTER TABLE `parcel_categories`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `parcel_delivery_instructions`
+--
+ALTER TABLE `parcel_delivery_instructions`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `pharmacy_item_details`
+--
+ALTER TABLE `pharmacy_item_details`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
@@ -2616,6 +4418,12 @@ ALTER TABLE `provide_d_m_earnings`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `react_testimonials`
+--
+ALTER TABLE `react_testimonials`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `refunds`
 --
 ALTER TABLE `refunds`
@@ -2625,7 +4433,7 @@ ALTER TABLE `refunds`
 -- AUTO_INCREMENT for table `refund_reasons`
 --
 ALTER TABLE `refund_reasons`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `reviews`
@@ -2646,9 +4454,21 @@ ALTER TABLE `soft_credentials`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `storages`
+--
+ALTER TABLE `storages`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
 -- AUTO_INCREMENT for table `stores`
 --
 ALTER TABLE `stores`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `store_configs`
+--
+ALTER TABLE `store_configs`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
@@ -2658,15 +4478,45 @@ ALTER TABLE `store_schedule`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `store_subscriptions`
+--
+ALTER TABLE `store_subscriptions`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `store_wallets`
 --
 ALTER TABLE `store_wallets`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `subscription_billing_and_refund_histories`
+--
+ALTER TABLE `subscription_billing_and_refund_histories`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `subscription_packages`
+--
+ALTER TABLE `subscription_packages`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `subscription_transactions`
+--
+ALTER TABLE `subscription_transactions`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1000000;
 
 --
 -- AUTO_INCREMENT for table `tags`
 --
 ALTER TABLE `tags`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `temp_products`
+--
+ALTER TABLE `temp_products`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
@@ -2679,7 +4529,7 @@ ALTER TABLE `track_deliverymen`
 -- AUTO_INCREMENT for table `translations`
 --
 ALTER TABLE `translations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `units`
@@ -2709,12 +4559,24 @@ ALTER TABLE `user_notifications`
 -- AUTO_INCREMENT for table `vendors`
 --
 ALTER TABLE `vendors`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `vendor_employees`
 --
 ALTER TABLE `vendor_employees`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `wallet_bonuses`
+--
+ALTER TABLE `wallet_bonuses`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `wallet_payments`
+--
+ALTER TABLE `wallet_payments`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
@@ -2724,9 +4586,21 @@ ALTER TABLE `wallet_transactions`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `websockets_statistics_entries`
+--
+ALTER TABLE `websockets_statistics_entries`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `wishlists`
 --
 ALTER TABLE `wishlists`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `withdrawal_methods`
+--
+ALTER TABLE `withdrawal_methods`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
@@ -2739,7 +4613,7 @@ ALTER TABLE `withdraw_requests`
 -- AUTO_INCREMENT for table `zones`
 --
 ALTER TABLE `zones`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Constraints for dumped tables

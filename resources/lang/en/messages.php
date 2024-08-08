@@ -4885,4 +4885,13 @@
   'You_have_received_new_message' => 'You have received new message',
   'extra_packaging_amount_can_not_be_empty' => 'Extra packaging amount can not be empty',
   'If enabled, stores can actively engage with the customers by responding to the reviews left for their orders.' => 'If enabled, stores can actively engage with the customers by responding to the reviews left for their orders.',
+  'Demo Module' => 'Demo Module',
+  'store_imported_successfully' => 'Store imported successfully',
+  'product_imported_successfully' => 'Product imported successfully',
+  'duplicate_email_or_phone_exists_at_the_database' => 'Duplicate email or phone exists at the database',
+  'coordinates_out_of_zone' => 'Coordinates out of zone',
+  'Coordinates out of zone' => 'Coordinates out of zone',
+  '500_warning_message' => '500 warning message',
+  'reload_page' => 'Reload page',
+  'ex_: search_by_name,_email,_or_subject' => 'Ex : search by name, email, or subject',
 );
