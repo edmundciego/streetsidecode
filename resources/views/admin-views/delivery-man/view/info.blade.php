@@ -292,7 +292,7 @@
                 <div class="d-flex flex-column flex-md-row align-items-center gap-3 border rounded p-3">
                     <div class="d-flex gap-3">
                         <img class="rounded" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img1.jpg') }}"
-                            src="{{ \App\CentralLogics\Helpers::get_image_helper($deliveryMan,'image', asset('storage/app/public/delivery-man/') . '/' . $deliveryMan['image'], asset('public/assets/admin/img/160x160/img1.jpg'), 'delivery-man/') }}"
+                            src="{{ $deliveryMan['image_full_url']}}"
                             width="115" height="115" alt="Delivery man image">
                     </div>
 
@@ -527,13 +527,12 @@
                             <h5 class="mb-3 mt-5">{{ translate('messages.Identity_Image') }}</h5>
                         @endif
                         <div class="d-flex flex-wrap gap-3">
-                            @foreach (json_decode($deliveryMan->identity_image, true) as $key => $img)
-                            @php($img = is_array($img)?$img:['img'=>$img,'storage'=>'public'])
+                            @foreach ($deliveryMan->identity_image_full_url as $key => $img)
                                 <button class="btn" data-toggle="modal" data-target="#image-{{ $key }}">
                                     <div class="gallary-card">
                                         <img class="rounded mx-h150 mx-w-100"
                                             data-onerror-image="{{ asset('/public/assets/admin/img/900x400/img1.jpg') }}"
-                                            src="{{ \App\CentralLogics\Helpers::onerror_image_helper($img['img'], asset('storage/app/public/delivery-man/') . '/' . $img['img'], asset('public/assets/admin/img/900x400/img1.jpg'), 'delivery-man/',$img['storage'] ?? 'public') }}"
+                                            src="{{ $img }}"
                                             width="275" height="150" alt="">
                                     </div>
                                 </button>
@@ -550,7 +549,7 @@
                                             </div>
                                             <div class="modal-body">
                                                 <img data-onerror-image="{{ asset('/public/assets/admin/img/900x400/img1.jpg') }}"
-                                                src="{{ \App\CentralLogics\Helpers::onerror_image_helper($img['img'], asset('storage/app/public/delivery-man/') . '/' . $img['img'], asset('public/assets/admin/img/900x400/img1.jpg'), 'delivery-man/',$img['storage'] ?? 'public') }}"
+                                                src="{{ $img }}"
                                                     class="w-100 onerror-image">
                                             </div>
                                             <div class="modal-footer">

@@ -3,6 +3,7 @@
 namespace App\CentralLogics;
 
 use DateTime;
+use App\Models\Tag;
 use App\Models\Item;
 use App\Models\User;
 use App\Models\Zone;
@@ -12,6 +13,7 @@ use App\Models\Store;
 use App\Library\Payer;
 use App\Models\Module;
 use App\Models\Review;
+use App\Models\Allergy;
 use App\Models\Expense;
 use App\Traits\Payment;
 use App\Mail\PlaceOrder;
@@ -20,11 +22,14 @@ use App\Models\Category;
 use App\Models\Currency;
 use App\Models\DMReview;
 use App\Library\Receiver;
+use App\Models\Nutrition;
 use App\Models\DataSetting;
+use App\Models\GenericName;
 use App\Models\StoreWallet;
 use App\Models\Translation;
 use Illuminate\Support\Str;
 use PayPal\Api\Transaction;
+use App\Models\ItemCampaign;
 use App\Models\FlashSaleItem;
 use Illuminate\Support\Carbon;
 use App\Models\BusinessSetting;
@@ -33,18 +38,23 @@ use App\Models\StoreSubscription;
 use Illuminate\Support\Facades\DB;
 use App\Mail\OrderVerificationMail;
 use App\Models\NotificationMessage;
+use App\Models\NotificationSetting;
+
 use App\Models\SubscriptionPackage;
+use App\Traits\PaymentGatewayTrait;
 use Illuminate\Support\Facades\App;
 use App\Mail\SubscriptionSuccessful;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
-
+use App\Models\ExternalConfiguration;
 use App\Mail\SubscriptionRenewOrShift;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use App\Library\Payment as PaymentInfo;
 use App\Models\SubscriptionTransaction;
 use Illuminate\Support\Facades\Storage;
+use App\Models\StoreNotificationSetting;
+use App\Traits\NotificationDataSetUpTrait;
 use Illuminate\Database\Eloquent\Collection;
 use MatanYadaev\EloquentSpatial\Objects\Point;
 use App\Models\SubscriptionBillingAndRefundHistory;
@@ -52,6 +62,7 @@ use Laravelpkg\Laravelchk\Http\Controllers\LaravelchkController;
 
 class Helpers
 {
+    use PaymentGatewayTrait , NotificationDataSetUpTrait;
     public static function error_processor($validator)
     {
         $err_keeper = [];
@@ -201,6 +212,14 @@ class Helpers
         $data['is_prescription_required'] =  (int) $data->pharmacy_item_details?->is_prescription_required ?? 0;
         $data['halal_tag_status'] =  (int) $data->store->storeConfig?->halal_tag_status??0;
 
+        $data['nutritions_name']= $data?->nutritions ? Nutrition::whereIn('id',$data?->nutritions->pluck('id') )->pluck('nutrition') : null;
+        $data['allergies_name']= $data?->allergies ?Allergy::whereIn('id',$data?->allergies->pluck('id') )->pluck('allergy') : null;
+        $data['generic_name']= $data?->generic ? GenericName::whereIn('id',$data?->generic->pluck('id') )->pluck('generic_name'): null ;
+
+        unset($data['nutritions']);
+        unset($data['allergies']);
+        unset($data['generic']);
+
         unset($data['pharmacy_item_details']);
         unset($data['store']);
         unset($data['rating']);
@@ -245,7 +264,7 @@ class Helpers
                 $item['category_ids'] = $categories;
                 $item['attributes'] = json_decode($item['attributes']);
                 $item['choice_options'] = json_decode($item['choice_options']);
-                $item['add_ons'] = self::addon_data_formatting(AddOn::withoutGlobalScope('translate')->whereIn('id', json_decode($item['add_ons'], true))->active()->get(), true, $trans, $local);
+                $item['add_ons'] = self::addon_data_formatting(AddOn::whereIn('id', json_decode($item['add_ons'], true))->active()->get(), true, $trans, $local);
                 foreach (json_decode($item['variations'], true) as $var) {
                     array_push($variations, [
                         'type' => $var['type'],
@@ -286,6 +305,13 @@ class Helpers
 
                 $item->store['self_delivery_system'] = (int) $item->store->sub_self_delivery;
 
+                $item['nutritions_name']= $item?->nutritions ? Nutrition::whereIn('id',$item?->nutritions->pluck('id') )->pluck('nutrition') : null;
+                $item['allergies_name']= $item?->allergies ?Allergy::whereIn('id',$item?->allergies->pluck('id') )->pluck('allergy') : null;
+                $item['generic_name']= $item?->generic ? GenericName::whereIn('id',$item?->generic->pluck('id') )->pluck('generic_name'): null ;
+
+                unset($item['nutritions']);
+                unset($item['allergies']);
+                unset($item['generic']);
                 unset($item['pharmacy_item_details']);
                 unset($item['store']);
                 unset($item['rating']);
@@ -356,14 +382,27 @@ class Helpers
             $data['is_basic'] =  (int) $data->pharmacy_item_details?->is_basic ?? 0;
             $data['is_prescription_required'] =  (int) $data->pharmacy_item_details?->is_prescription_required ?? 0;
             $data['halal_tag_status'] =  (int) $data->store->storeConfig?->halal_tag_status??0;
+
+            $data['nutritions_name']= $data?->nutritions ? Nutrition::whereIn('id',$data?->nutritions->pluck('id') )->pluck('nutrition') : null;
+            $data['allergies_name']= $data?->allergies ?Allergy::whereIn('id',$data?->allergies->pluck('id') )->pluck('allergy') : null;
+            $data['generic_name']= $data?->generic ? GenericName::whereIn('id',$data?->generic->pluck('id') )->pluck('generic_name'): null ;
+
             if($temp_product == true){
-                $data['tags']=\App\Models\Tag::whereIn('id',json_decode($data?->tag_ids) )->get(['tag','id']);
+                $data['tags']=Tag::whereIn('id',json_decode($data?->tag_ids) )->get(['tag','id']);
+                $data['nutritions_data']=Nutrition::whereIn('id',json_decode($data?->nutrition_ids) )->get(['nutrition','id']);
+                $data['allergies_data']=Allergy::whereIn('id',json_decode($data?->allergy_ids) )->get(['allergy','id']);
+                $data['generic_name_data']=GenericName::whereIn('id',json_decode($data?->generic_ids) )->get(['generic_name','id']);
             }
+
             $data->store['self_delivery_system'] = (int) $data->store->sub_self_delivery;
 
             unset($data['pharmacy_item_details']);
             unset($data['store']);
             unset($data['rating']);
+            unset($data['nutritions']);
+            unset($data['allergies']);
+            unset($data['generic']);
+
         }
 
         return $data;
@@ -476,6 +515,14 @@ class Helpers
                 if (!$trans) {
                     unset($item['translations']);
                 }
+
+                $item['nutritions_name']= $item?->nutritions ? Nutrition::whereIn('id',$item?->nutritions->pluck('id') )->pluck('nutrition') : null;
+                $item['allergies_name']= $item?->allergies ?Allergy::whereIn('id',$item?->allergies->pluck('id') )->pluck('allergy') : null;
+                $item['generic_name']= $item?->generic ? GenericName::whereIn('id',$item?->generic->pluck('id') )->pluck('generic_name'): null ;
+
+                unset($item['nutritions']);
+                unset($item['allergies']);
+                unset($item['generic']);
                 unset($item['ecommerce_item_details']);
                 unset($item['pharmacy_item_details']);
                 unset($item['store']);
@@ -580,9 +627,18 @@ class Helpers
                     }
                 }
             }
+
+            $data['nutritions_name']= $data?->nutritions ? Nutrition::whereIn('id',$data?->nutritions->pluck('id') )->pluck('nutrition') : null;
+            $data['allergies_name']= $data?->allergies ?Allergy::whereIn('id',$data?->allergies->pluck('id') )->pluck('allergy') : null;
+            $data['generic_name']= $data?->generic ? GenericName::whereIn('id',$data?->generic->pluck('id') )->pluck('generic_name'): null ;
+
+
             if (!$trans) {
                 unset($data['translations']);
             }
+            unset($data['nutritions']);
+            unset($data['allergies']);
+            unset($data['generic']);
             unset($data['ecommerce_item_details']);
             unset($data['pharmacy_item_details']);
             unset($data['store']);
@@ -757,8 +813,8 @@ class Helpers
                 if($item->storeConfig && $item->storeConfig->is_recommended_deleted == 0 ){
                     $item['is_recommended'] = $item->storeConfig->is_recommended;
                 }
-                $item0['self_delivery_system'] = (int) $item->sub_self_delivery;
-
+                $item['self_delivery_system'] = (int) $item->sub_self_delivery;
+                $item['current_opening_time'] = self::getNextOpeningTime($item['schedules']) ?? 'closed';
                 unset($item['items_count']);
                 unset($item['campaigns_count']);
                 unset($item['storeConfig']);
@@ -787,6 +843,7 @@ class Helpers
             $data['positive_rating'] = $ratings['positive_rating'];
             $data['total_items'] = $data['items_count'];
             $data['total_campaigns'] = $data['campaigns_count'];
+            $data['current_opening_time'] = self::getNextOpeningTime($data['schedules']) ?? 'closed';
             unset($data['items_count']);
             unset($data['campaigns_count']);
             unset($data['campaigns']);
@@ -967,7 +1024,8 @@ class Helpers
                 'lng' => $item->last_location ? $item->last_location->longitude : false,
                 'location' => $item->last_location ? $item->last_location->location : '',
                 'storage' => $storage_type,
-                'image_link' => self::onerror_image_helper($item['image'], asset('storage/app/public/delivery-man/').'/'. $item['image'], asset('public/assets/admin/img/160x160/img1.jpg') , 'delivery-man/', $storage_type)
+                'image_link' => $item['image_full_url'],
+                'image_full_url' => $item['image_full_url'],
             ];
         }
         $data = $storage;
@@ -1018,6 +1076,18 @@ class Helpers
 
         if ($paymentmethod) {
             $config = $paymentmethod->value;
+        }
+
+        return $config;
+    }
+    public static function get_external_data($name)
+    {
+        $config = null;
+
+        $paymentmethod = ExternalConfiguration::where('key', $name)->first();
+
+        if ($paymentmethod) {
+            $config = $paymentmethod?->value;
         }
 
         return $config;
@@ -1107,11 +1177,7 @@ class Helpers
 
     public static function send_push_notif_to_device($fcm_token, $data, $web_push_link = null)
     {
-//        if(isset($data['message'])){
-//            $message = $data['message'];
-//        }else{
-//            $message = '';
-//        }
+
         if(isset($data['conversation_id'])){
             $conversation_id = $data['conversation_id'];
         }else{
@@ -1132,12 +1198,19 @@ class Helpers
         }else{
             $order_type = '';
         }
+        if(isset($data['data_id'])){
+            $data_id = $data['data_id'];
+        }else{
+            $data_id = '';
+        }
 
-//        $click_action = "";
-//        if($web_push_link){
-//            $click_action = ',
-//            "click_action": "'.$web_push_link.'"';
-//        }
+        if(isset($data['advertisement_id'])){
+            $advertisement_id = $data['advertisement_id'];
+        }else{
+            $advertisement_id = '';
+        }
+
+
         $postData = [
             'message' => [
                 "token" => $fcm_token,
@@ -1147,6 +1220,8 @@ class Helpers
                     "image" => (string)$data['image'],
                     "order_id" => (string)$data['order_id'],
                     "type" => (string)$data['type'],
+                    "data_id" => (string)$data_id,
+                    "advertisement_id" => (string)$advertisement_id,
                     "conversation_id" => (string)$conversation_id,
                     "module_id" => (string)$module_id,
                     "sender_type" => (string)$sender_type,
@@ -1157,7 +1232,20 @@ class Helpers
                 "notification" => [
                     'title' => (string)$data['title'],
                     'body' => (string)$data['description'],
+                    "image" => (string)$data['image'],
                 ],
+                "android" => [
+                    "notification" => [
+                        "channelId" => '6ammart',
+                    ]
+                ],
+                "apns" => [
+                    "payload" => [
+                        "aps" => [
+                            "sound" => "notification.wav"
+                        ]
+                    ]
+                ]
             ]
         ];
 
@@ -1209,7 +1297,20 @@ class Helpers
                     "notification" => [
                         "title" => (string)$data['title'],
                         "body" => (string)$data['description'],
+                        "image" => (string)$data['image'],
                     ],
+                    "android" => [
+                        "notification" => [
+                            "channelId" => '6ammart',
+                        ]
+                    ],
+                    "apns" => [
+                        "payload" => [
+                            "aps" => [
+                                "sound" => "notification.wav"
+                            ]
+                        ]
+                    ]
                 ]
             ];
         } else {
@@ -1228,7 +1329,20 @@ class Helpers
                     "notification" => [
                         "title" => (string)$data['title'],
                         "body" => (string)$data['description'],
+                        "image" => (string)$data['image'],
                     ],
+                    "android" => [
+                        "notification" => [
+                            "channelId" => '6ammart',
+                        ]
+                    ],
+                    "apns" => [
+                        "payload" => [
+                            "aps" => [
+                                "sound" => "notification.wav"
+                            ]
+                        ]
+                    ]
                 ]
             ];
         }
@@ -1483,13 +1597,14 @@ class Helpers
 
     public static function send_order_notification($order)
     {
+        $push_notification_status=self::getNotificationStatusData('store','store_order_notification','push_notification_status', $order?->store?->id);
 
         try {
 
 
             if((in_array($order->payment_method, ['cash_on_delivery', 'offline_payment'])  && $order->order_status == 'pending' )||(!in_array($order->payment_method, ['cash_on_delivery', 'offline_payment']) && $order->order_status == 'confirmed' )){
                 $data = [
-                    'title' => translate('messages.order_push_title'),
+                    'title' => translate('Order_Notification'),
                     'description' => translate('messages.new_order_push_description'),
                     'order_id' => $order->id,
                     'image' => '',
@@ -1518,9 +1633,9 @@ class Helpers
                 $user_fcm = $order?->customer?->cm_firebase_token;
             }
 
-            if ($value) {
+            if (self::getNotificationStatusData('customer','customer_order_notification','push_notification_status') &&  $value && $user_fcm) {
                 $data = [
-                    'title' => translate('messages.order_push_title'),
+                    'title' => translate('Order_Notification'),
                     'description' => $value,
                     'order_id' => $order->id,
                     'image' => '',
@@ -1537,13 +1652,13 @@ class Helpers
 
             if ($status == 'picked_up') {
                 $data = [
-                    'title' => translate('messages.order_push_title'),
+                    'title' => translate('Order_Notification'),
                     'description' => $value,
                     'order_id' => $order->id,
                     'image' => '',
                     'type' => 'order_status',
                 ];
-                if($order->store && $order->store->vendor){
+                if($order->store && $order->store->vendor && $push_notification_status){
                     self::send_push_notif_to_device($order->store->vendor->firebase_token, $data);
                     DB::table('user_notifications')->insert([
                         'data' => json_encode($data),
@@ -1555,9 +1670,9 @@ class Helpers
             }
 
             if ($order->order_type == 'delivery' && !$order->scheduled && $status == 'pending' && $order->payment_method == 'cash_on_delivery' && config('order_confirmation_model') == 'deliveryman') {
-                if ($order->store->sub_self_delivery) {
+                if ($order->store->sub_self_delivery && $push_notification_status) {
                     $data = [
-                        'title' => translate('messages.order_push_title'),
+                        'title' => translate('Order_Notification'),
                         'description' => translate('messages.new_order_push_description'),
                         'order_id' => $order->id,
                         'module_id' => $order->module_id,
@@ -1565,7 +1680,7 @@ class Helpers
                         'image' => '',
                         'type' => 'new_order',
                     ];
-                    if($order->store && $order->store->vendor){
+                    if($order->store && $order->store->vendor && $push_notification_status){
                         self::send_push_notif_to_device($order->store->vendor->firebase_token, $data);
                         $web_push_link = url('/').'/store-panel/order/list/all';
                         self::send_push_notif_to_topic($data, "store_panel_{$order->store_id}_message", 'new_order', $web_push_link);
@@ -1580,7 +1695,7 @@ class Helpers
                     }
                 } else {
                     $data = [
-                        'title' => translate('messages.order_push_title'),
+                        'title' => translate('Order_Notification'),
                         'description' => translate('messages.new_order_push_description'),
                         'order_id' => $order->id,
                         'module_id' => $order->module_id,
@@ -1603,7 +1718,7 @@ class Helpers
 
             if ($order->order_type == 'parcel' && in_array($order->order_status, ['pending', 'confirmed'])) {
                 $data = [
-                    'title' => translate('messages.order_push_title'),
+                    'title' => translate('Order_Notification'),
                     'description' => translate('messages.new_order_push_description'),
                     'order_id' => $order->id,
                     'module_id' => $order->module_id,
@@ -1624,7 +1739,7 @@ class Helpers
 
             if ($order->order_type == 'delivery' && !$order->scheduled && $order->order_status == 'pending' && $order->payment_method == 'cash_on_delivery' && config('order_confirmation_model') == 'store') {
                 $data = [
-                    'title' => translate('messages.order_push_title'),
+                    'title' => translate('Order_Notification'),
                     'description' => translate('messages.new_order_push_description'),
                     'order_id' => $order->id,
                     'module_id' => $order->module_id,
@@ -1632,7 +1747,7 @@ class Helpers
                     'image' => '',
                     'type' => 'new_order',
                 ];
-                if($order->store && $order->store->vendor){
+                if($order->store && $order->store->vendor && $push_notification_status){
                     self::send_push_notif_to_device($order->store->vendor->firebase_token, $data);
                     $web_push_link = url('/').'/store-panel/order/list/all';
                     self::send_push_notif_to_topic($data, "store_panel_{$order->store_id}_message", 'new_order', $web_push_link);
@@ -1648,13 +1763,13 @@ class Helpers
 
             if (!$order->scheduled && (($order->order_type == 'take_away' && $order->order_status == 'pending') || ($order->payment_method != 'cash_on_delivery' && $order->order_status == 'confirmed'))) {
                 $data = [
-                    'title' => translate('messages.order_push_title'),
+                    'title' => translate('Order_Notification'),
                     'description' => translate('messages.new_order_push_description'),
                     'order_id' => $order->id,
                     'image' => '',
                     'type' => 'new_order',
                 ];
-                if($order->store && $order->store->vendor){
+                if($order->store && $order->store->vendor && $push_notification_status){
                     self::send_push_notif_to_device($order->store->vendor->firebase_token, $data);
                     $web_push_link = url('/').'/store-panel/order/list/all';
                     self::send_push_notif_to_topic($data, "store_panel_{$order->store_id}_message", 'new_order', $web_push_link);
@@ -1670,7 +1785,7 @@ class Helpers
             if ($order->order_status == 'confirmed' && $order->order_type != 'take_away' && config('order_confirmation_model') == 'deliveryman' && $order->payment_method == 'cash_on_delivery') {
                 if ($order->store->sub_self_delivery) {
                     $data = [
-                        'title' => translate('messages.order_push_title'),
+                        'title' => translate('Order_Notification'),
                         'description' => translate('messages.new_order_push_description'),
                         'order_id' => $order->id,
                         'module_id' => $order->module_id,
@@ -1681,7 +1796,7 @@ class Helpers
                     self::send_push_notif_to_topic($data, "restaurant_dm_" . $order->store_id, 'new_order',null);
                 } else {
                     $data = [
-                        'title' => translate('messages.order_push_title'),
+                        'title' => translate('Order_Notification'),
                         'description' => translate('messages.new_order_push_description'),
                         'order_id' => $order->id,
                         'module_id' => $order->module_id,
@@ -1689,7 +1804,7 @@ class Helpers
                         'image' => '',
                         'type' => 'new_order',
                     ];
-                    if($order->store && $order->store->vendor){
+                    if($order->store && $order->store->vendor && $push_notification_status){
                         self::send_push_notif_to_device($order->store->vendor->firebase_token, $data);
                         $web_push_link = url('/').'/store-panel/order/list/all';
                         self::send_push_notif_to_topic($data, "store_panel_{$order->store_id}_message", 'new_order', $web_push_link);
@@ -1705,7 +1820,7 @@ class Helpers
 
             if ($order->order_type == 'delivery' && !$order->scheduled && $order->order_status == 'confirmed'  && ($order->payment_method != 'cash_on_delivery' || config('order_confirmation_model') == 'store')) {
                 $data = [
-                    'title' => translate('messages.order_push_title'),
+                    'title' => translate('Order_Notification'),
                     'description' => translate('messages.new_order_push_description'),
                     'order_id' => $order->id,
                     'module_id' => $order->module_id,
@@ -1726,9 +1841,9 @@ class Helpers
                 }
             }
 
-            if (in_array($order->order_status, ['processing', 'handover']) && $order->delivery_man) {
+            if (in_array($order->order_status, ['processing', 'handover']) && $order->delivery_man && self::getNotificationStatusData('deliveryman','deliveryman_order_notification','push_notification_status')) {
                 $data = [
-                    'title' => translate('messages.order_push_title'),
+                    'title' => translate('Order_Notification'),
                     'description' => $order->order_status == 'processing' ? translate('messages.Proceed_for_cooking') : translate('messages.ready_for_delivery'),
                     'order_id' => $order->id,
                     'image' => '',
@@ -1742,13 +1857,13 @@ class Helpers
                     'updated_at' => now()
                 ]);
             }
-            $mail_status = Helpers::get_mail_status('place_order_mail_status_user');
+
             try {
-                if ($order->order_status == 'confirmed' && $order->payment_method != 'cash_on_delivery' && config('mail.status') && $mail_status == '1' && $order->is_guest == 0) {
+                if ($order->order_status == 'confirmed' && $order->payment_method != 'cash_on_delivery' && config('mail.status') && Helpers::get_mail_status('place_order_mail_status_user') == '1' && $order->is_guest == 0 && Helpers::getNotificationStatusData('customer','customer_order_notification','mail_status')) {
                     Mail::to($order->customer->email)->send(new PlaceOrder($order->id));
                 }
                 $order_verification_mail_status = Helpers::get_mail_status('order_verification_mail_status_user');
-                if ($order->order_status == 'pending' && config('order_delivery_verification') == 1 && $order_verification_mail_status == '1' && $order->is_guest == 0) {
+                if ($order->order_status == 'pending' && config('order_delivery_verification') == 1  && config('mail.status') && $order_verification_mail_status == '1' && $order->is_guest == 0 && Helpers::getNotificationStatusData('customer','customer_delivery_verification','mail_status')) {
                     Mail::to($order->customer->email)->send(new OrderVerificationMail($order->otp,$order->customer->f_name));
                 }
             } catch (\Exception $ex) {
@@ -3026,7 +3141,7 @@ class Helpers
         return $status;
     }
 
-    public static function text_variable_data_format($value,$user_name=null,$store_name=null,$delivery_man_name=null,$transaction_id=null,$order_id=null)
+    public static function text_variable_data_format($value,$user_name=null,$store_name=null,$delivery_man_name=null,$transaction_id=null,$order_id=null,$add_id= null)
     {
         $data = $value;
         if ($value) {
@@ -3048,6 +3163,9 @@ class Helpers
 
             if($order_id){
                 $data =  str_replace("{orderId}", $order_id, $data);
+            }
+            if($add_id){
+                $data =  str_replace("{advertisementId}", $add_id, $data);
             }
         }
 
@@ -3343,121 +3461,51 @@ class Helpers
         return  Carbon::parse($data)->locale(app()->getLocale())->translatedFormat($time);
     }
 
-    public static function get_image_helper($data, $key, $src, $error_src ,$path){
-
-        if(!$data){
-            return $error_src;
-        }
-        $image = '';
-        $storage = 'public';
-
-
-        if (!(is_array($data)) && (get_class($data) == 'stdClass' && property_exists($data, $key))) {
-            $image = $data->$key;
-        }elseif ((is_array($data) && array_key_exists($key, $data))) {
-            $image = $data[$key] ?? '';
-        }elseif(!(is_array($data)) && (get_class($data) != 'stdClass')) {
-            $image = (is_object($data) && ($data instanceof Collection)) ? $data->$key : ($data[$key] ?? '');
-        }
-
-        if (is_object($data) && property_exists($data, 'storage') && is_object($data->storage)) {
-            if ($data->storage && count($data->storage) > 0) {
-                foreach ($data->storage as $value) {
-                    if ($value['key'] == $key || $value['data_type'] == 'App\Models\BusinessSetting' || $value['data_type'] == 'App\Models\DataSetting') {
-                        $storage = $value['value'];
-                    }
-                }
-            }
-        } elseif (is_array($data) && array_key_exists('storage', $data) && is_array($data['storage'])) {
-            if ($data['storage'] && count($data['storage']) > 0) {
-                foreach ($data['storage'] as $value) {
-                    if ($value['key'] == $key || $value['data_type'] == 'App\Models\BusinessSetting' || $value['data_type'] == 'App\Models\DataSetting') {
-                        $storage = $value['value'];
-                    }
-                }
-            }
-        }
-        elseif(!(is_array($data)) && (get_class($data) != 'stdClass')) {
-
-            if(is_object($data) && ($data instanceof Collection)){
-                if ($data->storage && count($data->storage) > 0) {
-                    foreach ($data->storage as $value) {
-                        if ($value['key'] == $key || $value['data_type'] == 'App\Models\BusinessSetting' || $value['data_type'] == 'App\Models\DataSetting') {
-                            $storage = $value['value'];
-                        }
-                    }
-                }
-            }else{
-                if ($data['storage'] && count($data['storage']) > 0) {
-                    foreach ($data['storage'] as $value) {
-                        if ($value['key'] == $key || $value['data_type'] == 'App\Models\BusinessSetting' || $value['data_type'] == 'App\Models\DataSetting') {
-                            $storage = $value['value'];
-                        }
-                    }
-                }
-            }
-        }
+    public static function get_full_url($path,$data,$type,$placeholder = null){
+        $place_holders = [
+            'default' => asset('public/assets/admin/img/100x100/2.jpg'),
+            'business' => asset('public/assets/admin/img/160x160/img2.jpg'),
+            'contact_us_image' => asset('public/assets/admin/img/160x160/img2.jpg'),
+            'profile' => asset('public/assets/admin/img/160x160/img2.jpg'),
+            'product' => asset('public/assets/admin/img/160x160/img2.jpg'),
+            'order' => asset('public/assets/admin/img/160x160/img2.jpg'),
+            'refund' => asset('public/assets/admin/img/160x160/img2.jpg'),
+            'delivery-man' => asset('public/assets/admin/img/160x160/img2.jpg'),
+            'admin' => asset('public/assets/admin/img/160x160/img1.jpg'),
+            'conversation' => asset('public/assets/admin/img/160x160/img1.jpg'),
+            'banner' => asset('public/assets/admin/img/900x400/img1.jpg'),
+            'campaign' => asset('public/assets/admin/img/900x400/img1.jpg'),
+            'notification' => asset('public/assets/admin/img/900x400/img1.jpg'),
+            'category' => asset('public/assets/admin/img/100x100/2.jpg'),
+            'store' => asset('public/assets/admin/img/160x160/img1.jpg'),
+            'vendor' => asset('public/assets/admin/img/160x160/img1.jpg'),
+            'brand' => asset('public/assets/admin/img/100x100/2.jpg'),
+            'upload_image' => asset('public/assets/admin/img/upload-img.png'),
+            'store/cover' => asset('public/assets/admin/img/100x100/2.jpg'),
+            'upload_image_4' => asset('/public/assets/admin/img/upload-4.png'),
+            'promotional_banner' => asset('public/assets/admin/img/100x100/2.jpg'),
+            'admin_feature' => asset('public/assets/admin/img/100x100/2.jpg'),
+            'aspect_1' => asset('/public/assets/admin/img/aspect-1.png'),
+            'special_criteria' => asset('public/assets/admin/img/100x100/2.jpg'),
+            'download_user_app_image' => asset('public/assets/admin/img/100x100/2.jpg'),
+            'reviewer_image' => asset('public/assets/admin/img/100x100/2.jpg'),
+            'fixed_header_image' => asset('/public/assets/admin/img/aspect-1.png'),
+            'header_icon' => asset('/public/assets/admin/img/aspect-1.png'),
+            'available_zone_image' => asset('public/assets/admin/img/100x100/2.jpg'),
+            'why_choose' => asset('/public/assets/admin/img/aspect-1.png'),
+            'header_banner' => asset('/public/assets/admin/img/aspect-1.png'),
+            'reviewer_company_image' => asset('public/assets/admin/img/100x100/2.jpg'),
+            'module' => asset('public/assets/admin/img/100x100/2.jpg'),
+            'parcel_category' => asset('/public/assets/admin/img/400x400/img2.jpg'),
+            'favicon' => asset('/public/assets/admin/img/favicon.png'),
+            'seller' => asset('public/assets/back-end/img/160x160/img1.jpg'),
+            'upload_placeholder' => asset('/public/assets/admin/img/upload-placeholder.png'),
+            'payment_modules/gateway_image' => asset('/public/assets/admin/img/payment/placeholder.png'),
+            'email_template' => asset('/public/assets/admin/img/blank1.png'),
+        ];
 
         try {
-            if(($storage  == 'public') && isset($image) && strlen($image) >1 && Storage::disk($storage)->exists($path.$image)){
-                return asset('storage/app/public') . '/' . $path . '/' . $image;
-            }
-            if(($storage  == 's3') && isset($image) && strlen($image) >1 && Storage::disk($storage)->exists($path.$image)){
-                return Storage::disk($storage)->url($path . $image);
-//                $awsUrl = config('filesystems.disks.s3.url');
-//                $awsBucket = config('filesystems.disks.s3.bucket');
-//                return rtrim($awsUrl, '/').'/'.ltrim($awsBucket.'/'.$path.$image, '/');
-            }
-        } catch (\Exception $e) {
-            return $error_src;
-        }
-        return $error_src;
-    }
-
-
-    public static function onerror_image_helper($image, $src, $error_src ,$path, $storage = null){
-
-        try {
-            if(($storage  == 'public') && isset($image) && strlen($image) >1 && Storage::disk($storage)->exists($path.$image)){
-                return asset('storage/app/public') . '/' . $path . '/' . $image;
-            }
-            if(($storage  == 's3') && isset($image) && strlen($image) >1 && Storage::disk($storage)->exists($path.$image)){
-                return Storage::disk($storage)->url($path . $image);
-//                $awsUrl = config('filesystems.disks.s3.url');
-//                $awsBucket = config('filesystems.disks.s3.bucket');
-//                return rtrim($awsUrl, '/').'/'.ltrim($awsBucket.'/'.$path.$image, '/');
-            }
-        } catch (\Exception $e) {
-            return $error_src;
-        }
-        return $error_src;
-    }
-
-    public static function local_storage_link($path,$data){
-        if (Storage::disk('public')->exists($path .'/'. $data)) {
-            return asset('storage/app/public') . '/' . $path . '/' . $data;
-        }
-        return 'def.png';
-    }
-    public static function s3_storage_link($path,$data){
-        try {
-
-            if (Storage::disk('s3')->exists($path .'/'. $data)) {
-                return Storage::disk('s3')->url($path .'/'. $data);
-//                $awsUrl = config('filesystems.disks.s3.url');
-//                $awsBucket = config('filesystems.disks.s3.bucket');
-//                return rtrim($awsUrl, '/') . '/' . ltrim($awsBucket . '/' . $path . '/' . $data, '/');
-            }
-        } catch (\Exception $e){
-
-        }
-        return 'def.png';
-    }
-
-    public static function get_full_url($path,$data,$type){
-        try {
-
-            if ($type == 's3' && Storage::disk('s3')->exists($path .'/'. $data)) {
+            if ($data && $type == 's3' && Storage::disk('s3')->exists($path .'/'. $data)) {
                 return Storage::disk('s3')->url($path .'/'. $data);
 //                $awsUrl = config('filesystems.disks.s3.url');
 //                $awsBucket = config('filesystems.disks.s3.bucket');
@@ -3465,9 +3513,23 @@ class Helpers
             }
         } catch (\Exception $e){
         }
-        if (Storage::disk('public')->exists($path .'/'. $data)) {
+
+        if ($data && Storage::disk('public')->exists($path .'/'. $data)) {
             return asset('storage/app/public') . '/' . $path . '/' . $data;
         }
+
+        if (request()->is('api/*')) {
+            return null;
+        }
+
+        if(isset($placeholder) && array_key_exists($placeholder, $place_holders)){
+            return $place_holders[$placeholder];
+        }elseif(array_key_exists($path, $place_holders)){
+            return $place_holders[$path];
+        }else{
+            return $place_holders['default'];
+        }
+
         return 'def.png';
     }
 
@@ -3679,7 +3741,7 @@ class Helpers
                 $store_subscription->total_package_renewed= $store_subscription->total_package_renewed + 1;
 
                 $day_left=$store_subscription->expiry_date_parsed->format('Y-m-d');
-                if (Carbon::now()->subDays(1)->diffInDays($day_left, false) > 0) {
+                if (Carbon::now()->diffInDays($day_left, false) > 0 && $store_subscription->is_canceled != 1) {
                     $add_days= Carbon::now()->subDays(1)->diffInDays($day_left, false);
                 }
                 if ($store_subscription->max_order != 'unlimited' && $store_subscription->max_order > 0) {
@@ -3699,11 +3761,10 @@ class Helpers
                 ]);
                 $store_subscription =new StoreSubscription();
                 $store_subscription->total_package_renewed= 0;
-                $store_subscription->is_trial= 0;
 
-            }
+                }
 
-
+            $store_subscription->is_trial= 0;
             $store_subscription->renewed_at=now();
             $store_subscription->package_id=$package->id;
             $store_subscription->store_id=$store->id;
@@ -3852,16 +3913,66 @@ class Helpers
 
         try {
 
-            if (config('mail.status') && Helpers::get_mail_status('subscription_renew_mail_status_store') == '1' && $type == 'renew' ) {
+            if($type == 'renew'){
+                $push_notification_status=Helpers::getNotificationStatusData('store','store_subscription_renew','push_notification_status',$store->id);
+                $title=translate('subscription_renewed');
+                $des=translate('Your_subscription_successfully_renewed');
+                } elseif($type != 'renew'){
+                    $des=translate('Your_subscription_successfully_shifted');
+                    $title=translate('subscription_shifted');
+                    $push_notification_status=Helpers::getNotificationStatusData('store','store_subscription_shift','push_notification_status',$store->id);
+
+
+            }
+            if($push_notification_status  &&  $store?->vendor?->firebase_token){
+                $data = [
+                    'title' => $title ?? '',
+                    'description' => $des ?? '',
+                    'order_id' => '',
+                    'image' => '',
+                    'type' => 'subscription',
+                    'order_status' => '',
+                ];
+                Helpers::send_push_notif_to_device($store?->vendor?->firebase_token, $data);
+                DB::table('user_notifications')->insert([
+                    'data' => json_encode($data),
+                    'vendor_id' => $store?->vendor_id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
+
+            if (config('mail.status') && Helpers::get_mail_status('subscription_renew_mail_status_store') == '1' && $type == 'renew' && Helpers::getNotificationStatusData('store','store_subscription_renew','mail_status',$store->id)) {
                 Mail::to($store->email)->send(new SubscriptionRenewOrShift($type,$store->name));
             }
-            if (config('mail.status') && Helpers::get_mail_status('subscription_shift_mail_status_store') == '1' && $type != 'renew' ) {
+            if (config('mail.status') && Helpers::get_mail_status('subscription_shift_mail_status_store') == '1' && $type != 'renew'  && Helpers::getNotificationStatusData('store','store_subscription_shift','mail_status',$store->id)) {
                 Mail::to($store->email)->send(new SubscriptionRenewOrShift($type,$store->name));
             }
-            if (config('mail.status') && Helpers::get_mail_status('subscription_successful_mail_status_store') == '1' ) {
+            if (config('mail.status') && Helpers::get_mail_status('subscription_successful_mail_status_store') == '1' && Helpers::getNotificationStatusData('store','store_subscription_success','mail_status',$store->id) ) {
                 $url=route('subscription_invoice',['id' => base64_encode($subscription_transaction->id)]);
                 Mail::to($store->email)->send(new SubscriptionSuccessful($store->name,$url));
             }
+
+
+            if( Helpers::getNotificationStatusData('store','store_subscription_success','push_notification_status',$store->id)  &&  $store?->vendor?->firebase_token){
+                $data = [
+                    'title' => translate('subscription_successful'),
+                    'description' => translate('You_are_successfully_subscribed'),
+                    'order_id' => '',
+                    'image' => '',
+                    'type' => 'subscription',
+                    'order_status' => '',
+                ];
+                Helpers::send_push_notif_to_device($store?->vendor?->firebase_token, $data);
+                DB::table('user_notifications')->insert([
+                    'data' => json_encode($data),
+                    'vendor_id' => $store?->vendor_id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
 
         } catch (\Exception $ex) {
             info($ex->getMessage());
@@ -3883,7 +3994,7 @@ class Helpers
         $store_logo= BusinessSetting::where(['key' => 'logo'])->first();
         $additional_data = [
             'business_name' => BusinessSetting::where(['key'=>'business_name'])->first()?->value,
-            'business_logo' => \App\CentralLogics\Helpers::get_image_helper($store_logo,'value', asset('storage/app/public/business/').'/' . $store_logo->value, asset('public/assets/admin/img/160x160/img2.jpg') ,'business/' )
+            'business_logo' => \App\CentralLogics\Helpers::get_full_url('business',$store_logo?->value,$store_logo?->storage[0]?->value ?? 'public')
         ];
         $payment_info = new PaymentInfo(
             success_hook: 'sub_success',
@@ -3928,10 +4039,10 @@ class Helpers
     public static function calculateSubscriptionRefundAmount($store,$return_data=null){
 
         $store_subscription=$store->store_sub;
-        if($store_subscription){
+        if($store_subscription && $store_subscription?->is_canceled === 0 && $store_subscription?->is_trial === 0 ){
             $day_left=$store_subscription->expiry_date_parsed->format('Y-m-d');
-            if (Carbon::now()->subDays(1)->diffInDays($day_left, false) > 0) {
-                $add_days= Carbon::now()->subDays(1)->diffInDays($day_left, false);
+            if (Carbon::now()->diffInDays($day_left, false) > 0) {
+                $add_days= Carbon::now()->diffInDays($day_left, false);
                 $validity=$store_subscription?->validity;
                 $subscription_usage_max_time=BusinessSetting::where('key', 'subscription_usage_max_time')->first()?->value ?? 50 ;
                 $subscription_usage_max_time=  ($validity * $subscription_usage_max_time) /100 ;
@@ -4006,6 +4117,192 @@ class Helpers
         }
         return $data;
     }
-}
 
+    public static function getNotificationStatusData($user_type,$key,$notification_type, $store_id= null){
+        $data= NotificationSetting::where('type',$user_type)->where('key',$key)->select($notification_type)->first();
+        $data= $data?->{$notification_type} === 'active' ? 1 : 0;
+
+        if($store_id && $user_type == 'store' && $data === 1){
+            $data= self::getStoreNotificationStatusData(store_id:$store_id,key:$key ,notification_type: $notification_type);
+            $data= $data?->{$notification_type} === 'active' ? 1 : 0;
+        }
+
+        return $data;
+    }
+        public static function getNotificationStatusDataAdmin($user_type,$key){
+            $data= NotificationSetting::where('type',$user_type)->where('key',$key)->select(['mail_status','push_notification_status','sms_status'])->first();
+            return $data ?? null ;
+        }
+
+    public static function notificationDataSetup(){
+
+        $data=self::getAdminNotificationSetupData();
+        $data = NotificationSetting::upsert($data,['key','type'],['title','mail_status','sms_status','push_notification_status','sub_title']);
+        return true;
+    }
+    public static function storeNotificationDataSetup($id){
+        $data=self::getStoreNotificationSetupData($id);
+        $data = StoreNotificationSetting::upsert($data,['key','store_id'],['title','mail_status','sms_status','push_notification_status','sub_title']);
+        return true;
+    }
+    public static function updateAdminNotificationSetupDataSetup(){
+        self::updateAdminNotificationSetupData();
+    return true;
+    }
+    public static function addNewAdminNotificationSetupDataSetup(){
+        self::addNewAdminNotificationSetupData();
+    return true;
+    }
+    public static function getStoreNotificationStatusData($store_id,$key,$notification_type){
+        $data= StoreNotificationSetting::where('store_id',$store_id)->where('key',$key)->select($notification_type)->first();
+        if(!$data){
+            self::storeNotificationDataSetup($store_id);
+            $data= StoreNotificationSetting::where('store_id',$store_id)->where('key',$key)->select($notification_type)->first();
+        }
+        return $data ?? null ;
+    }
+    public static function add_fund_push_notification($user_id){
+        $customer_push_notification_status=self::getNotificationStatusData('customer','customer_add_fund_to_wallet','push_notification_status' );
+
+        $user= User::where('id',$user_id)->first();
+        if ($customer_push_notification_status && $user?->cm_firebase_token) {
+            $data = [
+                'title' => translate('messages.Fund_added'),
+                'description' => translate('messages.Fund_added_to_your_wallet'),
+                'order_id' => '',
+                'image' => '',
+                'type' => 'add_fund',
+                'order_status' =>'',
+            ];
+            self::send_push_notif_to_device($user?->cm_firebase_token, $data);
+
+            DB::table('user_notifications')->insert([
+                'data' => json_encode($data),
+                'user_id' => $user_id,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
+        return true;
+    }
+
+
+    public static function getActivePaymentGateways(){
+
+        if (!Schema::hasTable('addon_settings')) {
+            return [];
+        }
+
+        $published_status = 0;
+        $payment_published_status = config('get_payment_publish_status');
+        if (isset($payment_published_status[0]['is_published'])) {
+            $published_status = $payment_published_status[0]['is_published'];
+        }
+
+
+        if($published_status == 1){
+            $methods = DB::table('addon_settings')->where('is_active',1)->where('settings_type', 'payment_config')->get();
+            $env = env('APP_ENV') == 'live' ? 'live' : 'test';
+            $credentials = $env . '_values';
+
+        } else{
+            $methods = DB::table('addon_settings')->where('is_active',1)->whereIn('settings_type', ['payment_config'])->whereIn('key_name', ['ssl_commerz','paypal','stripe','razor_pay','senang_pay','paytabs','paystack','paymob_accept','paytm','flutterwave','liqpay','bkash','mercadopago'])->get();
+            $env = env('APP_ENV') == 'live' ? 'live' : 'test';
+            $credentials = $env . '_values';
+
+        }
+
+            $data = [];
+            foreach ($methods as $method) {
+                $credentialsData = json_decode($method->$credentials);
+                $additional_data = json_decode($method->additional_data);
+                if ($credentialsData?->status == 1) {
+                    $data[] = [
+                        'gateway' => $method->key_name,
+                        'gateway_title' => $additional_data?->gateway_title,
+                        'gateway_image' => $additional_data?->gateway_image,
+                        'gateway_image_full_url' => Helpers::get_full_url('payment_modules/gateway_image',$additional_data?->gateway_image,$additional_data?->storage ?? 'public')
+                    ];
+                }
+            }
+            return $data;
+
+    }
+
+
+
+    public static function checkCurrency($data , $type= null){
+
+        $digital_payment=self::get_business_settings('digital_payment');
+
+        if($digital_payment && $digital_payment['status']==1){
+            if($type === null){
+                if(is_array(self::getActivePaymentGateways())){
+                    foreach(self::getActivePaymentGateways() as $payment_gateway){
+
+                        if(!empty(self::getPaymentGatewaySupportedCurrencies($payment_gateway['gateway'])) && !array_key_exists($data,self::getPaymentGatewaySupportedCurrencies($payment_gateway['gateway']))    ){
+                            return  $payment_gateway['gateway'];
+                        }
+                    }
+                }
+            }
+            elseif($type == 'payment_gateway'){
+                $currency=  BusinessSetting::where('key','currency')->first()?->value;
+                    if(!empty(self::getPaymentGatewaySupportedCurrencies($data)) && !array_key_exists($currency,self::getPaymentGatewaySupportedCurrencies($data))    ){
+                        return  $data;
+                    }
+            }
+        }
+
+        return true;
+        }
+
+
+    public static function updateStorageTable($dataType, $dataId, $image)
+    {
+        $value = Helpers::getDisk();
+        DB::table('storages')->updateOrInsert([
+            'data_type' => $dataType,
+            'data_id' => $dataId,
+            'key' => 'image',
+        ], [
+            'value' => $value,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+    public static function getNextOpeningTime($schedule) {
+        $currentTime =now()->format('H:i');
+        if ($schedule) {
+            foreach($schedule as $entry) {
+                if ($entry['day'] == now()->format('w')) {
+                        if ($currentTime >= $entry['opening_time'] && $currentTime <= $entry['closing_time']) {
+                            return $entry['opening_time'];
+                        } elseif($currentTime < $entry['opening_time']){
+                            return $entry['opening_time'];
+                        }
+                }
+            }
+        }
+            return 'closed';
+        }
+
+    public static function checkExternalConfiguration($externalBaseUrl, $externalTokem, $martToken)
+    {
+        $activationMode = ExternalConfiguration::where('key', 'activation_mode')->first()?->value;
+        $driveMondBaseUrl = ExternalConfiguration::where('key', 'drivemond_base_url')->first()?->value;
+        $driveMondToken = ExternalConfiguration::where('key', 'drivemond_token')->first()?->value;
+        $systemSelfToken = ExternalConfiguration::where('key', 'system_self_token')->first()?->value;
+        return $activationMode == 1 && $driveMondBaseUrl == $externalBaseUrl && $driveMondToken == $externalTokem && $systemSelfToken == $martToken;
+    }
+
+    public static function checkSelfExternalConfiguration()
+    {
+        $activationMode = ExternalConfiguration::where('key', 'activation_mode')->first()?->value;
+        $driveMondBaseUrl = ExternalConfiguration::where('key', 'drivemond_base_url')->first()?->value;
+        $driveMondToken = ExternalConfiguration::where('key', 'drivemond_token')->first()?->value;
+        $systemSelfToken = ExternalConfiguration::where('key', 'system_self_token')->first()?->value;
+        return $activationMode == 1 && $driveMondBaseUrl != null && $driveMondToken != null && $systemSelfToken != null;
+    }
+}
 

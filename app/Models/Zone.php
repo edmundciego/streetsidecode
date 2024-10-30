@@ -19,6 +19,7 @@ use App\Scopes\ZoneScope;
  *
  * @property int $id
  * @property string $name
+ * @property string $display_name
  * @property mixed $coordinates
  * @property int $status
  * @property Carbon|null $created_at
@@ -45,6 +46,7 @@ class Zone extends Model
      */
     protected $fillable = [
         'name',
+        'display_name',
         'coordinates',
         'status',
         'store_wise_topic',
@@ -77,6 +79,18 @@ class Zone extends Model
         if (count($this->translations) > 0) {
             foreach ($this->translations as $translation) {
                 if ($translation['key'] == 'name') {
+                    return $translation['value'];
+                }
+            }
+        }
+
+        return $value;
+    }
+
+    public function getDisplayNameAttribute($value){
+        if (count($this->translations) > 0) {
+            foreach ($this->translations as $translation) {
+                if ($translation['key'] == 'display_name') {
                     return $translation['value'];
                 }
             }

@@ -110,12 +110,7 @@
                                 <div class="text-center py-3 my-auto">
                                     <img class="img--130 onerror-image" id="viewer"
 
-                                    src="{{ \App\CentralLogics\Helpers::get_image_helper(
-                                        $parcel_category,'image',
-                                        asset('storage/app/public/parcel_category').'/'.$parcel_category['image'] ?? '',
-                                        asset('/public/assets/admin/img/400x400/img2.jpg'),
-                                        'parcel_category/'
-                                    ) }}"
+                                    src="{{ $parcel_category['image_full_url'] }}"
 
                                     data-onerror-image="{{asset('/public/assets/admin/img/400x400/img2.jpg')}}" />
                                 </div>

@@ -161,34 +161,34 @@ class DeliveryMan extends Authenticatable
         if (count($this->storage) > 0) {
             foreach ($this->storage as $storage) {
                 if ($storage['key'] == 'image') {
-
-                    if($storage['value'] == 's3'){
-
-                        return Helpers::s3_storage_link('delivery-man',$value);
-                    }else{
-                        return Helpers::local_storage_link('delivery-man',$value);
-                    }
+                    return Helpers::get_full_url('delivery-man',$value,$storage['value']);
                 }
             }
         }
 
-        return Helpers::local_storage_link('delivery-man',$value);
+        return Helpers::get_full_url('delivery-man',$value,'public');
     }
     public function getIdentityImageFullUrlAttribute(){
         $images = [];
-        $value = is_array($this->identity_image)?$this->identity_image:json_decode($this->identity_image,true);
+        $value = is_array($this->identity_image)
+            ? $this->identity_image
+            : ($this->identity_image && is_string($this->identity_image) && $this->isValidJson($this->identity_image)
+                ? json_decode($this->identity_image, true)
+                : []);
         if ($value){
             foreach ($value as $item){
                 $item = is_array($item)?$item:(is_object($item) && get_class($item) == 'stdClass' ? json_decode(json_encode($item), true):['img' => $item, 'storage' => 'public']);
-                if($item['storage']=='s3'){
-                    $images[] = Helpers::s3_storage_link('delivery-man',$item['img']);
-                }else{
-                    $images[] = Helpers::local_storage_link('delivery-man',$item['img']);
-                }
+                $images[] = Helpers::get_full_url('delivery-man',$item['img'],$item['storage']);
             }
         }
 
         return $images;
+    }
+
+    private function isValidJson($string)
+    {
+        json_decode($string);
+        return (json_last_error() === JSON_ERROR_NONE);
     }
 
     public function storage()

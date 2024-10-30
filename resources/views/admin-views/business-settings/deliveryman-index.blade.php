@@ -308,7 +308,7 @@
                                 </div>
 
                             </div>
-                            <div class="btn--container justify-content-end">
+                            <div class="btn--container justify-content-end mt-5">
                                 <button type="reset" id="reset_btn" class="btn btn--reset location-reload">{{ translate('messages.reset') }}</button>
                                 <button type="submit" id="submit" class="btn btn--primary">{{ translate('messages.save_information') }}</button>
                             </div>

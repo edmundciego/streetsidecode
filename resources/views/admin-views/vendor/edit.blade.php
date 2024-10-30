@@ -143,12 +143,7 @@
                                     <label class="text-center position-relative">
                                         <img class="img--110 min-height-170px min-width-170px onerror-image image--border" id="viewer"
                                         data-onerror-image="{{ asset('public/assets/admin/img/upload-img.png') }}"
-                                        src="{{ \App\CentralLogics\Helpers::get_image_helper(
-                                            $store,'logo',
-                                            asset('storage/app/public/store').'/'.$store->logo ?? '',
-                                            asset('public/assets/admin/img/upload-img.png'),
-                                            'store/'
-                                        ) }}"
+                                        src="{{ $store->logo_full_url ?? asset('public/assets/admin/img/upload-img.png') }}"
                                             alt="logo image" />
                                         <div class="icon-file-group">
                                             <div class="icon-file">
@@ -169,12 +164,7 @@
                                     <label class="text-center position-relative">
                                         <img class="img--vertical min-height-170px min-width-170px onerror-image image--border" id="coverImageViewer"
                                         data-onerror-image="{{ asset('public/assets/admin/img/upload-img.png') }}"
-                                        src="{{ \App\CentralLogics\Helpers::get_image_helper(
-                                            $store,'cover_photo',
-                                            asset('storage/app/public/store/cover').'/'.$store->cover_photo ?? '',
-                                            asset('public/assets/admin/img/upload-img.png'),
-                                            'store/cover/'
-                                        ) }}"
+                                        src="{{ $store->cover_photo_full_url ?? asset('public/assets/admin/img/upload-img.png') }}"
                                             alt="Fav icon" />
                                         <div class="icon-file-group">
                                             <div class="icon-file">
@@ -409,6 +399,11 @@
     <script src="https://maps.googleapis.com/maps/api/js?key={{\App\Models\BusinessSetting::where('key', 'map_api_key')->first()->value}}&libraries=places&callback=initMap&v=3.45.8"></script>
     <script>
         "use strict";
+        $("#vendor_form").on('keydown', function(e){
+            if (e.keyCode === 13) {
+                e.preventDefault();
+            }
+        })
       $(document).on('ready', function () {
             $('.offcanvas').on('click', function(){
                 $('.offcanvas, .floating--date').removeClass('active')

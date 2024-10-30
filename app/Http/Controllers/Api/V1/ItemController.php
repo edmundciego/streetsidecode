@@ -4,16 +4,21 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Item;
 use App\Models\Order;
+use App\Models\Store;
 use App\Models\Review;
+use App\Models\Allergy;
 use App\Models\Category;
+use App\Models\Nutrition;
+use App\Models\GenericName;
+use App\Models\PriorityList;
 use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
+use App\Models\BusinessSetting;
 use App\CentralLogics\StoreLogic;
-use App\CentralLogics\CategoryLogic;
 use Illuminate\Support\Facades\DB;
 use App\CentralLogics\ProductLogic;
+use App\CentralLogics\CategoryLogic;
 use App\Http\Controllers\Controller;
-use App\Models\Store;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -91,6 +96,15 @@ class ItemController extends Controller
         if ($validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
+
+
+        $product_search_default_status =BusinessSetting::where('key', 'product_search_default_status')->first()?->value ?? 1;
+        $product_search_sort_by_general =PriorityList::where('name', 'product_search_sort_by_general')->where('type','general')->first()?->value ?? '';
+        $product_search_sort_by_unavailable =PriorityList::where('name', 'product_search_sort_by_unavailable')->where('type','unavailable')->first()?->value ?? '';
+        $product_search_sort_by_temp_closed =PriorityList::where('name', 'product_search_sort_by_temp_closed')->where('type','temp_closed')->first()?->value ?? '';
+
+
+
         $zone_id = $request->header('zoneId');
 
         $key = explode(' ', $request['name']);
@@ -104,13 +118,42 @@ class ItemController extends Controller
         $max = $request->query('max_price');
         $rating_count = $request->query('rating_count');
 
-        $items = Item::active()->type($type)
+        $query = Item::active()->type($type)
         ->with('store', function($query){
             $query->withCount(['campaigns'=> function($query){
                 $query->Running();
             }]);
         })
-        ->when($request->category_id, function($query)use($request){
+        ->select(['items.*'])
+        ->selectSub(function ($subQuery) {
+            $subQuery->selectRaw('active as temp_available')
+                ->from('stores')
+                ->whereColumn('stores.id', 'items.store_id');
+        }, 'temp_available');
+
+
+        if ($product_search_default_status != '1'){
+            if(config('module.current_module_data')['module_type']  !== 'food'){
+                if($product_search_sort_by_unavailable == 'remove'){
+                    $query = $query->where('stock', '>', 0);
+                }elseif($product_search_sort_by_unavailable == 'last'){
+                    $query = $query->orderByRaw('CASE WHEN stock = 0 THEN 1 ELSE 0 END');
+                }
+
+            }
+
+            if($product_search_sort_by_temp_closed == 'remove'){
+                $query = $query->having('temp_available', '>', 0);
+            }elseif($product_search_sort_by_temp_closed == 'last'){
+                $query = $query->orderByDesc('temp_available');
+            }
+        }
+
+
+
+
+
+        $query= $query->when($request->category_id, function($query)use($request){
             $query->whereHas('category',function($q)use($request){
                 return $q->whereId($request->category_id)->orWhere('parent_id', $request->category_id);
             });
@@ -148,6 +191,27 @@ class ItemController extends Controller
                 $query->where(function($q)use($key){
                     foreach ($key as $value) {
                         $q->where('tag', 'like', "%{$value}%");
+                    };
+                });
+            });
+            $q->orWhereHas('nutritions',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('nutrition', 'like', "%{$value}%");
+                    };
+                });
+            });
+            $q->orWhereHas('allergies',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('allergy', 'like', "%{$value}%");
+                    };
+                });
+            });
+            $q->orWhereHas('generic',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('generic_name', 'like', "%{$value}%");
                     };
                 });
             });
@@ -174,6 +238,7 @@ class ItemController extends Controller
             $query->whereBetween('price',[$min,$max]);
         })
         ->orderByRaw("FIELD(name, ?) DESC", [$request['name']])
+
         ->when($filter&&in_array('top_rated',$filter),function ($qurey){
             $qurey->withCount('reviews')->orderBy('reviews_count','desc');
         })
@@ -188,17 +253,47 @@ class ItemController extends Controller
         })
         ->when($filter&&in_array('low',$filter),function ($qurey){
             $qurey->orderBy('price', 'asc');
-        })
-        ->paginate($limit, ['*'], 'page', $offset);
+        });
 
 
-        $item_categories = Item::active()->type($type)
+
+        $items = $query->paginate($limit, ['*'], 'page', $offset);
+
+
+
+
+        $query = Item::active()->type($type)
         ->with('store', function($query){
             $query->withCount(['campaigns'=> function($query){
                 $query->Running();
             }]);
         })
-        ->when($request->category_id, function($query)use($request){
+        ->select(['items.*'])
+        ->selectSub(function ($subQuery) {
+            $subQuery->selectRaw('active as temp_available')
+                ->from('stores')
+                ->whereColumn('stores.id', 'items.store_id');
+        }, 'temp_available');
+
+
+        if ($product_search_default_status != '1'){
+            if(config('module.current_module_data')['module_type']  !== 'food'){
+                if($product_search_sort_by_unavailable == 'remove'){
+                    $query = $query->where('stock', '>', 0);
+                }elseif($product_search_sort_by_unavailable == 'last'){
+                    $query = $query->orderByRaw('CASE WHEN stock = 0 THEN 1 ELSE 0 END');
+                }
+
+            }
+
+            if($product_search_sort_by_temp_closed == 'remove'){
+                $query = $query->having('temp_available', '>', 0);
+            }elseif($product_search_sort_by_temp_closed == 'last'){
+                $query = $query->orderByDesc('temp_available');
+            }
+        }
+
+        $query= $query->when($request->category_id, function($query)use($request){
             $query->whereHas('category',function($q)use($request){
                 return $q->whereId($request->category_id)->orWhere('parent_id', $request->category_id);
             });
@@ -239,6 +334,27 @@ class ItemController extends Controller
                     };
                 });
             });
+            $q->orWhereHas('nutritions',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('nutrition', 'like', "%{$value}%");
+                    };
+                });
+            });
+            $q->orWhereHas('allergies',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('allergy', 'like', "%{$value}%");
+                    };
+                });
+            });
+            $q->orWhereHas('generic',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('generic_name', 'like', "%{$value}%");
+                    };
+                });
+            });
             $q->orWhereHas('category.parent',function($query)use($key){
                 $query->where(function($q)use($key){
                     foreach ($key as $value) {
@@ -260,8 +376,12 @@ class ItemController extends Controller
         })
         ->when($min && $max, function($query)use($min,$max){
             $query->whereBetween('price',[$min,$max]);
-        })
-        ->pluck('category_id')->toArray();
+        });
+
+
+
+
+        $item_categories=  $query->pluck('category_id')->toArray();
 
         $item_categories = array_unique($item_categories);
 
@@ -347,6 +467,27 @@ class ItemController extends Controller
                 $query->where(function($q)use($key){
                     foreach ($key as $value) {
                         $q->where('tag', 'like', "%{$value}%");
+                    };
+                });
+            });
+            $q->orWhereHas('nutritions',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('nutrition', 'like', "%{$value}%");
+                    };
+                });
+            });
+            $q->orWhereHas('allergies',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('allergy', 'like', "%{$value}%");
+                    };
+                });
+            });
+            $q->orWhereHas('generic',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('generic_name', 'like', "%{$value}%");
                     };
                 });
             });
@@ -450,7 +591,8 @@ class ItemController extends Controller
     public function get_product($id)
     {
         try {
-            $item = Item::withCount('whislists')->with(['tags','reviews','reviews.customer'])->active()
+
+            $item = Item::withCount('whislists')->with(['tags','nutritions','allergies','reviews','reviews.customer'])->active()
             ->when(config('module.current_module_data'), function($query){
                 $query->module(config('module.current_module_data')['id']);
             })
@@ -477,13 +619,12 @@ class ItemController extends Controller
                 $store['category_details'] = Category::whereIn('id',$store['category_ids'])->get();
                 $store['price_range']  = Item::withoutGlobalScopes()->where('store_id', $item->store_id)
                 ->select(DB::raw('MIN(price) AS min_price, MAX(price) AS max_price'))
-                ->get(['min_price','max_price']);
+                ->get(['min_price','max_price'])->toArray();
             }
             $item = Helpers::product_data_formatting($item, false, false, app()->getLocale());
             $item['store_details'] = $store;
             return response()->json($item, 200);
         } catch (\Exception $e) {
-            dd($e->getLine());
             return response()->json([
                 'errors' => ['code' => 'product-001', 'message' => translate('messages.not_found')]
             ], 404);
@@ -737,6 +878,20 @@ class ItemController extends Controller
                     };
                 });
             });
+            $q->orWhereHas('nutritions',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('nutrition', 'like', "%{$value}%");
+                    };
+                });
+            });
+            $q->orWhereHas('allergies',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('allergy', 'like', "%{$value}%");
+                    };
+                });
+            });
             $q->orWhereHas('category.parent',function($query)use($key){
                 $query->where(function($q)use($key){
                     foreach ($key as $value) {
@@ -748,6 +903,13 @@ class ItemController extends Controller
                 $query->where(function($q)use($key){
                     foreach ($key as $value) {
                         $q->where('name', 'like', "%{$value}%");
+                    };
+                });
+            });
+            $q->orWhereHas('generic',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('generic_name', 'like', "%{$value}%");
                     };
                 });
             });
@@ -931,6 +1093,21 @@ class ItemController extends Controller
 
         $items['products'] = Helpers::product_data_formatting($items['products'], true, false, app()->getLocale());
         return response()->json($items, 200);
+    }
+
+
+
+    public function getGenericNameList(){
+        $names= GenericName::select(['generic_name'])->pluck('generic_name');
+        return response()->json($names, 200);
+    }
+    public function getAllergyNameList(){
+        $names= Allergy::select(['allergy'])->pluck('allergy');
+        return response()->json($names, 200);
+    }
+    public function getNutritionNameList(){
+        $names= Nutrition::select(['nutrition'])->pluck('nutrition');
+        return response()->json($names, 200);
     }
 
 

@@ -115,6 +115,27 @@ class SearchController extends Controller
                     };
                 });
             });
+            $q->orWhereHas('nutritions',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('nutrition', 'like', "%{$value}%");
+                    };
+                });
+            });
+            $q->orWhereHas('allergies',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('allergy', 'like', "%{$value}%");
+                    };
+                });
+            });
+            $q->orWhereHas('generic',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('generic_name', 'like', "%{$value}%");
+                    };
+                });
+            });
 
         })
         ->when($rating_count, function($query) use ($rating_count){
@@ -207,6 +228,27 @@ class SearchController extends Controller
                 $query->where(function($q)use($key){
                     foreach ($key as $value) {
                         $q->where('name', 'like', "%{$value}%");
+                    };
+                });
+            });
+            $q->orWhereHas('nutritions',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('nutrition', 'like', "%{$value}%");
+                    };
+                });
+            });
+            $q->orWhereHas('allergies',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('allergy', 'like', "%{$value}%");
+                    };
+                });
+            });
+            $q->orWhereHas('generic',function($query)use($key){
+                $query->where(function($q)use($key){
+                    foreach ($key as $value) {
+                        $q->where('generic_name', 'like', "%{$value}%");
                     };
                 });
             });

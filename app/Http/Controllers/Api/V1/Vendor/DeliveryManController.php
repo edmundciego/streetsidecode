@@ -169,7 +169,7 @@ class DeliveryManController extends Controller
         {
             if($request->status == 0)
             {   $delivery_man->auth_token = null;
-                if(isset($delivery_man->fcm_token))
+                if(Helpers::getNotificationStatusData('deliveryman','deliveryman_account_block','push_notification_status') &&  isset($delivery_man->fcm_token))
                 {
                     $data = [
                         'title' => translate('messages.suspended'),
@@ -187,9 +187,25 @@ class DeliveryManController extends Controller
                         'updated_at'=>now()
                     ]);
                 }
+            }else{
+                if(Helpers::getNotificationStatusData('deliveryman','deliveryman_account_unblock','push_notification_status') &&   isset($delivery_man->fcm_token)){
+                    $data = [
+                        'title' => translate('messages.Account_activation'),
+                        'description' => translate('messages.your_account_has_been_activated'),
+                        'order_id' => '',
+                        'image' => '',
+                        'type'=> 'unblock'
+                    ];
+                    Helpers::send_push_notif_to_device($delivery_man->fcm_token, $data);
 
+                    DB::table('user_notifications')->insert([
+                        'data'=> json_encode($data),
+                        'delivery_man_id'=>$delivery_man->id,
+                        'created_at'=>now(),
+                        'updated_at'=>now()
+                    ]);
+                }
             }
-
         }
         catch (\Exception $e) {
 

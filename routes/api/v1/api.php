@@ -16,12 +16,20 @@ use BeyondCode\LaravelWebSockets\Facades\WebSocketsRouter;
 */
 
 Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function () {
+    Route::group(['prefix' => 'configurations'], function () {
+        Route::get('/', 'ExternalConfigurationController@getConfiguration');
+        Route::get('/get-external', 'ExternalConfigurationController@getExternalConfiguration');
+        Route::post('/store', 'ExternalConfigurationController@updateConfiguration');
+    });
+
     Route::get('zone/list', 'ZoneController@get_zones');
     Route::get('zone/check', 'ZoneController@zonesCheck');
+
     Route::get('offline_payment_method_list', 'ConfigController@offline_payment_method_list');
     Route::group(['prefix' => 'auth', 'namespace' => 'Auth'], function () {
         Route::post('sign-up', 'CustomerAuthController@register');
         Route::post('login', 'CustomerAuthController@login');
+        Route::post('external-login', 'CustomerAuthController@customerLoginFromDrivemond');
         Route::post('verify-phone', 'CustomerAuthController@verify_phone');
 
         Route::post('check-email', 'CustomerAuthController@check_email');
@@ -29,6 +37,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
 
         Route::post('forgot-password', 'PasswordResetController@reset_password_request');
         Route::post('verify-token', 'PasswordResetController@verify_token');
+        Route::post('firebase-verify-token', 'CustomerAuthController@firebase_auth_verify');
         Route::put('reset-password', 'PasswordResetController@reset_password_submit');
 
         Route::post('guest/request','CustomerAuthController@guest_request');
@@ -39,6 +48,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
 
             Route::post('forgot-password', 'DMPasswordResetController@reset_password_request');
             Route::post('verify-token', 'DMPasswordResetController@verify_token');
+            Route::post('firebase-verify-token', 'DMPasswordResetController@firebase_auth_verify');
             Route::put('reset-password', 'DMPasswordResetController@reset_password_submit');
         });
         Route::group(['prefix' => 'vendor'], function () {
@@ -200,6 +210,18 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
             Route::post('delete', 'CouponController@delete')->name('delete');
             Route::post('search', 'CouponController@search')->name('search');
         });
+       // advertisement
+        Route::group([ 'prefix' => 'advertisement', 'as' => 'advertisement.'], function () {
+            Route::get('/', 'AdvertisementController@index');
+            Route::get('details/{id}', 'AdvertisementController@show');
+            Route::delete('delete/{id}', 'AdvertisementController@destroy');
+            Route::post('store', 'AdvertisementController@store');
+            Route::post('update/{id}', 'AdvertisementController@update');
+            Route::put('/status', 'AdvertisementController@status')->name('status');
+            Route::post('copy-add-post', 'AdvertisementController@copyAddPost');
+
+        });
+
         // Addon
         Route::group(['prefix'=>'addon'], function(){
             Route::get('/', 'AddOnController@list');
@@ -279,12 +301,20 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
     });
 
     Route::get('customer/order/cancellation-reasons', 'OrderController@cancellation_reason');
+    Route::get('customer/automated-message', 'OrderController@automatedMessage');
+
+    Route::get('item/get-generic-name-list', 'ItemController@getGenericNameList');
+    Route::get('item/get-allergy-name-list', 'ItemController@getAllergyNameList');
+    Route::get('item/get-nutrition-name-list', 'ItemController@getNutritionNameList');
+
     Route::get('customer/order/parcel-instructions', 'OrderController@parcel_instructions');
     Route::get('most-tips', 'OrderController@most_tips');
     Route::get('stores/details/{id}', 'StoreController@get_details');
 
     Route::group(['middleware'=>['module-check']], function(){
         Route::group(['prefix' => 'customer', 'middleware' => 'auth:api'], function () {
+            Route::post('get-data', 'CustomerController@getCustomer');
+            Route::post('external-update-data', 'CustomerController@externalUpdateCustomer')->withoutMiddleware(['auth:api','module-check']);
             Route::get('notifications', 'NotificationController@get_notifications');
             Route::get('info', 'CustomerController@info');
             Route::get('update-zone', 'CustomerController@update_zone');
@@ -327,6 +357,9 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
                 Route::get('transactions', 'WalletController@transactions');
                 Route::get('bonuses', 'WalletController@get_bonus');
                 Route::post('add-fund', 'WalletController@add_fund');
+                #handshake
+                Route::post('transfer-mart-to-drivemond', 'WalletController@transferMartToDrivemondWallet');
+                Route::post('transfer-mart-from-drivemond', 'WalletController@transferMartFromDrivemondWallet')->withoutMiddleware('auth:api');
             });
 
             Route::get('visit-again', 'OrderController@order_again');
@@ -419,6 +452,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
             Route::get('items/{category_id}/all', 'CategoryController@get_all_products');
             Route::get('stores/{category_id}', 'CategoryController@get_stores');
             Route::get('featured/items', 'CategoryController@get_featured_category_products');
+            Route::get('popular', 'CategoryController@get_popular_category_list');
         });
 
         Route::group(['prefix' => 'common-condition'], function () {
@@ -452,6 +486,8 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         });
 
         Route::get('parcel-category','ParcelCategoryController@index');
+        Route::get('advertisement/list', 'AdvertisementController@get_adds');
+
     });
     Route::get('vehicle/extra_charge', 'ConfigController@extra_charge');
     Route::get('get-vehicles', 'ConfigController@get_vehicles');

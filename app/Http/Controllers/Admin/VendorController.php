@@ -194,7 +194,7 @@ class VendorController extends Controller
         } catch (\Exception $ex) {
             info($ex->getMessage());
         }
-        Toastr::success(translate('messages.store').translate('messages.added_successfully'));
+        Toastr::success(translate('messages.store_added_successfully'));
         return redirect('admin/store/list');
     }
 
@@ -341,7 +341,7 @@ class VendorController extends Controller
             $userinfo->image = $store->logo;
             $userinfo->save();
         }
-        Toastr::success(translate('messages.store').translate('messages.updated_successfully'));
+        Toastr::success(translate('messages.store_updated_successfully'));
         return redirect('admin/store/list');
     }
 
@@ -399,7 +399,7 @@ class VendorController extends Controller
 
         $key = explode(' ', request()->search);
 
-        $store = Store::find($store_id);
+        $store = Store::findOrFail($store_id);
         $wallet = $store->vendor->wallet;
         if(!$wallet)
         {
@@ -595,7 +595,7 @@ class VendorController extends Controller
         ->when(is_numeric($module_id), function($query)use($request){
             return $query->module($request->query('module_id'));
         })
-                ->when(isset($key), function($query)use($key){
+                ->when(isset($key), function($query)use($key,$request){
             return $query->where(function($query)use($key){
                 $query->orWhereHas('vendor',function ($q) use ($key) {
                     $q->where(function($q)use($key){
@@ -613,7 +613,7 @@ class VendorController extends Controller
                             ->orWhere('phone', 'like', "%{$value}%");
                     }
                 });
-            });
+            })->orderByRaw("FIELD(name, ?) DESC", [$request->search]);
         })
         ->module(Config::get('module.current_module_id'))
         ->with('vendor','module')->type($type)->latest()->paginate(config('default_pagination'));
@@ -804,7 +804,7 @@ class VendorController extends Controller
         {
             if($request->status == 0)
             {   $vendor->auth_token = null;
-                if(isset($vendor->fcm_token))
+                if(isset($vendor->firebase_token) && Helpers::getNotificationStatusData('store','store_account_block','push_notification_status',$store?->id))
                 {
                     $data = [
                         'title' => translate('messages.suspended'),
@@ -813,7 +813,7 @@ class VendorController extends Controller
                         'image' => '',
                         'type'=> 'block'
                     ];
-                    Helpers::send_push_notif_to_device($vendor->fcm_token, $data);
+                    Helpers::send_push_notif_to_device($vendor->firebase_token, $data);
                     DB::table('user_notifications')->insert([
                         'data'=> json_encode($data),
                         'vendor_id'=>$vendor->id,
@@ -822,11 +822,30 @@ class VendorController extends Controller
                     ]);
                 }
 
-                if ( config('mail.status') && Helpers::get_mail_status('suspend_mail_status_store') == '1') {
+                if ( config('mail.status') && Helpers::get_mail_status('suspend_mail_status_store') == '1' &&  Helpers::getNotificationStatusData('store','store_account_block','mail_status',$store?->id)) {
                     Mail::to( $vendor?->email)->send(new \App\Mail\VendorStatus('suspended', $vendor?->f_name.' '.$vendor?->l_name));
                 }
             } else{
-                if ( config('mail.status') && Helpers::get_mail_status('unsuspend_mail_status_store') == '1') {
+
+                if ( Helpers::getNotificationStatusData('store','store_account_unblock','push_notification_status',$store?->id) &&  isset($vendor->firebase_token)) {
+                    $data = [
+                        'title' => translate('Account_Activation'),
+                        'description' => translate('messages.your_account_has_been_activated'),
+                        'order_id' => '',
+                        'image' => '',
+                        'type' => 'unblock'
+                    ];
+                    Helpers::send_push_notif_to_device($vendor->firebase_token, $data);
+                    DB::table('user_notifications')->insert([
+                        'data' => json_encode($data),
+                        'vendor_id' => $vendor->id,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+
+
+                if ( config('mail.status') && Helpers::get_mail_status('unsuspend_mail_status_store') == '1' &&  Helpers::getNotificationStatusData('store','store_account_unblock','mail_status',$store?->id)) {
                     Mail::to( $vendor?->email)->send(new \App\Mail\VendorStatus('unsuspended', $vendor?->f_name.' '.$vendor?->l_name));
                 }
             }
@@ -836,7 +855,7 @@ class VendorController extends Controller
             Toastr::warning(translate('messages.push_notification_faild'));
         }
 
-        Toastr::success(translate('messages.store').translate('messages.status_updated'));
+        Toastr::success(translate('messages.store_status_updated'));
         return back();
     }
 
@@ -875,7 +894,7 @@ class VendorController extends Controller
 
         $store[$request->menu] = $request->status;
         $store->save();
-        Toastr::success(translate('messages.store').translate('messages.settings_updated'));
+        Toastr::success(translate('messages.store_settings_updated'));
         return back();
     }
 
@@ -926,7 +945,7 @@ class VendorController extends Controller
         $store->non_veg = (bool)($request->veg_non_veg == 'non_veg' || $request->veg_non_veg == 'both');
 
         $store->save();
-        Toastr::success(translate('messages.store').translate('messages.settings_updated'));
+        Toastr::success(translate('messages.store_settings_updated'));
         return back();
     }
 
@@ -998,7 +1017,7 @@ class VendorController extends Controller
                 }
             }
         }
-        Toastr::success(translate('messages.store').translate('messages.meta_data_updated'));
+        Toastr::success(translate('messages.store_meta_data_updated'));
         return back();
     }
 
@@ -1025,13 +1044,11 @@ class VendorController extends Controller
         $store->save();
         try{
             if($request->status==1){
-                $mail_status = Helpers::get_mail_status('approve_mail_status_store');
-                if ( config('mail.status') && $mail_status == '1') {
+                if ( config('mail.status') && Helpers::get_mail_status('approve_mail_status_store') == '1' &&  Helpers::getNotificationStatusData('store','store_registration_approval','mail_status')) {
                     Mail::to($store?->vendor?->email)->send(new \App\Mail\VendorSelfRegistration('approved', $store->vendor->f_name.' '.$store->vendor->l_name));
                 }
             }else{
-                $mail_status = Helpers::get_mail_status('deny_mail_status_store');
-                if ( config('mail.status') && $mail_status == '1') {
+                if ( config('mail.status') &&  Helpers::get_mail_status('deny_mail_status_store') == '1' &&  Helpers::getNotificationStatusData('store','store_registration_deny','mail_status')) {
                     Mail::to($store?->vendor?->email)->send(new \App\Mail\VendorSelfRegistration('denied', $store->vendor->f_name.' '.$store->vendor->l_name));
                 }
             }
@@ -1045,7 +1062,7 @@ class VendorController extends Controller
     public function cleardiscount(Store $store)
     {
         $store->discount->delete();
-        Toastr::success(translate('messages.store').translate('messages.discount_cleared'));
+        Toastr::success(translate('messages.store_discount_cleared'));
         return back();
     }
 
@@ -1190,8 +1207,27 @@ class VendorController extends Controller
             $withdraw->save();
             try
             {
-                $mail_status = Helpers::get_mail_status('withdraw_approve_mail_status_store');
-                if(config('mail.status') && $mail_status == '1') {
+                if( Helpers::getNotificationStatusData('store','store_withdraw_approve','push_notification_status',$withdraw->vendor?->stores[0]?->id) && $withdraw->vendor?->firebase_token ){
+
+                    $data = [
+                        'title' => translate('Withdraw_approved'),
+                        'description' => translate('Withdraw_request_approved_by_admin'),
+                        'order_id' => '',
+                        'image' => '',
+                        'type' => 'withdraw',
+                        'order_status' => '',
+                    ];
+                    Helpers::send_push_notif_to_device($withdraw->vendor->firebase_token, $data);
+                    DB::table('user_notifications')->insert([
+                        'data' => json_encode($data),
+                        'vendor_id' => $withdraw->vendor_id,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+
+
+                if(config('mail.status') &&  Helpers::get_mail_status('withdraw_approve_mail_status_store') == '1' &&  Helpers::getNotificationStatusData('store','store_withdraw_approve','mail_status',$withdraw->vendor?->stores[0]?->id)) {
                     Mail::to($withdraw->vendor->email)->send(new \App\Mail\WithdrawRequestMail('approved',$withdraw));
                 }
             }
@@ -1206,8 +1242,26 @@ class VendorController extends Controller
             $withdraw->save();
             try
             {
-                $mail_status = Helpers::get_mail_status('withdraw_deny_mail_status_store');
-                if(config('mail.status') && $mail_status == '1') {
+                if(  Helpers::getNotificationStatusData('store','store_withdraw_rejaction','push_notification_status',$withdraw->vendor?->stores[0]?->id) && $withdraw->vendor?->firebase_token ){
+
+                    $data = [
+                        'title' => translate('Withdraw_rejected'),
+                        'description' => translate('Withdraw_request_rejected_by_admin'),
+                        'order_id' => '',
+                        'image' => '',
+                        'type' => 'withdraw',
+                        'order_status' => '',
+                    ];
+                    Helpers::send_push_notif_to_device($withdraw->vendor->firebase_token, $data);
+                    DB::table('user_notifications')->insert([
+                        'data' => json_encode($data),
+                        'vendor_id' => $withdraw->vendor_id,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+
+                if(config('mail.status') &&  Helpers::get_mail_status('withdraw_deny_mail_status_store') == '1'  &&  Helpers::getNotificationStatusData('store','store_withdraw_rejaction','mail_status',$withdraw->vendor?->stores[0]?->id)) {
                     Mail::to($withdraw->vendor->email)->send(new \App\Mail\WithdrawRequestMail('denied',$withdraw));
                 }
             }
@@ -1441,7 +1495,12 @@ class VendorController extends Controller
 
                 foreach($chunk_stores as $key=> $chunk_store){
                     DB::table('vendors')->insert($chunk_vendors[$key]);
-                    DB::table('stores')->insert($chunk_store);
+//                    DB::table('stores')->insert($chunk_store);
+                    foreach ($chunk_store as $store) {
+                        $insertedId = DB::table('stores')->insertGetId($store);
+                        Helpers::updateStorageTable(get_class(new Store), $insertedId, $store['logo']);
+                        Helpers::updateStorageTable(get_class(new Store), $insertedId, $store['cover_photo']);
+                    }
                 }
                 DB::table('store_schedule')->insert(array_merge(...$data));
                 DB::commit();
@@ -1573,8 +1632,19 @@ class VendorController extends Controller
                 DB::beginTransaction();
 
                 foreach($chunk_stores as $key=> $chunk_store){
-                DB::table('vendors')->upsert($chunk_vendors[$key],['id','email','phone'],['f_name','l_name','password']);
-                DB::table('stores')->upsert($chunk_store,['id','email','phone','vendor_id'],['name','logo','cover_photo','latitude','longitude','address','zone_id','module_id','minimum_order','comission','tax','delivery_time','minimum_shipping_charge','per_km_shipping_charge','maximum_shipping_charge','schedule_order','status','self_delivery_system','veg','non_veg','free_delivery','take_away','delivery','reviews_section','pos_system','active','featured']);
+                    DB::table('vendors')->upsert($chunk_vendors[$key],['id','email','phone'],['f_name','l_name','password']);
+//                    DB::table('stores')->upsert($chunk_store,['id','email','phone','vendor_id'],['name','logo','cover_photo','latitude','longitude','address','zone_id','module_id','minimum_order','comission','tax','delivery_time','minimum_shipping_charge','per_km_shipping_charge','maximum_shipping_charge','schedule_order','status','self_delivery_system','veg','non_veg','free_delivery','take_away','delivery','reviews_section','pos_system','active','featured']);
+                    foreach ($chunk_store as $store) {
+                        if (isset($store['id']) && DB::table('food')->where('id', $store['id'])->exists()) {
+                            DB::table('stores')->where('id', $store['id'])->update($store);
+                            Helpers::updateStorageTable(get_class(new Store), $store['id'], $store['logo']);
+                            Helpers::updateStorageTable(get_class(new Store), $store['id'], $store['cover_photo']);
+                        } else {
+                            $insertedId = DB::table('stores')->insertGetId($store);
+                            Helpers::updateStorageTable(get_class(new Store), $insertedId, $store['logo']);
+                            Helpers::updateStorageTable(get_class(new Store), $insertedId, $store['cover_photo']);
+                        }
+                    }
                 }
                 DB::commit();
             }catch(\Exception $e)
@@ -1912,5 +1982,30 @@ class VendorController extends Controller
 
 
 
+    public function get_store_ratings(Request $request)
+    {
 
+        $data=['review' => 4.7, 'rating' => 2];
+
+        if(!$request->store_id){
+            return response()->json($data);
+        }
+
+
+        $store =  Store::where('id',$request->store_id)->first();
+        if(!$store){
+            return response()->json($data);
+        }
+        $review = (int) $store->reviews_comments()->count();
+        $reviewsInfo = $store->reviews()
+        ->selectRaw('avg(reviews.rating) as average_rating, count(reviews.id) as total_reviews, items.store_id')
+        ->groupBy('items.store_id')
+        ->first();
+
+        $rating = (float)  $reviewsInfo?->average_rating ?? 0;
+
+        $data=['review' => round($review,1), 'rating' => round($rating,1)];
+
+        return response()->json($data);
+    }
 }

@@ -65,8 +65,7 @@ class WalletController extends Controller
             try
             {
                 $admin= Admin::where('role_id', 1)->first();
-                $mail_status = Helpers::get_mail_status('withdraw_request_mail_status_admin');
-                if(config('mail.status') && $mail_status == '1') {
+                if(config('mail.status') && Helpers::get_mail_status('withdraw_request_mail_status_admin') == '1' &&   Helpers::getNotificationStatusData('admin','withdraw_request','mail_status')) {
                     $wallet_transaction = WithdrawRequest::where('vendor_id',Helpers::get_vendor_id())->latest()->first();
                     Mail::to($admin['email'])->send(new \App\Mail\WithdrawRequestMail('pending',$wallet_transaction));
                 }
@@ -178,7 +177,7 @@ class WalletController extends Controller
         $store_logo= BusinessSetting::where(['key' => 'logo'])->first();
         $additional_data = [
             'business_name' => BusinessSetting::where(['key'=>'business_name'])->first()?->value,
-            'business_logo' => \App\CentralLogics\Helpers::get_image_helper($store_logo,'value', asset('storage/app/public/business/').'/' . $store_logo->value, asset('public/assets/admin/img/160x160/img2.jpg') ,'business/' )
+            'business_logo' => \App\CentralLogics\Helpers::get_full_url('business',$store_logo?->value,$store_logo?->storage[0]?->value ?? 'public' )
         ];
         $payment_info = new PaymentInfo(
             success_hook: 'collect_cash_success',

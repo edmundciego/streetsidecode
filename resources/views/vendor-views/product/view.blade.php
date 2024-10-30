@@ -33,7 +33,7 @@
                         <div class="col-lg-5 col-md-6 mb-3 mb-md-0">
                             <div class="d-flex flex-wrap align-items-center food--media">
                                 <img class="avatar avatar-xxl avatar-4by3 mr-4 onerror-image"
-                                src="{{\App\CentralLogics\Helpers::get_image_helper($product,'image', asset('storage/app/public/product/').'/'.$product['image'], asset('public/assets/admin/img/160x160/img2.jpg'), 'product/') }}"
+                                src="{{ $product['image_full_url'] }}"
                                         data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}"
                                         alt="Image Description">
                                         <div class="d-block">
@@ -232,6 +232,20 @@
                         <thead class="thead-light">
                             <tr>
                                 <th class="px-4 border-0"><h4 class="m-0 text-capitalize">{{translate('short_description')}}</h4></th>
+                                @if (in_array($product->module->module_type ,['food','grocery']))
+                                <th class="px-4 border-0">
+                                    <h4 class="m-0 text-capitalize">{{ translate('Nutrition') }}</h4>
+                                </th>
+                                <th class="px-4 border-0">
+                                    <h4 class="m-0 text-capitalize">{{ translate('Allergy') }}</h4>
+                                </th>
+
+                            @endif
+                            @if (in_array($product->module->module_type ,['pharmacy']))
+                            <th class="px-4 border-0">
+                                <h4 class="m-0 text-capitalize">{{ translate('Generic_Name') }}</h4>
+                            </th>
+                        @endif
                                 <th class="px-4 border-0"><h4 class="m-0 text-capitalize">{{translate('price')}}</h4></th>
                                 <th class="px-4 border-0"><h4 class="m-0 text-capitalize">{{translate('variations')}}</h4></th>
                                 @if(\App\CentralLogics\Helpers::get_store_data()->module->module_type == 'food')
@@ -249,6 +263,30 @@
                                         {!!$product['description'] !!}
                                     </div>
                                 </td>
+                                @if (in_array($product->module->module_type ,['food','grocery']))
+                                    <td class="px-4">
+                                        @if ($product->nutritions)
+                                            @foreach($product->nutritions as $nutrition)
+                                                {{$nutrition->nutrition}}{{ !$loop->last ? ',' : '.'}}
+                                            @endforeach
+                                        @endif
+                                    </td>
+                                    <td class="px-4">
+                                        @if ($product->allergies)
+                                            @foreach($product->allergies as $allergy)
+                                                {{$allergy->allergy}}{{ !$loop->last ? ',' : '.'}}
+                                            @endforeach
+                                        @endif
+                                    </td>
+                                @endif
+                                @if (in_array($product->module->module_type ,['pharmacy']))
+                                    <td class="px-4">
+                                        @if ($product->generic->pluck('generic_name')->first())
+                                            {{ $product->generic->pluck('generic_name')->first() }}
+                                        @endif
+                                    </td>
+
+                                @endif
                                 <td class="px-4">
                                     <span class="d-block mb-1">
                                         <span>{{translate('messages.price')}} : </span>
@@ -383,7 +421,7 @@
                                         <div class="position-relative media align-items-center">
                                             <a class=" text-hover-primary absolute--link" href="{{route('vendor.item.view',[$review->item['id']])}}">
                                                 <img class="avatar avatar-lg mr-3  onerror-image"  data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
-                                                     src="{{\App\CentralLogics\Helpers::get_image_helper($review->item,'image', asset('storage/app/public/product/').'/'.$review->item['image'], asset('public/assets/admin/img/160x160/img1.jpg'), 'product/') }}" alt="{{$review->item->name}} image">
+                                                     src="{{ $review->item['image_full_url'] }}" alt="{{$review->item->name}} image">
                                             </a>
                                             <div class="media-body">
                                                 <h5 class="text-hover-primary important--link mb-0">{{Str::limit($review->item['name'],10)}}</h5>
@@ -448,7 +486,7 @@
                                                     <a class="absolute--link" href="{{route('vendor.item.view',[$review->item['id']])}}">
                                                     </a>
                                                     <img class="avatar avatar-lg mr-3  onerror-image"  data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
-                                                         src="{{\App\CentralLogics\Helpers::get_image_helper($review->item,'image', asset('storage/app/public/product/').'/'.$review->item['image'], asset('public/assets/admin/img/160x160/img1.jpg'), 'product/') }}" alt="{{$review->item->name}} image">
+                                                         src="{{ $review->item['image_full_url'] }}" alt="{{$review->item->name}} image">
                                                     <div>
                                                         <h5 class="text-hover-primary mb-0">{{ $review->item['name'] }}</h5>
                                                         @if ($review->item['avg_rating'] == 5)

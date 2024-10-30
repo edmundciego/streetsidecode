@@ -131,7 +131,7 @@ class DeliveryManController extends Controller
         {
             if($request->status == 0)
             {   $delivery_man->auth_token = null;
-                if(isset($delivery_man->fcm_token))
+                if(isset($delivery_man->fcm_token) && Helpers::getNotificationStatusData('deliveryman','deliveryman_account_block','push_notification_status') )
                 {
                     $data = [
                         'title' => translate('messages.suspended'),
@@ -150,6 +150,25 @@ class DeliveryManController extends Controller
                     ]);
                 }
 
+            } else{
+                if( Helpers::getNotificationStatusData('deliveryman','deliveryman_account_unblock','push_notification_status') && isset($delivery_man->fcm_token))
+                {
+                    $data = [
+                        'title' => translate('messages.Account_activation'),
+                        'description' => translate('messages.your_account_has_been_activated'),
+                        'order_id' => '',
+                        'image' => '',
+                        'type'=> 'unblock'
+                    ];
+                    Helpers::send_push_notif_to_device($delivery_man->fcm_token, $data);
+
+                    DB::table('user_notifications')->insert([
+                        'data'=> json_encode($data),
+                        'delivery_man_id'=>$delivery_man->id,
+                        'created_at'=>now(),
+                        'updated_at'=>now()
+                    ]);
+                }
             }
 
         }
@@ -199,9 +218,9 @@ class DeliveryManController extends Controller
 
         if ($request->has('identity_image')){
             foreach (json_decode($delivery_man['identity_image'], true) as $img) {
-          
+
                 Helpers::check_and_delete('delivery-man/' , $img);
-                
+
             }
             $img_keeper = [];
             foreach ($request->identity_image as $img) {
@@ -244,12 +263,12 @@ class DeliveryManController extends Controller
         $delivery_man = DeliveryMan::find($request->id);
 
         Helpers::check_and_delete('delivery-man/' , $delivery_man['image']);
-        
+
 
         foreach (json_decode($delivery_man['identity_image'], true) as $img) {
-         
+
             Helpers::check_and_delete('delivery-man/' , $img);
-            
+
         }
         if($delivery_man->userinfo){
 

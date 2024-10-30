@@ -23,10 +23,24 @@
                     </h1>
                 </div>
                 <div class="col-sm text-sm-right">
-                    <span class="d-inline-flex align-items-center">
-                        <span class="mr-2">{{translate('messages.followup')}}</span>
-                        <i class="tio-restaurant fz-30px"></i>
-                    </span>
+
+                    <div class="promo-card-2">
+                        <img src="{{asset('public/assets/admin/img/promo-arrow.png')}}" class="shapes" alt="">
+                        <div class="left">
+                            <img src="{{asset('public/assets/admin/img/promo.png')}}" width="40" class="mw-100" alt="">
+                            <div class="inner">
+                                <div class="d-flex flex-wrap flex-md-nowrap align-items-center justify-content-between gap-2">
+                                    <div>
+                                        <h4 class="m-0 text-white">{{ translate('Want_to_get_highlighted?') }}</h4>
+                                        <p class="m-0 text-white">
+                                            {{ translate('Create_ads_to_get_highlighted_on_the_app_and_web_browser') }}
+                                        </p>
+                                    </div>
+                                    <a href="{{ route('vendor.advertisement.create') }}" class="btn btn-white text-nowrap font-semibold text-dark">{{ translate('Create_Ads') }}</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -55,6 +55,7 @@ class ZoneController extends BaseController
         $zone = $this->zoneRepo->add(data: $this->zoneService->getAddData(request: $request, zoneId: $zoneId));
 
         $this->translationRepo->addByModel(request: $request, model: $zone, modelPath: 'App\Models\Zone', attribute: 'name');
+        $this->translationRepo->addByModel(request: $request, model: $zone, modelPath: 'App\Models\Zone', attribute: 'display_name');
 
         $zones = $this->zoneRepo->getListWhere(
             relations: ['stores','deliverymen'],
@@ -89,9 +90,10 @@ class ZoneController extends BaseController
 
     public function update(ZoneUpdateRequest $request, $id): RedirectResponse
     {
-        $zone = $this->zoneRepo->update(id: $id ,data: $this->zoneService->getAddData(request: $request, zoneId: $id));
+        $zone = $this->zoneRepo->update(id: $id ,data: $this->zoneService->getUpdateData(request: $request, zoneId: $id));
 
         $this->translationRepo->updateByModel(request: $request, model: $zone, modelPath: 'App\Models\Zone', attribute: 'name');
+        $this->translationRepo->updateByModel(request: $request, model: $zone, modelPath: 'App\Models\Zone', attribute: 'display_name');
 
         Toastr::success(translate('messages.zone_updated_successfully'));
         return back();

@@ -52,9 +52,10 @@ class VendorController extends Controller
         $store['module']=$store->module;
 
         $vendor['order_count'] =$vendor->orders->where('order_type','!=','pos')->whereNotIn('order_status',['canceled','failed'])->count();
-        $vendor['todays_order_count'] =$vendor->todaysorders->where('order_type','!=','pos')->whereNotIn('order_status',['canceled','failed'])->count();
-        $vendor['this_week_order_count'] =$vendor->this_week_orders->where('order_type','!=','pos')->whereNotIn('order_status',['canceled','failed'])->count();
-        $vendor['this_month_order_count'] =$vendor->this_month_orders->where('order_type','!=','pos')->whereNotIn('order_status',['canceled','failed'])->count();
+        $vendor['order_count'] =$vendor->orders->where('order_type','!=','pos')->whereNotIn('order_status',['canceled','failed'])->count();
+        $vendor['todays_order_count'] =$vendor->todaysorders->where('order_type','!=','pos')->whereIn('order_status', ['refunded', 'delivered'])->count();
+        $vendor['this_week_order_count'] =$vendor->this_week_orders->where('order_type','!=','pos')->whereIn('order_status', ['refunded', 'delivered'])->count();
+        $vendor['this_month_order_count'] =$vendor->this_month_orders->where('order_type','!=','pos')->whereIn('order_status', ['refunded', 'delivered'])->count();
         $vendor['member_since_days'] =$vendor->created_at->diffInDays();
         $vendor['cash_in_hands'] =$vendor->wallet?(float)$vendor->wallet->collected_cash:0;
         $vendor['balance'] =$vendor->wallet?(float)$vendor->wallet->balance:0;
@@ -501,6 +502,7 @@ class VendorController extends Controller
         $details = isset($order->details)?$order->details:null;
         if ($details != null && $details->count() > 0) {
             $details = $details = Helpers::order_details_data_formatting($details);
+            $details[0]['is_guest'] = (int)$order->is_guest;
             return response()->json($details, 200);
         } else if ($order->order_type == 'parcel' || $order->prescription_order == 1) {
             $order->delivery_address = json_decode($order->delivery_address, true);
@@ -698,11 +700,11 @@ class VendorController extends Controller
         {
             $admin= Admin::where('role_id', 1)->first();
             $mail_status = Helpers::get_mail_status('campaign_request_mail_status_admin');
-            if(config('mail.status') && $mail_status == '1') {
+            if(config('mail.status') && $mail_status == '1' && Helpers::getNotificationStatusData('admin','campaign_join_request','mail_status' )) {
                 Mail::to($admin->email)->send(new \App\Mail\CampaignRequestMail($store->name));
             }
             $mail_status = Helpers::get_mail_status('campaign_request_mail_status_store');
-            if(config('mail.status') && $mail_status == '1') {
+            if(config('mail.status') && $mail_status == '1' &&  Helpers::getNotificationStatusData('store','store_campaign_join_request','mail_status',$store->id )) {
                 Mail::to($store->vendor->email)->send(new \App\Mail\VendorCampaignRequestMail($store->name,'pending'));
             }
         }
@@ -823,7 +825,7 @@ class VendorController extends Controller
                 DB::table('withdraw_requests')->insert($data);
                 $w?->increment('pending_withdraw', $request['amount']);
                 $mail_status = Helpers::get_mail_status('withdraw_request_mail_status_admin');
-                if(config('mail.status') && $mail_status == '1') {
+                if(config('mail.status') && $mail_status == '1'  &&  Helpers::getNotificationStatusData('admin','withdraw_request','mail_status' )) {
                     $wallet_transaction = WithdrawRequest::where('vendor_id',$w->vendor_id)->latest()->first();
                     $admin= \App\Models\Admin::where('role_id', 1)->first();
                     Mail::to($admin->email)->send(new \App\Mail\WithdrawRequestMail('admin_mail',$wallet_transaction));
@@ -1038,7 +1040,8 @@ class VendorController extends Controller
         }
         $vendor = $request['vendor'];
 
-        $order = Order::whereHas('store.vendor', function($query) use($vendor){
+        $order = Order::where('id' ,$request->order_id)
+        ->whereHas('store.vendor', function($query) use($vendor){
             $query->where('id', $vendor->id);
         })
         ->with('customer')
@@ -1076,13 +1079,13 @@ class VendorController extends Controller
 
             $fcm_token= $order->is_guest == 0 ? $order?->customer?->cm_firebase_token : $order?->guest?->fcm_token;
 
-            if ($value && $fcm_token) {
+            if ($value && $fcm_token && Helpers::getNotificationStatusData('customer','customer_delivery_verification','push_notification_status')) {
                 $data = [
                     'title' => translate('messages.order_ready_to_be_delivered'),
                     'description' => $value,
                     'order_id' => $order->id,
                     'image' => '',
-                    'type' => 'order_status',
+                    'type' => 'otp',
                 ];
                 Helpers::send_push_notif_to_device($fcm_token , $data);
                 DB::table('user_notifications')->insert([
@@ -1145,7 +1148,7 @@ class VendorController extends Controller
         $store_logo= BusinessSetting::where(['key' => 'logo'])->first();
         $additional_data = [
             'business_name' => BusinessSetting::where(['key'=>'business_name'])->first()?->value,
-            'business_logo' => \App\CentralLogics\Helpers::get_image_helper($store_logo,'value', asset('storage/app/public/business/').'/' . $store_logo->value, asset('public/assets/admin/img/160x160/img2.jpg') ,'business/' )
+            'business_logo' => \App\CentralLogics\Helpers::get_full_url('business',$store_logo?->value,$store_logo?->storage[0]?->value ?? 'public' )
         ];
         $payment_info = new PaymentInfo(
             success_hook: 'collect_cash_success',

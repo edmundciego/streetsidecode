@@ -134,6 +134,8 @@ class InstallController extends Controller
 
         Helpers::insert_business_settings_key('check_daily_subscription_validity_check', date('Y-m-d'));
 
+        Helpers::insert_business_settings_key('country_picker_status', '1');
+
 
         $previousRouteServiceProvier = base_path('app/Providers/RouteServiceProvider.php');
         $newRouteServiceProvier = base_path('app/Providers/RouteServiceProvider.txt');
@@ -171,7 +173,7 @@ class InstallController extends Controller
                     DB_PORT=3306
                     DB_DATABASE=' . $request->DB_DATABASE . '
                     DB_USERNAME=' . $request->DB_USERNAME . '
-                    DB_PASSWORD=' . $request->DB_PASSWORD . '
+                    DB_PASSWORD="' . $request->DB_PASSWORD . '"
 
                     BROADCAST_DRIVER=log
                     CACHE_DRIVER=file
@@ -192,7 +194,7 @@ class InstallController extends Controller
                     BUYER_USERNAME=' . session('username') . '
                     SOFTWARE_ID=MzY3NzIxMTI=
 
-                    SOFTWARE_VERSION=2.8.1
+                    SOFTWARE_VERSION=2.10
                     REACT_APP_KEY=45370351
                     ';
             $file = fopen(base_path('.env'), 'w');

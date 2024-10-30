@@ -157,7 +157,7 @@ class StoreController extends Controller
             $store['category_details'] = Category::whereIn('id',$store['category_ids'])->get();
             $store['price_range']  = Item::withoutGlobalScopes()->where('store_id', $store->id)
             ->select(DB::raw('MIN(price) AS min_price, MAX(price) AS max_price'))
-            ->get(['min_price','max_price']);
+            ->get(['min_price','max_price'])->toArray();
         }
         return response()->json($store, 200);
     }
@@ -213,6 +213,7 @@ class StoreController extends Controller
             $temp['item_name'] = null;
             $temp['item_image'] = null;
             $temp['customer_name'] = null;
+            // $temp->item=null;
             if($temp->item)
             {
                 $temp['item_name'] = $temp->item->name;
@@ -223,13 +224,14 @@ class StoreController extends Controller
                     $translate = array_column($temp->item->translations->toArray(), 'value', 'key');
                     $temp['item_name'] = $translate['name'];
                 }
+                unset($temp->item);
+                $temp['item'] = Helpers::product_data_formatting($temp->item, false, false, app()->getLocale());
             }
             if($temp->customer)
             {
                 $temp['customer_name'] = $temp->customer->f_name.' '.$temp->customer->l_name;
             }
 
-            unset($temp['item']);
             unset($temp['customer']);
             array_push($storage, $temp);
         }

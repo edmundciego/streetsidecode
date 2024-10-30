@@ -32,12 +32,7 @@
                             <div class="col-lg-5 col-md-6 mb-3 mb-md-0">
                                 <div class="d-flex flex-wrap align-items-center food--media">
                                     <img class="avatar avatar-xxl avatar-4by3 mr-4 onerror-image"
-                                    src="{{ \App\CentralLogics\Helpers::get_image_helper(
-                                        $product,'image',
-                                        asset('storage/app/public/product').'/'.$product['image'] ?? '',
-                                        asset('public/assets/admin/img/160x160/img2.jpg'),
-                                        'product/'
-                                    ) }}"
+                                    src="{{ $product['image_full_url'] ?? asset('public/assets/admin/img/160x160/img2.jpg') }}"
 
                                     data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
                                         alt="Image Description">
@@ -240,12 +235,7 @@
                                 <img class="img--120 rounded mx-auto mb-3 onerror-image"
                                 data-onerror-image="{{ asset('public/assets/admin/img/160x160/img1.jpg') }}"
 
-                                    src="{{ \App\CentralLogics\Helpers::get_image_helper(
-                                        $product->store,'logo',
-                                        asset('storage/app/public/store').'/'.$product->store->logo ?? '',
-                                        asset('public/assets/admin/img/160x160/img1.jpg'),
-                                        'store/'
-                                    ) }}"
+                                    src="{{ $product->store->logo_full_url ?? asset('public/assets/admin/img/160x160/img1.jpg') }}"
 
                                     alt="Image Description">
                                 <div class="text-center">
@@ -274,6 +264,21 @@
                                 <th class="px-4 border-0">
                                     <h4 class="m-0 text-capitalize">{{ translate('short_description') }}</h4>
                                 </th>
+                                @if (in_array($product->module->module_type ,['food','grocery']))
+                                    <th class="px-4 border-0">
+                                        <h4 class="m-0 text-capitalize">{{ translate('Nutrition') }}</h4>
+                                    </th>
+                                    <th class="px-4 border-0">
+                                        <h4 class="m-0 text-capitalize">{{ translate('Allergy') }}</h4>
+                                    </th>
+
+                                @endif
+                                @if (in_array($product->module->module_type ,['pharmacy']))
+                                    <th class="px-4 border-0">
+                                        <h4 class="m-0 text-capitalize">{{ translate('Generic_Name') }}</h4>
+                                    </th>
+                                @endif
+
                                 <th class="px-4 border-0">
                                     <h4 class="m-0 text-capitalize">{{ translate('price') }}</h4>
                                 </th>
@@ -297,6 +302,30 @@
                                         {!! $product['description'] !!}
                                     </div>
                                 </td>
+                                @if (in_array($product->module->module_type ,['food','grocery']))
+                                    <td class="px-4">
+                                        @if ($product->nutritions)
+                                            @foreach($product->nutritions as $nutrition)
+                                                {{$nutrition->nutrition}}{{ !$loop->last ? ',' : '.'}}
+                                            @endforeach
+                                        @endif
+                                    </td>
+                                    <td class="px-4">
+                                        @if ($product->allergies)
+                                            @foreach($product->allergies as $allergy)
+                                                {{$allergy->allergy}}{{ !$loop->last ? ',' : '.'}}
+                                            @endforeach
+                                        @endif
+                                    </td>
+                                @endif
+                                @if (in_array($product->module->module_type ,['pharmacy']))
+                                    <td class="px-4">
+                                        @if ($product->generic->pluck('generic_name')->first())
+                                            {{ $product->generic->pluck('generic_name')->first() }}
+                                        @endif
+                                    </td>
+
+                                @endif
                                 <td class="px-4">
                                     <span class="d-block mb-1">
                                         <span>{{ translate('messages.price') }} : </span>
@@ -387,7 +416,7 @@
                             @if ($product->tags)
                                 <td>
                                     @foreach($product->tags as $c)
-                                        {{$c->tag.','}}
+                                        {{$c->tag}}{{ !$loop->last ? ',' : '.'}}
                                     @endforeach
                                 </td>
                             @endif
@@ -437,121 +466,7 @@
 
 
         </div>
-        <!-- Table -->
-{{--        <div class="table-responsive datatable-custom">--}}
-{{--            <table id="datatable" class="table table-borderless table-thead-bordered table-nowrap card-table"--}}
-{{--                data-hs-datatables-options='{--}}
-{{--                     "columnDefs": [{--}}
-{{--                        "targets": [0, 3, 6],--}}
-{{--                        "orderable": false--}}
-{{--                      }],--}}
-{{--                     "order": [],--}}
-{{--                     "info": {--}}
-{{--                       "totalQty": "#datatableWithPaginationInfoTotalQty"--}}
-{{--                     },--}}
-{{--                     "search": "#datatableSearch",--}}
-{{--                     "entries": "#datatableEntries",--}}
-{{--                     "pageLength": 25,--}}
-{{--                     "isResponsive": false,--}}
-{{--                     "isShowPaging": false,--}}
-{{--                     "pagination": "datatablePagination"--}}
-{{--                   }'>--}}
-{{--                <thead class="thead-light">--}}
-{{--                    <tr>--}}
-{{--                        <th class="border-0">{{ translate('messages.reviewer') }}</th>--}}
-{{--                        <th class="border-0">{{ translate('messages.review') }}</th>--}}
-{{--                        <th class="border-0">{{ translate('messages.date') }}</th>--}}
-{{--                        <th class="border-0">{{ translate('messages.status') }}</th>--}}
-{{--                    </tr>--}}
-{{--                </thead>--}}
 
-{{--                <tbody>--}}
-
-{{--                    @foreach ($reviews as $review)--}}
-{{--                        <tr>--}}
-{{--                            <td>--}}
-{{--                                @if ($review->customer)--}}
-{{--                                    <a class="d-flex align-items-center"--}}
-{{--                                        href="{{ route('admin.customer.view', [$review['user_id']]) }}">--}}
-{{--                                        <div class="avatar avatar-circle">--}}
-{{--                                            <img class="avatar-img onerror-image"  data-onerror-image="{{ asset('public/assets/admin/img/160x160/img1.jpg') }}"  width="75" height="75"--}}
-{{--                                            --}}
-{{--                                                src="{{ \App\CentralLogics\Helpers::onerror_image_helper(--}}
-{{--                                                    $review->customer->image ?? '',--}}
-{{--                                                    asset('storage/app/public/profile').'/'.$review->customer->image ?? '',--}}
-{{--                                                    asset('public/assets/admin/img/160x160/img1.jpg'),--}}
-{{--                                                    'profile/'--}}
-{{--                                                ) }}"--}}
-
-{{--                                                alt="Image Description">--}}
-{{--                                        </div>--}}
-{{--                                        <div class="ml-3">--}}
-{{--                                            <span--}}
-{{--                                                class="d-block h5 text-hover-primary mb-0">{{ $review->customer['f_name'] . ' ' . $review->customer['l_name'] }}--}}
-{{--                                                <i class="tio-verified text-primary" data-toggle="tooltip"--}}
-{{--                                                    data-placement="top" title="Verified Customer"></i></span>--}}
-{{--                                            <span--}}
-{{--                                                class="d-block font-size-sm text-body">{{ $review->customer->email }}</span>--}}
-{{--                                        </div>--}}
-{{--                                    </a>--}}
-{{--                                    <span class="ml-8"><a--}}
-{{--                                            href="{{ route('admin.order.details', ['id' => $review->order_id]) }}">{{ translate('messages.order_id') }}:--}}
-{{--                                            {{ $review->order_id }}</a></span>--}}
-{{--                                @else--}}
-{{--                                    {{ translate('messages.customer_not_found') }}--}}
-{{--                                @endif--}}
-{{--                            </td>--}}
-{{--                            <td>--}}
-{{--                                <div class="text-wrap min--240">--}}
-{{--                                    <div class="d-flex mb-2">--}}
-{{--                                        <label class="badge badge-soft-info">--}}
-{{--                                            {{ $review->rating }} <i class="tio-star"></i>--}}
-{{--                                        </label>--}}
-{{--                                    </div>--}}
-
-{{--                                    <p>--}}
-{{--                                        {{ $review['comment'] }}--}}
-{{--                                    </p>--}}
-{{--                                </div>--}}
-{{--                            </td>--}}
-{{--                            <td>--}}
-{{--                                {{ date('d M Y ' . config('timeformat'), strtotime($review['created_at'])) }}--}}
-{{--                            </td>--}}
-{{--                            <td>--}}
-{{--                                <label class="toggle-switch toggle-switch-sm"--}}
-{{--                                    for="reviewCheckbox{{ $review->id }}">--}}
-{{--                                    <input type="checkbox"--}}
-{{--                                           data-id="status-{{ $review['id'] }}" data-message="{{ $review->status ? translate('messages.you_want_to_hide_this_review_for_customer') : translate('messages.you_want_to_show_this_review_for_customer') }}"--}}
-{{--                                        class="toggle-switch-input status_form_alert" id="reviewCheckbox{{ $review->id }}"--}}
-{{--                                        {{ $review->status ? 'checked' : '' }}>--}}
-{{--                                    <span class="toggle-switch-label">--}}
-{{--                                        <span class="toggle-switch-indicator"></span>--}}
-{{--                                    </span>--}}
-{{--                                </label>--}}
-{{--                                <form--}}
-{{--                                    action="{{ route('admin.item.reviews.status', [$review['id'], $review->status ? 0 : 1]) }}"--}}
-{{--                                    method="get" id="status-{{ $review['id'] }}">--}}
-{{--                                </form>--}}
-{{--                            </td>--}}
-{{--                        </tr>--}}
-{{--                    @endforeach--}}
-{{--                </tbody>--}}
-{{--            </table>--}}
-{{--            @if (count($reviews) !== 0)--}}
-{{--                <hr>--}}
-{{--            @endif--}}
-{{--            <div class="page-area">--}}
-{{--                {!! $reviews->links() !!}--}}
-{{--            </div>--}}
-{{--            @if (count($reviews) === 0)--}}
-{{--                <div class="empty--data">--}}
-{{--                    <img src="{{ asset('/public/assets/admin/svg/illustrations/sorry.svg') }}" alt="public">--}}
-{{--                    <h5>--}}
-{{--                        {{ translate('no_data_found') }}--}}
-{{--                    </h5>--}}
-{{--                </div>--}}
-{{--            @endif--}}
-{{--        </div>--}}
         <div class="table-responsive datatable-custom">
             <table id="datatable" class="table table-borderless table-thead-bordered table-nowrap card-table"
                    data-hs-datatables-options='{
@@ -594,12 +509,7 @@
                                         <img class="avatar-img onerror-image"
                                              data-onerror-image="{{ asset('public/assets/admin/img/160x160/img1.jpg') }}"  width="75" height="75"
 
-                                             src="{{ \App\CentralLogics\Helpers::get_image_helper(
-                                                    $review->customer,'image',
-                                                    asset('storage/app/public/profile').'/'.$review->customer->image ?? '',
-                                                    asset('public/assets/admin/img/160x160/img1.jpg'),
-                                                    'profile/'
-                                                ) }}"
+                                             src="{{ $review->customer->image_full_url ??  asset('public/assets/admin/img/160x160/img1.jpg') }}"
                                              alt="Image Description">
                                     </div>
                                     <div class="ml-3">

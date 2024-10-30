@@ -71,7 +71,7 @@
                                 </label>
                                 <div class="text-center py-3 my-auto">
                                     <img class="img--vertical onerror-image" id="viewer"
-                                    src="{{\App\CentralLogics\Helpers::get_image_helper($notification,'image', asset('storage/app/public/notification/').'/'.$notification['image'], asset('public/assets/admin/img/900x400/img1.jpg'), 'notification/') }}"
+                                    src="{{ $notification['image_full_url'] }}"
                                     data-onerror-image="{{asset('public/assets/admin/img/900x400/img1.jpg')}}" alt="image"/>
                                 </div>
                                 <div class="custom-file">

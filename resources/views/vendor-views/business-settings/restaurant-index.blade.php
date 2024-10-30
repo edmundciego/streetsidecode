@@ -446,7 +446,7 @@
                                             <div class="text-center">
                                                 <img class="img--110 min-height-170px min-width-170px onerror-image" id="viewer"
                                                      data-onerror-image="{{ asset('public/assets/admin/img/upload.png') }}"
-                                                     src="{{\App\CentralLogics\Helpers::get_image_helper($store,'meta_image', asset('storage/app/public/store').'/'.$store->meta_image, asset('public/assets/admin/img/upload.png'), 'store/') }}"
+                                                     src="{{ $store->meta_image_full_url }}"
                                                      alt="{{ translate('meta_image') }}" />
                                             </div>
                                             <input type="file" name="meta_image" id="customFileEg1" class="custom-file-input"

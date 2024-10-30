@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Zone;
+use App\Models\Order;
 use App\Models\Contact;
 use App\Models\DataSetting;
 use App\Models\AdminFeature;
@@ -9,12 +11,15 @@ use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
 use App\Models\BusinessSetting;
 use App\Models\AdminTestimonial;
+use Gregwar\Captcha\CaptchaBuilder;
 use App\Models\AdminSpecialCriteria;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\View;
 use App\Models\AdminPromotionalBanner;
 use App\Models\SubscriptionTransaction;
-use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Session;
 
 class HomeController extends Controller
 {
@@ -78,6 +83,9 @@ class HomeController extends Controller
         $criterias = AdminSpecialCriteria::where('status',1)->get();
         $testimonials = AdminTestimonial::where('status',1)->get();
 
+        $zones= Zone::where('status',1)->get();
+        $zones = self::zone_format($zones);
+
         $landing_data = [
             'fixed_header_title'=>(isset($settings['fixed_header_title']) )  ? $settings['fixed_header_title'] : null ,
             'fixed_header_sub_title'=>(isset($settings['fixed_header_sub_title']) )  ? $settings['fixed_header_sub_title'] : null ,
@@ -122,6 +130,13 @@ class HomeController extends Controller
             'dm_app_earning_links'=> (isset($settings['dm_app_earning_links']) )  ? json_decode($settings['dm_app_earning_links'], true) : null ,
             'download_user_app_links'=> (isset($settings['download_user_app_links']) )  ? json_decode($settings['download_user_app_links'], true) : null ,
             'fixed_link'=> (isset($settings['fixed_link']) )  ? json_decode($settings['fixed_link'], true) : null ,
+
+            'available_zone_status' => (int)((isset($settings['available_zone_status'])) ? $settings['available_zone_status'] : 0),
+            'available_zone_title' => (isset($settings['available_zone_title'])) ? $settings['available_zone_title'] : null,
+            'available_zone_short_description' => (isset($settings['available_zone_short_description'])) ? $settings['available_zone_short_description'] : null,
+            'available_zone_image' => (isset($settings['available_zone_image'])) ? $settings['available_zone_image'] : null,
+            'available_zone_image_full_url' => Helpers::get_full_url('available_zone_image', (isset($settings['available_zone_image'])) ? $settings['available_zone_image'] : null, (isset($settings['available_zone_image_storage'])) ? $settings['available_zone_image_storage'] : 'public'),
+            'available_zone_list' => $zones,
         ];
 
 
@@ -130,7 +145,6 @@ class HomeController extends Controller
         $redirect_url = Helpers::get_business_data('landing_page_custom_url');
 
         $new_user= request()?->new_user ?? null ;
-
 
         if(isset($config) && $config){
 
@@ -142,6 +156,22 @@ class HomeController extends Controller
         }else{
             abort(404);
         }
+    }
+
+    private function zone_format($data)
+    {
+        $storage = [];
+        foreach ($data as $item) {
+            $storage[] = [
+                'id' => $item['id'],
+                'name' => $item['name'],
+                'display_name' => $item['display_name']?$item['display_name']:$item['name'],
+                'modules' => $item->modules->pluck('module_name')
+            ];
+        }
+        $data = $storage;
+
+        return $data;
     }
 
     public function terms_and_conditions(Request $request)
@@ -203,8 +233,12 @@ class HomeController extends Controller
         $landing_integration_type = Helpers::get_business_data('landing_integration_type');
         $redirect_url = Helpers::get_business_data('landing_page_custom_url');
 
+        $custome_recaptcha = new CaptchaBuilder;
+        $custome_recaptcha->build();
+        Session::put('six_captcha', $custome_recaptcha->getPhrase());
+
         if(isset($config) && $config){
-            return view('contact-us');
+            return view('contact-us',compact('custome_recaptcha'));
         }elseif($landing_integration_type == 'file_upload' && File::exists('resources/views/layouts/landing/custom/index.blade.php')){
             return view('layouts.landing.custom.index');
         }elseif($landing_integration_type == 'url'){
@@ -222,6 +256,29 @@ class HomeController extends Controller
             'subject' => 'required',
             'message' => 'required',
         ]);
+
+        $recaptcha = Helpers::get_business_settings('recaptcha');
+        if (isset($recaptcha) && $recaptcha['status'] == 1) {
+            $request->validate([
+                'g-recaptcha-response' => [
+                    function ($attribute, $value, $fail) {
+                        $secret_key = Helpers::get_business_settings('recaptcha')['secret_key'];
+                        $gResponse = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+                            'secret' => $secret_key,
+                            'response' => $value,
+                            'remoteip' => \request()->ip(),
+                        ]);
+
+                        if (!$gResponse->successful()) {
+                            $fail(translate('ReCaptcha Failed'));
+                        }
+                    },
+                ],
+            ]);
+        } else if (strtolower(session('six_captcha')) != strtolower($request->custome_recaptcha)) {
+            Toastr::error(translate('messages.ReCAPTCHA Failed'));
+            return back();
+        }
 
         $contact = new Contact;
         $contact->name = $request->name;
@@ -398,6 +455,20 @@ class HomeController extends Controller
         $logo=BusinessSetting::where('key', "logo")->first() ;
         $mpdf_view = View::make('subscription-invoice', compact('transaction','BusinessData','logo'));
         Helpers::gen_mpdf(view: $mpdf_view,file_prefix: 'Subscription',file_postfix: $id);
+        return back();
+    }
+    public function order_invoice($id){
+
+        $id= base64_decode($id);
+        $BusinessData= ['footer_text','email_address'];
+        $order=Order::findOrFail($id);
+
+        $BusinessData=BusinessSetting::whereIn('key', $BusinessData)->pluck('value' ,'key') ;
+        $logo=BusinessSetting::where('key', "logo")->first() ;
+        // return view('order-invoice',compact('order','BusinessData','logo'));
+
+        $mpdf_view = View::make('order-invoice', compact('order','BusinessData','logo'));
+        Helpers::gen_mpdf(view: $mpdf_view,file_prefix: 'OrderInvoice',file_postfix: $id);
         return back();
     }
 }

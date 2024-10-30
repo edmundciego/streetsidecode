@@ -34,11 +34,14 @@ class VendorController extends Controller
             Toastr::error(translate('messages.not_found'));
             return back();
         }
+        $admin_commission= BusinessSetting::where('key','admin_commission')->first()?->value;
+        $business_name= BusinessSetting::where('key','business_name')->first()?->value;
+        $packages= SubscriptionPackage::where('status',1)->latest()->get();
         $custome_recaptcha = new CaptchaBuilder;
         $custome_recaptcha->build();
         Session::put('six_captcha', $custome_recaptcha->getPhrase());
 
-        return view('vendor-views.auth.general-info', compact('custome_recaptcha'));
+        return view('vendor-views.auth.general-info', compact('custome_recaptcha','admin_commission','business_name','packages' ));
     }
 
     public function store(Request $request)
@@ -56,12 +59,14 @@ class VendorController extends Controller
                 'g-recaptcha-response' => [
                     function ($attribute, $value, $fail) {
                         $secret_key = Helpers::get_business_settings('recaptcha')['secret_key'];
-                        $response = $value;
-                        $url = 'https://www.google.com/recaptcha/api/siteverify?secret=' . $secret_key . '&response=' . $response;
-                        $response = Http::get($url);
-                        $response = $response->json();
-                        if (!isset($response['success']) || !$response['success']) {
-                            $fail(translate('messages.ReCAPTCHA Failed'));
+                        $gResponse = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+                            'secret' => $secret_key,
+                            'response' => $value,
+                            'remoteip' => \request()->ip(),
+                        ]);
+
+                        if (!$gResponse->successful()) {
+                            $fail(translate('ReCaptcha Failed'));
                         }
                     },
                 ],
@@ -82,12 +87,20 @@ class VendorController extends Controller
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|unique:vendors',
             'minimum_delivery_time' => 'required',
             'maximum_delivery_time' => 'required',
-            'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
+            'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols()],
             'zone_id' => 'required',
             'module_id' => 'required',
             'logo' => 'required',
             'tax' => 'required',
             'delivery_time_type'=>'required',
+        ],[
+            'password.min_length' => translate('The password must be at least :min characters long'),
+            'password.mixed' => translate('The password must contain both uppercase and lowercase letters'),
+            'password.letters' => translate('The password must contain letters'),
+            'password.numbers' => translate('The password must contain numbers'),
+            'password.symbols' => translate('The password must contain symbols'),
+            'password.uncompromised' => translate('The password is compromised. Please choose a different one'),
+            'password.custom' => translate('The password cannot contain white spaces.'),
         ]);
         if ($validator->fails()) {
             return back()
@@ -105,6 +118,12 @@ class VendorController extends Controller
                 return back()->withErrors($validator)
                         ->withInput();
             }
+        }
+
+        if ($request->business_plan == 'subscription-base' && $request->package_id == null ) {
+            $validator->getMessageBag()->add('package_id', translate('messages.You_must_select_a_package'));
+            return back()->withErrors($validator)
+                    ->withInput();
         }
 
         $vendor = new Vendor();
@@ -134,61 +153,17 @@ class VendorController extends Controller
         $store->store_business_model = 'none';
         $store->save();
 
-        $default_lang = str_replace('_', '-', app()->getLocale());
-            $data = [];
-            foreach ($request->lang as $index => $key) {
-                if($default_lang == $key && !($request->name[$index])){
-                    if ($key != 'default') {
-                        array_push($data, array(
-                            'translationable_type' => 'App\Models\Store',
-                            'translationable_id' => $store->id,
-                            'locale' => $key,
-                            'key' => 'name',
-                            'value' => $store->name,
-                        ));
-                    }
-                }else{
-                    if ($request->name[$index] && $key != 'default') {
-                        array_push($data, array(
-                            'translationable_type' => 'App\Models\Store',
-                            'translationable_id' => $store->id,
-                            'locale' => $key,
-                            'key' => 'name',
-                            'value' => $request->name[$index],
-                        ));
-                    }
-                }
-                if($default_lang == $key && !($request->address[$index])){
-                    if ($key != 'default') {
-                        array_push($data, array(
-                            'translationable_type' => 'App\Models\Store',
-                            'translationable_id' => $store->id,
-                            'locale' => $key,
-                            'key' => 'address',
-                            'value' => $store->address,
-                        ));
-                    }
-                }else{
-                    if ($request->address[$index] && $key != 'default') {
-                        array_push($data, array(
-                            'translationable_type' => 'App\Models\Store',
-                            'translationable_id' => $store->id,
-                            'locale' => $key,
-                            'key' => 'address',
-                            'value' => $request->address[$index],
-                        ));
-                    }
-                }
-            }
-            Translation::insert($data);
+
+        Helpers::add_or_update_translations(request: $request, key_data: 'name', name_field: 'name', model_name: 'Store', data_id: $store->id, data_value: $store->name);
+        Helpers::add_or_update_translations(request: $request, key_data: 'address', name_field: 'address', model_name: 'Store', data_id: $store->id, data_value: $store->address);
+
+
         try{
             $admin= Admin::where('role_id', 1)->first();
-            $mail_status = Helpers::get_mail_status('registration_mail_status_store');
-            if(config('mail.status') && $mail_status == '1'){
+            if(config('mail.status') && Helpers::get_mail_status('registration_mail_status_store') == '1' &&  Helpers::getNotificationStatusData('store','store_registration','mail_status') ){
                 Mail::to($request['email'])->send(new \App\Mail\VendorSelfRegistration('pending', $vendor->f_name.' '.$vendor->l_name));
             }
-            $mail_status = Helpers::get_mail_status('store_registration_mail_status_admin');
-            if(config('mail.status') && $mail_status == '1'){
+            if(config('mail.status') && Helpers::get_mail_status('store_registration_mail_status_admin') == '1' &&  Helpers::getNotificationStatusData('admin','store_self_registration','mail_status') ){
                 Mail::to($admin['email'])->send(new \App\Mail\StoreRegistration('pending', $vendor->f_name.' '.$vendor->l_name));
             }
         }catch(\Exception $ex){
@@ -201,26 +176,49 @@ class VendorController extends Controller
             StoreLogic::insert_schedule($store->id);
         }
 
-
-        $admin_commission= BusinessSetting::where('key','admin_commission')->first();
-        $business_name= BusinessSetting::where('key','business_name')->first();
-        $packages= SubscriptionPackage::where('status',1)->latest()->get();
         if (Helpers::subscription_check()) {
-            Toastr::success(translate('messages.your_registration_info_is_saved_successfully_now_please_choose_your_business_model'));
-            return view('vendor-views.auth.register-step-2',[
-                'store_id' =>$store->id,
-                'packages' =>$packages,
-                'business_name' =>$business_name?->value,
-                'admin_commission' =>$admin_commission?->value,
-            ]);
-        } else{
-            $store->store_business_model = 'commission';
-            $store->save();
-            Toastr::success(translate('messages.your_store_registration_is_successful'));
-            return view('vendor-views.auth.register-complete',[
-                'type'=>'commission'
-            ]);
-        }
+                    if ($request->business_plan == 'subscription-base' && $request->package_id != null ) {
+                        $key=['subscription_free_trial_days','subscription_free_trial_type','subscription_free_trial_status'];
+                        $free_trial_settings=BusinessSetting::whereIn('key', $key)->pluck('value','key');
+                        $store->package_id = $request->package_id;
+                        $store->save();
+
+                        return view('vendor-views.auth.register-subscription-payment',[
+                        'package_id'=> $request->package_id,
+                        'store_id' => $store->id,
+                        'free_trial_settings'=>$free_trial_settings,
+                        'payment_methods' => Helpers::getDefaultPaymentMethods(),
+
+                        ]);
+                    }
+                    elseif($request->business_plan == 'commission-base' ){
+                        $store->store_business_model = 'commission';
+                        $store->save();
+                        return view('vendor-views.auth.register-complete',[
+                            'type'=>'commission'
+                        ]);
+                    }
+                    else{
+                        $admin_commission= BusinessSetting::where('key','admin_commission')->first();
+                        $business_name= BusinessSetting::where('key','business_name')->first();
+                        $packages= SubscriptionPackage::where('status',1)->get();
+                        Toastr::error(translate('messages.please_follow_the_steps_properly.'));
+                        return view('vendor-views.auth.register-step-2',[
+                            'admin_commission'=> $admin_commission?->value,
+                            'business_name'=> $business_name?->value,
+                            'packages'=> $packages,
+                            'store_id' =>$store->id,
+                            'type'=>$request->type
+                            ]);
+                    }
+            } else{
+                $store->store_business_model = 'commission';
+                $store->save();
+                Toastr::success(translate('messages.your_store_registration_is_successful'));
+                return view('vendor-views.auth.register-complete',[
+                    'type'=>'commission'
+                ]);
+                }
 
 
         Toastr::success(translate('messages.application_placed_successfully'));

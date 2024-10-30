@@ -15,7 +15,7 @@
                     <img src="{{asset('public/assets/admin/img/order.png')}}" class="w--26" alt="">
                 </span>
                 <span>
-                    {{str_replace('_',' ',$status)}} {{translate('messages.orders')}}
+                    {{translate(str_replace('_',' ',$status))}} {{translate('messages.orders')}}
                     <span class="badge badge-soft-dark ml-2">{{$orders->total()}}</span>
                 </span>
             </h1>

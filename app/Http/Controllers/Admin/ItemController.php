@@ -3,15 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 
-use App\Models\Brand;
-use App\Models\EcommerceItemDetails;
 use Carbon\Carbon;
 use App\Models\Tag;
 use App\Models\Item;
+use App\Models\Brand;
 use App\Models\Store;
 use App\Models\Review;
+use App\Models\Allergy;
 use App\Models\Category;
+use App\Models\Nutrition;
 use App\Scopes\StoreScope;
+use App\Models\GenericName;
 use App\Models\TempProduct;
 use App\Models\Translation;
 use Illuminate\Support\Str;
@@ -27,6 +29,7 @@ use Illuminate\Support\Facades\DB;
 use App\CentralLogics\ProductLogic;
 use App\Models\PharmacyItemDetails;
 use App\Http\Controllers\Controller;
+use App\Models\EcommerceItemDetails;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
@@ -77,8 +80,7 @@ class ItemController extends Controller
         }
 
         if ($request['price'] <= $dis) {
-                $validator->getMessageBag()->add('unit_price', translate("Discount amount can't be greater than 100%
-"));
+                $validator->getMessageBag()->add('unit_price', translate("Discount amount can't be greater than 100%"));
         }
 
         if ($request['price'] <= $dis || $validator->fails()) {
@@ -89,7 +91,6 @@ class ItemController extends Controller
 
         if($request->item_id && $request?->product_gellary == 1 ){
             $item_data= Item::withoutGlobalScope(StoreScope::class)->select(['image','images'])->findOrfail($request->item_id);
-
             if(!$request->has('image')){
 
                 $oldDisk = 'public';
@@ -101,8 +102,8 @@ class ItemController extends Controller
                     }
                 }
                 $oldPath = "product/{$item_data->image}";
-                $newFileName = Carbon::now()->toDateString() . "-" . uniqid() . ".png";
-                $newPath = "product/{$newFileName}";
+                $newFileNamethumb = Carbon::now()->toDateString() . "-" . uniqid() . ".png";
+                $newPath = "product/{$newFileNamethumb}";
                 $dir = 'product/';
                 $newDisk = Helpers::getDisk();
 
@@ -118,28 +119,27 @@ class ItemController extends Controller
                 }
             }
 
-            $uniqueValues = array_diff($item_data->images, explode(",", $request->removedImageKeys));
-
-            foreach($uniqueValues as$key=> $value){
-                $value = is_array($value)?$value:['img' => $value, 'storage' => 'public'];
-                $oldDisk = $value['storage'];
-                $oldPath = "product/{$value['img']}";
-                $newFileName = Carbon::now()->toDateString() . "-" . uniqid() . ".png";
-                $newPath = "product/{$newFileName}";
-                $dir = 'product/';
-                $newDisk = Helpers::getDisk();
-
-                try{
-                    if (Storage::disk($oldDisk)->exists($oldPath)) {
-                        if (!Storage::disk($newDisk)->exists($dir)) {
-                            Storage::disk($newDisk)->makeDirectory($dir);
+            foreach($item_data->images as$key=> $value){
+                if( !in_array( is_array($value) ?   $value['img'] : $value ,explode(",", $request->removedImageKeys))) {
+                    $value = is_array($value)?$value:['img' => $value, 'storage' => 'public'];
+                    $oldDisk = $value['storage'];
+                    $oldPath = "product/{$value['img']}";
+                    $newFileName = Carbon::now()->toDateString() . "-" . uniqid() . ".png";
+                    $newPath = "product/{$newFileName}";
+                    $dir = 'product/';
+                    $newDisk = Helpers::getDisk();
+                    try{
+                        if (Storage::disk($oldDisk)->exists($oldPath)) {
+                            if (!Storage::disk($newDisk)->exists($dir)) {
+                                Storage::disk($newDisk)->makeDirectory($dir);
+                            }
+                            $fileContents = Storage::disk($oldDisk)->get($oldPath);
+                            Storage::disk($newDisk)->put($newPath, $fileContents);
                         }
-                        $fileContents = Storage::disk($oldDisk)->get($oldPath);
-                        Storage::disk($newDisk)->put($newPath, $fileContents);
+                    } catch (\Exception $e) {
                     }
-                } catch (\Exception $e) {
+                    $images[]=['img'=>$newFileName, 'storage'=> Helpers::getDisk()];
                 }
-                $images[]=['img'=>$newFileName, 'storage'=> Helpers::getDisk()];
             }
         }
 
@@ -154,6 +154,42 @@ class ItemController extends Controller
                 );
                 $tag->save();
                 array_push($tag_ids, $tag->id);
+            }
+        }
+
+        $nutrition_ids = [];
+        if ($request->nutritions != null) {
+            $nutritions = $request->nutritions;
+        }
+        if (isset($nutritions)) {
+            foreach ($nutritions as $key => $value) {
+                $nutrition = Nutrition::firstOrNew(
+                    ['nutrition' => $value]
+                );
+                $nutrition->save();
+                array_push($nutrition_ids, $nutrition->id);
+            }
+        }
+        $generic_ids = [];
+        if ($request->generic_name != null) {
+            $generic_name = GenericName::firstOrNew(
+                ['generic_name' => $request->generic_name]
+            );
+            $generic_name->save();
+            array_push($generic_ids, $generic_name->id);
+        }
+
+        $allergy_ids = [];
+        if ($request->allergies != null) {
+            $allergies = $request->allergies;
+        }
+        if (isset($allergies)) {
+            foreach ($allergies as $key => $value) {
+                $allergy = Allergy::firstOrNew(
+                    ['allergy' => $value]
+                );
+                $allergy->save();
+                array_push($allergy_ids, $allergy->id);
             }
         }
 
@@ -222,6 +258,13 @@ class ItemController extends Controller
                 $temp = [];
                 $temp['type'] = $str;
                 $temp['price'] = abs($request['price_' . str_replace('.', '_', $str)]);
+
+
+                if($request->discount_type == 'amount' &&  $temp['price']  <   $request->discount){
+                    $validator->getMessageBag()->add('unit_price', translate("Variation price must be greater than discount amount"));
+                    return response()->json(['errors' => Helpers::error_processor($validator)]);
+                }
+
                 $temp['stock'] = abs($request['stock_' . str_replace('.', '_', $str)]);
                 array_push($variations, $temp);
             }
@@ -273,7 +316,7 @@ class ItemController extends Controller
         $item->food_variations = json_encode($food_variations);
         $item->variations = json_encode($variations);
         $item->price = $request->price;
-        $item->image =  $request->has('image') ? Helpers::upload('product/', 'png', $request->file('image')) : $newFileName ?? null;
+        $item->image =  $request->has('image') ? Helpers::upload('product/', 'png', $request->file('image')) : $newFileNamethumb ?? null;
         $item->available_time_starts = $request->available_time_starts ?? '00:00:00';
         $item->available_time_ends = $request->available_time_ends ?? '23:59:59';
         $item->discount = $request->discount_type == 'amount' ? $request->discount : $request->discount;
@@ -294,6 +337,8 @@ class ItemController extends Controller
         $item->is_halal =  $request->is_halal ?? 0;
         $item->save();
         $item->tags()->sync($tag_ids);
+        $item->nutritions()->sync($nutrition_ids);
+        $item->allergies()->sync($allergy_ids);
         if ($module_type == 'pharmacy') {
             $item_details = new PharmacyItemDetails();
             $item_details->item_id = $item->id;
@@ -301,7 +346,8 @@ class ItemController extends Controller
             $item_details->is_basic = $request->basic ?? 0;
             $item_details->is_prescription_required = $request->is_prescription_required ?? 0;
             $item_details->save();
-        }
+            $item->generic()->sync($generic_ids);
+            }
         if ($module_type == 'ecommerce') {
             $item_details = new EcommerceItemDetails();
             $item_details->item_id = $item->id;
@@ -343,8 +389,6 @@ class ItemController extends Controller
             $category = $temp;
             $sub_category = null;
         }
-
-
 
         return view('admin-views.product.edit', compact('product', 'sub_category', 'category','temp_product'));
     }
@@ -407,6 +451,41 @@ class ItemController extends Controller
                 array_push($tag_ids, $tag->id);
             }
         }
+        $nutrition_ids = [];
+        if ($request->nutritions != null) {
+            $nutritions = $request->nutritions;
+        }
+        if (isset($nutritions)) {
+            foreach ($nutritions as $key => $value) {
+                $nutrition = Nutrition::firstOrNew(
+                    ['nutrition' => $value]
+                );
+                $nutrition->save();
+                array_push($nutrition_ids, $nutrition->id);
+            }
+        }
+        $allergy_ids = [];
+        if ($request->allergies != null) {
+            $allergies = $request->allergies;
+        }
+        if (isset($allergies)) {
+            foreach ($allergies as $key => $value) {
+                $allergy = Allergy::firstOrNew(
+                    ['allergy' => $value]
+                );
+                $allergy->save();
+                array_push($allergy_ids, $allergy->id);
+            }
+        }
+
+        $generic_ids = [];
+        if ($request->generic_name != null) {
+            $generic_name = GenericName::firstOrNew(
+                ['generic_name' => $request->generic_name]
+            );
+            $generic_name->save();
+            array_push($generic_ids, $generic_name->id);
+        }
 
         $item->name = $request->name[array_search('default', $request->lang)];
 
@@ -429,6 +508,26 @@ class ItemController extends Controller
                 'position' => 3,
             ]);
         }
+
+
+        $images = $item['images'];
+        if (!$request?->temp_product) {
+            foreach($item->images as $key=> $value){
+                if( in_array( is_array($value) ?   $value['img'] : $value ,explode(",", $request->removedImageKeys))) {
+                    $value = is_array($value)?$value:['img' => $value, 'storage' => 'public'];
+                    Helpers::check_and_delete('product/' , $value['img']);
+                    unset($images[$key]);
+                }
+                }
+            $images = array_values($images);
+            if ($request->has('item_images')) {
+                foreach ($request->item_images as $img) {
+                    $image = Helpers::upload('product/', 'png', $img);
+                    array_push($images, ['img'=>$image, 'storage'=> Helpers::getDisk()]);
+                }
+            }
+        }
+
 
         $item->category_id = $request->sub_category_id ? $request->sub_category_id : $request->category_id;
         $item->category_ids = json_encode($category);
@@ -473,18 +572,18 @@ class ItemController extends Controller
                 $temp = [];
                 $temp['type'] = $str;
                 $temp['price'] = abs($request['price_' . str_replace('.', '_', $str)]);
+
+                if($request->discount_type == 'amount' &&  $temp['price']  <   $request->discount){
+                    $validator->getMessageBag()->add('unit_price', translate("Variation price must be greater than discount amount"));
+                    return response()->json(['errors' => Helpers::error_processor($validator)]);
+                }
                 $temp['stock'] = abs($request['stock_' . str_replace('.', '_', $str)]);
                 array_push($variations, $temp);
             }
         }
         //combinations end
-        $images = $item['images'];
-        if ($request->has('item_images')) {
-            foreach ($request->item_images as $img) {
-                $image = Helpers::upload('product/', 'png', $img);
-                array_push($images, ['img'=>$image, 'storage'=> Helpers::getDisk()]);
-            }
-        }
+
+
 
         $food_variations = [];
         if (isset($request->options)) {
@@ -527,7 +626,7 @@ class ItemController extends Controller
         $item->available_time_starts = $request->available_time_starts ?? '00:00:00';
         $item->available_time_ends = $request->available_time_ends ?? '23:59:59';
 
-        $item->discount = $request->discount_type == 'amount' ? $request->discount : $request->discount;
+        $item->discount =  $request->discount;
         $item->discount_type = $request->discount_type;
         $item->unit_id = $request->unit;
         $item->attributes = $request->has('attribute_id') ? json_encode($request->attribute_id) : json_encode([]);
@@ -541,6 +640,54 @@ class ItemController extends Controller
         $item->veg = $request->veg;
         $item->images = $images;
         if (Helpers::get_mail_status('product_approval') && $request?->temp_product) {
+
+
+            $images=$item->temp_product?->images ?? [] ;
+
+            if($request->removedImageKeys){
+                foreach($images as $key=> $value){
+                    if( in_array( is_array($value) ?   $value['img'] : $value ,explode(",", $request->removedImageKeys))) {
+                        unset($images[$key]);
+                    }
+                }
+                $images = array_values($images);
+            }
+
+            foreach($images as $k=> $value){
+                    $value = is_array($value)?$value:['img' => $value, 'storage' => 'public'];
+                    $oldDisk = $value['storage'];
+                    $oldPath = "product/{$value['img']}";
+                    $newFileName = Carbon::now()->toDateString() . "-" . uniqid() . ".png";
+                    $newPath = "product/{$newFileName}";
+                    $dir = 'product/';
+                    $newDisk = Helpers::getDisk();
+                    try{
+                        if (Storage::disk($oldDisk)->exists($oldPath)) {
+                            if (!Storage::disk($newDisk)->exists($dir)) {
+                                Storage::disk($newDisk)->makeDirectory($dir);
+                            }
+                            $fileContents = Storage::disk($oldDisk)->get($oldPath);
+                            Storage::disk($newDisk)->put($newPath, $fileContents);
+                            unset($images[$k]);
+                            }
+                            } catch (\Exception $e) {
+                            }
+                            $images[]=['img'=>$newFileName, 'storage'=> Helpers::getDisk()];
+
+            }
+
+            $images = array_values($images);
+
+            if ($request->has('item_images')){
+                foreach ($request->item_images as $img) {
+                    $image = Helpers::upload('product/', 'png', $img);
+                    array_push($images, ['img'=>$image, 'storage'=> Helpers::getDisk()]);
+                    }
+                }
+
+
+            $item->images = $images;
+
             $item->temp_product?->translations()->delete();
             $item?->pharmacy_item_details()?->delete();
             if($item->module->module_type == 'pharmacy'){
@@ -553,8 +700,26 @@ class ItemController extends Controller
             $item->is_approved = 1;
             try
             {
-                $mail_status = Helpers::get_mail_status('product_approve_mail_status_store');
-                if(config('mail.status') && $mail_status == '1') {
+
+                if(Helpers::getNotificationStatusData('store','store_product_approve','push_notification_status',$item?->store->id)  &&  $item?->store?->vendor?->firebase_token){
+                    $data = [
+                        'title' => translate('product_approved'),
+                        'description' => translate('Product_Request_Has_Been_Approved_By_Admin'),
+                        'order_id' => '',
+                        'image' => '',
+                        'type' => 'product',
+                        'order_status' => '',
+                    ];
+                    Helpers::send_push_notif_to_device($item?->store?->vendor?->firebase_token, $data);
+                    DB::table('user_notifications')->insert([
+                        'data' => json_encode($data),
+                        'vendor_id' => $item?->store?->vendor_id,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+
+                if(config('mail.status') && Helpers::get_mail_status('product_approve_mail_status_store') == '1' &&  Helpers::getNotificationStatusData('store','store_product_approve','mail_status',$item?->store?->id) ) {
                     Mail::to($item?->store?->vendor?->email)->send(new \App\Mail\VendorProductMail($item?->store?->name,'approved'));
                 }
             }
@@ -566,7 +731,10 @@ class ItemController extends Controller
         }
         $item->save();
         $item->tags()->sync($tag_ids);
+        $item->nutritions()->sync($nutrition_ids);
+        $item->allergies()->sync($allergy_ids);
         if($item->module->module_type == 'pharmacy'){
+            $item->generic()->sync($generic_ids);
             DB::table('pharmacy_item_details')
                 ->updateOrInsert(
                     ['item_id' => $item->id],
@@ -606,9 +774,11 @@ class ItemController extends Controller
         }
 
         if ($product->image) {
-
             Helpers::check_and_delete('product/' , $product['image']);
-
+        }
+        foreach($product->images as $value){
+            $value = is_array($value)?$value:['img' => $value, 'storage' => 'public'];
+            Helpers::check_and_delete('product/' , $value['img']);
         }
         $product?->translations()->delete();
         $product->delete();
@@ -640,10 +810,33 @@ class ItemController extends Controller
             }
             $result = $tmp;
         }
+
+        $data = [];
+        foreach ($result as $combination) {
+            $str = '';
+            foreach ($combination as $key => $item) {
+                if ($key > 0) {
+                    $str .= '-' . str_replace(' ', '', $item);
+                } else {
+                    $str .= str_replace(' ', '', $item);
+                }
+            }
+
+            $price_field = 'price_' . $str;
+            $stock_field = 'stock_' . $str;
+            $item_price = $request->input($price_field);
+            $item_stock = $request->input($stock_field);
+
+            $data[] = [
+                'name' => $str,
+                'price' => $item_price ?? $price,
+                'stock' => $item_stock ?? 1
+            ];
+        }
         $combinations = $result;
         $stock = $request->stock == 'true' ? true : false;
         return response()->json([
-            'view' => view('admin-views.product.partials._variant-combinations', compact('combinations', 'price', 'product_name', 'stock'))->render(),
+            'view' => view('admin-views.product.partials._variant-combinations', compact('combinations', 'price', 'product_name', 'stock','data'))->render(),
             'length' => count($combinations),
             'stock' => $stock,
         ]);
@@ -1130,7 +1323,11 @@ class ItemController extends Controller
                 $chunkSize = 100;
                 $chunk_items = array_chunk($data, $chunkSize);
                 foreach ($chunk_items as $key => $chunk_item) {
-                    DB::table('items')->insert($chunk_item);
+//                    DB::table('items')->insert($chunk_item);
+                    foreach ($chunk_item as $item) {
+                        $insertedId = DB::table('items')->insertGetId($item);
+                        Helpers::updateStorageTable(get_class(new Item), $insertedId, $item['image']);
+                    }
                 }
                 DB::commit();
             } catch (\Exception $e) {
@@ -1216,7 +1413,16 @@ class ItemController extends Controller
             $chunkSize = 100;
             $chunk_items = array_chunk($data, $chunkSize);
             foreach ($chunk_items as $key => $chunk_item) {
-                DB::table('items')->upsert($chunk_item, ['id', 'module_id'], ['name', 'description', 'image', 'images', 'category_id', 'category_ids', 'unit_id', 'stock', 'price', 'discount', 'discount_type', 'available_time_starts', 'available_time_ends','choice_options', 'variations', 'food_variations', 'add_ons', 'attributes', 'store_id', 'status', 'veg', 'recommended']);
+//                DB::table('items')->upsert($chunk_item, ['id', 'module_id'], ['name', 'description', 'image', 'images', 'category_id', 'category_ids', 'unit_id', 'stock', 'price', 'discount', 'discount_type', 'available_time_starts', 'available_time_ends','choice_options', 'variations', 'food_variations', 'add_ons', 'attributes', 'store_id', 'status', 'veg', 'recommended']);
+                foreach ($chunk_item as $item) {
+                    if (isset($item['id']) && DB::table('items')->where('id', $item['id'])->exists()) {
+                        DB::table('items')->where('id', $item['id'])->update($item);
+                        Helpers::updateStorageTable(get_class(new Item), $item['id'], $item['image']);
+                    } else {
+                        $insertedId = DB::table('items')->insertGetId($item);
+                        Helpers::updateStorageTable(get_class(new Item), $insertedId, $item['image']);
+                    }
+                }
             }
             DB::commit();
         } catch (\Exception $e) {
@@ -1649,8 +1855,27 @@ class ItemController extends Controller
 
         try
         {
-            $mail_status = Helpers::get_mail_status('product_deny_mail_status_store');
-            if(config('mail.status') && $mail_status == '1') {
+
+            if(Helpers::getNotificationStatusData('store','store_product_reject','push_notification_status',$data?->store->id)  &&  $data?->store?->vendor?->firebase_token){
+                $ndata = [
+                    'title' => translate('product_rejected'),
+                    'description' => translate('Product_Request_Has_Been_Rejected_By_Admin'),
+                    'order_id' => '',
+                    'image' => '',
+                    'type' => 'product',
+                    'order_status' => '',
+                ];
+                Helpers::send_push_notif_to_device($data?->store?->vendor?->firebase_token, $ndata);
+                DB::table('user_notifications')->insert([
+                    'data' => json_encode($ndata),
+                    'vendor_id' => $data?->store?->vendor_id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
+
+            if(config('mail.status') && Helpers::get_mail_status('product_deny_mail_status_store')  == '1' &&  Helpers::getNotificationStatusData('store','store_product_reject','mail_status',$data?->store?->id) ) {
                 Mail::to($data?->store?->vendor?->email)->send(new \App\Mail\VendorProductMail($data?->store?->name,'denied'));
             }
         }
@@ -1667,9 +1892,19 @@ class ItemController extends Controller
 
         $item->name = $data->name;
         $item->description =  $data->description;
+
+
+        if ($item->image) {
+            Helpers::check_and_delete('product/' , $item['image']);
+        }
+
+        foreach($item->images as $value){
+            $value = is_array($value)?$value:['img' => $value, 'storage' => 'public'];
+            Helpers::check_and_delete('product/' , $value['img']);
+        }
+
         $item->image = $data->image;
         $item->images = $data->images;
-
         $item->store_id = $data->store_id;
         $item->module_id = $data->module_id;
         $item->unit_id = $data->unit_id;
@@ -1699,6 +1934,9 @@ class ItemController extends Controller
 
         $item->save();
         $item->tags()->sync(json_decode($data->tag_ids));
+        $item->nutritions()->sync(json_decode($data->nutrition_ids));
+        $item->allergies()->sync(json_decode($data->allergy_ids));
+        $item->generic()->sync(json_decode($data->generic_ids));
 
         $item?->pharmacy_item_details()?->delete();
 
@@ -1719,16 +1957,34 @@ class ItemController extends Controller
 
         try
         {
-            $mail_status = Helpers::get_mail_status('product_approve_mail_status_store');
-            if(config('mail.status') && $mail_status == '1') {
-                Mail::to($data?->store?->vendor?->email)->send(new \App\Mail\VendorProductMail($data?->store?->name,'approved'));
+
+            if(Helpers::getNotificationStatusData('store','store_product_approve','push_notification_status',$item?->store->id)  &&  $item?->store?->vendor?->firebase_token){
+                $data = [
+                    'title' => translate('product_approved'),
+                    'description' => translate('Product_Request_Has_Been_Approved_By_Admin'),
+                    'order_id' => '',
+                    'image' => '',
+                    'type' => 'product',
+                    'order_status' => '',
+                ];
+                Helpers::send_push_notif_to_device($item?->store?->vendor?->firebase_token, $data);
+                DB::table('user_notifications')->insert([
+                    'data' => json_encode($data),
+                    'vendor_id' => $item?->store?->vendor_id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
+
+            if(config('mail.status') && Helpers::get_mail_status('product_approve_mail_status_store') == '1' &&  Helpers::getNotificationStatusData('store','store_product_approve','mail_status',$item?->store?->id)) {
+                Mail::to($item?->store?->vendor?->email)->send(new \App\Mail\VendorProductMail($item?->store?->name,'approved'));
             }
         }
         catch(\Exception $e)
         {
             info($e->getMessage());
         }
-
         Toastr::success(translate('messages.Product_approved'));
         return to_route('admin.item.approval_list');
     }

@@ -192,6 +192,20 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::delete('delete/{id}', 'CouponController@delete')->name('delete');
         });
 
+        Route::group([ 'prefix' => 'advertisement', 'as' => 'advertisement.' ,'middleware' => ['module:advertisement','subscription:coupon']], function () {
+
+            Route::get('/', 'AdvertisementController@index')->name('index');
+            Route::get('create/', 'AdvertisementController@create')->name('create');
+            Route::get('details/{advertisement}', 'AdvertisementController@show')->name('show');
+            Route::get('{advertisement}/edit', 'AdvertisementController@edit')->name('edit');
+            Route::post('store', 'AdvertisementController@store')->name('store');
+            Route::put('update/{advertisement}', 'AdvertisementController@update')->name('update');
+            Route::delete('delete/{id}', 'AdvertisementController@destroy')->name('destroy');
+            Route::get('/status', 'AdvertisementController@status')->name('status');
+            Route::get('/copy-advertisement/{advertisement}', 'AdvertisementController@copyAdd')->name('copyAdd');
+            Route::post('/copy-add-post/{advertisement}', 'AdvertisementController@copyAddPost')->name('copyAddPost');
+        });
+
         Route::group(['prefix' => 'addon', 'as' => 'addon.', 'middleware' => ['module:addon','subscription:addon']], function () {
             Route::get('add-new', 'AddOnController@index')->name('add-new');
             Route::post('store', 'AddOnController@store')->name('store');
@@ -229,6 +243,8 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::post('update-setup/{store}', 'BusinessSettingsController@store_setup')->name('update-setup');
             Route::post('update-meta-data/{store}', 'BusinessSettingsController@updateStoreMetaData')->name('update-meta-data');
             Route::get('toggle-settings-status/{store}/{status}/{menu}', 'BusinessSettingsController@store_status')->name('toggle-settings');
+            Route::get('notification-setup', 'BusinessSettingsController@notification_index')->name('notification-setup');
+            Route::get('notification-status-change/{key}/{type}', 'BusinessSettingsController@notification_status_change')->name('notification_status_change');
         });
 
         Route::group(['prefix' => 'profile', 'as' => 'profile.', 'middleware' => ['module:bank_info' ,'subscription:bank_info']], function () {

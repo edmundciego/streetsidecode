@@ -125,4 +125,12 @@ class SystemController extends Controller
         }
         return response()->json(['message' => translate('landing_page_is_on.')]);
     }
+    public function system_currency(Request $request)
+    {
+        $currency_check=Helpers::checkCurrency($request['currency']);
+        if( $currency_check !== true ){
+        return response()->json(['data'=> translate($currency_check) ],200);
+        }
+        return response()->json([],200);
+    }
 }

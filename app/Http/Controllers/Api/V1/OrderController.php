@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Models\OrderPayment;
-use App\Models\ParcelDeliveryInstruction;
-use Stripe\Product;
 use App\Models\Cart;
 use App\Models\Item;
+use App\Models\User;
 use App\Models\Zone;
 use App\Models\Admin;
 use App\Models\Order;
@@ -18,12 +16,15 @@ use App\Models\DMVehicle;
 use App\Mail\RefundRequest;
 use App\Models\OrderDetail;
 use App\Models\ItemCampaign;
+use App\Models\OrderPayment;
 use App\Models\RefundReason;
 use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
 use App\Models\ParcelCategory;
 use App\Models\BusinessSetting;
+use App\Models\CashBackHistory;
 use App\Models\OfflinePayments;
+use App\Models\AutomatedMessage;
 use App\CentralLogics\OrderLogic;
 use App\Models\OrderCancelReason;
 use App\CentralLogics\CouponLogic;
@@ -32,11 +33,11 @@ use App\CentralLogics\ProductLogic;
 use App\Mail\OrderVerificationMail;
 use App\CentralLogics\CustomerLogic;
 use App\Http\Controllers\Controller;
-use App\Models\CashBackHistory;
 use App\Models\OfflinePaymentMethod;
-use App\Models\User;
 use Illuminate\Support\Facades\Mail;
+use App\Models\ParcelDeliveryInstruction;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 use MatanYadaev\EloquentSpatial\Objects\Point;
 
 class OrderController extends Controller
@@ -52,7 +53,13 @@ class OrderController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
         $user_id = $request?->user?->id ;
-        $order = Order::with(['store','store.store_sub' ,'delivery_man.rating', 'parcel_category', 'refund','payments'])->withCount('details')->where('id', $request['order_id'])
+
+        if ($request['contact_number'] && (substr($request['contact_number'], 0, 1) !== '+')) {
+            $request['contact_number'] = '+' . $request['contact_number'];
+        }
+
+        $order = Order::with(['store','store.store_sub' ,'delivery_man.rating', 'parcel_category', 'refund','payments'])->withCount('details')
+        ->where('id', $request['order_id'])
         ->when($request->user, function ($query) use ($user_id) {
             return $query->where('user_id', $user_id);
         })
@@ -100,10 +107,72 @@ class OrderController extends Controller
             'guest_id' => $request->user ? 'nullable' : 'required',
             'contact_person_name' => $request->user ? 'nullable' : 'required',
             'contact_person_number' => $request->user ? 'nullable' : 'required',
+            'contact_person_email' => $request->user ? 'nullable' : 'required',
+            'password' => $request->create_new_user ? ['required', Password::min(8)] : 'nullable',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
+
+        if($request->create_new_user){
+            if(!$request->password){
+                return response()->json([
+                    'errors' => [
+                        ['code' => 'password', 'message' => translate('messages.password_is_required')]
+                    ]
+                ], 403);
+            }
+            if(User::where('phone',$request->contact_person_number)->first()){
+                return response()->json([
+                    'errors' => [
+                        ['code' => 'phone_person_email', 'message' => translate('messages.phone_already_taken')]
+                    ]
+                ], 403);
+            }
+            if(User::where('email',$request->contact_person_email)->first()){
+                return response()->json([
+                    'errors' => [
+                        ['code' => 'contact_person_email', 'message' => translate('messages.email_already_taken')]
+                    ]
+                ], 403);
+            }
+            $user = new User();
+            $user->f_name = $request->contact_person_name;
+            $user->email = $request->contact_person_email;
+            $user->phone = $request->contact_person_number;
+            $user->password = bcrypt($request->password);
+            $user->ref_code = Helpers::generate_referer_code($user);
+            $user->save();
+
+            try
+            {
+                if (config('mail.status') && $request->contact_person_email && Helpers::get_mail_status('registration_mail_status_user') == '1' && Helpers::getNotificationStatusData('customer','customer_registration','mail_status')) {
+                    Mail::to($request->contact_person_email)->send(new \App\Mail\CustomerRegistration($request->contact_person_name));
+                }
+            }
+            catch(\Exception $ex)
+            {
+                info($ex->getMessage());
+            }
+            if($request->guest_id  && isset($user->id)){
+
+                $userStoreIds = Cart::where('user_id', $request->guest_id)
+                    ->join('items', 'carts.item_id', '=', 'items.id')
+                    ->pluck('items.store_id')
+                    ->toArray();
+
+                Cart::where('user_id', $user->id)
+                    ->whereHas('item', function ($query) use ($userStoreIds) {
+                        $query->whereNotIn('store_id', $userStoreIds);
+                    })
+                    ->delete();
+
+                Cart::where('user_id', $request->guest_id)->update(['user_id' => $user->id,'is_guest' => 0]);
+            }
+
+            $request->is_guest = 0;
+            $request->user = $user;
         }
 
 
@@ -409,7 +478,8 @@ class OrderController extends Controller
 
         $address = [
             'contact_person_name' => $request->contact_person_name ? $request->contact_person_name : ($request->user?$request->user->f_name . ' ' . $request->user->f_name:''),
-            'contact_person_number' => $request->contact_person_number ? ($request->user ? $request->contact_person_number :str_replace('+', '', $request->contact_person_number)) : ($request->user?$request->user->phone:''),
+            'contact_person_number' => $request->contact_person_number ? $request->contact_person_number : ($request->user?$request->user->phone:''),
+//            'contact_person_number' => $request->contact_person_number ? ($request->user ? $request->contact_person_number :str_replace('+', '', $request->contact_person_number)) : ($request->user?$request->user->phone:''),
             'contact_person_email' => $request->contact_person_email ? $request->contact_person_email : ($request->user?$request->user->email:''),
             'address_type' => $request->address_type ? $request->address_type : 'Delivery',
             'address' => $request?->address??'',
@@ -970,29 +1040,29 @@ class OrderController extends Controller
                         }
 
 
-                    if ($order->order_status == 'pending' && config('mail.status') && $order_mail_status == '1' && $request->user) {
+                    if ($order->order_status == 'pending' && config('mail.status') && $order_mail_status == '1' && $request->user && Helpers::getNotificationStatusData('customer','customer_order_notification','mail_status')) {
                         Mail::to($request->user->email)->send(new PlaceOrder($order->id));
                     }
-                    if ($order->order_status == 'pending' && config('order_delivery_verification') == 1 && $order_verification_mail_status == '1' && $request->user) {
+                    if ($order->order_status == 'pending' && config('order_delivery_verification') == 1 && $order_verification_mail_status == '1' && $request->user && Helpers::getNotificationStatusData('customer','customer_delivery_verification','mail_status')) {
                         Mail::to($request->user->email)->send(new OrderVerificationMail($order->otp,$request->user->f_name));
                     }
-                    if ($order->is_guest == 1 && $order->order_status == 'pending' && config('mail.status') && $order_mail_status == '1' && isset($request->contact_person_email)) {
+                    if ($order->is_guest == 1 && $order->order_status == 'pending' && config('mail.status') && $order_mail_status == '1' && isset($request->contact_person_email) && Helpers::getNotificationStatusData('customer','customer_order_notification','mail_status')) {
                         Mail::to($request->contact_person_email)->send(new PlaceOrder($order->id));
                     }
-                    if ($order->is_guest == 1 && $order->order_status == 'pending' && config('order_delivery_verification') == 1 && $order_verification_mail_status == '1' && isset($request->contact_person_email)) {
+                    if ($order->is_guest == 1 && $order->order_status == 'pending' && config('order_delivery_verification') == 1 && $order_verification_mail_status == '1' && isset($request->contact_person_email) && Helpers::getNotificationStatusData('customer','customer_delivery_verification','mail_status') ) {
                         Mail::to($request->contact_person_email)->send(new OrderVerificationMail($order->otp,$request->contact_person_name));
                     }
                 }
             } catch (\Exception $ex) {
                 info($ex->getMessage());
             }
-            //PlaceOrderMail end
             return response()->json([
                 'message' => translate('messages.order_placed_successfully'),
                 'order_id' => $order->id,
                 'total_ammount' => $order->order_amount,
                 'status' => $order->order_status,
-                'created_at' => $order->created_at
+                'created_at' => $order->created_at,
+                'user_id' => (int) $order->user_id,
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -1425,7 +1495,7 @@ class OrderController extends Controller
             $mail_status = Helpers::get_mail_status('place_order_mail_status_user');
             //PlaceOrderMail
             try {
-                if ($order->order_status == 'pending' && config('mail.status') && $mail_status == '1' && $request->user) {
+                if ($order->order_status == 'pending' && config('mail.status') && $mail_status == '1' && $request->user && Helpers::getNotificationStatusData('customer','customer_order_notification','mail_status')) {
                     Mail::to($request->user->email)->send(new PlaceOrder($order->id));
                 }
             } catch (\Exception $ex) {
@@ -1438,7 +1508,8 @@ class OrderController extends Controller
                 'total_ammount' => $order->order_amount,
                 'offline_payments' => isset($order->offline_payments) ? Helpers::offline_payment_formater($order->offline_payments) : null,
                 'status' => $order->order_status,
-                'created_at' => $order->created_at
+                'created_at' => $order->created_at,
+                'user_id' => (int) $order->user_id,
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -1467,9 +1538,9 @@ class OrderController extends Controller
 
         $paginator = Order::with(['store', 'delivery_man.rating', 'parcel_category', 'refund:order_id,admin_note,customer_note'])->withCount('details')->where(['user_id' => $user_id])->whereIn('order_status', ['delivered', 'canceled', 'refund_requested', 'refund_request_canceled', 'refunded', 'failed'])
 
-        ->when(!isset($request->user) , function($query){
-            $query->where('is_guest' , 1);
-        })
+        // ->when(!isset($request->user) , function($query){
+        //     $query->where('is_guest' , 1);
+        // })
 
         ->when(isset($request->user)  , function($query){
             $query->where('is_guest' , 0);
@@ -1507,9 +1578,9 @@ class OrderController extends Controller
         $user_id = $request->user ? $request->user->id : $request['guest_id'];
 
         $paginator = Order::with(['store', 'delivery_man.rating', 'parcel_category'])
-        ->when(!isset($request->user) , function($query){
-            $query->where('is_guest' , 1);
-        })
+        // ->when(!isset($request->user) , function($query){
+        //     $query->where('is_guest' , 1);
+        // })
 
         ->when(isset($request->user)  , function($query){
             $query->where('is_guest' , 0);
@@ -1544,20 +1615,21 @@ class OrderController extends Controller
         $user_id = $request?->user?->id ;
 
         $order = Order::with('details', 'offline_payments','parcel_category')
-        ->when(!isset($request->user) , function($query){
-            $query->where('is_guest' , 1);
-        })
+//        ->when(!isset($request->user) , function($query){
+//            $query->where('is_guest' , 1);
+//        })
 
         ->when(isset($request->user)  , function($query){
             $query->where('is_guest' , 0);
         })
             ->when($request->user, function ($query) use ($user_id) {
                 return $query->where('user_id', $user_id);
-            })->find($request->order_id);
+            })->findOrFail($request->order_id);
 
         $details = isset($order->details) ? $order->details : null;
         if ($details != null && $details->count() > 0) {
             $details = Helpers::order_details_data_formatting($details);
+            $details[0]['is_guest'] = (int)$order->is_guest;
             // $details['store'] = $order['store'] ? Helpers::store_data_formatting($order['store']) : $order['store'];
             // $details['delivery_man'] = $order['delivery_man'] ? Helpers::deliverymen_data_formatting([$order['delivery_man']]) : $order['delivery_man'];
             return response()->json($details, 200);
@@ -1592,9 +1664,9 @@ class OrderController extends Controller
 
         $order = Order::where(['user_id' => $user_id, 'id' => $request['order_id']])
 
-        ->when(!isset($request->user) , function($query){
-            $query->where('is_guest' , 1);
-        })
+        // ->when(!isset($request->user) , function($query){
+        //     $query->where('is_guest' , 1);
+        // })
 
         ->when(isset($request->user)  , function($query){
             $query->where('is_guest' , 0);
@@ -1657,9 +1729,9 @@ class OrderController extends Controller
 
         $order = Order::where(['user_id' => $request->user->id, 'id' => $request['order_id']])
 
-        ->when(!isset($request->user) , function($query){
-            $query->where('is_guest' , 1);
-        })
+        // ->when(!isset($request->user) , function($query){
+        //     $query->where('is_guest' , 1);
+        // })
 
         ->when(isset($request->user)  , function($query){
             $query->where('is_guest' , 0);
@@ -1706,7 +1778,7 @@ class OrderController extends Controller
             $admin = Admin::where('role_id',1)->first();
             $mail_status = Helpers::get_mail_status('refund_request_mail_status_admin');
             try {
-                if (config('mail.status') && $admin['email'] && $mail_status == '1') {
+                if (config('mail.status') && $admin['email'] && $mail_status == '1' && Helpers::getNotificationStatusData('admin','order_refund_request','mail_status')) {
                     Mail::to($admin['email'])->send(new RefundRequest($order->id));
                 }
             } catch (\Exception $ex) {
@@ -1767,10 +1839,10 @@ class OrderController extends Controller
             try {
                 Helpers::send_order_notification($order);
 
-                if ($order->is_guest == 0 && config('mail.status') && $order_mail_status == '1'&& $order->customer) {
+                if ($order->is_guest == 0 && config('mail.status') && $order_mail_status == '1'&& $order->customer && Helpers::getNotificationStatusData('customer','customer_order_notification','mail_status')) {
                     Mail::to($order->customer->email)->send(new PlaceOrder($order->id));
                 }
-                if ($order->is_guest == 1 && config('mail.status') && $order_mail_status == '1' && isset($address['contact_person_email'])) {
+                if ($order->is_guest == 1 && config('mail.status') && $order_mail_status == '1' && isset($address['contact_person_email']) && Helpers::getNotificationStatusData('customer','customer_order_notification','mail_status')) {
                     Mail::to($address['contact_person_email'])->send(new PlaceOrder($order->id));
                 }
 
@@ -1893,7 +1965,7 @@ class OrderController extends Controller
 
 
                 $data = [
-                    'title' => translate('messages.order_push_title'),
+                    'title' => translate('Order_Notification'),
                     'description' => translate('messages.new_order_push_description'),
                     'order_id' => $order->id,
                     'image' => '',
@@ -2012,5 +2084,23 @@ class OrderController extends Controller
             ]);
         }
         return true;
+    }
+
+
+    public function automatedMessage(Request $request)
+    {
+        $limit = $request->query('limit', 25);
+        $offset = $request->query('offset', 1);
+        $messages = AutomatedMessage::orderBy('id', 'desc')->where('status',1)->select(['id','message'])
+        ->paginate($limit, ['*'], 'page', $offset);
+        $messages->makeHidden(['translations']);
+        $data = [
+            'total_size' => $messages->total(),
+            'limit' => $limit,
+            'offset' => $offset,
+            'data' => $messages->items()
+        ];
+
+        return response()->json($data, 200);
     }
 }

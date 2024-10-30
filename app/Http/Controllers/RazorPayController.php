@@ -82,8 +82,7 @@ class RazorPayController extends Controller
         $payment = $api->payment->fetch($input['razorpay_payment_id']);
 
         if (count($input) && !empty($input['razorpay_payment_id'])) {
-            $response = $api->payment->fetch($input['razorpay_payment_id'])->capture(array('amount' => $payment['amount']));
-
+            $response = $api->payment->fetch($input['razorpay_payment_id'])->capture(array('amount' => $payment['amount'] - $payment['fee']));
             $this->payment::where(['id' => $request['payment_id']])->update([
                 'payment_method' => 'razor_pay',
                 'is_paid' => 1,

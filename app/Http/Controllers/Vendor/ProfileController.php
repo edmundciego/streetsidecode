@@ -15,7 +15,7 @@ class ProfileController extends Controller
     {
         return view('vendor-views.profile.index');
     }
-    
+
     public function bank_view()
     {
         $data = Helpers::get_vendor_data();

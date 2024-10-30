@@ -487,8 +487,29 @@ class OrderController extends Controller
             }
 
             try {
-                $mail_status = Helpers::get_mail_status('refund_order_mail_status_user');
-                if(config('mail.status') && $order?->customer?->email && $mail_status == '1'){
+
+
+                if(Helpers::getNotificationStatusData('customer','customer_refund_request_approval','push_notification_status') && $order?->customer?->cm_firebase_token){
+                    $data = [
+                        'title' => translate('messages.order_refunded'),
+                        'description' => translate('messages.Your_refund_request_has_been_approved'),
+                        'order_id' => $order->id,
+                        'image' => '',
+                        'type' => 'order_status',
+                        'order_status' => $order->order_status,
+                    ];
+                    Helpers::send_push_notif_to_device($order?->customer?->cm_firebase_token, $data);
+                    DB::table('user_notifications')->insert([
+                        'data' => json_encode($data),
+                        'user_id' => $order->user_id,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+
+
+
+                if(config('mail.status') && $order?->customer?->email && Helpers::get_mail_status('refund_order_mail_status_user') == '1'  &&  Helpers::getNotificationStatusData('customer','customer_refund_request_approval','mail_status') ){
                     Mail::to($order->customer->email)->send(new \App\Mail\RefundedOrderMail($order->id));
                 }
             } catch (\Throwable $th) {
@@ -569,22 +590,24 @@ class OrderController extends Controller
                 $dm = $order->delivery_man;
                 $dm->current_orders = $dm->current_orders > 1 ? $dm->current_orders - 1 : 0;
                 $dm->save();
+                if (Helpers::getNotificationStatusData('deliveryman','deliveryman_order_assign_unassign','push_notification_status')) {
+                    $data = [
+                        'title' => translate('Order_Notification'),
+                        'description' => translate('messages.you_are_unassigned_from_a_order'),
+                        'order_id' => '',
+                        'image' => '',
+                        'type' => 'unassign'
+                    ];
+                    Helpers::send_push_notif_to_device($dm->fcm_token, $data);
 
-                $data = [
-                    'title' => translate('messages.order_push_title'),
-                    'description' => translate('messages.you_are_unassigned_from_a_order'),
-                    'order_id' => '',
-                    'image' => '',
-                    'type' => 'assign'
-                ];
-                Helpers::send_push_notif_to_device($dm->fcm_token, $data);
+                    DB::table('user_notifications')->insert([
+                        'data' => json_encode($data),
+                        'delivery_man_id' => $dm->id,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
 
-                DB::table('user_notifications')->insert([
-                    'data' => json_encode($data),
-                    'delivery_man_id' => $dm->id,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
             }
             $order->delivery_man_id = $delivery_man_id;
             $order->order_status = in_array($order->order_status, ['pending', 'confirmed']) ? 'accepted' : $order->order_status;
@@ -600,16 +623,14 @@ class OrderController extends Controller
             $order?->customer?->current_language_key:'en');
             $value = Helpers::text_variable_data_format(value:$value,store_name:$order->store?->name,order_id:$order->id,user_name:"{$order?->customer?->f_name} {$order?->customer?->l_name}",delivery_man_name:"{$order->delivery_man?->f_name} {$order->delivery_man?->l_name}");
             try {
-                if ($value) {
+                if ($value  && Helpers::getNotificationStatusData('customer','customer_order_notification','push_notification_status') && $fcm_token ) {
                     $data = [
-                        'title' => translate('messages.order_push_title'),
+                        'title' => translate('Order_Notification'),
                         'description' => $value,
                         'order_id' => $order['id'],
                         'image' => '',
                         'type' => 'order_status'
                     ];
-
-                    if($fcm_token){
                         Helpers::send_push_notif_to_device($fcm_token, $data);
                         DB::table('user_notifications')->insert([
                             'data' => json_encode($data),
@@ -617,22 +638,25 @@ class OrderController extends Controller
                             'created_at' => now(),
                             'updated_at' => now()
                         ]);
-                    }
                 }
-                $data = [
-                    'title' => translate('messages.order_push_title'),
-                    'description' => translate('messages.you_are_assigned_to_a_order'),
-                    'order_id' => $order['id'],
-                    'image' => '',
-                    'type' => 'assign'
-                ];
-                Helpers::send_push_notif_to_device($deliveryman->fcm_token, $data);
-                DB::table('user_notifications')->insert([
-                    'data' => json_encode($data),
-                    'delivery_man_id' => $deliveryman->id,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
+
+                if(Helpers::getNotificationStatusData('deliveryman','deliveryman_order_assign_unassign','push_notification_status')){
+                    $data = [
+                        'title' => translate('Order_Notification'),
+                        'description' => translate('messages.you_are_assigned_to_a_order'),
+                        'order_id' => $order['id'],
+                        'image' => '',
+                        'type' => 'order_status'
+                    ];
+                    Helpers::send_push_notif_to_device($deliveryman->fcm_token, $data);
+                    DB::table('user_notifications')->insert([
+                        'data' => json_encode($data),
+                        'delivery_man_id' => $deliveryman->id,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+
             } catch (\Exception $e) {
                 info($e->getMessage());
                 Toastr::warning(translate('messages.push_notification_faild'));
@@ -758,9 +782,9 @@ class OrderController extends Controller
             Toastr::warning(translate('all_image_delete_warning'));
             return back();
         }
-     
+
         Helpers::check_and_delete('order/' , $request['name']);
-        
+
         foreach ($proof as $image) {
             if ($image != $request['name']) {
                 array_push($array, $image);
@@ -1547,8 +1571,29 @@ class OrderController extends Controller
         $order->refund_request_canceled = now();
         $order->save();
         try {
-            $mail_status = Helpers::get_mail_status('refund_request_deny_mail_status_user');
-            if(config('mail.status') && $order?->customer?->email && $mail_status == '1'){
+
+
+            if(Helpers::getNotificationStatusData('customer','customer_refund_request_rejaction','push_notification_status')  && isset($order?->customer?->cm_firebase_token))
+            {
+                $data = [
+                    'title' => translate('messages.Refund Canceled'),
+                    'description' => translate('Your Refund request has been Rejected'),
+                    'order_id' => $order->id,
+                    'image' => '',
+                    'type'=> 'order_status',
+                    'order_status' => $order->order_status,
+                ];
+                Helpers::send_push_notif_to_device($order?->customer?->cm_firebase_token, $data);
+
+                DB::table('user_notifications')->insert([
+                    'data'=> json_encode($data),
+                    'user_id'=>$order?->customer?->id,
+                    'created_at'=>now(),
+                    'updated_at'=>now()
+                ]);
+            }
+
+            if(config('mail.status') && $order?->customer?->email && Helpers::get_mail_status('refund_request_deny_mail_status_user') == '1' &&  Helpers::getNotificationStatusData('customer','customer_refund_request_rejaction','mail_status')){
                 Mail::to($order->customer->email)->send(new RefundRejected($order->id));
             }
         } catch (\Throwable $th) {
@@ -1612,14 +1657,16 @@ class OrderController extends Controller
                 $value = Helpers::text_variable_data_format(value:Helpers::order_status_update_message('offline_verified',$order->module->module_type),store_name:$order->store?->name,order_id:$order->id,user_name:"{$order?->customer?->f_name} {$order?->customer?->l_name}",delivery_man_name:"{$order?->delivery_man?->f_name} {$order?->delivery_man?->l_name}");
                 $data = [
                     'title' => translate('messages.Your_Offline_payment_is_approved'),
-                    'description' => $value ??$request->note,
+                    'description' => $value == false  ||  $value == null ? ' ' :  $value ,
                     'order_id' => $order->id,
                     'image' => '',
                     'type' => 'order_status',
                 ];
 
                 $fcm= $order->is_guest == 0 ? $order?->customer?->cm_firebase_token : $order?->guest?->fcm_token;
-                if($fcm && ( $value || $request->note)){
+
+
+                if($fcm  && Helpers::getNotificationStatusData('customer','customer_offline_payment_approve','push_notification_status') ){
                     Helpers::send_push_notif_to_device($fcm, $data);
                     DB::table('user_notifications')->insert([
                         'data' => json_encode($data),
@@ -1677,7 +1724,7 @@ class OrderController extends Controller
                     ];
 
                     $fcm= $order->is_guest == 0 ? $order?->customer?->cm_firebase_token : $order?->guest?->fcm_token ;
-                    if($fcm && ( $value || $request->note)){
+                    if($fcm && ( $value || $request->note) &&  Helpers::getNotificationStatusData('customer','customer_offline_payment_deny','push_notification_status')){
                         Helpers::send_push_notif_to_device($fcm, $data);
                         DB::table('user_notifications')->insert([
                             'data' => json_encode($data),
@@ -1701,20 +1748,20 @@ class OrderController extends Controller
         {
             if($status == 'approved' && config('mail.status') ){
 
-                if(Helpers::get_mail_status('offline_payment_approve_mail_status_user') == '1'){
+                if(Helpers::get_mail_status('offline_payment_approve_mail_status_user') == '1' &&  Helpers::getNotificationStatusData('customer','customer_offline_payment_approve','mail_status')){
                     Mail::to($email)->send(new UserOfflinePaymentMail($name, 'approved'));
                 }
-                $order_verification_mail_status = Helpers::get_mail_status('order_verification_mail_status_user');
-                if ( $order_verification_mail_status == '1'  && $otp) {
+
+                if ( Helpers::get_mail_status('order_verification_mail_status_user') == '1'  && $otp  && Helpers::getNotificationStatusData('customer','customer_delivery_verification','mail_status') ) {
                     Mail::to($email)->send(new OrderVerificationMail($otp, $name));
                 }
             }
 
-            if($status == 'COD' && $order_id  && config('mail.status'))
+            if($status == 'COD' && $order_id  && config('mail.status')  && Helpers::getNotificationStatusData('customer','customer_order_notification','mail_status'))
             {
                 Mail::to($email)->send(new PlaceOrder($order_id));
             }
-            if($status == 'denied' && config('mail.status') && Helpers::get_mail_status('offline_payment_deny_mail_status_user') == '1'){
+            if($status == 'denied' && config('mail.status') && Helpers::get_mail_status('offline_payment_deny_mail_status_user') == '1' &&  Helpers::getNotificationStatusData('customer','customer_offline_payment_deny','mail_status')){
                 Mail::to($email)->send(new UserOfflinePaymentMail($name, 'denied'));
             }
         }

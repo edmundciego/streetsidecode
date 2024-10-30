@@ -181,7 +181,7 @@
                             </h5>
                         </div>
                         <div class="card-body">
-                            <div class="row g-2">
+                            <div class="row g-2 align-items-end">
                                 <div class="col-sm-6 col-lg-3">
                                     <div class="form-group mb-0">
                                         <label class="input-label" for="store_id">{{ translate('messages.store') }} <span class="form-label-secondary text-danger"
@@ -269,6 +269,40 @@
                                         </select>
                                     </div>
                                 </div>
+                                @if(Config::get('module.current_module_type') == 'grocery' || Config::get('module.current_module_type') == 'food')
+
+                                    <div class="col-sm-6" id="nutrition">
+                                        <label class="input-label" for="sub-categories">
+                                            {{translate('Nutrition')}}
+                                            <span class="input-label-secondary" title="{{ translate('Specify the necessary keywords relating to energy values for the item.') }}" data-toggle="tooltip">
+                                                <i class="tio-info-outined"></i>
+                                            </span>
+                                        </label>
+                                        <select name="nutritions[]" class="form-control multiple-select2" multiple>
+                                            <option disabled>{{translate('Select Nutrition')}}</option>
+                                            @foreach (\App\Models\Nutrition::select(['nutrition'])->get() as $nutrition)
+                                                <option value="{{ $nutrition->nutrition }}">{{ $nutrition->nutrition }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+
+                                    <div class="col-sm-6" id="allergy">
+                                        <label class="input-label" for="sub-categories">
+                                            {{translate('Allegren Ingredients')}}
+                                            <span class="input-label-secondary" title="{{ translate('Specify the ingredients of the item which can make a reaction as an allergen.') }}" data-toggle="tooltip">
+                                                <i class="tio-info-outined"></i>
+                                            </span>
+                                        </label>
+                                        <select name="allergies[]" class="form-control multiple-select2" multiple>
+                                            <option disabled>{{translate('Select Allegren Ingredients')}}</option>
+                                            @foreach (\App\Models\Allergy::select(['allergy'])->get() as $allergy)
+                                                <option value="{{ $allergy->allergy }}">{{ $allergy->allergy }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                @endif
+
 
                                 <div class="col-sm-6 col-lg-3" id="maximum_cart_quantity">
                                     <div class="form-group mb-0">
@@ -285,7 +319,7 @@
                                     </div>
                                 </div>
                                 <div class="col-sm-6 col-lg-3" id="organic">
-                                    <div class="form-check mb-0 p-6">
+                                    <div class="form-check mb-sm-2 pb-sm-1">
                                         <input class="form-check-input" name="organic" type="checkbox" value="1" id="flexCheckDefault" checked>
                                         <label class="form-check-label" for="flexCheckDefault">
                                           {{ translate('messages.is_organic') }}
@@ -293,32 +327,56 @@
                                       </div>
                                 </div>
                                 <div class="col-sm-6 col-lg-3" id="basic">
-                                    <div class="form-check mb-0 p-6">
-                                        <input class="form-check-input" name="basic" type="checkbox" value="1" id="flexCheckDefault" checked>
-                                        <label class="form-check-label" for="flexCheckDefault">
+                                    <div class="form-check mb-sm-2 pb-sm-1">
+                                        <input class="form-check-input" name="basic" type="checkbox" value="1" id="flexCheckDefaultBasic" checked>
+                                        <label class="form-check-label" for="flexCheckDefaultBasic">
                                           {{ translate('messages.Is_Basic_Medicine') }}
                                         </label>
                                       </div>
                                 </div>
                                 @if(Config::get('module.current_module_type') == 'pharmacy')
                                 <div class="col-sm-6 col-lg-3" id="is_prescription_required">
-                                    <div class="form-check mb-0 p-6">
+                                    <div class="form-check mb-sm-2 pb-sm-1">
                                         <input class="form-check-input" name="is_prescription_required" type="checkbox" value="1" id="flexCheckDefaultprescription" checked>
                                         <label class="form-check-label" for="flexCheckDefaultprescription">
                                           {{ translate('messages.is_prescription_required') }}
                                         </label>
                                       </div>
                                 </div>
+
+
+                                <div class="col-sm-6" id="generic_name">
+                                    <label class="input-label" for="sub-categories">
+                                        {{translate('generic_name')}}
+                                        <span class="input-label-secondary" title="{{ translate('Specify the medicine`s active ingredient that makes it work') }}" data-toggle="tooltip">
+                                            <i class="tio-info-outined"></i>
+                                        </span>
+                                    </label>
+                                    <div class="dropdown suggestion_dropdown">
+                                        <input type="text" class="form-control" name="generic_name" autocomplete="off">
+                                        @if(count(\App\Models\GenericName::select(['generic_name'])->get())>0)
+                                        <div class="dropdown-menu">
+                                            @foreach (\App\Models\GenericName::select(['generic_name'])->get() as $generic_name)
+                                            <div class="dropdown-item">{{ $generic_name->generic_name }}</div>
+                                            @endforeach
+                                        </div>
+                                        @endif
+                                    </div>
+                                </div>
                                 @endif
+
+
                                 @if(Config::get('module.current_module_type') == 'grocery' || Config::get('module.current_module_type') == 'food')
                                     <div class="col-sm-6 col-lg-3" id="halal">
-                                        <div class="form-check mb-0 p-6">
+                                        <div class="form-check mb-sm-2 pb-sm-1">
                                             <input class="form-check-input" name="is_halal" type="checkbox" value="1" id="flexCheckDefault1" checked>
                                             <label class="form-check-label" for="flexCheckDefault1">
                                                 {{ translate('messages.Is_It_Halal') }}
                                             </label>
                                         </div>
                                     </div>
+
+
                                 @endif
                             </div>
                         </div>
@@ -584,6 +642,7 @@
     <script>
         "use strict";
 
+
         $(document).on('change', '#discount_type', function () {
          let data =  document.getElementById("discount_type");
          if(data.value === 'amount'){
@@ -743,6 +802,7 @@
                 dataType: 'json',
                 success: function(data) {
                     module_data = data.data;
+                    console.log(module_data)
                     stock = module_data.stock;
                     module_type = data.type;
                     if (stock) {
@@ -799,6 +859,16 @@
                         $('#basic').show();
                     } else {
                         $('#basic').hide();
+                    }
+                    if (module_data.nutrition) {
+                        $('#nutrition').show();
+                    } else {
+                        $('#nutrition').hide();
+                    }
+                    if (module_data.allergy) {
+                        $('#allergy').show();
+                    } else {
+                        $('#allergy').hide();
                     }
                 },
             });
@@ -994,6 +1064,12 @@
             });
         }
 
+        // $('#item_form').on('keydown', function(e) {
+        //     if (e.key === 'Enter') {
+        //     e.preventDefault(); // Prevent submission on Enter
+        //     }
+        // });
+
         $('#item_form').on('submit', function(e) {
             $('#submitButton').attr('disabled', true);
             e.preventDefault();
@@ -1123,5 +1199,10 @@
                 }
             });
         })
+
+
+
+
+
     </script>
 @endpush
