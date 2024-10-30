@@ -14,3 +14,5 @@ yarn-error.log
 error_log
 /storage/tmp
 .DS_Store
+Dockerfile
+*.zip
