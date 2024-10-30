@@ -77,6 +77,17 @@ class ZoneScope implements Scope
                     });
                     break;
 
+                    case 'App\Models\storeSubscription':
+                        $builder->whereHas('store', function($q){
+                            $q->where('zone_id', auth('admin')->user()->zone_id);
+                        });
+                        break;
+                    case 'App\Models\SubscriptionTransaction':
+                        $builder->whereHas('store', function($q){
+                            $q->where('zone_id', auth('admin')->user()->zone_id);
+                        });
+                        break;
+
                 default:
                     $builder;
                     break;

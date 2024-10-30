@@ -36,7 +36,7 @@ class PaymentConfigController extends Controller
 
         $payment_gateway_list = [
             'ssl_commerz','paypal','stripe','razor_pay','senang_pay','paytabs','paystack',
-            'paymob_accept','paytm','flutterwave','liqpay','bkash','mercadopago','placetoPay','digiWallet'
+            'paymob_accept','paytm','flutterwave','liqpay','bkash','mercadopago','placetoPay','digiWallet','oneLink'
         ];
         $data_values = $this->payment_setting->whereIn('settings_type', ['payment_config'])->whereIn('key_name', $payment_gateway_list)->get();
         if (base64_decode(env('SOFTWARE_ID')) == '40224772') {
@@ -56,7 +56,7 @@ class PaymentConfigController extends Controller
     {
         collect(['status'])->each(fn($item, $key) => $request[$item] = $request->has($item) ? (int)$request[$item] : 0);
         $validation = [
-            'gateway' => 'required|in:ssl_commerz,paypal,stripe,razor_pay,senang_pay,paytabs,paystack,paymob_accept,paytm,flutterwave,liqpay,bkash,mercadopago,placetoPay,digiWallet',
+            'gateway' => 'required|in:ssl_commerz,paypal,stripe,razor_pay,senang_pay,paytabs,paystack,paymob_accept,paytm,flutterwave,liqpay,bkash,mercadopago,placetoPay,digiWallet,oneLink',
             'mode' => 'required|in:live,test'
         ];
 
@@ -161,6 +161,12 @@ class PaymentConfigController extends Controller
                 'status' => 'required|in:1,0',
                 'merchant_id' => 'required',
                 'api_key' => 'required',
+            ];
+        } elseif ($request['gateway'] == 'oneLink') {
+            $additional_data = [
+                'status' => 'required|in:1,0',
+                'token' => 'required',
+                'salt' => 'required'
             ];
         }
 

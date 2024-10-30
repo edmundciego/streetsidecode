@@ -182,8 +182,8 @@
                                     <div class="position-relative">
                                     <div class="img">
                                         <img
-                                        src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                            $header_icon['value'] ?? '',
+                                        src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                            $header_icon,'value',
                                             asset('storage/app/public/header_icon').'/'.$header_icon['value'] ?? '',
                                             asset('/public/assets/admin/img/aspect-1.png'),
                                             'header_icon/'
@@ -211,7 +211,14 @@
                                 <label class="upload-img-3 m-0">
                                     <div class="position-relative">
                                     <div class="img">
-                                        <img src="{{asset('storage/app/public/header_banner')}}/{{ $header_banner['value']??'' }}" onerror='this.src="{{asset('/public/assets/admin/img/aspect-1.png')}}"' class="img__aspect-1 mw-100 min-w-135px" alt="">
+                                        <img
+                                            src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                            $header_banner,'value',
+                                            asset('storage/app/public/header_banner').'/'.$header_banner['value'] ?? '',
+                                            asset('/public/assets/admin/img/aspect-1.png'),
+                                            'header_banner/'
+                                        ) }}" data-onerror-image="{{asset('/public/assets/admin/img/aspect-1.png')}}"
+                                            class="img__aspect-1 mw-100 min-w-135px onerror-image" alt="">
                                     </div>
                                         <input type="file" name="banner_image"  hidden>
 
@@ -233,7 +240,7 @@
                 <input type="hidden" name="image_path" value="header_icon" >
                 <input type="hidden" name="field_name" value="value" >
             </form>
-              
+
 
         </div>
     </div>

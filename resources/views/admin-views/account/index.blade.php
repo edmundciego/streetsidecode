@@ -172,7 +172,7 @@
                                             data-date="{{\App\CentralLogics\Helpers::time_date_format($at->created_at)}}"
                                             data-type="{{ $at->from_type == 'deliveryman' ?  translate('DeliveryMan_Info') : translate('Store_Info') }}"
                                             data-phone="{{ $at->store ?  $at?->store?->phone : $at?->deliveryman?->phone  }}"
-                                            data-address="{{ $at->store ?  $at?->store?->address : $at?->deliveryman?->last_location?->location ?? tralslate('address_not_found') }}"
+                                            data-address="{{ $at->store ?  $at?->store?->address : $at?->deliveryman?->last_location?->location ?? translate('address_not_found') }}"
                                             data-latitude="{{ $at->store ?  $at?->store?->latitude : $at?->deliveryman?->last_location?->location ?? 0 }}"
                                             data-longitude="{{ $at->store ?  $at?->store?->longitude : $at?->deliveryman?->last_location?->location ?? 0 }}"
                                             data-name="{{ $at->store ?  $at?->store?->name : $at?->deliveryman?->f_name.' '.$at?->deliveryman?->l_name }}"

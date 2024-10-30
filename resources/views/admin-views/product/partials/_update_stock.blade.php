@@ -6,8 +6,8 @@
     <input name="product_id" value="{{$product['id']}}" type="hidden" class="initial-hidden">
 
     <div class="d-flex align-items-center gap-2 flex-column mb-3">
-        <img width="50" height="50" class="rounded"  src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-            $product['image'] ?? '',
+        <img width="50" height="50" class="rounded"  src="{{ \App\CentralLogics\Helpers::get_image_helper(
+            $product,'image',
             asset('storage/app/public/product').'/'.$product['image'] ?? '',
             asset('public/assets/admin/img/160x160/img2.jpg'),
             'product/'

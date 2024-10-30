@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use App\CentralLogics\Helpers;
 use App\Scopes\ZoneScope;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,6 +33,8 @@ class ItemCampaign extends Model
         'start_time'=>'datetime',
         'end_time'=>'datetime',
     ];
+
+    protected $appends = ['image_full_url'];
 
     public function carts()
     {
@@ -73,6 +78,25 @@ class ItemCampaign extends Model
         return $value;
     }
 
+    public function getImageFullUrlAttribute(){
+        $value = $this->image;
+        if (count($this->storage) > 0) {
+            foreach ($this->storage as $storage) {
+                if ($storage['key'] == 'image') {
+
+                    if($storage['value'] == 's3'){
+
+                        return Helpers::s3_storage_link('campaign',$value);
+                    }else{
+                        return Helpers::local_storage_link('campaign',$value);
+                    }
+                }
+            }
+        }
+
+        return Helpers::local_storage_link('campaign',$value);
+    }
+
     public function store()
     {
         return $this->belongsTo(Store::class);
@@ -95,7 +119,19 @@ class ItemCampaign extends Model
 
     public function scopeActive($query)
     {
-        return $query->where('status', '=', 1);
+        // return $query->where('status', '=', 1);
+        return $query->where('status', 1)
+        ->whereHas('store', function($query) {
+            $query->where('status', 1)
+                    ->where(function($query) {
+                        $query->where('store_business_model', 'commission')
+                                ->orWhereHas('store_sub', function($query) {
+                                    $query->where(function($query) {
+                                        $query->where('max_order', 'unlimited')->orWhere('max_order', '>', 0);
+                                    });
+                                });
+                    });
+            });
     }
 
     public function scopeRunning($query)
@@ -111,14 +147,35 @@ class ItemCampaign extends Model
                 return $query->where('locale', app()->getLocale());
             }]);
         });
+        static::addGlobalScope('storage', function ($builder) {
+            $builder->with('storage');
+        });
     }
-
+    public function storage()
+    {
+        return $this->morphMany(Storage::class, 'data');
+    }
     protected static function boot()
     {
         parent::boot();
         static::created(function ($itemcampaign) {
             $itemcampaign->slug = $itemcampaign->generateSlug($itemcampaign->title);
             $itemcampaign->save();
+        });
+        static::saved(function ($model) {
+            if($model->isDirty('image')){
+                $value = Helpers::getDisk();
+
+                DB::table('storages')->updateOrInsert([
+                    'data_type' => get_class($model),
+                    'data_id' => $model->id,
+                    'key' => 'image',
+                ], [
+                    'value' => $value,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
         });
     }
     private function generateSlug($name)

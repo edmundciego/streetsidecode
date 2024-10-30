@@ -27,8 +27,8 @@
                 <div class="rated-media d-flex align-items-center">
                     <img
 
-                    src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                        $item['image'] ?? '',
+                    src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                        $item,'image',
                         asset('storage/app/public/product').'/'.$item['image'] ?? '',
                         asset('public/assets/admin/img/100x100/2.png'),
                         'product/'

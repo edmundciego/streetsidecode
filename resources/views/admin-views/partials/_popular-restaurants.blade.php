@@ -24,8 +24,8 @@
             <div class="img-container">
                 <img class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/100x100/1.png')}}"
 
-                src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                    $item->store['logo'] ?? '',
+                src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                    $item->store,'logo',
                     asset('storage/app/public/store').'/'.$item->store['logo'] ?? '',
                     asset('public/assets/admin/img/100x100/1.png'),
                     'store/'

@@ -86,13 +86,14 @@
                             <div class="form-group">
                                 <div class="btn--container" id="coba">
                                     @foreach(json_decode($delivery_man['identity_image'],true) as $img)
+                                    @php($img = is_array($img)?$img:['img'=>$img,'storage'=>'public'])
                                         <div>
                                             <img class="img--120"
                                             src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                                $img,
-                                                asset('storage/app/public/delivery-man') . '/' .$img,
+                                                $img['img'],
+                                                asset('storage/app/public/delivery-man') . '/' .$img['img'],
                                                 asset('/public/assets/admin/img/160x160/img1.jpg'),
-                                                'delivery-man/'
+                                                'delivery-man/',$img['storage'] ?? 'public'
                                             ) }}"  alt="image">
                                         </div>
                                     @endforeach
@@ -112,8 +113,8 @@
                                 <div class="text-center pt-3">
                                     <img class="img--120" id="viewer"
 
-                                    src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                        $delivery_man['image'],
+                                    src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                        $delivery_man,'image',
                                         asset('storage/app/public/delivery-man') . '/' .$delivery_man['image'],
                                         asset('/public/assets/admin/img/160x160/img1.jpg'),
                                         'delivery-man/'
@@ -212,7 +213,20 @@
 <script src="{{asset('public/assets/admin/js/spartan-multi-image-picker.js')}}"></script>
 <script type="text/javascript">
     "use strict";
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
 
+                reader.onload = function (e) {
+                    $('#viewer').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $("#customFileEg1").change(function () {
+            readURL(this);
+        });
         $(function () {
             $("#coba").spartanMultiImagePicker({
                 fieldName: 'identity_image[]',

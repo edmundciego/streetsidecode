@@ -143,8 +143,8 @@
                                     <label class="text-center position-relative">
                                         <img class="img--110 min-height-170px min-width-170px onerror-image image--border" id="viewer"
                                         data-onerror-image="{{ asset('public/assets/admin/img/upload-img.png') }}"
-                                        src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                            $store->logo ?? '',
+                                        src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                            $store,'logo',
                                             asset('storage/app/public/store').'/'.$store->logo ?? '',
                                             asset('public/assets/admin/img/upload-img.png'),
                                             'store/'
@@ -169,8 +169,8 @@
                                     <label class="text-center position-relative">
                                         <img class="img--vertical min-height-170px min-width-170px onerror-image image--border" id="coverImageViewer"
                                         data-onerror-image="{{ asset('public/assets/admin/img/upload-img.png') }}"
-                                        src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                            $store->cover_photo ?? '',
+                                        src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                            $store,'cover_photo',
                                             asset('storage/app/public/store/cover').'/'.$store->cover_photo ?? '',
                                             asset('public/assets/admin/img/upload-img.png'),
                                             'store/cover/'

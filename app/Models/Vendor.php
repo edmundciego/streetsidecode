@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\CentralLogics\Helpers;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Store;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class Vendor extends Authenticatable
 {
@@ -23,7 +26,25 @@ class Vendor extends Authenticatable
         'auth_token',
         'remember_token',
     ];
+    protected $appends = ['image_full_url'];
+    public function getImageFullUrlAttribute(){
+        $value = $this->image;
+        if (count($this->storage) > 0) {
+            foreach ($this->storage as $storage) {
+                if ($storage['key'] == 'image') {
 
+                    if($storage['value'] == 's3'){
+
+                        return Helpers::s3_storage_link('profile',$value);
+                    }else{
+                        return Helpers::local_storage_link('profile',$value);
+                    }
+                }
+            }
+        }
+
+        return Helpers::local_storage_link('profile',$value);
+    }
     public function order_transaction()
     {
         return $this->hasMany(OrderTransaction::class);
@@ -80,6 +101,39 @@ class Vendor extends Authenticatable
     public function userinfo()
     {
         return $this->hasOne(UserInfo::class,'vendor_id', 'id');
+    }
+
+    public function storage()
+    {
+        return $this->morphMany(Storage::class, 'data');
+    }
+
+    protected static function booted()
+    {
+        static::addGlobalScope('storage', function ($builder) {
+            $builder->with('storage');
+        });
+
+    }
+    protected static function boot()
+    {
+        parent::boot();
+        static::saved(function ($model) {
+            if($model->isDirty('image')){
+                $value = Helpers::getDisk();
+
+                DB::table('storages')->updateOrInsert([
+                    'data_type' => get_class($model),
+                    'data_id' => $model->id,
+                    'key' => 'image',
+                ], [
+                    'value' => $value,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        });
+
     }
 
 

@@ -66,8 +66,6 @@ class CustomerController extends Controller
         ->when(!$order_wise, function ($query) {
             $query->orderBy('orders_count', 'desc');
         })
-
-
             ->paginate(config('default_pagination'));
 
         return view('admin-views.customer.list', compact('customers'));

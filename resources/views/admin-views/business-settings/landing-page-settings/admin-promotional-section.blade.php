@@ -165,8 +165,8 @@
                                     </td>
                                     <td>
                                         <img
-                                        src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                            $banner->image ?? '',
+                                        src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                            $banner,'image',
                                             asset('storage/app/public/promotional_banner').'/'.$banner->image ?? '',
                                             asset('/public/assets/admin/img/upload-3.png'),
                                             'promotional_banner/'

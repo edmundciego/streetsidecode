@@ -104,7 +104,7 @@
                                 <button class="btn btn--primary" data-toggle="modal"
                                     data-target="#add-customer">{{ translate('messages.add_new_customer') }}</button>
                             </div>
-                            @if ($store_data->self_delivery_system == 1)
+                            @if ($store_data->sub_self_delivery == 1)
                                 <div class="pos--delivery-options">
                                     <div class="d-flex justify-content-between">
                                         <h5 class="card-title">
@@ -216,7 +216,7 @@
                     </div>
                     <div class="modal-body row ff-emoji">
                         <div class="col-md-12">
-                            <div class="text-center"> 
+                            <div class="text-center">
                                 <input type="button" class="btn btn--primary non-printable text-white print-Div"
                                     value="Proceed, If thermal printer is ready." />
                                 <a href="{{ url()->previous() }}" class="btn btn-danger non-printable">{{translate('messages.back')}}</a>
@@ -439,14 +439,26 @@
                                             document.getElementById('distance').value = distancMileResult;
                                         <?php
                                         $module_wise_delivery_charge = $store_data->zone->modules()->where('modules.id', $store_data->module_id)->first();
-                                        if ($module_wise_delivery_charge) {
-                                            $per_km_shipping_charge = $module_wise_delivery_charge->pivot->per_km_shipping_charge;
-                                            $minimum_shipping_charge = $module_wise_delivery_charge->pivot->minimum_shipping_charge;
-                                            $maximum_shipping_charge = $module_wise_delivery_charge->pivot->maximum_shipping_charge??0;
-                                        } else {
-                                            $per_km_shipping_charge = (float)\App\Models\BusinessSetting::where(['key' => 'per_km_shipping_charge'])->first()->value;
-                                            $minimum_shipping_charge = (float)\App\Models\BusinessSetting::where(['key' => 'minimum_shipping_charge'])->first()->value;
-                                            $maximum_shipping_charge = 0;
+
+                                        if($store_data->sub_self_delivery ){
+                                                $per_km_shipping_charge = $store_data?->per_km_shipping_charge ?? 0;
+                                                $minimum_shipping_charge = $store_data?->minimum_shipping_charge ?? 0;
+                                                $maximum_shipping_charge = $store_data?->maximum_shipping_charge?? 0;
+
+                                                $self_delivery_status = 1;
+                                        } else{
+                                                $self_delivery_status = 0;
+
+                                            if ($module_wise_delivery_charge) {
+                                                $per_km_shipping_charge = $module_wise_delivery_charge->pivot->per_km_shipping_charge;
+                                                $minimum_shipping_charge = $module_wise_delivery_charge->pivot->minimum_shipping_charge;
+                                                $maximum_shipping_charge = $module_wise_delivery_charge->pivot->maximum_shipping_charge??0;
+
+                                            } else {
+                                                $per_km_shipping_charge = (float)\App\Models\BusinessSetting::where(['key' => 'per_km_shipping_charge'])->first()->value;
+                                                $minimum_shipping_charge = (float)\App\Models\BusinessSetting::where(['key' => 'minimum_shipping_charge'])->first()->value;
+                                                $maximum_shipping_charge = 0;
+                                            }
                                         }
 
 
@@ -457,6 +469,7 @@
                                                 dataType: 'json',
                                                 data: {
                                                     distancMileResult: distancMileResult,
+                                                    self_delivery_status: {{ $self_delivery_status }},
                                                 },
                                                 success: function(data) {
                                                    let extra_charge = data;
@@ -729,8 +742,18 @@
             });
         });
 
-        $(document).on('click', '.payable-amount', function () {
+        $(document).on('click', '.payable-amount', function (event) {
            let form_id = 'payable_store_amount';
+
+                if($('#paid').val() < 0){
+                    toastr.error('{{ translate('Amount_must_be_grater_then_0') }}', {
+                            CloseButton: true,
+                            ProgressBar: true
+                        });
+                        event.preventDefault();
+                        return;
+                }
+
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')

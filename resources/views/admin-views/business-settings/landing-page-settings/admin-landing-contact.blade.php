@@ -168,8 +168,8 @@
                                         <div class="position-relative">
                                         <div class="img">
                                             <img
-                                            src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                                $contact_us_image['value'] ?? '',
+                                            src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                                $contact_us_image,'value',
                                                 asset('storage/app/public/contact_us_image').'/'.$contact_us_image['value'] ?? '',
                                                 asset('public/assets/admin/img/upload-4.png'),
                                                 'contact_us_image/'

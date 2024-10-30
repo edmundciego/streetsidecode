@@ -235,6 +235,7 @@ $(".store-filter").on("change", function () {
     const id = $(this).val();
     const url = $(this).data('url');
     let nurl = new URL(url);
+    nurl.searchParams.delete('page');
     nurl.searchParams.set('store_id', id);
     location.href = nurl;
 });

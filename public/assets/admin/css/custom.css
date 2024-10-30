@@ -170,3 +170,12 @@ div.scroll-down {
     max-height: 300px;
     overflow-y: scroll;
 }
+.created-package-slide-item {
+    width: 280px;
+}
+@media screen and (min-width: 576px) {
+
+.created-package-slide-item {
+    width: 320px;
+}
+}

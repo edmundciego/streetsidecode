@@ -76,5 +76,7 @@ class Kernel extends HttpKernel
         'module-check' => \App\Http\Middleware\ModuleCheckMiddleware::class,
         'current-module' => \App\Http\Middleware\CurrentModule::class,
         'apiGuestCheck' => \App\Http\Middleware\APIGuestMiddleware::class,
+        'subscription' => \App\Http\Middleware\Subscription::class,
+
     ];
 }

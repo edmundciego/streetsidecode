@@ -395,9 +395,9 @@ class SocialAuthController extends Controller
                 $res = $client->request('GET', 'https://graph.facebook.com/' . $unique_id . '?access_token=' . $token . '&&fields=name,email');
                 $data = json_decode($res->getBody()->getContents(), true);
             } elseif ($request['medium'] == 'apple') {
-                $apple_login=\App\Models\BusinessSetting::where(['key'=>'apple_login'])->first();
-                if($apple_login){
-                    $apple_login = json_decode($apple_login->value)[0];
+                $apple_login_data=\App\Models\BusinessSetting::where(['key'=>'apple_login'])->first();
+                if($apple_login_data){
+                    $apple_login = json_decode($apple_login_data->value)[0];
                 }
                 $teamId = $apple_login->team_id;
                 $keyId = $apple_login->key_id;
@@ -405,7 +405,11 @@ class SocialAuthController extends Controller
                 $aud = 'https://appleid.apple.com';
                 $iat = strtotime('now');
                 $exp = strtotime('+60days');
-                $keyContent = file_get_contents('storage/app/public/apple-login/'.$apple_login->service_file);
+                $awsUrl = config('filesystems.disks.s3.url');
+                $awsBucket = config('filesystems.disks.s3.bucket');
+                $awsBaseURL = rtrim($awsUrl, '/').'/'.ltrim($awsBucket.'/');
+                $service_file = (count($apple_login_data?->storage)>0 && $apple_login_data?->storage[0]?->value == 's3') ? $awsBaseURL.'apple-login/'.$apple_login->service_file : 'storage/app/public/apple-login/'.$apple_login->service_file;
+                $keyContent = file_get_contents($service_file);
 
                 $token = JWT::encode([
                     'iss' => $teamId,
@@ -422,7 +426,6 @@ class SocialAuthController extends Controller
                     'client_id' => $sub,
                     'client_secret' => $token,
                 ]);
-
 
                 $claims = explode('.', $res['id_token'])[1];
                 $data = json_decode(base64_decode($claims),true);

@@ -191,8 +191,8 @@
                                         </td>
                                         <td>
                                             <img
-                                            src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                                $review->reviewer_image ?? '',
+                                            src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                                $review,'reviewer_image',
                                                 asset('storage/app/public/reviewer_image').'/'.$review->reviewer_image ?? '',
                                                 asset('/public/assets/admin/img/upload-3.png'),
                                                 'reviewer_image/'

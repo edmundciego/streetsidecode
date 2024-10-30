@@ -157,8 +157,8 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <img  src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                                $banner->image ?? '',
+                                            <img  src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                                $banner,'image',
                                                 asset('storage/app/public/why_choose').'/'.$banner->image ?? '',
                                                 asset('/public/assets/admin/img/upload-3.png'),
                                                 'why_choose/'

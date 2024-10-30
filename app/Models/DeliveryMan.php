@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\CentralLogics\Helpers;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
@@ -28,7 +30,7 @@ class DeliveryMan extends Authenticatable
         'auth_token',
     ];
 
-
+    protected $appends = ['image_full_url','identity_image_full_url'];
     public function total_canceled_orders()
     {
         return $this->hasMany(Order::class)->where('order_status','canceled');
@@ -154,8 +156,72 @@ class DeliveryMan extends Authenticatable
         return $query->where('type','zone_wise');
     }
 
+    public function getImageFullUrlAttribute(){
+        $value = $this->image;
+        if (count($this->storage) > 0) {
+            foreach ($this->storage as $storage) {
+                if ($storage['key'] == 'image') {
+
+                    if($storage['value'] == 's3'){
+
+                        return Helpers::s3_storage_link('delivery-man',$value);
+                    }else{
+                        return Helpers::local_storage_link('delivery-man',$value);
+                    }
+                }
+            }
+        }
+
+        return Helpers::local_storage_link('delivery-man',$value);
+    }
+    public function getIdentityImageFullUrlAttribute(){
+        $images = [];
+        $value = is_array($this->identity_image)?$this->identity_image:json_decode($this->identity_image,true);
+        if ($value){
+            foreach ($value as $item){
+                $item = is_array($item)?$item:(is_object($item) && get_class($item) == 'stdClass' ? json_decode(json_encode($item), true):['img' => $item, 'storage' => 'public']);
+                if($item['storage']=='s3'){
+                    $images[] = Helpers::s3_storage_link('delivery-man',$item['img']);
+                }else{
+                    $images[] = Helpers::local_storage_link('delivery-man',$item['img']);
+                }
+            }
+        }
+
+        return $images;
+    }
+
+    public function storage()
+    {
+        return $this->morphMany(Storage::class, 'data');
+    }
+
     protected static function booted()
     {
+        static::addGlobalScope('storage', function ($builder) {
+            $builder->with('storage');
+        });
         static::addGlobalScope(new ZoneScope);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::saved(function ($model) {
+            if($model->isDirty('image')){
+                $value = Helpers::getDisk();
+
+                DB::table('storages')->updateOrInsert([
+                    'data_type' => get_class($model),
+                    'data_id' => $model->id,
+                    'key' => 'image',
+                ], [
+                    'value' => $value,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        });
+
     }
 }

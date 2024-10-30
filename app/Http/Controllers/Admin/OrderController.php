@@ -478,6 +478,8 @@ class OrderController extends Controller
                 'refund_status' => 'approved',
                 'refund_method' => $refund_method,
             ]);
+            $order?->store ?   Helpers::increment_order_count($order?->store) : '';
+
             if ($order->delivery_man) {
                 $dm = $order->delivery_man;
                 $dm->current_orders = $dm->current_orders > 1 ? $dm->current_orders - 1 : 0;
@@ -500,6 +502,9 @@ class OrderController extends Controller
             }
             $order->cancellation_reason = $request->reason;
             $order->canceled_by = 'admin';
+
+            $order?->store ?   Helpers::increment_order_count($order?->store) : '';
+
             if (config('module.' . $order->module->module_type)['stock']) {
                 foreach ($order->details as $detail) {
                     $variant = json_decode($detail['variation'], true);
@@ -731,12 +736,14 @@ class OrderController extends Controller
         if (!empty($request->file('order_proof'))) {
             foreach ($request->order_proof as $img) {
                 $image_name = Helpers::upload('order/', 'png', $img);
-                array_push($img_names, $image_name);
+                array_push($img_names, ['img'=>$image_name, 'storage'=> Helpers::getDisk()]);
             }
             $images = $img_names;
         }
 
-        $order->order_proof = json_encode($images);
+        if(count($images)>0){
+            $order->order_proof = json_encode($images);
+        }
         $order->save();
 
         Toastr::success(translate('messages.order_proof_added'));
@@ -751,9 +758,9 @@ class OrderController extends Controller
             Toastr::warning(translate('all_image_delete_warning'));
             return back();
         }
-        if (Storage::disk('public')->exists('order/' . $request['name'])) {
-            Storage::disk('public')->delete('order/' . $request['name']);
-        }
+     
+        Helpers::check_and_delete('order/' , $request['name']);
+        
         foreach ($proof as $image) {
             if ($image != $request['name']) {
                 array_push($array, $image);
@@ -1591,6 +1598,10 @@ class OrderController extends Controller
                     'status'=> 'verified'
                 ]);
 
+                if( $order?->store?->is_valid_subscription == 1 && $order?->store?->store_sub?->max_order != "unlimited" && $order?->store?->store_sub?->max_order > 0){
+                    $order?->store?->store_sub?->decrement('max_order' , 1);
+                }
+
                 $payment_method_name = json_decode($order->offline_payments->payment_info, true)['method_name'];
                 if($order->payment_method == 'partial_payment'){
                     $order->payments()->where('payment_status','unpaid')->update([
@@ -1634,6 +1645,11 @@ class OrderController extends Controller
                         'payment_method'=> 'cash_on_delivery',
                     ]);
                 }
+
+                if( $order?->store?->is_valid_subscription == 1 && $order?->store?->store_sub?->max_order != "unlimited" && $order?->store?->store_sub?->max_order > 0){
+                    $order?->store?->store_sub?->decrement('max_order' , 1);
+                }
+
                 Helpers::send_order_notification($order);
                 $order->payment_method = 'cash_on_delivery';
 

@@ -3,13 +3,13 @@
         <div class="navbar-vertical-container">
             <div class="navbar-brand-wrapper justify-content-between">
                 <!-- Logo -->
-                @php($store_logo = \App\Models\BusinessSetting::where(['key' => 'logo'])->first()->value)
-                <a class="navbar-brand" href="{{ route('admin.business-settings.business-setup') }}" aria-label="Front">
+                @php($store_logo = \App\Models\BusinessSetting::where(['key' => 'logo'])->first())
+                <a class="navbar-brand" href="{{ route('admin.dispatch.dashboard') }}" aria-label="Front">
                        <img class="navbar-brand-logo initial--36 onerror-image onerror-image" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
-                    src="{{\App\CentralLogics\Helpers::onerror_image_helper($store_logo, asset('storage/app/public/business/').'/' . $store_logo, asset('public/assets/admin/img/160x160/img1.jpg') ,'business/' )}}"
+                    src="{{\App\CentralLogics\Helpers::get_image_helper($store_logo,'value', asset('storage/app/public/business/').'/' . $store_logo->value, asset('public/assets/admin/img/160x160/img1.jpg') ,'business/' )}}"
                     alt="Logo">
                     <img class="navbar-brand-logo-mini initial--36 onerror-image onerror-image" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
-                    src="{{\App\CentralLogics\Helpers::onerror_image_helper($store_logo, asset('storage/app/public/business/').'/' . $store_logo, asset('public/assets/admin/img/160x160/img2.jpg') ,'business/' )}}"
+                    src="{{\App\CentralLogics\Helpers::get_image_helper($store_logo,'value', asset('storage/app/public/business/').'/' . $store_logo->value, asset('public/assets/admin/img/160x160/img2.jpg') ,'business/' )}}"
                     alt="Logo">
                 </a>
                 <!-- End Logo -->
@@ -49,6 +49,12 @@
                     <small class="nav-subtitle" title="{{ translate('messages.business_settings') }}">{{ translate('messages.business_management') }}</small>
                     <small class="tio-more-horizontal nav-subtitle-replacer"></small>
                 </li>
+
+
+
+
+
+
                 @if (\App\CentralLogics\Helpers::module_permission_check('zone'))
                 <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/zone*') ? 'active' : '' }}">
                     <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.business-settings.zone.home') }}" title="{{ translate('messages.zone_setup') }}">
@@ -92,6 +98,45 @@
                         <span class="text-truncate">{{ translate('messages.business_settings') }}</span>
                     </a>
                 </li>
+                @endif
+
+                @if (\App\CentralLogics\Helpers::module_permission_check('subscription'))
+                <li class="navbar-vertical-aside-has-menu @yield('subscription')">
+                    <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" id="tourb-3" href="javascript:" title="{{ translate('messages.subscription_management') }}">
+                        <i class="tio-crown nav-icon"></i>
+                        <span class="text-truncate">{{ translate('messages.subscription_management') }}</span>
+                    </a>
+                    <ul class="js-navbar-vertical-aside-submenu nav nav-sub" style="display:{{ Request::is('admin/business-settings/subscription*') ? 'block' : 'none' }}">
+                        <li class="navbar-vertical-aside-has-menu @yield('subscription_index')">
+                            <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{  route('admin.business-settings.subscriptionackage.index') }}" title="{{ translate('messages.subscription_Package') }}">
+                                <span class="tio-circle nav-indicator-icon"></span>
+                                <span class="text-truncate">
+                                    {{ translate('messages.subscription_Package') }}
+                                </span>
+                            </a>
+                        </li>
+                        <li class="navbar-vertical-aside-has-menu  @yield('subscriberList')">
+                            <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.business-settings.subscriptionackage.subscriberList') }}" title="{{ translate('messages.Subscriber_List') }}">
+                                <span class="tio-circle nav-indicator-icon"></span>
+                                <span class="text-truncate">
+                                    {{ translate('messages.Subscriber_List') }}
+                                </span>
+                            </a>
+                        </li>
+                        <li class="navbar-vertical-aside-has-menu  @yield('subscription_settings')">
+                            <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.business-settings.subscriptionackage.settings') }}" title="{{ translate('messages.settings') }}">
+                                <span class="tio-circle nav-indicator-icon"></span>
+                                <span class="text-truncate">
+                                    {{ translate('messages.settings') }}
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                @endif
+
+                @if (\App\CentralLogics\Helpers::module_permission_check('settings'))
+
                 <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/pages*') ? 'active' : '' }}">
                     <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:" title="{{ translate('messages.pages_setup') }}">
                         <i class="tio-pages nav-icon"></i>
@@ -309,7 +354,7 @@
                                     <img class="avatar-img onerror-image"
                                     data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
 
-                                    src="{{\App\CentralLogics\Helpers::onerror_image_helper(auth('admin')->user()->image, asset('storage/app/public/admin/').'/'.auth('admin')->user()->image, asset('public/assets/admin/img/160x160/img1.jpg') ,'admin/')}}"
+                                    src="{{\App\CentralLogics\Helpers::get_image_helper(auth('admin')->user(),'image', asset('storage/app/public/admin/').'/'.auth('admin')->user()->image, asset('public/assets/admin/img/160x160/img1.jpg') ,'admin/')}}"
 
                                     alt="Image Description">
                                     <span class="avatar-status avatar-sm-status avatar-status-success"></span>
@@ -332,7 +377,7 @@
                                         <img class="avatar-img onerror-image"
                                         data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
 
-                                        src="{{\App\CentralLogics\Helpers::onerror_image_helper(auth('admin')->user()->image, asset('storage/app/public/admin/').'/'.auth('admin')->user()->image, asset('public/assets/admin/img/160x160/img1.jpg') ,'admin/')}}"
+                                        src="{{\App\CentralLogics\Helpers::get_image_helper(auth('admin')->user(),'image', asset('storage/app/public/admin/').'/'.auth('admin')->user()->image, asset('public/assets/admin/img/160x160/img1.jpg') ,'admin/')}}"
 
                                         alt="Image Description">
                                     </div>

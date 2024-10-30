@@ -45,7 +45,7 @@
                     <div class="col-md-4">
                         @php($config=\App\CentralLogics\Helpers::get_business_settings('cash_on_delivery'))
                         <form action="{{route('admin.business-settings.third-party.payment-method-update',['cash_on_delivery'])}}"
-                            method="post" id="cash_on_delivery_status_form">
+                              method="post" id="cash_on_delivery_status_form">
                             @csrf
                             <label class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
                                 <span class="pr-1 d-flex align-items-center switch--label">
@@ -66,7 +66,7 @@
                                     data-text-on="<p>{{ translate('Customers will not be able to select COD as a payment method during checkout. Please review your settings and enable COD if you wish to offer this payment option to customers.') }}</p>"
                                     data-text-off="<p>{{ translate('Customers will be able to select COD as a payment method during checkout.') }}</p>"
                                     class="status toggle-switch-input dynamic-checkbox"
-                                       name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
+                                    name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
                                 <span class="toggle-switch-label text">
                                     <span class="toggle-switch-indicator"></span>
                                 </span>
@@ -76,7 +76,7 @@
                     <div class="col-md-4">
                         @php($digital_payment=\App\CentralLogics\Helpers::get_business_settings('digital_payment'))
                         <form action="{{route('admin.business-settings.third-party.payment-method-update',['digital_payment'])}}"
-                            method="post" id="digital_payment_status_form">
+                              method="post" id="digital_payment_status_form">
                             @csrf
                             <label class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
                                 <span class="pr-1 d-flex align-items-center switch--label">
@@ -87,16 +87,16 @@
                                 </span>
                                 <input type="hidden" name="toggle_type" value="digital_payment">
                                 <input  type="checkbox" id="digital_payment_status"
-                                       data-id="digital_payment_status"
-                                       data-type="status"
-                                       data-image-on="{{ asset('/public/assets/admin/img/modal/digital-payment-on.png') }}"
-                                       data-image-off="{{ asset('/public/assets/admin/img/modal/digital-payment-off.png') }}"
-                                       data-title-on="{{ translate('By Turning ON Digital Payment Option') }}"
-                                       data-title-off="{{ translate('By Turning OFF Digital Payment Option') }}"
-                                       data-text-on="<p>{{ translate('Customers will not be able to select digital payment as a payment method during checkout. Please review your settings and enable digital payment if you wish to offer this payment option to customers.') }}</p>"
-                                       data-text-off="<p>{{ translate('Customers will be able to select digital payment as a payment method during checkout.') }}</p>"
-                                       class="status toggle-switch-input dynamic-checkbox"
-                                       name="status" value="1" {{$digital_payment?($digital_payment['status']==1?'checked':''):''}}>
+                                        data-id="digital_payment_status"
+                                        data-type="status"
+                                        data-image-on="{{ asset('/public/assets/admin/img/modal/digital-payment-on.png') }}"
+                                        data-image-off="{{ asset('/public/assets/admin/img/modal/digital-payment-off.png') }}"
+                                        data-title-on="{{ translate('By Turning ON Digital Payment Option') }}"
+                                        data-title-off="{{ translate('By Turning OFF Digital Payment Option') }}"
+                                        data-text-on="<p>{{ translate('Customers will not be able to select digital payment as a payment method during checkout. Please review your settings and enable digital payment if you wish to offer this payment option to customers.') }}</p>"
+                                        data-text-off="<p>{{ translate('Customers will be able to select digital payment as a payment method during checkout.') }}</p>"
+                                        class="status toggle-switch-input dynamic-checkbox"
+                                        name="status" value="1" {{$digital_payment?($digital_payment['status']==1?'checked':''):''}}>
                                 <span class="toggle-switch-label text">
                                     <span class="toggle-switch-indicator"></span>
                                 </span>
@@ -106,7 +106,7 @@
                     <div class="col-md-4">
                         @php($Offline_Payment=\App\CentralLogics\Helpers::get_business_settings('offline_payment_status'))
                         <form action="{{route('admin.business-settings.third-party.payment-method-update',['offline_payment_status'])}}"
-                            method="post" id="offline_payment_status_form">
+                              method="post" id="offline_payment_status_form">
                             @csrf
                             <label class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
                                 <span class="pr-1 d-flex align-items-center switch--label">
@@ -138,19 +138,19 @@
             </div>
         </div>
         @if($published_status == 1)
-        <br>
-        <div>
-            <div class="card">
-                <div class="card-body d-flex flex-wrap justify-content-around">
-                    <h4 class="w-50 flex-grow-1 module-warning-text">
-                        <i class="tio-info-outined"></i>
-                    {{ translate('Your_current_payment_settings_are_disabled,_because_you_have_enabled_payment_gateway_addon,_To_visit_your_currently_active_payment_gateway_settings_please_follow_the_link.') }}</h4>
-                    <div>
-                        <a href="{{!empty($payment_url) ? $payment_url : ''}}" class="btn btn-outline-primary"> <i class="tio-settings"></i> {{translate('Settings')}}</a>
+            <br>
+            <div>
+                <div class="card">
+                    <div class="card-body d-flex flex-wrap justify-content-around">
+                        <h4 class="w-50 flex-grow-1 module-warning-text">
+                            <i class="tio-info-outined"></i>
+                            {{ translate('Your_current_payment_settings_are_disabled,_because_you_have_enabled_payment_gateway_addon,_To_visit_your_currently_active_payment_gateway_settings_please_follow_the_link.') }}</h4>
+                        <div>
+                            <a href="{{!empty($payment_url) ? $payment_url : ''}}" class="btn btn-outline-primary"> <i class="tio-settings"></i> {{translate('Settings')}}</a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
         @endif
         @php($is_published = $published_status == 1 ? 'inactive' : '')
         <!-- Tab Content -->
@@ -181,23 +181,23 @@
                             <div class="card-body">
                                 <div class="payment--gateway-img">
                                     <img  id="{{$payment->key_name}}-image-preview" class="__height-80 onerror-image"
-                                    data-onerror-image="{{asset('/public/assets/admin/img/payment/placeholder.png')}}"
+                                          data-onerror-image="{{asset('/public/assets/admin/img/payment/placeholder.png')}}"
 
-                                @if ($additional_data != null)
-                                    src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                                          @if ($additional_data != null)
+                                              src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
                                         $additional_data?->gateway_image,
                                         asset('storage/app/public/payment_modules/gateway_image').'/'.$additional_data?->gateway_image,
                                         asset('/public/assets/admin/img/payment/placeholder.png'),
-                                        'payment_modules/gateway_image/'
+                                        'payment_modules/gateway_image/',$additional_data?->storage??'public'
                                     ) }}"
 
-                                @else
-                                src="{{asset('/public/assets/admin/img/payment/placeholder.png')}}"
-                                @endif
+                                          @else
+                                              src="{{asset('/public/assets/admin/img/payment/placeholder.png')}}"
+                                          @endif
 
 
 
-                                         alt="public">
+                                          alt="public">
                                 </div>
 
                                 <input name="gateway" value="{{$payment->key_name}}" class="d-none">
@@ -248,7 +248,7 @@
                                 <div class="form-floating mb-2" >
                                     <label for="exampleFormControlInput1"
                                            class="form-label">{{translate('logo')}}</label>
-                                    <input type="file" class="form-control" name="gateway_image" id="{{$payment->key_name}}-image" accept=".jpg, .png, .jpeg|image/*">
+                                    <input type="file" class="form-control logo" name="gateway_image" data-id="{{$payment->key_name}}" id="{{$payment->key_name}}-image" accept=".jpg, .png, .jpeg|image/*">
                                 </div>
 
                                 <div class="text-right mt-2 "  >
@@ -271,10 +271,21 @@
 
 @push('script_2')
     <script src="{{asset('public/assets/admin/js/view-pages/business-settings-payment-page.js')}}"></script>
-<script>
-    "use strict";
-    @if(!isset($digital_payment) || $digital_payment['status']==0)
+    <script>
+        "use strict";
+
+        $(".logo").change(function() {
+            let viewer = $(this).data('id');
+            if (this.files && this.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#' + viewer + '-image-preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        @if(!isset($digital_payment) || $digital_payment['status']==0)
         $('.digital_payment_methods').hide();
-    @endif
-</script>
+        @endif
+    </script>
 @endpush

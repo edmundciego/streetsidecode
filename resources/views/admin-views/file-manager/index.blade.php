@@ -16,11 +16,27 @@
                 {{translate('messages.gallery')}}
             </span>
         </h1>
-        <div class="d-flex flex-wrap justify-content-between">
-            <button type="button" class="btn btn--primary modalTrigger mr-3" data-toggle="modal" data-target="#exampleModal">
-                <i class="tio-add-circle"></i>
-                <span class="text">{{translate('messages.add_new')}}</span>
-            </button>
+    </div>
+    <div class="mb-4 mt-2">
+        <div class="js-nav-scroller hs-nav-scroller-horizontal">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-5 __gap-12px">
+                <div class="js-nav-scroller hs-nav-scroller-horizontal mt-2">
+                    <!-- Nav -->
+                    <ul class="nav nav-tabs border-0 nav--tabs nav--pills">
+                        <li class="nav-item">
+                            <a class="nav-link {{ $storage == 'local' ? 'active' : '' }}"
+                               href="{{ route('admin.business-settings.file-manager.index', ['folder_path'=>'cHVibGlj', 'storage'=>'local']) }}">{{translate('local_storage')}}</a>
+                        </li>
+                        @if(\App\CentralLogics\Helpers::getDisk() == 's3')
+                        <li class="nav-item">
+                            <a class="nav-link {{ $storage == 's3' ? 'active' : '' }}"
+                               href="{{ route('admin.business-settings.file-manager.index', ['folder_path'=>'cHVibGlj', 'storage'=>'s3']) }}">{{translate('S3_bucket')}}</a>
+                        </li>
+                        @endif
+                    </ul>
+                    <!-- End Nav -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -30,25 +46,34 @@
             <div class="card-header">
                 @php
                     $pwd = explode('/',base64_decode($folder_path));
+                    $awsUrl = config('filesystems.disks.s3.url');
+                    $awsBucket = config('filesystems.disks.s3.bucket');
                 @endphp
-                    <h5 class="card-title">{{end($pwd)}} <span class="badge badge-soft-dark ml-2" id="itemCount">{{count($data)}}</span></h5>
+                    <h5 class="card-title">{{end($pwd) == ''?'Root':end($pwd)}} <span class="badge badge-soft-dark ml-2" id="itemCount">{{count($data)}}</span></h5>
+                <div class="d-flex flex-wrap justify-content-between">
+                    <button type="button" class="btn btn--primary modalTrigger mr-3" data-toggle="modal" data-target="#exampleModal">
+                        <i class="tio-add-circle"></i>
+                        <span class="text">{{translate('messages.add_new')}}</span>
+                    </button>
                     <a class="btn btn-sm badge-soft-primary" href="{{url()->previous()}}"><i class="tio-arrow-long-left mr-2"></i>{{translate('messages.back')}}</a>
+                </div>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         @foreach($data as $key=>$file)
                         <div class="col-6 col-sm-auto">
                             @if($file['type']=='folder')
-                            <a class="btn p-0 btn--folder"  href="{{route('admin.business-settings.file-manager.index', base64_encode($file['path']))}}">
+                            <a class="btn p-0 btn--folder"  href="{{route('admin.business-settings.file-manager.index', [base64_encode($file['path']),$storage])}}">
                                 <img class="img-thumbnail border-0 p-0" src="{{asset('public/assets/admin/img/folder.png')}}" alt="">
                                 <p>{{Str::limit($file['name'],10)}}</p>
                             </a>
                             @elseif($file['type']=='file')
-                            <!-- <a class="btn" href="{{asset('storage/app/'.$file['path'])}}" download> -->
+{{--                                {{dd($file['path'])}}--}}
                                 <div class="folder-btn-item mx-auto">
                                 <button class="btn p-0 w-100" title="{{$file['name']}}">
                                     <div class="gallary-card">
-                                        <img src="{{asset('storage/app/'.$file['path'])}}" alt="{{$file['name']}}" class="w-100 rounded">
+                                        <img src="{{$storage == 's3'? Storage::disk($storage)->url($file['path']) : asset('storage/app/'.$file['path'])}}" alt="{{$file['name']}}" class="w-100 rounded">
+{{--                                        <img src="{{$storage == 's3'? rtrim($awsUrl, '/').'/'.ltrim($awsBucket.'/'.$file['path'], '/') : asset('storage/app/'.$file['path'])}}" alt="{{$file['name']}}" class="w-100 rounded">--}}
                                     </div>
                                     <small class="overflow-hidden text-title">{{Str::limit($file['name'],10)}}</small>
                                 </button>
@@ -59,7 +84,7 @@
                                     <a href="#" title="{{translate('Copy Link')}}" class="copy-test" data-toggle="tooltip" data-placement="left" data-file-path="{{$file['db_path']}}">
                                         <img src="{{asset('/public/assets/admin/img/download/link.png')}}" alt="">
                                     </a>
-                                    <a title="{{translate('Download')}}" data-toggle="tooltip" data-placement="left" href="{{route('admin.business-settings.file-manager.download', base64_encode($file['path']))}}">
+                                    <a title="{{translate('Download')}}" data-toggle="tooltip" data-placement="left" href="{{route('admin.business-settings.file-manager.download', [base64_encode($file['path']),$storage])}}">
                                         <img src="{{asset('/public/assets/admin/img/download/download.png')}}" alt="">
                                     </a>
                                     <form action="{{route('admin.business-settings.file-manager.destroy',base64_encode($file['path']))}}" method="post"  class="form-submit-warning">
@@ -79,13 +104,14 @@
                                                 <a href="#" class="d-block ml-auto copy-test" data-file-path="{{$file['db_path']}}">
                                                     {{translate('Copy Path')}} <i class="tio-link"></i>
                                                 </a>
-                                                <a class="d-block" href="{{route('admin.business-settings.file-manager.download', base64_encode($file['path']))}}">
+                                                <a class="d-block" href="{{route('admin.business-settings.file-manager.download', [base64_encode($file['path']),$storage])}}">
                                                     {{translate('Download')}} <i class="tio-download-to"></i>
                                                 </a>
                                             </div>
                                         </div>
                                         <div class="modal-body p-1 pt-0">
-                                            <img src="{{asset('storage/app/'.$file['path'])}}" class="w-100">
+                                            <img src="{{$storage == 's3'? Storage::disk($storage)->url($file['path']) : asset('storage/app/'.$file['path'])}}" class="w-100">
+{{--                                            <img src="{{$storage == 's3'? rtrim($awsUrl, '/').'/'.ltrim($awsBucket.'/'.$file['path'], '/') : asset('storage/app/'.$file['path'])}}" class="w-100">--}}
                                         </div>
                                     </div>
                                 </div>
@@ -113,16 +139,21 @@
                 <form action="{{route('admin.business-settings.file-manager.image-upload')}}"  method="post" enctype="multipart/form-data">
                     @csrf
                     <input type="text" name="path" value = "{{base64_decode($folder_path)}}" hidden>
+                    <input type="text" name="disk" value = "{{$storage}}" hidden>
                     <div class="form-group">
+                        <label class="input-label"
+                               for="exampleFormControlInput1">{{ translate('messages.upload_image') }}</label>
                         <div class="custom-file">
                             <input type="file" name="images[]" id="customFileUpload" class="custom-file-input" accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" multiple>
                             <label class="custom-file-label" for="customFileUpload"></label>
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="input-label"
+                               for="exampleFormControlInput1">{{ translate('messages.upload_zip_file') }}</label>
                         <div class="custom-file">
                             <input type="file" name="file" id="customZipFileUpload" class="custom-file-input" accept=".zip">
-                            <label class="custom-file-label" id="zipFileLabel" for="customZipFileUpload">{{translate('messages.upload_zip_file')}}</label>
+                            <label class="custom-file-label" id="zipFileLabel" for="customZipFileUpload"></label>
                         </div>
                     </div>
 

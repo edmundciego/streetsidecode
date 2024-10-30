@@ -228,6 +228,19 @@ class ConfigServiceProvider extends ServiceProvider
                 Config::set('toggle_veg_non_veg', false);
             }
 
+            $data = BusinessSetting::where(['key' => 's3_credential'])->first();
+            $credentials = json_decode($data['value'], true);
+            $config = (boolean)BusinessSetting::where(['key' => 'local_storage'])->first()->value;
+            if ($credentials) {
+                Config::set('filesystems.default', $config ? ($config == 0 ? 's3' : 'local') : 'local');
+                Config::set('filesystems.disks.s3.key', $credentials['key']);
+                Config::set('filesystems.disks.s3.secret', $credentials['secret']);
+                Config::set('filesystems.disks.s3.region', $credentials['region']);
+                Config::set('filesystems.disks.s3.bucket', $credentials['bucket']);
+                Config::set('filesystems.disks.s3.url', $credentials['url']);
+                Config::set('filesystems.disks.s3.endpoint', $credentials['end_point']);
+            }
+
         } catch (\Exception $ex) {
 
         }

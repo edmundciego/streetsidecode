@@ -149,7 +149,7 @@
             <tr>
                 <td class="main-table-td">
                     <img class="mail-img-1"  id="iconViewer"
-                    src="{{\App\CentralLogics\Helpers::onerror_image_helper(data_get($data,'icon'), asset('storage/app/public/email_template/'.data_get($data,'icon')),   asset('public/assets/admin/img/emai_demo_template_2.png'), 'email_template/') }}"
+                    src="{{\App\CentralLogics\Helpers::get_image_helper($data,'icon', asset('storage/app/public/email_template/'.data_get($data,'icon')),   asset('public/assets/admin/img/emai_demo_template_2.png'), 'email_template/') }}"
                     alt="image">
 
 
@@ -157,7 +157,7 @@
                     <div class="mb-1" id="mail-body">{!! $body?? translate('Hi_Sabrina,') !!}</div>
 
                     <img class="mb-2 mail-img-3" id="bannerViewer"
-                    src="{{\App\CentralLogics\Helpers::onerror_image_helper(data_get($data,'image'), asset('storage/app/public/email_template/'.data_get($data,'image')),   asset('public/assets/admin/img/emai_demo_template_1.png'), 'email_template/') }}"
+                    src="{{\App\CentralLogics\Helpers::get_image_helper($data,'image', asset('storage/app/public/email_template/'.data_get($data,'image')),   asset('public/assets/admin/img/emai_demo_template_1.png'), 'email_template/') }}"
                     alt="image">
 
                     @if ($data?->button_url)

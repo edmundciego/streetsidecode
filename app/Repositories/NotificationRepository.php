@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\CentralLogics\Helpers;
 use App\Contracts\Repositories\NotificationRepositoryInterface;
 use App\Models\Notification;
 use Illuminate\Database\Eloquent\Collection;
@@ -64,9 +65,9 @@ class NotificationRepository implements NotificationRepositoryInterface
     public function delete(string $id): bool
     {
         $notification = $this->notification->find($id);
-        if (Storage::disk('public')->exists('notification/' . $notification['image'])) {
-            Storage::disk('public')->delete('notification/' . $notification['image']);
-        }
+
+        Helpers::check_and_delete('notification/' , $notification['image']);
+        
         $notification->delete();
 
         return true;

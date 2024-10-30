@@ -8,8 +8,8 @@ $company_name = App\Models\BusinessSetting::where('key', 'business_name')->first
                 <div class="text-center">
                 <img class="mail-img-2 onerror-image" data-onerror-image="{{ asset('/public/assets/admin/img/blank3.png') }}"
 
-                src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                    data_get($data, 'icon' , null),
+                src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                    $data, 'icon',
                     asset('storage/app/public/email_template').'/'.data_get($data, 'icon' , null),
                     asset('/public/assets/admin/img/blank3.png'),
                     'email_template/'

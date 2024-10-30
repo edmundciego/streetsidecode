@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\CentralLogics\Helpers;
 use App\Contracts\Repositories\DeliveryManRepositoryInterface;
 use App\Models\DeliveryMan;
 use Illuminate\Database\Eloquent\Collection;
@@ -73,14 +74,12 @@ class DeliveryManRepository implements DeliveryManRepositoryInterface
     public function delete(string $id): bool
     {
         $deliveryMan = $this->deliveryMan->find($id);
-        if (Storage::disk('public')->exists('delivery-man/' . $deliveryMan['image'])) {
-            Storage::disk('public')->delete('delivery-man/' . $deliveryMan['image']);
-        }
+        Helpers::check_and_delete('delivery-man/' , $deliveryMan['image']);
+        
 
         foreach (json_decode($deliveryMan['identity_image'], true) as $img) {
-            if (Storage::disk('public')->exists('delivery-man/' . $img)) {
-                Storage::disk('public')->delete('delivery-man/' . $img);
-            }
+            Helpers::check_and_delete('delivery-man/' , $img);
+        
         }
 
         if($deliveryMan->userinfo){

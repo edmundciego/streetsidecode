@@ -35,7 +35,7 @@ class OrderController extends Controller
             return $query->whereIn('order_status',['confirmed', 'accepted'])->whereNotNull('confirmed');
         })
         ->when($status == 'pending', function($query){
-            if(config('order_confirmation_model') == 'store' || Helpers::get_store_data()->self_delivery_system)
+            if(config('order_confirmation_model') == 'store' || Helpers::get_store_data()->sub_self_delivery)
             {
                 return $query->where('order_status','pending');
             }
@@ -64,7 +64,7 @@ class OrderController extends Controller
         })
         ->when($status == 'scheduled', function($query){
             return $query->Scheduled()->where(function($q){
-                if(config('order_confirmation_model') == 'store' || Helpers::get_store_data()->self_delivery_system)
+                if(config('order_confirmation_model') == 'store' || Helpers::get_store_data()->sub_self_delivery)
                 {
                     $q->whereNotIn('order_status',['failed','canceled', 'refund_requested', 'refunded']);
                 }
@@ -79,7 +79,7 @@ class OrderController extends Controller
         })
         ->when($status == 'all', function($query){
             return $query->where(function($query){
-                $query->whereNotIn('order_status',(config('order_confirmation_model') == 'store'|| Helpers::get_store_data()->self_delivery_system)?['failed','canceled', 'refund_requested', 'refunded']:['pending','failed','canceled', 'refund_requested', 'refunded'])
+                $query->whereNotIn('order_status',(config('order_confirmation_model') == 'store'|| Helpers::get_store_data()->sub_self_delivery)?['failed','canceled', 'refund_requested', 'refunded']:['pending','failed','canceled', 'refund_requested', 'refunded'])
                 ->orWhere(function($query){
                     return $query->where('order_status','pending')->where('order_type', 'take_away');
                 });
@@ -118,7 +118,7 @@ class OrderController extends Controller
             return $query->whereIn('order_status',['confirmed', 'accepted'])->whereNotNull('confirmed');
         })
         ->when($status == 'pending', function($query){
-            if(config('order_confirmation_model') == 'store' || Helpers::get_store_data()->self_delivery_system)
+            if(config('order_confirmation_model') == 'store' || Helpers::get_store_data()->sub_self_delivery)
             {
                 return $query->where('order_status','pending');
             }
@@ -147,7 +147,7 @@ class OrderController extends Controller
         })
         ->when($status == 'scheduled', function($query){
             return $query->Scheduled()->where(function($q){
-                if(config('order_confirmation_model') == 'store' || Helpers::get_store_data()->self_delivery_system)
+                if(config('order_confirmation_model') == 'store' || Helpers::get_store_data()->sub_self_delivery)
                 {
                     $q->whereNotIn('order_status',['failed','canceled', 'refund_requested', 'refunded']);
                 }
@@ -162,7 +162,7 @@ class OrderController extends Controller
         })
         ->when($status == 'all', function($query){
             return $query->where(function($query){
-                $query->whereNotIn('order_status',(config('order_confirmation_model') == 'store'|| Helpers::get_store_data()->self_delivery_system)?['failed','canceled', 'refund_requested', 'refunded']:['pending','failed','canceled', 'refund_requested', 'refunded'])
+                $query->whereNotIn('order_status',(config('order_confirmation_model') == 'store'|| Helpers::get_store_data()->sub_self_delivery)?['failed','canceled', 'refund_requested', 'refunded']:['pending','failed','canceled', 'refund_requested', 'refunded'])
                 ->orWhere(function($query){
                     return $query->where('order_status','pending')->where('order_type', 'take_away');
                 });
@@ -267,7 +267,7 @@ class OrderController extends Controller
 
 
 
-        if($request['order_status']=='delivered' && $order->order_type != 'take_away' && !Helpers::get_store_data()->self_delivery_system)
+        if($request['order_status']=='delivered' && $order->order_type != 'take_away' && !Helpers::get_store_data()->sub_self_delivery)
         {
             Toastr::warning(translate('messages.you_can_not_delivered_delivery_order'));
             return back();
@@ -275,7 +275,7 @@ class OrderController extends Controller
 
         if($request['order_status'] =="confirmed")
         {
-            if(!Helpers::get_store_data()->self_delivery_system && config('order_confirmation_model') == 'deliveryman' && $order->order_type != 'take_away')
+            if(!Helpers::get_store_data()->sub_self_delivery && config('order_confirmation_model') == 'deliveryman' && $order->order_type != 'take_away')
             {
                 Toastr::warning(translate('messages.order_confirmation_warning'));
                 return back();
@@ -350,6 +350,9 @@ class OrderController extends Controller
 
                 $order->cancellation_reason = $request->reason;
                 $order->canceled_by = 'store';
+                
+                $order?->store ?   Helpers::increment_order_count($order?->store) : '';
+
             }
 
         }
@@ -616,12 +619,14 @@ class OrderController extends Controller
         if (!empty($request->file('order_proof'))) {
             foreach ($request->order_proof as $img) {
                 $image_name = Helpers::upload('order/', 'png', $img);
-                array_push($img_names, $image_name);
+                array_push($img_names, ['img'=>$image_name, 'storage'=> Helpers::getDisk()]);
             }
             $images = $img_names;
         }
 
-        $order->order_proof = json_encode($images);
+        if(count($images)>0){
+            $order->order_proof = json_encode($images);
+        }
         $order->save();
 
         Toastr::success(translate('messages.order_proof_added'));
@@ -638,9 +643,9 @@ class OrderController extends Controller
             Toastr::warning(translate('all_image_delete_warning'));
             return back();
         }
-        if (Storage::disk('public')->exists('order/' . $request['name'])) {
-            Storage::disk('public')->delete('order/' . $request['name']);
-        }
+      
+        Helpers::check_and_delete('order/' , $request['name']);
+        
         foreach ($proof as $image) {
             if ($image != $request['name']) {
                 array_push($array, $image);

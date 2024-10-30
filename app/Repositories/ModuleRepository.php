@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\CentralLogics\Helpers;
 use App\Contracts\Repositories\ModuleRepositoryInterface;
 use App\Models\Module;
 use Illuminate\Database\Eloquent\Collection;
@@ -66,9 +67,9 @@ class ModuleRepository implements ModuleRepositoryInterface
         $module = $this->module->find($id);
         if($module->thumbnail)
         {
-            if (Storage::disk('public')->exists('module/' . $module['thumbnail'])) {
-                Storage::disk('public')->delete('module/' . $module['thumbnail']);
-            }
+       
+            Helpers::check_and_delete('module/' , $module['thumbnail']);
+            
         }
         $module->translations()->delete();
         $module->delete();

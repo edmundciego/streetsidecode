@@ -94,8 +94,8 @@
                                                 <tr>
                                                     <td>{{ $key+1 }}</td>
                                                     <td>
-                                                        <img src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                                            $banner->value ?? '',
+                                                        <img src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                                            $banner,'value',
                                                             asset('storage/app/public/promotional_banner').'/'.$banner->value ?? '',
                                                             asset('/public/assets/admin/img/upload-3.png'),
                                                             'promotional_banner/'
@@ -114,8 +114,8 @@
                                                                                 class="sr-only">{{ translate('messages.cancel') }}</span></button>
                                                                     </div>
                                                                     <div class="modal-body">
-                                                                        <img src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                                            $banner->value ?? '',
+                                                                        <img src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                                            $banner,'value',
                                                             asset('storage/app/public/promotional_banner').'/'.$banner->value ?? '',
                                                             asset('/public/assets/admin/img/upload-3.png'),
                                                             'promotional_banner/'

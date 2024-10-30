@@ -29,8 +29,8 @@ class StoreController extends Controller
         $type = $request->query('type', 'all');
         $store_type = $request->query('store_type', 'all');
         $zone_id= $request->header('zoneId');
-        $longitude= (float)$request->header('longitude');
-        $latitude= (float)$request->header('latitude');
+        $longitude= $request->header('longitude');
+        $latitude= $request->header('latitude');
         $stores = StoreLogic::get_stores( $zone_id, $filter_data, $type, $store_type, $request['limit'], $request['offset'], $request->query('featured'),$longitude,$latitude);
         $stores['stores'] = Helpers::store_data_formatting($stores['stores'], true);
 
@@ -50,8 +50,8 @@ class StoreController extends Controller
         $type = $request->query('type', 'all');
 
         $zone_id= $request->header('zoneId');
-        $longitude= (float)$request->header('longitude');
-        $latitude= (float)$request->header('latitude');
+        $longitude= $request->header('longitude');
+        $latitude= $request->header('latitude');
         $stores = StoreLogic::get_latest_stores($zone_id, $request['limit'], $request['offset'], $type,$longitude,$latitude);
         $stores['stores'] = Helpers::store_data_formatting($stores['stores'], true);
 
@@ -69,8 +69,8 @@ class StoreController extends Controller
         }
         $type = $request->query('type', 'all');
         $zone_id= $request->header('zoneId');
-        $longitude= (float)$request->header('longitude');
-        $latitude= (float)$request->header('latitude');
+        $longitude= $request->header('longitude');
+        $latitude= $request->header('latitude');
         $stores = StoreLogic::get_popular_stores($zone_id, $request['limit'], $request['offset'], $type,$longitude,$latitude);
         $stores['stores'] = Helpers::store_data_formatting($stores['stores'], true);
 
@@ -88,8 +88,8 @@ class StoreController extends Controller
         }
         $type = $request->query('type', 'all');
         $zone_id= $request->header('zoneId');
-        $longitude= (float)$request->header('longitude');
-        $latitude= (float)$request->header('latitude');
+        $longitude= $request->header('longitude');
+        $latitude= $request->header('latitude');
         $stores = StoreLogic::get_discounted_stores($zone_id, $request['limit'], $request['offset'], $type,$longitude,$latitude);
         $stores['stores'] = Helpers::store_data_formatting($stores['stores'], true);
 
@@ -107,8 +107,8 @@ class StoreController extends Controller
         }
         $type = $request->query('type', 'all');
         $zone_id= $request->header('zoneId');
-        $longitude= (float)$request->header('longitude');
-        $latitude= (float)$request->header('latitude');
+        $longitude= $request->header('longitude');
+        $latitude= $request->header('latitude');
         $stores = StoreLogic::get_top_rated_stores($zone_id, $request['limit'], $request['offset'], $type,$longitude,$latitude);
         $stores['stores'] = Helpers::store_data_formatting($stores['stores'], true);
 
@@ -139,8 +139,8 @@ class StoreController extends Controller
 
     public function get_details(Request $request,$id)
     {
-        $longitude= (float)$request->header('longitude');
-        $latitude= (float)$request->header('latitude');
+        $longitude= $request->header('longitude');
+        $latitude= $request->header('latitude');
         $store = StoreLogic::get_store_details($id,$longitude,$latitude);
         if($store)
         {
@@ -182,8 +182,8 @@ class StoreController extends Controller
         $type = $request->query('type', 'all');
 
         $zone_id= $request->header('zoneId');
-        $longitude= (float)$request->header('longitude');
-        $latitude= (float)$request->header('latitude');
+        $longitude= $request->header('longitude');
+        $latitude= $request->header('latitude');
         $stores = StoreLogic::search_stores($request['name'], $zone_id, $request->category_id,$request['limit'], $request['offset'], $type,$longitude,$latitude);
         $stores['stores'] = Helpers::store_data_formatting($stores['stores'], true);
         return response()->json($stores, 200);
@@ -217,6 +217,7 @@ class StoreController extends Controller
             {
                 $temp['item_name'] = $temp->item->name;
                 $temp['item_image'] = $temp->item->image;
+                $temp['item_image_full_url'] = $temp->item->image_full_url;
                 if(count($temp->item->translations)>0)
                 {
                     $translate = array_column($temp->item->translations->toArray(), 'value', 'key');
@@ -249,8 +250,8 @@ class StoreController extends Controller
         }
         $type = $request->query('type', 'all');
         $zone_id= $request->header('zoneId');
-        $longitude= (float)$request->header('longitude') ?? 0;
-        $latitude= (float)$request->header('latitude') ?? 0;
+        $longitude= $request->header('longitude') ?? 0;
+        $latitude= $request->header('latitude') ?? 0;
         $stores = StoreLogic::get_recommended_stores($zone_id, $request['limit'], $request['offset'], $type,$longitude,$latitude);
         $stores['stores'] = Helpers::store_data_formatting($stores['stores'], true);
 
@@ -269,8 +270,8 @@ class StoreController extends Controller
         $type = $request->query('type', 'all');
         $limit = $request->query('limit', 10);
         $offset = $request->query('offset', 1);
-        $longitude = (float) $request->header('longitude') ?? 0;
-        $latitude = (float) $request->header('latitude') ?? 0;
+        $longitude =  $request->header('longitude') ?? 0;
+        $latitude =  $request->header('latitude') ?? 0;
         $filter = $request->query('filter', '');
         $filter = $filter?(is_array($filter)?$filter:str_getcsv(trim($filter, "[]"), ',')):'';
         $rating_count = $request->query('rating_count');

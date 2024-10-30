@@ -42,15 +42,18 @@ class BannerLogic
                     });
                 })
                 ->find($banner->data);
-                $data[]=[
-                    'id'=>$banner->id,
-                    'title'=>$banner->title,
-                    'type'=>$banner->type,
-                    'image'=>$banner->image,
-                    'link'=> null,
-                    'store'=> $store?Helpers::store_data_formatting($store, false):null,
-                    'item'=>null
-                ];
+                if($store){
+                    $data[]=[
+                        'id'=>$banner->id,
+                        'title'=>$banner->title,
+                        'type'=>$banner->type,
+                        'image'=>$banner->image,
+                        'link'=> null,
+                        'store'=> $store?Helpers::store_data_formatting($store, false):null,
+                        'item'=>null,
+                        'image_full_url' => $banner->image_full_url
+                    ];
+                }
             }
             if($banner->type=='item_wise')
             {
@@ -69,6 +72,7 @@ class BannerLogic
                     'link'=> null,
                     'store'=> null,
                     'item'=> $item?Helpers::product_data_formatting($item, false, false, app()->getLocale()):null,
+                    'image_full_url' => $banner->image_full_url
                 ];
             }
             if($banner->type=='default')
@@ -81,6 +85,7 @@ class BannerLogic
                     'link'=>$banner->default_link,
                     'store'=> null,
                     'item'=> null,
+                    'image_full_url' => $banner->image_full_url
                 ];
             }
             if($banner->type == null)
@@ -93,6 +98,7 @@ class BannerLogic
                     'link'=> null,
                     'store'=> null,
                     'item'=> null,
+                    'image_full_url' => $banner->image_full_url
                 ];
             }
         }

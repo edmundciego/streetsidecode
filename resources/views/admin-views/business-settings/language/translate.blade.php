@@ -77,7 +77,7 @@
                             <hr>
                             @endif
                             <div class="page-area">
-                                {!! $full_data->links() !!}
+                                {!! $full_data->appends(request()->query())->links() !!}
                             </div>
                             @if(count($full_data) === 0)
                             <div class="empty--data">

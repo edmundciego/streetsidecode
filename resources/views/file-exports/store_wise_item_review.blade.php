@@ -25,11 +25,13 @@
 
         <tr>
             <th>{{ translate('sl') }}</th>
+            <th>{{translate('messages.Review_Id')}}</th>
             <th>{{ translate('Item_Name') }}</th>
             <th>{{ translate('Order_ID') }}</th>
             <th>{{ translate('Customer_Name') }}</th>
             <th>{{ translate('Rating') }}</th>
             <th>{{ translate('Review') }}</th>
+            <th >{{translate('messages.store_reply')}}</th>
             <th>{{ translate('Status') }}</th>
 
         </thead>
@@ -38,6 +40,7 @@
 
             <tr>
         <td>{{ $loop->index+1}}</td>
+        <td>{{$review?->review_id}}</td>
         <td>{{ $review?->item?->name }}</td>
         <td> {{$review->order_id}}</td>
         <td>
@@ -45,6 +48,7 @@
         </td>
         <td> {{$review->rating}}</td>
         <td>{{$review->comment}}</td>
+        <td>{{ $review?->reply ?? translate('not_given') }}</td>
         <td>{{ $review->status == 1 ? translate('messages.active') : translate('messages.inactive') }}</td>
 
             </tr>

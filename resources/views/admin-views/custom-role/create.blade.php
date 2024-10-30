@@ -122,6 +122,13 @@
                             </div>
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
+                                    <input type="checkbox" name="modules[]" value="cashback" class="form-check-input"
+                                           id="cashback">
+                                    <label class="form-check-label qcont text-dark" for="cashback">{{translate('messages.cashback')}}</label>
+                                </div>
+                            </div>
+                            <div class="check-item">
+                                <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="customer_management" class="form-check-input"
                                            id="customer_management">
                                     <label class="form-check-label qcont text-dark" for="customer_management">{{translate('messages.customer_management')}}</label>
@@ -231,6 +238,13 @@
                                     <input type="checkbox" name="modules[]" value="unit" class="form-check-input"
                                            id="unit">
                                     <label class="form-check-label qcont text-dark" for="unit">{{translate('messages.unit')}}</label>
+                                </div>
+                            </div>
+                            <div class="check-item">
+                                <div class="form-group form-check form--check">
+                                    <input type="checkbox" name="modules[]" value="subscription" class="form-check-input"
+                                           id="subscription">
+                                    <label class="form-check-label qcont text-dark" for="subscription">{{translate('messages.subscription')}}</label>
                                 </div>
                             </div>
                         </div>

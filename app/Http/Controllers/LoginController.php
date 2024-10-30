@@ -14,6 +14,7 @@ use App\Models\BusinessSetting;
 use App\CentralLogics\SMS_module;
 use App\Models\PhoneVerification;
 use Illuminate\Support\Facades\DB;
+use App\Models\SubscriptionPackage;
 use Gregwar\Captcha\CaptchaBuilder;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
@@ -158,18 +159,36 @@ class LoginController extends Controller
             $vendor = Vendor::where('email', $request->email)->first();
             if($vendor)
             {
-                if($vendor->stores[0]->status == 0)
+                if($vendor?->stores[0]?->store_business_model == 'none'){
+                    $admin_commission= BusinessSetting::where('key','admin_commission')->first();
+                    $business_name= BusinessSetting::where('key','business_name')->first();
+                    $packages= SubscriptionPackage::where('status',1)->get();
+                    return view('vendor-views.auth.register-step-2',[
+                        'store_id' => $vendor?->stores[0]?->id,
+                        'packages' =>$packages,
+                        'business_name' =>$business_name?->value,
+                        'admin_commission' =>$admin_commission?->value,
+                    ]);
+                }
+
+                if($vendor?->stores[0]?->status == 0 &&  $vendor?->status == 0)
                 {
                     return redirect()->back()->withInput($request->only('email', 'remember'))
-                        ->withErrors([translate('messages.inactive_vendor_warning')]);
+                        ->withErrors([translate('messages.Admin_did_not_approve_your_registration_yet.')]);
                 }
             }
         } elseif ($request->role == 'vendor_employee') {
             $employee = VendorEmployee::where('email', $request->email)->first();
             if ($employee) {
+
+                if(in_array($employee?->store?->store_business_model,['none','unsubscribed'])){
+                    return redirect()->back()->withInput($request->only('email', 'remember'))
+                    ->withErrors([translate('messages.store_is_inactive')]);
+                }
+
                 if ($employee?->store?->status == 0) {
                     return redirect()->back()->withInput($request->only('email', 'remember'))
-                        ->withErrors([translate('messages.inactive_vendor_warning')]);
+                        ->withErrors([translate('messages.store_is_inactive')]);
                 }
             }
         }
@@ -405,10 +424,17 @@ class LoginController extends Controller
         if(auth('vendor')?->check()){
             $user_link = Helpers::get_login_url('store_login_url');
             auth()->guard('vendor')->logout();
+            session()->forget('subscription_free_trial_close_btn');
+            session()->forget('subscription_renew_close_btn');
+            session()->forget('subscription_cancel_close_btn');
+
         }
         elseif(auth('vendor_employee')?->check()){
             $user_link = Helpers::get_login_url('store_employee_login_url');
             auth()->guard('vendor_employee')->logout();
+            session()->forget('subscription_free_trial_close_btn');
+            session()->forget('subscription_renew_close_btn');
+            session()->forget('subscription_cancel_close_btn');
         }
         else{
             if(!auth()?->guard('admin')?->user()?->role_id == 1){

@@ -3,24 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\Zone;
+use App\Models\Admin;
 use App\Models\Store;
 use App\Models\Module;
 use App\Models\Vendor;
+use App\Models\Translation;
 use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
 use App\Models\BusinessSetting;
 use App\CentralLogics\StoreLogic;
-use App\Models\Admin;
-use App\Models\Translation;
 use Illuminate\Support\Facades\DB;
+use App\Models\SubscriptionPackage;
 use Gregwar\Captcha\CaptchaBuilder;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
-use MatanYadaev\EloquentSpatial\Objects\Point;
 use Illuminate\Validation\Rules\Password;
+use MatanYadaev\EloquentSpatial\Objects\Point;
 
 class VendorController extends Controller
 {
@@ -36,7 +38,7 @@ class VendorController extends Controller
         $custome_recaptcha->build();
         Session::put('six_captcha', $custome_recaptcha->getPhrase());
 
-        return view('vendor-views.auth.register', compact('custome_recaptcha'));
+        return view('vendor-views.auth.general-info', compact('custome_recaptcha'));
     }
 
     public function store(Request $request)
@@ -129,6 +131,7 @@ class VendorController extends Controller
         $store->tax = $request->tax;
         $store->delivery_time = $request->minimum_delivery_time .'-'. $request->maximum_delivery_time.' '.$request->delivery_time_type;
         $store->status = 0;
+        $store->store_business_model = 'none';
         $store->save();
 
         $default_lang = str_replace('_', '-', app()->getLocale());
@@ -197,6 +200,29 @@ class VendorController extends Controller
         {
             StoreLogic::insert_schedule($store->id);
         }
+
+
+        $admin_commission= BusinessSetting::where('key','admin_commission')->first();
+        $business_name= BusinessSetting::where('key','business_name')->first();
+        $packages= SubscriptionPackage::where('status',1)->latest()->get();
+        if (Helpers::subscription_check()) {
+            Toastr::success(translate('messages.your_registration_info_is_saved_successfully_now_please_choose_your_business_model'));
+            return view('vendor-views.auth.register-step-2',[
+                'store_id' =>$store->id,
+                'packages' =>$packages,
+                'business_name' =>$business_name?->value,
+                'admin_commission' =>$admin_commission?->value,
+            ]);
+        } else{
+            $store->store_business_model = 'commission';
+            $store->save();
+            Toastr::success(translate('messages.your_store_registration_is_successful'));
+            return view('vendor-views.auth.register-complete',[
+                'type'=>'commission'
+            ]);
+        }
+
+
         Toastr::success(translate('messages.application_placed_successfully'));
         return back();
     }
@@ -206,7 +232,99 @@ class VendorController extends Controller
             $query->where('zone_id', $request->zone_id);
         })->notParcel()
         ->where('modules.module_name', 'like', '%'.$request->q.'%')
-        ->limit(8)->get([DB::raw('modules.id as id, modules.module_name as text')]);
+        ->limit(8)->get()->map(function($module) {
+            return [
+                'id' => $module->id,
+                'text' => $module->module_name
+            ];
+        });
         return response()->json($module_data);
     }
+
+    public function business_plan(Request $request){
+        $store=Store::find($request->store_id);
+
+        if ($request->business_plan == 'subscription-base' && $request->package_id != null ) {
+            $key=['subscription_free_trial_days','subscription_free_trial_type','subscription_free_trial_status'];
+            $free_trial_settings=BusinessSetting::whereIn('key', $key)->pluck('value','key');
+
+            return view('vendor-views.auth.register-subscription-payment',[
+            'package_id'=> $request->package_id,
+            'store_id' => $request->store_id,
+            'free_trial_settings'=>$free_trial_settings,
+            'payment_methods' => Helpers::getDefaultPaymentMethods(),
+
+            ]);
+        }
+        elseif($request->business_plan == 'commission-base' ){
+            $store->store_business_model = 'commission';
+            $store->save();
+            return view('vendor-views.auth.register-complete',[
+                'type'=>'commission'
+            ]);
+        }
+        else{
+            $admin_commission= BusinessSetting::where('key','admin_commission')->first();
+            $business_name= BusinessSetting::where('key','business_name')->first();
+            $packages= SubscriptionPackage::where('status',1)->get();
+            Toastr::error(translate('messages.please_follow_the_steps_properly.'));
+            return view('vendor-views.auth.register-step-2',[
+                'admin_commission'=> $admin_commission?->value,
+                'business_name'=> $business_name?->value,
+                'packages'=> $packages,
+                'store_id' => $request->store_id,
+                'type'=>$request->type
+                ]);
+        }
+
+    }
+
+    public function payment(Request $request){
+        $request->validate([
+            'package_id' => 'required',
+            'store_id' => 'required',
+            'payment' => 'required'
+        ]);
+
+        $store= Store::Where('id',$request->store_id)->first(['id','vendor_id']);
+        $package = SubscriptionPackage::withoutGlobalScope('translate')->find($request->package_id);
+
+        if(!in_array($request->payment,['free_trial'])){
+            $url= route('restaurant.final_step',['store_id' => $store->id?? null]);
+            return redirect()->away(Helpers::subscriptionPayment(store_id:$store->id,package_id:$package->id,payment_gateway:$request->payment,payment_platform:'web',url:$url,type: 'new_join'));
+        }
+        if($request->payment == 'free_trial'){
+            $plan_data=   Helpers::subscription_plan_chosen(store_id:$store->id,package_id:$package->id,payment_method:'free_trial',discount:0,reference:'free_trial',type: 'new_join');
+        }
+        $plan_data != false ?  Toastr::success( translate('Successfully_Subscribed.')) : Toastr::error( translate('Something_went_wrong!.'));
+        return to_route('restaurant.final_step');
+    }
+
+public function back(Request $request){
+    $admin_commission= BusinessSetting::where('key','admin_commission')->first();
+    $business_name= BusinessSetting::where('key','business_name')->first();
+    $packages= SubscriptionPackage::where('status',1)->get();
+    return view('vendor-views.auth.register-step-2',[
+        'admin_commission'=> $admin_commission?->value,
+        'business_name'=> $business_name?->value,
+        'packages'=> $packages,
+        'store_id' => $request->store_id
+        ]);
+}
+
+
+public function final_step(Request $request){
+
+
+    $store_id= null;
+    $payment_status= null;
+    if($request?->store_id && is_string($request?->store_id)){
+        $data = explode('?', $request?->store_id);
+        $store_id = $data[0];
+        $payment_status = $data[1]  != 'flag=success' ? 'fail': 'success';
+    }
+
+    return view('vendor-views.auth.register-complete',['store_id' =>$store_id,'payment_status'=> $payment_status]);
+}
+
 }

@@ -17,6 +17,7 @@ use BeyondCode\LaravelWebSockets\Facades\WebSocketsRouter;
 
 Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function () {
     Route::get('zone/list', 'ZoneController@get_zones');
+    Route::get('zone/check', 'ZoneController@zonesCheck');
     Route::get('offline_payment_method_list', 'ConfigController@offline_payment_method_list');
     Route::group(['prefix' => 'auth', 'namespace' => 'Auth'], function () {
         Route::post('sign-up', 'CustomerAuthController@register');
@@ -50,6 +51,16 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
 
         Route::post('social-login', 'SocialAuthController@social_login');
         Route::post('social-register', 'SocialAuthController@social_register');
+    });
+
+    //Store Subscription
+    Route::group(['prefix' => 'vendor','namespace' => 'Vendor'], function () {
+        Route::get('package-view', 'SubscriptionController@package_view');
+        Route::post('business_plan', 'SubscriptionController@business_plan');
+        Route::post('subscription/payment/api', 'SubscriptionController@subscription_payment_api')->name('subscription_payment_api');
+        Route::post('package-renew', 'SubscriptionController@package_renew_change_update_api');
+        Route::post('cancel-subscription', 'SubscriptionController@cancelSubscription');
+        Route::get('check-product-limits', 'SubscriptionController@checkProductLimits');
     });
 
     // Module
@@ -160,6 +171,8 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
 
         Route::get('get-expense', 'ReportController@expense_report');
         Route::get('get-disbursement-report', 'ReportController@disbursement_report');
+        Route::get('subscription-transaction', 'SubscriptionController@transaction');
+
 
 
         //remove account
@@ -227,6 +240,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
             Route::get('details/{id}', 'ItemController@get_item');
             Route::POST('search', 'ItemController@search');
             Route::get('reviews', 'ItemController@reviews');
+            Route::put('reply-update', 'ItemController@update_reply');
             Route::get('recommended', 'ItemController@recommended');
             Route::get('organic', 'ItemController@organic');
             Route::get('pending/item/list', 'ItemController@pending_item_list');

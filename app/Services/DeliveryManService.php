@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services;
+use App\CentralLogics\Helpers;
 use App\Traits\FileManagerTrait;
 use Illuminate\Support\Facades\Storage;
 use PhpParser\Node\Expr\Cast\Object_;
@@ -21,7 +22,7 @@ class DeliveryManService
         if (!empty($request->file('identity_image'))) {
             foreach ($request->identity_image as $img) {
                 $identityImage = $this->upload('delivery-man/', 'png', $img);
-                array_push($identityImageNames, $identityImage);
+                array_push($identityImageNames, ['img'=>$identityImage, 'storage'=> Helpers::getDisk()]);
             }
             $identityImage = json_encode($identityImageNames);
         } else {
@@ -55,14 +56,14 @@ class DeliveryManService
 
         if ($request->has('identity_image')){
             foreach (json_decode($deliveryMan['identity_image'], true) as $img) {
-                if (Storage::disk('public')->exists('delivery-man/' . $img)) {
-                    Storage::disk('public')->delete('delivery-man/' . $img);
-                }
+                
+                Helpers::check_and_delete('delivery-man/' , $img);
+                
             }
             $imgKeeper = [];
             foreach ($request->identity_image as $img) {
                 $identityImage = $this->upload('delivery-man/', 'png', $img);
-                array_push($imgKeeper, $identityImage);
+                array_push($imgKeeper, ['img'=>$identityImage, 'storage'=> Helpers::getDisk()]);
             }
             $identityImage = json_encode($imgKeeper);
         } else {

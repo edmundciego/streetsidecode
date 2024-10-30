@@ -231,8 +231,8 @@
                                 <a class="media align-items-center" href="{{route('admin.item.requested_item_view',['id'=> $item['id']])}}">
                                     <img class="avatar avatar-lg mr-3 onerror-image"
 
-                                    src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                        $item['image'] ?? '',
+                                    src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                        $item,'image',
                                         asset('storage/app/public/product').'/'.$item['image'] ?? '',
                                         asset('public/assets/admin/img/160x160/img2.jpg'),
                                         'product/'

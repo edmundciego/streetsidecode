@@ -157,7 +157,7 @@ width: 24px;
                     <div class="text-center">
                     <img onerror="this.src='{{ asset('/public/assets/admin/img/blank3.png') }}'" class="mail-img-2"
 
-                    src="{{\App\CentralLogics\Helpers::onerror_image_helper( data_get($data, 'icon'), asset('storage/app/public/email_template/').'/'.data_get($data, 'icon'), asset('public/assets/admin/img/emai_demo_template_2.png'), 'email_template/') }}"
+                    src="{{\App\CentralLogics\Helpers::get_image_helper( $data, 'icon', asset('storage/app/public/email_template/').'/'.data_get($data, 'icon'), asset('public/assets/admin/img/emai_demo_template_2.png'), 'email_template/') }}"
 
                     id="iconViewer" alt="">
                         <h2 id="mail-title" class="mt-2">{{ $title?? translate('Main_Title_or_Subject_of_the_Mail') }}</h2>

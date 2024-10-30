@@ -202,12 +202,14 @@
                             <td>
                                 <a class="media align-items-center" href="{{route('admin.item.view',[$item['id'],'module_id'=>$item['module_id']])}}">
                                     <img class="avatar avatar-lg mr-3 onerror-image"
-                                    src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                        $item['image'] ?? '',
+                                    src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                        $item,'image',
                                         asset('storage/app/public/product').'/'.$item['image'] ?? '',
                                         asset('public/assets/admin/img/160x160/img2.jpg'),
                                         'product/'
                                     ) }}"
+
+
                                     data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}" alt="{{$item->name}} image">
                                     <div class="media-body">
                                         <h5 class="text-hover-primary mb-0" title="{{ $item['name'] }}">

@@ -3,6 +3,7 @@
 namespace App\WebSockets\Handler;
 
 use App\Models\DeliveryMan;
+use App\Models\DeliveryHistory;
 use Ratchet\ConnectionInterface;
 use Illuminate\Support\Facades\DB;
 use BeyondCode\LaravelWebSockets\Apps\App;
@@ -18,30 +19,29 @@ class DMLocationSocketHandler implements MessageComponentInterface
     function onMessage(ConnectionInterface $from, MessageInterface $msg)
     {
         $data = json_decode($msg->getPayload(), true);
-        
+
         // Check if the message contains the necessary data for recording
         if (
             isset($data['token'], $data['longitude'], $data['latitude'], $data['location'])
         ) {
             $dm = DeliveryMan::where(['auth_token' => $data['token']])->first();
-    
+
             if ($dm) {
-                DB::table('delivery_histories')->insert([
-                    'delivery_man_id' => $dm['id'],
+                DeliveryHistory::updateOrCreate(['delivery_man_id' => $dm['id']], [
                     'longitude' => $data['longitude'],
                     'latitude' => $data['latitude'],
                     'time' => now(),
                     'location' => $data['location'],
                     'created_at' => now(),
                     'updated_at' => now()
-                ]);
-                
+                    ]);
+
                 // Send a response back to the client indicating successful recording
                 $from->send(json_encode(['message' => 'location recorded']));
             }
         }
     }
-    
+
 
     function onOpen(ConnectionInterface $conn)
     {

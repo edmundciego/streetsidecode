@@ -91,26 +91,58 @@ class ItemController extends Controller
             $item_data= Item::withoutGlobalScope(StoreScope::class)->select(['image','images'])->findOrfail($request->item_id);
 
             if(!$request->has('image')){
-                $oldPath = storage_path("app/public/product/{$item_data->image}");
-                $newFileName =\Carbon\Carbon::now()->toDateString() . "-" . uniqid() . ".png" ;
-                $newPath = storage_path("app/public/product/{$newFileName}");
-                if (File::exists($oldPath)) {
-                    File::copy($oldPath, $newPath);
+
+                $oldDisk = 'public';
+                if ($item_data->storage && count($item_data->storage) > 0) {
+                    foreach ($item_data->storage as $value) {
+                        if ($value['key'] == 'image') {
+                            $oldDisk = $value['value'];
+                        }
+                    }
+                }
+                $oldPath = "product/{$item_data->image}";
+                $newFileName = Carbon::now()->toDateString() . "-" . uniqid() . ".png";
+                $newPath = "product/{$newFileName}";
+                $dir = 'product/';
+                $newDisk = Helpers::getDisk();
+
+                try{
+                    if (Storage::disk($oldDisk)->exists($oldPath)) {
+                        if (!Storage::disk($newDisk)->exists($dir)) {
+                            Storage::disk($newDisk)->makeDirectory($dir);
+                        }
+                        $fileContents = Storage::disk($oldDisk)->get($oldPath);
+                        Storage::disk($newDisk)->put($newPath, $fileContents);
+                    }
+                } catch (\Exception $e) {
                 }
             }
 
             $uniqueValues = array_diff($item_data->images, explode(",", $request->removedImageKeys));
 
             foreach($uniqueValues as$key=> $value){
-                $oldPath = storage_path("app/public/product/{$value}");
-                $newFileName =\Carbon\Carbon::now()->toDateString() . "-" . uniqid() . ".png" ;
-                $newPath = storage_path("app/public/product/{$newFileName}");
-                if (File::exists($oldPath)) {
-                    File::copy($oldPath, $newPath);
+                $value = is_array($value)?$value:['img' => $value, 'storage' => 'public'];
+                $oldDisk = $value['storage'];
+                $oldPath = "product/{$value['img']}";
+                $newFileName = Carbon::now()->toDateString() . "-" . uniqid() . ".png";
+                $newPath = "product/{$newFileName}";
+                $dir = 'product/';
+                $newDisk = Helpers::getDisk();
+
+                try{
+                    if (Storage::disk($oldDisk)->exists($oldPath)) {
+                        if (!Storage::disk($newDisk)->exists($dir)) {
+                            Storage::disk($newDisk)->makeDirectory($dir);
+                        }
+                        $fileContents = Storage::disk($oldDisk)->get($oldPath);
+                        Storage::disk($newDisk)->put($newPath, $fileContents);
+                    }
+                } catch (\Exception $e) {
                 }
-                $images[]=$newFileName;
+                $images[]=['img'=>$newFileName, 'storage'=> Helpers::getDisk()];
             }
         }
+
         $tag_ids = [];
         if ($request->tags != null) {
             $tags = explode(",", $request->tags);
@@ -199,7 +231,7 @@ class ItemController extends Controller
         if (!empty($request->file('item_images'))) {
             foreach ($request->item_images as $img) {
                 $image_name = Helpers::upload('product/', 'png', $img);
-                $images[]=$image_name;
+                $images[]=['img'=>$image_name, 'storage'=> Helpers::getDisk()];
             }
         }
         // food variation
@@ -450,7 +482,7 @@ class ItemController extends Controller
         if ($request->has('item_images')) {
             foreach ($request->item_images as $img) {
                 $image = Helpers::upload('product/', 'png', $img);
-                array_push($images, $image);
+                array_push($images, ['img'=>$image, 'storage'=> Helpers::getDisk()]);
             }
         }
 
@@ -574,9 +606,9 @@ class ItemController extends Controller
         }
 
         if ($product->image) {
-            if (Storage::disk('public')->exists('product/' . $product['image'])) {
-                Storage::disk('public')->delete('product/' . $product['image']);
-            }
+
+            Helpers::check_and_delete('product/' , $product['image']);
+
         }
         $product?->translations()->delete();
         $product->delete();
@@ -825,9 +857,7 @@ class ItemController extends Controller
 
     public function remove_image(Request $request)
     {
-        if (Storage::disk('public')->exists('product/' . $request['name'])) {
-            Storage::disk('public')->delete('product/' . $request['name']);
-        }
+
         if($request?->temp_product){
             $item = TempProduct::withoutGlobalScope(StoreScope::class)->find($request['id']);
         }
@@ -840,9 +870,19 @@ class ItemController extends Controller
             Toastr::warning(translate('all_image_delete_warning'));
             return back();
         }
+
+
+        Helpers::check_and_delete('product/' , $request['name']);
+
         foreach ($item['images'] as $image) {
-            if ($image != $request['name']) {
-                array_push($array, $image);
+            if(is_array($image)) {
+                if ($image['img'] != $request['name']) {
+                    array_push($array, $image);
+                }
+            } else{
+                if ($image != $request['name']) {
+                    array_push($array, $image);
+                }
             }
         }
 
@@ -911,7 +951,7 @@ class ItemController extends Controller
                         foreach ($key as $value) {
                             $query->where('f_name', 'like', "%{$value}%")->orwhere('l_name', 'like', "%{$value}%");
                         }
-                    })->orwhere('rating', $request['search']);
+                    })->orwhere('rating', $request['search'])->orwhere('review_id', $request['search']);
                 });
 
             })

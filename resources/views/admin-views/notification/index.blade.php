@@ -186,8 +186,8 @@
                                     <td>
                                         @if($notification['image']!=null)
                                             <img class="h--50px onerror-image"
-                                            src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                                $notification['image'] ?? '',
+                                            src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                                $notification,'image',
                                                 asset('storage/app/public/notification').'/'.$notification['image'],
                                                 asset('public/assets/admin/img/160x160/img2.jpg'),
                                                 'notification/'

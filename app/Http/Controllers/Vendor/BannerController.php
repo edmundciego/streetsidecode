@@ -103,9 +103,9 @@ class BannerController extends Controller
 
     public function delete(Banner $banner)
     {
-        if (Storage::disk('public')->exists('banner/' . $banner['image'])) {
-            Storage::disk('public')->delete('banner/' . $banner['image']);
-        }
+   
+        Helpers::check_and_delete('banner/' , $banner['image']);
+        
         $banner->translations()->delete();
         $banner->delete();
         Toastr::success(translate('messages.banner_deleted_successfully'));

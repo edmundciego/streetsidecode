@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\CentralLogics\Helpers;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class Admin
@@ -55,6 +59,7 @@ class Admin extends Authenticatable
     protected $casts = [
         'is_logged_in' => 'boolean',
     ];
+    protected $appends = ['image_full_url'];
 
     /**
      * @return BelongsTo
@@ -71,6 +76,24 @@ class Admin extends Authenticatable
     {
         return $this->belongsTo(Zone::class,'zone_id');
     }
+    public function getImageFullUrlAttribute(){
+        $value = $this->image;
+        if (count($this->storage) > 0) {
+            foreach ($this->storage as $storage) {
+                if ($storage['key'] == 'image') {
+                 
+                    if($storage['value'] == 's3'){
+
+                        return Helpers::s3_storage_link('admin',$value);
+                    }else{
+                        return Helpers::local_storage_link('admin',$value);
+                    }
+                }
+            }
+        }
+
+        return Helpers::local_storage_link('admin',$value);
+    }
 
     /**
      * @param $query
@@ -83,5 +106,35 @@ class Admin extends Authenticatable
             return $query->where('zone_id', auth('admin')->user()->zone_id);
         }
         return $query;
+    }
+    public function storage()
+    {
+        return $this->morphMany(Storage::class, 'data');
+    }
+    protected static function booted()
+    {
+        static::addGlobalScope('storage', function ($builder) {
+            $builder->with('storage');
+        });
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::saved(function ($model) {
+            if($model->isDirty('image')){
+                $value = Helpers::getDisk();
+
+                DB::table('storages')->updateOrInsert([
+                    'data_type' => get_class($model),
+                    'data_id' => $model->id,
+                    'key' => 'image',
+                ], [
+                    'value' => $value,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        });
     }
 }

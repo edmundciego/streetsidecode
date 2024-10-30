@@ -147,8 +147,8 @@
                                     <div class="position-relative">
                                     <div class="img">
                                         <img
-                                        src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                            $business_image['value'] ?? '',
+                                        src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                            $business_image,'value',
                                             asset('storage/app/public/business_image').'/'.$business_image['value'] ?? '',
                                             asset('/public/assets/admin/img/aspect-1.png'),
                                             'business_image/'

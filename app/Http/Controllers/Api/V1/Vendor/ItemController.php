@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Vendor;
 
+use Carbon\Carbon;
 use App\Models\Tag;
 use App\Models\Item;
 use App\Models\Review;
@@ -67,6 +68,37 @@ class ItemController extends Controller
         if ($request['price'] <= $dis || count($data) < 1 || $validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)], 402);
         }
+
+
+
+        $store=$request['vendor']->stores[0];
+        if (  $store->store_business_model == 'subscription' ) {
+
+            $store_sub = $store?->store_sub;
+            if (isset($store_sub)) {
+                if ($store_sub?->max_product != "unlimited" && $store_sub?->max_product > 0 ) {
+                    $total_item= Item::where('store_id', $store->id)->count()+1;
+                    if ( $total_item >= $store_sub->max_product  ){
+                        $store->update(['item_section' => 0]);
+                    }
+                }
+            } else{
+                return response()->json([
+                    'unsubscribed'=>[
+                        ['code'=>'unsubscribed', 'message'=>translate('messages.you_are_not_subscribed_to_any_package')]
+                    ]
+                ]);
+            }
+        } elseif($store->store_business_model == 'unsubscribed'){
+            return response()->json([
+                'unsubscribed'=>[
+                    ['code'=>'unsubscribed', 'message'=>translate('messages.you_are_not_subscribed_to_any_package')]
+                ]
+            ]);
+        }
+
+
+
 
         $tag_ids = [];
         if ($request->tags != null) {
@@ -159,24 +191,55 @@ class ItemController extends Controller
             $item_data= Item::withoutGlobalScope(StoreScope::class)->select(['image','images'])->findOrfail($request->item_id);
 
             if(!$request->has('image')){
-                $oldPath = storage_path("app/public/product/{$item_data->image}");
-                $newFileName =\Carbon\Carbon::now()->toDateString() . "-" . uniqid() . ".png" ;
-                $newPath = storage_path("app/public/product/{$newFileName}");
-                if (File::exists($oldPath)) {
-                    File::copy($oldPath, $newPath);
+
+                $oldDisk = 'public';
+                if ($item_data->storage && count($item_data->storage) > 0) {
+                    foreach ($item_data->storage as $value) {
+                        if ($value['key'] == 'image') {
+                            $oldDisk = $value['value'];
+                        }
+                    }
+                }
+                $oldPath = "product/{$item_data->image}";
+                $newFileName = Carbon::now()->toDateString() . "-" . uniqid() . ".png";
+                $newPath = "product/{$newFileName}";
+                $dir = 'product/';
+                $newDisk = Helpers::getDisk();
+
+                try{
+                    if (Storage::disk($oldDisk)->exists($oldPath)) {
+                        if (!Storage::disk($newDisk)->exists($dir)) {
+                            Storage::disk($newDisk)->makeDirectory($dir);
+                        }
+                        $fileContents = Storage::disk($oldDisk)->get($oldPath);
+                        Storage::disk($newDisk)->put($newPath, $fileContents);
+                    }
+                } catch (\Exception $e) {
                 }
             }
 
             $uniqueValues = array_diff($item_data->images, explode(",", $request->removedImageKeys));
 
             foreach($uniqueValues as$key=> $value){
-                $oldPath = storage_path("app/public/product/{$value}");
-                $newFileName =\Carbon\Carbon::now()->toDateString() . "-" . uniqid() . ".png" ;
-                $newPath = storage_path("app/public/product/{$newFileName}");
-                if (File::exists($oldPath)) {
-                    File::copy($oldPath, $newPath);
+                $value = is_array($value)?$value:['img' => $value, 'storage' => 'public'];
+                $oldDisk = $value['storage'];
+                $oldPath = "product/{$value['img']}";
+                $newFileName = Carbon::now()->toDateString() . "-" . uniqid() . ".png";
+                $newPath = "product/{$newFileName}";
+                $dir = 'product/';
+                $newDisk = Helpers::getDisk();
+
+                try{
+                    if (Storage::disk($oldDisk)->exists($oldPath)) {
+                        if (!Storage::disk($newDisk)->exists($dir)) {
+                            Storage::disk($newDisk)->makeDirectory($dir);
+                        }
+                        $fileContents = Storage::disk($oldDisk)->get($oldPath);
+                        Storage::disk($newDisk)->put($newPath, $fileContents);
+                    }
+                } catch (\Exception $e) {
                 }
-                $images[]=$newFileName;
+                $images[]=['img'=>$newFileName, 'storage'=> Helpers::getDisk()];
             }
         }
 
@@ -185,7 +248,7 @@ class ItemController extends Controller
         if (!empty($request->file('item_images'))) {
             foreach ($request->item_images as $img) {
                 $image_name = Helpers::upload('product/', 'png', $img);
-                $images[]=$image_name;
+                $images[]=['img'=>$image_name, 'storage'=> Helpers::getDisk()];
             }
         }
 
@@ -276,11 +339,20 @@ class ItemController extends Controller
 
     public function status(Request $request)
     {
-        if(!$request->vendor->stores[0]->item_section)
+
+        if(!$request->vendor->stores[0]->item_section && $request->vendor->stores[0]->product_uploaad_check == 'commission' )
         {
             return response()->json([
                 'errors'=>[
                     ['code'=>'unauthorized', 'message'=>translate('messages.permission_denied')]
+                ]
+            ],403);
+        }
+        if(!$request->vendor->stores[0]->product_uploaad_check !== null && $request->vendor->stores[0]->product_uploaad_check >= 0 && $request->status == 1 )
+        {
+            return response()->json([
+                'errors'=>[
+                    ['code'=>'unauthorized', 'message'=>translate('messages.Your_current_package_doesnot_allow_to_activate_more_then_allocated_items_in_your_package')]
                 ]
             ],403);
         }
@@ -445,10 +517,9 @@ class ItemController extends Controller
 
         foreach ($p['images'] as $img) {
             if (!in_array($img, json_decode($request->images, true))) {
-                if(Storage::disk('public')->exists('product/' . $img))
-                {
-                    Storage::disk('public')->delete('product/' . $img);
-                }
+
+                Helpers::check_and_delete('product/' , $img);
+
                 $key = array_search($img, $images);
                 unset($images[$key]);
             }
@@ -456,7 +527,7 @@ class ItemController extends Controller
         if ($request->has('item_images')){
             foreach ($request->item_images as $img) {
                 $image = Helpers::upload('product/', 'png', $img);
-                array_push($images, $image);
+                array_push($images, ['img'=>$image, 'storage'=> Helpers::getDisk()]);
             }
         }
 
@@ -598,9 +669,9 @@ class ItemController extends Controller
 
         if($product->image)
         {
-            if (Storage::disk('public')->exists('product/' . $product['image'])) {
-                Storage::disk('public')->delete('product/' . $product['image']);
-            }
+
+                Helpers::check_and_delete('product/' , $product['image']);
+
         }
         $product->translations()->delete();
         $product->delete();
@@ -653,11 +724,27 @@ class ItemController extends Controller
 
     public function reviews(Request $request)
     {
-        $id = $request['vendor']->stores[0]->id;;
+        $id = $request['vendor']->stores[0]->id;
+        $key = explode(' ', $request['search']);
 
         $reviews = Review::with(['customer', 'item'])
         ->whereHas('item', function($query)use($id){
             return $query->where('store_id', $id);
+        })
+        ->when(isset($key), function ($query) use ($key,$request) {
+            $query->where(function($query) use($key,$request) {
+
+                $query->whereHas('item', function ($query) use ($key) {
+                    foreach ($key as $value) {
+                        $query->where('name', 'like', "%{$value}%");
+                    }
+                })->orWhereHas('customer', function ($query) use ($key){
+                    foreach ($key as $value) {
+                        $query->where('f_name', 'like', "%{$value}%")->orwhere('l_name', 'like', "%{$value}%");
+                    }
+                })->orwhere('rating', $request['search'])->orwhere('review_id', $request['search']);
+            });
+
         })
         ->latest()->get();
 
@@ -671,6 +758,7 @@ class ItemController extends Controller
             {
                 $item['item_name'] = $item->item->name;
                 $item['item_image'] = $item->item->image;
+                $item['item_image_full_url'] = $item->item->image_full_url;
                 if(count($item->item->translations)>0)
                 {
                     $translate = array_column($item->item->translations->toArray(), 'value', 'key');
@@ -900,6 +988,25 @@ class ItemController extends Controller
         $product=  Helpers::product_data_formatting($product, false, false, app()->getLocale() , true);
         return response()->json($product,200);
 
+    }
+
+    public function update_reply(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+            'reply' => 'required|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
+
+        $review = Review::findOrFail($request->id);
+        $review->reply = $request->reply;
+        $review->store_id = $request['vendor']?->stores[0]?->id;
+        $review->save();
+
+        return response()->json(['message'=>translate('messages.review_reply_updated_successfully')], 200);
     }
 
 }

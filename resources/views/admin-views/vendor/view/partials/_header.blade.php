@@ -36,7 +36,7 @@
             <span class="hs-nav-scroller-arrow-prev d-none">
                 <a class="hs-nav-scroller-arrow-link" href="javascript:;">
                     <i class="tio-chevron-left"></i>
-                </a>
+            </a>
             </span>
 
             <span class="hs-nav-scroller-arrow-next d-none">
@@ -76,6 +76,9 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link  {{request('tab')=='disbursements' ?'active':''}}" href="{{route('admin.store.view', ['store'=>$store->id, 'tab'=> 'disbursements'])}}"  aria-disabled="true">{{translate('messages.disbursements')}}</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link  {{request('tab')=='business_plan' ?'active':''}}" href="{{route('admin.store.view', ['store'=>$store->id, 'tab'=> 'business_plan'])}}"  aria-disabled="true">{{translate('messages.business_plan')}}</a>
                 </li>
             </ul>
             <!-- End Nav -->

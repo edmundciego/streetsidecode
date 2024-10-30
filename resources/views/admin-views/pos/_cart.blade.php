@@ -32,6 +32,7 @@
                     }
                 ?>
                 @foreach(session()->get('cart') as $key => $cartItem)
+{{--                    {{dd($cartItem)}}--}}
 
                 @if(is_array($cartItem))
                     <?php
@@ -44,8 +45,8 @@
                 <tr>
                     <td class="media align-items-center cursor-pointer quick-View-Cart-Item" data-product-id="{{$cartItem['id']}}" data-item-key="{{$key}}">
                         <img class="avatar avatar-sm mr-1 onerror-image"
-                        src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                            $cartItem['image'] ?? '',
+                        src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                            $cartItem,'image',
                             asset('storage/app/public/product').'/'.$cartItem['image'] ?? '',
                             asset('public/assets/admin/img/100x100/2.png'),
                             'product/'

@@ -58,7 +58,7 @@ class DashboardController extends Controller
     public function store_data()
     {
         $new_pending_order = DB::table('orders')->where(['checked' => 0])->where('store_id', Helpers::get_store_id())->where('order_status','pending');
-        if(config('order_confirmation_model') != 'store' && !Helpers::get_store_data()->self_delivery_system)
+        if(config('order_confirmation_model') != 'store' && !Helpers::get_store_data()->sub_self_delivery)
         {
             $new_pending_order = $new_pending_order->where('order_type', 'take_away');
         }
@@ -153,7 +153,7 @@ class DashboardController extends Controller
             return $query->whereMonth('created_at', Carbon::now());
         })->where(['store_id' => Helpers::get_store_id()])
         ->where(function($query){
-            return $query->whereNotIn('order_status',(config('order_confirmation_model') == 'store'|| \App\CentralLogics\Helpers::get_store_data()->self_delivery_system)?['failed','canceled', 'refund_requested', 'refunded']:['pending','failed','canceled', 'refund_requested', 'refunded'])
+            return $query->whereNotIn('order_status',(config('order_confirmation_model') == 'store'|| \App\CentralLogics\Helpers::get_store_data()->sub_self_delivery)?['failed','canceled', 'refund_requested', 'refunded']:['pending','failed','canceled', 'refund_requested', 'refunded'])
             ->orWhere(function($query){
                 return $query->where('order_status','pending')->where('order_type', 'take_away');
             });

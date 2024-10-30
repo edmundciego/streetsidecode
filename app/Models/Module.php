@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use App\CentralLogics\Helpers;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class Module
@@ -58,6 +61,8 @@ class Module extends Model
         'status'=>'string',
         'all_zone_service'=>'integer'
     ];
+
+    protected $appends = ['icon_full_url','thumbnail_full_url'];
 
     /**
      * @return HasMany
@@ -145,13 +150,54 @@ class Module extends Model
         return $query->where('status', '=', 1);
     }
 
-    /**
-     * @return void
-     */
-    protected static function booted(): void
+    public function getIconFullUrlAttribute(){
+        $value = $this->icon;
+        if (count($this->storage) > 0) {
+            foreach ($this->storage as $storage) {
+                if ($storage['key'] == 'icon') {
+
+                    if($storage['value'] == 's3'){
+
+                        return Helpers::s3_storage_link('module',$value);
+                    }else{
+                        return Helpers::local_storage_link('module',$value);
+                    }
+                }
+            }
+        }
+
+        return Helpers::local_storage_link('module',$value);
+    }
+    public function getThumbnailFullUrlAttribute(){
+        $value = $this->thumbnail;
+        if (count($this->storage) > 0) {
+            foreach ($this->storage as $storage) {
+                if ($storage['key'] == 'thumbnail') {
+
+                    if($storage['value'] == 's3'){
+
+                        return Helpers::s3_storage_link('module',$value);
+                    }else{
+                        return Helpers::local_storage_link('module',$value);
+                    }
+                }
+            }
+        }
+
+        return Helpers::local_storage_link('module',$value);
+    }
+
+    public function storage()
     {
+        return $this->morphMany(Storage::class, 'data');
+    }
+    protected static function booted()
+    {
+        static::addGlobalScope('storage', function ($builder) {
+            $builder->with('storage');
+        });
         static::addGlobalScope('translate', function (Builder $builder) {
-            $builder->with(['translations' => function ($query) {
+            $builder->with(['translations' => function($query){
                 return $query->where('locale', app()->getLocale());
             }]);
         });
@@ -163,5 +209,39 @@ class Module extends Model
     public function zones(): BelongsToMany
     {
         return $this->belongsToMany(Zone::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::saved(function ($model) {
+            if($model->isDirty('icon')){
+                $value = Helpers::getDisk();
+
+                DB::table('storages')->updateOrInsert([
+                    'data_type' => get_class($model),
+                    'data_id' => $model->id,
+                    'key' => 'icon',
+                ], [
+                    'value' => $value,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+            if($model->isDirty('thumbnail')){
+                $value = Helpers::getDisk();
+
+                DB::table('storages')->updateOrInsert([
+                    'data_type' => get_class($model),
+                    'data_id' => $model->id,
+                    'key' => 'thumbnail',
+                ], [
+                    'value' => $value,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        });
+
     }
 }

@@ -432,15 +432,27 @@
                                         document.getElementById('distance').value = distancMileResult;
                                         <?php
                                         $module_wise_delivery_charge = $store->zone->modules()->where('modules.id', $store->module_id)->first();
-                                        if ($module_wise_delivery_charge) {
-                                            $per_km_shipping_charge = $module_wise_delivery_charge->pivot->per_km_shipping_charge;
-                                            $minimum_shipping_charge = $module_wise_delivery_charge->pivot->minimum_shipping_charge;
-                                            $maximum_shipping_charge = $module_wise_delivery_charge->pivot->maximum_shipping_charge??0;
-                                        } else {
-                                            $per_km_shipping_charge = (float)\App\Models\BusinessSetting::where(['key' => 'per_km_shipping_charge'])->first()->value;
-                                            $minimum_shipping_charge = (float)\App\Models\BusinessSetting::where(['key' => 'minimum_shipping_charge'])->first()->value;
-                                            $maximum_shipping_charge = 0;
+                                        if($store->sub_self_delivery ){
+                                                $per_km_shipping_charge = $store?->per_km_shipping_charge ?? 0;
+                                                $minimum_shipping_charge = $store?->minimum_shipping_charge ?? 0;
+                                                $maximum_shipping_charge = $store?->maximum_shipping_charge?? 0;
+                                        
+                                                $self_delivery_status = 1;
+                                        } else{
+                                                $self_delivery_status = 0;
+
+                                            if ($module_wise_delivery_charge) {
+                                                $per_km_shipping_charge = $module_wise_delivery_charge->pivot->per_km_shipping_charge;
+                                                $minimum_shipping_charge = $module_wise_delivery_charge->pivot->minimum_shipping_charge;
+                                                $maximum_shipping_charge = $module_wise_delivery_charge->pivot->maximum_shipping_charge??0;
+
+                                            } else {
+                                                $per_km_shipping_charge = (float)\App\Models\BusinessSetting::where(['key' => 'per_km_shipping_charge'])->first()->value;
+                                                $minimum_shipping_charge = (float)\App\Models\BusinessSetting::where(['key' => 'minimum_shipping_charge'])->first()->value;
+                                                $maximum_shipping_charge = 0;
+                                            }
                                         }
+
 
                                         ?>
 
@@ -449,6 +461,7 @@
                                                 dataType: 'json',
                                                 data: {
                                                     distancMileResult: distancMileResult,
+                                                    self_delivery_status: {{ $self_delivery_status }},
                                                 },
                                                 success: function(data) {
                                                  let   extra_charge = data;

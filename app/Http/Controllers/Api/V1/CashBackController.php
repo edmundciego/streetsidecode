@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\CentralLogics\Helpers;
-use App\Http\Controllers\Controller;
 use App\Models\CashBack;
 use Illuminate\Http\Request;
+use App\CentralLogics\Helpers;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -23,12 +24,20 @@ class CashBackController extends Controller
         return  Helpers::getCalculatedCashBackAmount(amount:$request->amount, customer_id:$customer_id);
     }
     public function list(){
-        $customer_id=Auth::user()?->id ?? 'all';
+        $customer_id=Auth::user()?->id ?? request()?->customer_id ?? 'all';
         $data =CashBack::active()
         ->Running()
         ->where(function($query)use($customer_id){
-            $query->whereJsonContains('customer_id', [$customer_id])->orWhereJsonContains('customer_id', ['all']);
+            $query->whereJsonContains('customer_id', [(string) $customer_id])->orWhereJsonContains('customer_id', ['all']);
         })
+        ->when(is_numeric($customer_id), function($q) use ($customer_id){
+            $q->where('same_user_limit', '>', function($query) use ($customer_id) {
+                $query->select(DB::raw('COUNT(*)'))
+                        ->from('cash_back_histories')
+                        ->where('user_id', $customer_id)
+                        ->whereColumn('cash_back_id', 'cash_backs.id');
+                });
+            })
         ->orderBy('cashback_amount','desc')->get();
         return response()->json($data, 200);
     }

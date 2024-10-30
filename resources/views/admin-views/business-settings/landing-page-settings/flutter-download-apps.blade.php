@@ -164,8 +164,8 @@
                                     <div class="img">
                                         <img
 
-                                        src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                                            $download_user_app_image['value'] ?? '',
+                                        src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                                            $download_user_app_image,'value',
                                             asset('storage/app/public/download_user_app_image').'/'.$download_user_app_image['value'] ?? '',
                                             asset('/public/assets/admin/img/upload-4.png'),
                                             'download_user_app_image/'

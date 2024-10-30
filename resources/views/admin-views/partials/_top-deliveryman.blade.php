@@ -20,8 +20,8 @@
 
             <a class="grid--card" href="{{route('admin.users.delivery-man.preview',[$item['id']])}}">
                 <img class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/admin.png')}}"
-                src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-                    $item['image'] ?? '',
+                src="{{ \App\CentralLogics\Helpers::get_image_helper(
+                    $item,'image',
                     asset('storage/app/public/delivery-man').'/'.$item['image'] ?? '',
                     asset('public/assets/admin/img/admin.png'),
                     'delivery-man/'

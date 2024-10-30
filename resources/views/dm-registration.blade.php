@@ -164,7 +164,7 @@ $countryCode= strtolower($country?$country->value:'auto');
                                     <div class="form-group mb-3">
                                         <label class="input-label" for="phone">{{ translate('messages.phone') }}</label>
                                         <div class="input-group">
-                                            <input type="tel" name="tel" id="phone" placeholder="{{ translate('messages.Ex:') }} 017********"
+                                            <input type="tel" name="phone" id="phone" placeholder="{{ translate('messages.Ex:') }} 017********"
                                                 class="form-control __form-control" value="{{ old('tel') }}" required>
                                         </div>
                                     </div>

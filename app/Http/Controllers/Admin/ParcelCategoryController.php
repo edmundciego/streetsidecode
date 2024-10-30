@@ -252,9 +252,9 @@ class ParcelCategoryController extends Controller
         $parcel_category = ParcelCategory::findOrFail($id);
         if($parcel_category->image)
         {
-            if (Storage::disk('public')->exists('parcel_category/' . $parcel_category['image'])) {
-                Storage::disk('public')->delete('parcel_category/' . $parcel_category['image']);
-            }
+     
+            Helpers::check_and_delete('parcel_category/' , $parcel_category['image']);
+            
         }
         $parcel_category->translations()->delete();
         $parcel_category->delete();

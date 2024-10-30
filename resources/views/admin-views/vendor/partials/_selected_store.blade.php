@@ -4,8 +4,8 @@
         <img class="avatar avatar-lg border onerror-image" width="75"
         data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
 
-        src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
-            $store['logo'] ?? '',
+        src="{{ \App\CentralLogics\Helpers::get_image_helper(
+            $store,'logo',
             asset('storage/app/public/store').'/'.$store['logo'] ?? '',
             asset('public/assets/admin/img/160x160/img1.jpg'),
             'store/'

@@ -14,6 +14,7 @@ use App\Http\Controllers\FlutterwaveV3Controller;
 use App\Http\Controllers\PaypalPaymentController;
 use App\Http\Controllers\StripePaymentController;
 use App\Http\Controllers\SslCommerzPaymentController;
+use App\Http\Controllers\FirebaseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +27,8 @@ use App\Http\Controllers\SslCommerzPaymentController;
 |
 */
 
+
+Route::post('/subscribeToTopic', [FirebaseController::class, 'subscribeToTopic']);
 Route::get('/', 'HomeController@index')->name('home');
 Route::get('lang/{locale}', 'HomeController@lang')->name('lang');
 Route::get('terms-and-conditions', 'HomeController@terms_and_conditions')->name('terms-and-conditions');
@@ -37,6 +40,7 @@ Route::get('cancelation', 'HomeController@cancelation')->name('cancelation');
 Route::get('refund', 'HomeController@refund_policy')->name('refund');
 Route::get('shipping-policy', 'HomeController@shipping_policy')->name('shipping-policy');
 Route::post('newsletter/subscribe', 'NewsletterController@newsLetterSubscribe')->name('newsletter.subscribe');
+Route::get('subscription-invoice/{id}', 'HomeController@subscription_invoice')->name('subscription_invoice');
 
 Route::get('login/{tab}', 'LoginController@login')->name('login');
 Route::post('login_submit', 'LoginController@submit')->name('login_post')->middleware('actch');
@@ -189,6 +193,11 @@ Route::group(['prefix' => 'store', 'as' => 'restaurant.'], function () {
     Route::get('apply', 'VendorController@create')->name('create');
     Route::post('apply', 'VendorController@store')->name('store');
     Route::get('get-all-modules', 'VendorController@get_all_modules')->name('get-all-modules');
+
+    Route::get('back', 'VendorController@back')->name('back');
+    Route::post('business-plan', 'VendorController@business_plan')->name('business_plan');
+    Route::post('payment', 'VendorController@payment')->name('payment');
+    Route::get('final-step', 'VendorController@final_step')->name('final_step');
 });
 
 //Deliveryman Registration

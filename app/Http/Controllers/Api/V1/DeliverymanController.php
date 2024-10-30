@@ -194,9 +194,18 @@ class DeliverymanController extends Controller
         {
             $orders = $orders->where('zone_id', $dm->zone_id)
             ->where(function($query){
-                $query->whereNull('store_id')->orWhereHas('store',function($q){
-                    $q->where('self_delivery_system','0');
-                });
+                $query->whereNull('store_id')
+
+                    ->orWhere(function($query){
+                        $query->whereHas('store', function($q){
+                            $q->where('store_business_model','subscription')->whereHas('store_sub', function($q1){
+                                $q1->where('self_delivery', 0);
+                            });
+                        })
+                        ->orWhereHas('store', function($qu) {
+                            $qu->where('store_business_model','commission')->where('self_delivery_system', 0);
+                        });
+                    });
             });
         }
         else
@@ -323,15 +332,15 @@ class DeliverymanController extends Controller
     public function record_location_data(Request $request)
     {
         $dm = DeliveryMan::where(['auth_token' => $request['token']])->first();
-        DB::table('delivery_histories')->insert([
-            'delivery_man_id' => $dm['id'],
+        DeliveryHistory::updateOrCreate(['delivery_man_id' => $dm['id']], [
             'longitude' => $request['longitude'],
             'latitude' => $request['latitude'],
             'time' => now(),
             'location' => $request['location'],
             'created_at' => now(),
             'updated_at' => now()
-        ]);
+            ]);
+
         return response()->json(['message' => 'location recorded'], 200);
     }
 
@@ -533,11 +542,14 @@ class DeliverymanController extends Controller
             if (!empty($request->file('order_proof'))) {
                 foreach ($request->order_proof as $img) {
                     $image_name = Helpers::upload('order/', 'png', $img);
-                    array_push($img_names, $image_name);
+                    array_push($img_names, ['img'=>$image_name, 'storage'=> Helpers::getDisk()]);
                 }
                 $images = $img_names;
             }
-            $order->order_proof = count($images)>0?json_encode($images):'';
+            if(count($images)>0){
+                $order->order_proof = json_encode($images);
+            }
+
             OrderLogic::update_unpaid_order_payment(order_id:$order->id, payment_method:$order->payment_method);
 
         }
@@ -753,14 +765,13 @@ class DeliverymanController extends Controller
             return response()->json(['errors'=>[['code'=>'on-going', 'message'=>translate('messages.You_have_cash_in_hand,_you_have_to_pay_the_due_to_delete_your_account.')]]],203);
         }
 
-        if (Storage::disk('public')->exists('delivery-man/' . $dm['image'])) {
-            Storage::disk('public')->delete('delivery-man/' . $dm['image']);
-        }
+
+        Helpers::check_and_delete('delivery-man/' , $dm['image']);
+
 
         foreach (json_decode($dm['identity_image'], true) as $img) {
-            if (Storage::disk('public')->exists('delivery-man/' . $img)) {
-                Storage::disk('public')->delete('delivery-man/' . $img);
-            }
+            Helpers::check_and_delete('delivery-man/' , $img);
+
         }
         if($dm->userinfo){
 
@@ -789,9 +800,11 @@ class DeliverymanController extends Controller
             $dm->phone,
             ''
         );
+
+        $store_logo= BusinessSetting::where(['key' => 'logo'])->first();
         $additional_data = [
             'business_name' => BusinessSetting::where(['key'=>'business_name'])->first()?->value,
-            'business_logo' => asset('storage/app/public/business') . '/' .BusinessSetting::where(['key' => 'logo'])->first()?->value
+            'business_logo' => \App\CentralLogics\Helpers::get_image_helper($store_logo,'value', asset('storage/app/public/business/').'/' . $store_logo->value, asset('public/assets/admin/img/160x160/img2.jpg') ,'business/' )
         ];
         $payment_info = new PaymentInfo(
             success_hook: 'collect_cash_success',

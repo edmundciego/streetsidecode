@@ -78,6 +78,45 @@
             </li>
             @endif
 
+            @if (\App\CentralLogics\Helpers::subscription_check())
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('admin/business-settings/email-setup/store/subscription-successful') ? 'active' : '' }}"
+                href="{{ route('admin.business-settings.email-setup', ['store','subscription-successful']) }}">
+                    {{translate('Subscription_Successful')}}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('admin/business-settings/email-setup/store/subscription-renew') ? 'active' : '' }}"
+                href="{{ route('admin.business-settings.email-setup', ['store','subscription-renew']) }}">
+                    {{translate('Subscription_Renew')}}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('admin/business-settings/email-setup/store/subscription-shift') ? 'active' : '' }}"
+                href="{{ route('admin.business-settings.email-setup', ['store','subscription-shift']) }}">
+                    {{translate('Subscription_Shift')}}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('admin/business-settings/email-setup/store/subscription-cancel') ? 'active' : '' }}"
+                href="{{ route('admin.business-settings.email-setup', ['store','subscription-cancel']) }}">
+                    {{translate('Subscription_Cancel')}}
+                </a>
+            </li>
+            {{-- <li class="nav-item">
+                <a class="nav-link {{ Request::is('admin/business-settings/email-setup/store/subscription-deadline') ? 'active' : '' }}"
+                href="{{ route('admin.business-settings.email-setup', ['store','subscription-deadline']) }}">
+                    {{translate('Subscription_Deadline_Warning')}}
+                </a>
+            </li> --}}
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('admin/business-settings/email-setup/store/subscription-plan_upadte') ? 'active' : '' }}"
+                href="{{ route('admin.business-settings.email-setup', ['store','subscription-plan_upadte']) }}">
+                    {{translate('Subscription_Plan_Upadte')}}
+                </a>
+            </li>
+            @endif
+
         </ul>
         <!-- End Nav -->
     </div>

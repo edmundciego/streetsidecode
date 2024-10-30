@@ -80,9 +80,9 @@ class BannerController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
         $banner = Banner::findOrFail($request->id);
-        if (Storage::disk('public')->exists('banner/' . $banner['image'])) {
-            Storage::disk('public')->delete('banner/' . $banner['image']);
-        }
+   
+        Helpers::check_and_delete('banner/' , $banner['image']);
+        
         $banner->translations()->delete();
         $banner->delete();
 

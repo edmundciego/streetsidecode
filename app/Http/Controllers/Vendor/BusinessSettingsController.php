@@ -44,10 +44,10 @@ class BusinessSettingsController extends Controller
         $store->minimum_order = $request->minimum_order??0;
         $store->gst = json_encode(['status'=>$request->gst_status, 'code'=>$request->gst]);
         // $store->delivery_charge = $store->self_delivery_system?$request->delivery_charge??0: $store->delivery_charge;
-        $store->minimum_shipping_charge = $store->self_delivery_system?$request->minimum_delivery_charge??0: $store->minimum_shipping_charge;
-        $store->per_km_shipping_charge = $store->self_delivery_system?$request->per_km_delivery_charge??0: $store->per_km_shipping_charge;
-        $store->per_km_shipping_charge = $store->self_delivery_system?$request->per_km_delivery_charge??0: $store->per_km_shipping_charge;
-        $store->maximum_shipping_charge = $store->self_delivery_system?$request->maximum_shipping_charge??0: $store->maximum_shipping_charge;
+        $store->minimum_shipping_charge = $store->sub_self_delivery?$request->minimum_delivery_charge??0: $store->minimum_shipping_charge;
+        $store->per_km_shipping_charge = $store->sub_self_delivery?$request->per_km_delivery_charge??0: $store->per_km_shipping_charge;
+        $store->per_km_shipping_charge = $store->sub_self_delivery?$request->per_km_delivery_charge??0: $store->per_km_shipping_charge;
+        $store->maximum_shipping_charge = $store->sub_self_delivery?$request->maximum_shipping_charge??0: $store->maximum_shipping_charge;
         $store->order_place_to_schedule_interval = $request->order_place_to_schedule_interval;
         $store->delivery_time = $request->minimum_delivery_time .'-'. $request->maximum_delivery_time.' '.$request->delivery_time_type;
         $store->save();
@@ -158,6 +158,12 @@ class BusinessSettingsController extends Controller
             Toastr::warning(translate('messages.You_need_to_add_announcement_message_first'));
             return back();
         }
+
+        if($request->menu == 'free_delivery' &&(($store->store_business_model == 'subscription' && $store?->store_sub?->self_delivery == 0) || ($store->store_business_model == 'unsubscribed'))){
+            Toastr::error(translate('your_subscription_plane_does_not_have_this_feature'));
+            return back();
+        }
+
 
         if($request->menu == 'halal_tag_status' || $request->menu == 'extra_packaging_status' || $request->menu == 'extra_packaging_amount' ){
 
