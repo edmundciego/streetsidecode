@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace Modules\Gateways\Traits;
 
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Foundation\Application;
