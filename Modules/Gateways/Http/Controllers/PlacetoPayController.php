@@ -17,6 +17,8 @@ use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Validator;
 use Modules\Gateways\Entities\PaymentRequest;
 use Modules\Gateways\Traits\Processor;
+use Modules\Gateways\Traits\Payment;
+
 
 class PlacetoPayController extends Controller
 {
