@@ -900,8 +900,7 @@ class VendorController extends Controller
 
     public function discountSetup(Store $store, Request $request)
     {
-        $message=translate('messages.discount');
-        $message .= $store->discount?translate('messages.updated_successfully'):translate('messages.added_successfully');
+        $message = $store->discount?translate('messages.discount_updated_successfully'):translate('messages.discount_added_successfully');
         $store->discount()->updateOrinsert(
         [
             'store_id' => $store->id

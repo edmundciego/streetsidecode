@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\CentralLogics\Helpers;
+use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -30,7 +32,17 @@ class SMSModuleController extends Controller
 
     public function sms_update(Request $request, $module)
     {
-
+        $login_setup_status = Helpers::get_business_settings('otp_login_status')??0;
+        $is_firebase_active=Helpers::get_business_settings('firebase_otp_verification') ?? 0;
+        $phone_verification_status = Helpers::get_business_settings('phone_verification_status')??0;
+        if(!$is_firebase_active && $login_setup_status && ($request['status']==0)){
+            Toastr::warning(translate('otp_login_status_is_enabled_in_login_setup._First_disable_from_login_setup.'));
+            return redirect()->back();
+        }
+        if(!$is_firebase_active && $phone_verification_status && ($request['status']==0)){
+            Toastr::warning(translate('phone_verification_status_is_enabled_in_login_setup._First_disable_from_login_setup.'));
+            return redirect()->back();
+        }
         if ($module == 'twilio') {
                 $additional_data = [
                     'status' => $request['status'],
@@ -72,19 +84,17 @@ class SMSModuleController extends Controller
         }
 
         $data= ['gateway' => $module ,
-        'mode' =>  isset($request['status']) === 1  ?  'live': 'test'
+        'mode' =>  isset($request['status']) == 1  ?  'live': 'test'
         ];
 
-
-        $credentials= json_encode(array_merge($data, $additional_data));
-
+    $credentials= json_encode(array_merge($data, $additional_data));
     DB::table('addon_settings')->updateOrInsert(['key_name' => $module, 'settings_type' => 'sms_config'], [
         'key_name' => $module,
         'live_values' => $credentials,
         'test_values' => $credentials,
         'settings_type' => 'sms_config',
-        'mode' => isset($request['status']) === 1  ?  'live': 'test',
-        'is_active' => isset($request['status']) === 1  ?  1: 0 ,
+        'mode' => isset($request['status']) == 1  ?  'live': 'test',
+        'is_active' => isset($request['status']) == 1  ?  1: 0 ,
     ]);
 
     if ($request['status'] == 1) {

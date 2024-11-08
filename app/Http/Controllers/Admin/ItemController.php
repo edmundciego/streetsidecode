@@ -707,7 +707,7 @@ class ItemController extends Controller
                         'description' => translate('Product_Request_Has_Been_Approved_By_Admin'),
                         'order_id' => '',
                         'image' => '',
-                        'type' => 'product',
+                        'type' => 'product_approve',
                         'order_status' => '',
                     ];
                     Helpers::send_push_notif_to_device($item?->store?->vendor?->firebase_token, $data);
@@ -764,7 +764,7 @@ class ItemController extends Controller
     {
 
         if($request?->temp_product){
-            $product = TempProduct::find($request->id);
+            $product = TempProduct::withoutGlobalScope(StoreScope::class)->find($request->id);
         }
         else{
             $product = Item::withoutGlobalScope(StoreScope::class)->withoutGlobalScope('translate')->find($request->id);
@@ -1466,7 +1466,14 @@ class ItemController extends Controller
         $product = Item::withoutGlobalScope(StoreScope::class)->find($request['id']);
 
         return response()->json([
-            'view' => view('admin-views.product.partials._update_stock', compact('product'))->render()
+            'view' => view('admin-views.product.partials._get_stock_data', compact('product'))->render()
+        ]);
+    }
+    public function get_stock(Request $request)
+    {
+        $product = Item::withoutGlobalScope(StoreScope::class)->find($request['id']);
+        return response()->json([
+            'view' => view('admin-views.product.partials._get_stock_data', compact('product'))->render()
         ]);
     }
 
@@ -1478,8 +1485,8 @@ class ItemController extends Controller
             foreach ($request['type'] as $key => $str) {
                 $item = [];
                 $item['type'] = $str;
-                $item['price'] = abs($request['price_' . str_replace('.', '_', $str)]);
-                $item['stock'] = abs($request['stock_' . str_replace('.', '_', $str)]);
+                $item['price'] = abs($request[ 'price_'.$key.'_'. str_replace('.', '_', $str)]);
+                $item['stock'] = abs($request['stock_'.$key.'_'. str_replace('.', '_', $str)]);
                 array_push($variations, $item);
             }
         }
@@ -1490,7 +1497,7 @@ class ItemController extends Controller
         $product->stock = $stock_count ?? 0;
         $product->variations = json_encode($variations);
         $product->save();
-        Toastr::success(translate("messages.product_updated_successfully"));
+        Toastr::success(translate("messages.Stock_updated_successfully"));
         return back();
     }
 
@@ -1847,7 +1854,7 @@ class ItemController extends Controller
 
     public function deny(Request $request)
     {
-        $data = TempProduct::findOrfail($request->id);
+        $data = TempProduct::withoutGlobalScope(StoreScope::class)->findOrfail($request->id);
         $data->is_rejected = 1;
         $data->note = $request->note;
         $data->save();
@@ -1862,7 +1869,7 @@ class ItemController extends Controller
                     'description' => translate('Product_Request_Has_Been_Rejected_By_Admin'),
                     'order_id' => '',
                     'image' => '',
-                    'type' => 'product',
+                    'type' => 'product_rejected',
                     'order_status' => '',
                 ];
                 Helpers::send_push_notif_to_device($data?->store?->vendor?->firebase_token, $ndata);
@@ -1887,8 +1894,9 @@ class ItemController extends Controller
     }
     public function approved(Request $request)
     {
-        $data = TempProduct::findOrfail($request->id);
-        $item= Item::withoutGlobalScope('translate')->with('translations')->findOrfail($data->item_id);
+        $data = TempProduct::withoutGlobalScope(StoreScope::class)->findOrfail($request->id);
+
+        $item= Item::withoutGlobalScope(StoreScope::class)->withoutGlobalScope('translate')->with('translations')->findOrfail($data->item_id);
 
         $item->name = $data->name;
         $item->description =  $data->description;
@@ -1964,7 +1972,7 @@ class ItemController extends Controller
                     'description' => translate('Product_Request_Has_Been_Approved_By_Admin'),
                     'order_id' => '',
                     'image' => '',
-                    'type' => 'product',
+                    'type' => 'product_approve',
                     'order_status' => '',
                 ];
                 Helpers::send_push_notif_to_device($item?->store?->vendor?->firebase_token, $data);

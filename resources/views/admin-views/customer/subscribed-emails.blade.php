@@ -26,7 +26,7 @@
                             <label class="form-label">{{translate('Subscription Date')}}</label>
                             <div class="position-relative">
                                 <span class="tio-calendar icon-absolute-on-right"></span>
-                                <input type="text" readonly name="join_date" value="{{ request()->get('join_date')  ?? null }}" class="date-range-picker form-control">
+                                <input type="text" readonly data-title="{{ translate('Select_Subscription_Date_Range') }}" name="join_date" value="{{ request()->get('join_date')  ?? null }}" class="date-range-picker form-control">
                             </div>
                         </div>
                         <div class="col-md-4">

@@ -35,8 +35,6 @@ class POSController extends Controller
         $store_id = $request->query('store_id', null);
         $categories = Category::active()->module(Config::get('module.current_module_id'))->get();
         $store = Store::active()->with('store_sub')->find($store_id);
-        // dd($store);
-
         if(!$store && $request->has('store_id')){
             Toastr::error(translate('messages.Store_is_not_available'));
             return back();
@@ -68,9 +66,11 @@ class POSController extends Controller
         })
         ->whereHas('store', function($query)use($store_id, $module_id){
             return $query->where(['id'=>$store_id, 'module_id'=>$module_id]);
-        })
-         ->available($time)
-        ->latest()->paginate(10);
+        });
+        if(Config::get('module.current_module_type') == 'food'){
+            $products=  $products->available($time);
+        }
+        $products=  $products->latest()->paginate(10);
         return view('admin-views.pos.index', compact('categories', 'products','category', 'keyword', 'store', 'module_id'));
     }
 
@@ -158,9 +158,6 @@ class POSController extends Controller
         $validator = Validator::make($request->all(),[
             'contact_person_name' => 'required',
             'contact_person_number' => 'required',
-//            'floor' => 'required',
-//            'road' => 'required',
-//            'house' => 'required',
             'longitude' => 'required',
             'latitude' => 'required',
         ]);
@@ -440,6 +437,7 @@ class POSController extends Controller
 
     public function single_items(Request $request)
     {
+        $time = Carbon::now()->toTimeString();
         $category = $request->category_id??0;
         $module_id = Config::get('module.current_module_id');
         $store_id = $request->store_id;
@@ -462,9 +460,13 @@ class POSController extends Controller
             })
             ->whereHas('store', function($query)use($store_id, $module_id){
                 return $query->where(['id'=>$store_id, 'module_id'=>$module_id]);
-            })
-            // ->available($time)
-            ->latest()->paginate(10);
+            });
+
+            if(Config::get('module.current_module_type') == 'food'){
+                $products=  $products->available($time);
+            }
+            $products=  $products->latest()->paginate(10);
+
         return view('admin-views.pos._single_product_list', compact('products','store'));
     }
 
@@ -474,7 +476,7 @@ class POSController extends Controller
         return view('admin-views.pos._cart', compact('store'));
     }
 
-    //removes from Cart
+
     public function removeFromCart(Request $request)
     {
         if ($request->session()->has('cart')) {
@@ -497,7 +499,6 @@ class POSController extends Controller
         return response()->json([],200);
     }
 
-    //updated the quantity for a cart item
     public function updateQuantity(Request $request)
     {
         $cart = $request->session()->get('cart', collect([]));
@@ -519,7 +520,6 @@ class POSController extends Controller
         return response()->json([],200);
     }
 
-    //empty Cart
     public function emptyCart(Request $request)
     {
         session()->forget('cart');
@@ -913,7 +913,8 @@ class POSController extends Controller
             'l_name' => $request['l_name'],
             'email' => $request['email'],
             'phone' => $request['phone'],
-            'password' => bcrypt('password')
+            'password' => bcrypt('password'),
+            'is_from_pos' => 1
         ]);
 
         try {
@@ -960,9 +961,9 @@ class POSController extends Controller
                     'customer_wallet' => Helpers::format_currency($user->wallet_balance),
                     'customer_image' => $user->image_full_url,
                 ];
-            }
-        return response()->json($user,200);
+                }
+            return response()->json($user,200);
         }
-    return response()->json([],200);
-}
+        return response()->json([],200);
+    }
 }

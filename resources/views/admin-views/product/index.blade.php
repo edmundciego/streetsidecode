@@ -160,7 +160,7 @@
                                         <img class="img--176 border" id="viewer" src="{{ asset('public/assets/admin/img/upload-img.png') }}" alt="thumbnail" />
                                         <div class="icon-file-group">
                                             <div class="icon-file"><input type="file" name="image" id="customFileEg1" class="custom-file-input d-none"
-                                            accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
+                                            accept=".jpg, .png, .webp, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
                                                     <i class="tio-edit"></i>
                                             </div>
                                         </div>
@@ -278,8 +278,8 @@
                                                 <i class="tio-info-outined"></i>
                                             </span>
                                         </label>
-                                        <select name="nutritions[]" class="form-control multiple-select2" multiple>
-                                            <option disabled>{{translate('Select Nutrition')}}</option>
+                                        <select name="nutritions[]" class="form-control multiple-select2" data-placeholder="{{ translate('messages.Type your content and press enter') }}" multiple>
+
                                             @foreach (\App\Models\Nutrition::select(['nutrition'])->get() as $nutrition)
                                                 <option value="{{ $nutrition->nutrition }}">{{ $nutrition->nutrition }}</option>
                                             @endforeach
@@ -294,8 +294,7 @@
                                                 <i class="tio-info-outined"></i>
                                             </span>
                                         </label>
-                                        <select name="allergies[]" class="form-control multiple-select2" multiple>
-                                            <option disabled>{{translate('Select Allegren Ingredients')}}</option>
+                                        <select name="allergies[]" class="form-control multiple-select2" data-placeholder="{{ translate('messages.Type your content and press enter') }}" multiple>
                                             @foreach (\App\Models\Allergy::select(['allergy'])->get() as $allergy)
                                                 <option value="{{ $allergy->allergy }}">{{ $allergy->allergy }}</option>
                                             @endforeach

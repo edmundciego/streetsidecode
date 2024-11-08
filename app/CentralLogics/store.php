@@ -18,27 +18,27 @@ class StoreLogic
     public static function get_stores( $zone_id, $filter_data, $type, $store_type, $limit = 10, $offset = 1, $featured=false,$longitude=0,$latitude=0,$filter=null,$rating_count=null)
     {
 
-        $all_stores_default_status = \App\Models\BusinessSetting::where('key', 'all_stores_default_status')->first()?->value ?? 1;
-        $all_stores_sort_by_general = \App\Models\PriorityList::where('name', 'all_stores_sort_by_general')->where('type','general')->first()?->value ?? '';
-        $all_stores_sort_by_unavailable = \App\Models\PriorityList::where('name', 'all_stores_sort_by_unavailable')->where('type','unavailable')->first()?->value ?? '';
-        $all_stores_sort_by_temp_closed = \App\Models\PriorityList::where('name', 'all_stores_sort_by_temp_closed')->where('type','temp_closed')->first()?->value ?? '';
+        $all_stores_default_status = BusinessSetting::where('key', 'all_stores_default_status')->first()?->value ?? 1;
+        $all_stores_sort_by_general = PriorityList::where('name', 'all_stores_sort_by_general')->where('type','general')->first()?->value ?? '';
+        $all_stores_sort_by_unavailable = PriorityList::where('name', 'all_stores_sort_by_unavailable')->where('type','unavailable')->first()?->value ?? '';
+        $all_stores_sort_by_temp_closed = PriorityList::where('name', 'all_stores_sort_by_temp_closed')->where('type','temp_closed')->first()?->value ?? '';
 
         $query = Store::type($type)->
-        withOpen($longitude??0,$latitude??0)
+        WithOpenWithDeliveryTime($longitude??0,$latitude??0)
             ->withCount(['items','campaigns','reviews','orders'])
             ->with(['discount'=>function($q){
                 return $q->validate();
             }])
             ->whereHas('module',function($query){
-                $query->active();
+                return  $query->active();
             })
             ->Active();
         if(config('module.current_module_data')) {
             $query = $query->whereHas('zone.modules', function($query){
-                $query->where('modules.id', config('module.current_module_data')['id']);
+                return  $query->where('modules.id', config('module.current_module_data')['id']);
             })->module(config('module.current_module_data')['id'])
                 ->when(!config('module.current_module_data')['all_zone_service'], function($query)use($zone_id){
-                    $query->whereIn('zone_id', json_decode($zone_id,true));
+                    return  $query->whereIn('zone_id', json_decode($zone_id,true));
                 });
         } else {
             $query = $query->whereIn('zone_id', json_decode($zone_id,true));
@@ -79,51 +79,62 @@ class StoreLogic
                     $query = $query->orderByDesc('name');
                 }
             }
-
-            $query = $query->when($store_type == 'all', function($q){
-                return $q->orderBy('open', 'desc')
-                    ->orderBy('distance');
-            })
-            ->when($store_type == 'newly_joined', function($q){
+            $query = $query->when($filter && in_array('free_delivery',$filter),function ($qurey){
+                return $qurey->where('free_delivery',1);
+            });
+            $query = $query->when($filter && in_array('coupon', $filter), function ($query) {
+                return $query->has('activeCoupons');
+            });
+            $query = $query->when($store_type == 'all' && $filter && !in_array('fast_delivery',$filter), function($q){
+                return $q->orderBy('open', 'desc')->orderBy('distance');
+            });
+            $query = $query->when($filter && in_array('currently_open', $filter), function ($query) {
+                return $query->having('open', '>', 0);
+            });
+            $query = $query->when($store_type == 'newly_joined', function($q){
                 return $q->latest();
-            })
-            ->when($rating_count, function($query) use ($rating_count){
-                $query->selectSub(function ($query) use ($rating_count){
-                    $query->selectRaw('AVG(reviews.rating)')
+            });
+            $query = $query->when($rating_count, function($query) use ($rating_count){
+                return  $query->selectSub(function ($query) use ($rating_count){
+                    return $query->selectRaw('AVG(reviews.rating)')
                         ->from('reviews')
                         ->join('items', 'items.id', '=', 'reviews.item_id')
                         ->whereColumn('items.store_id', 'stores.id')
                         ->groupBy('items.store_id')
                         ->havingRaw('AVG(reviews.rating) >= ?', [$rating_count]);
                 }, 'avg_r')->having('avg_r', '>=', $rating_count);
-            })
-            ->when(($filter && in_array('top_rated',$filter) ) || $store_type == 'top_rated' ,function ($qurey){
-                $qurey->whereNotNull('rating')->whereRaw("LENGTH(rating) > 0");
-            })
-            ->when(($filter && in_array('popular',$filter)) || $store_type == 'popular'  ,function ($qurey){
-                $qurey->withCount('orders')->orderBy('orders_count', 'desc');
-            })
-            ->when($filter && in_array('discounted',$filter),function ($qurey){
-                $qurey->where(function ($query) {
-                    $query->whereHas('items', function ($q) {
+            });
+            $query = $query->when(($filter && in_array('top_rated',$filter) ) || $store_type == 'top_rated' ,function ($qurey){
+                return $qurey->whereNotNull('rating')->whereRaw("LENGTH(rating) > 0");
+            });
+            $query = $query->when(($filter && in_array('popular',$filter)) || $store_type == 'popular'  ,function ($qurey){
+                return  $qurey->withCount('orders')->orderBy('orders_count', 'desc');
+            });
+            $query = $query->when($filter && in_array('discounted',$filter),function ($qurey){
+                return $qurey->where(function ($query) {
+                    return $query->whereHas('items', function ($q) {
                         $q->Discounted();
                     });
                 });
-            })
-            ->when($filter && in_array('open',$filter),function ($qurey){
-                $qurey->orderBy('open', 'desc');
-            })
-            ->when($filter && in_array('nearby',$filter),function ($qurey){
-                $qurey->orderBy('distance');
-            })
-            ->when($filter_data=='delivery', function($q){
+            });
+            $query = $query->when($filter && in_array('open',$filter),function ($qurey){
+                return $qurey->orderBy('open', 'desc');
+            });
+            $query = $query->when(($filter && in_array('nearby',$filter))   ,function ($qurey){
+                return  $qurey->orderByDesc('distance');
+            });
+            $query = $query->when($filter_data=='delivery', function($q){
                 return $q->delivery();
-            })
-            ->when($filter_data=='take_away', function($q){
+            });
+
+            $query = $query->when($filter_data=='take_away', function($q){
                 return $q->takeaway();
-            })
-            ->when($featured, function($query){
-                $query->featured();
+            });
+            $query = $query->when($featured, function($query){
+                return $query->featured();
+            });
+            $query = $query->when($filter && in_array('fast_delivery',$filter) , function($q) {
+                return $q->orderBy('open', 'desc')->orderBy('min_delivery_time');
             });
 
             if($all_stores_default_status == '1') {
@@ -357,29 +368,35 @@ class StoreLogic
 
     public static function get_discounted_stores($zone_id, $limit = 50, $offset = 1, $type = 'all',$longitude=0,$latitude=0,$filter=null,$rating_count=null)
     {
-        $paginator = Store::withOpen($longitude??0,$latitude??0)
+        $paginator = Store::WithOpenWithDeliveryTime($longitude??0,$latitude??0)
             ->withCount(['items','campaigns'])
             ->with(['discount'=>function($q){
                 return $q->validate();
             }])
             ->when(config('module.current_module_data'), function($query)use($zone_id){
-                $query->whereHas('zone.modules', function($query){
-                    $query->where('modules.id', config('module.current_module_data')['id']);
+                return   $query->whereHas('zone.modules', function($query){
+                    return $query->where('modules.id', config('module.current_module_data')['id']);
                 })->module(config('module.current_module_data')['id']);
                 if(!config('module.current_module_data')['all_zone_service']) {
-                    $query->whereIn('zone_id', json_decode($zone_id, true));
+                    return  $query->whereIn('zone_id', json_decode($zone_id, true));
                 }
             })
             ->where(function ($query) {
-                $query->whereHas('items', function ($q) {
+                return  $query->whereHas('items', function ($q) {
                     $q->Discounted();
                 });
             })
             ->Active()
             ->type($type)
+            ->when($filter && in_array('free_delivery',$filter),function ($qurey){
+                return $qurey->where('free_delivery',1);
+            })
+            ->when($filter && in_array('coupon',$filter),function ($qurey){
+                return $qurey->has('activeCoupons');
+            })
             ->when($rating_count, function($query) use ($rating_count){
-                $query->selectSub(function ($query) use ($rating_count){
-                    $query->selectRaw('AVG(reviews.rating)')
+                return  $query->selectSub(function ($query) use ($rating_count){
+                    return  $query->selectRaw('AVG(reviews.rating)')
                         ->from('reviews')
                         ->join('items', 'items.id', '=', 'reviews.item_id')
                         ->whereColumn('items.store_id', 'stores.id')
@@ -388,18 +405,21 @@ class StoreLogic
                 }, 'avg_r')->having('avg_r', '>=', $rating_count);
             })
             ->when($filter && in_array('top_rated',$filter),function ($qurey){
-                $qurey->whereNotNull('rating')->whereRaw("LENGTH(rating) > 0");
+                return $qurey->whereNotNull('rating')->whereRaw("LENGTH(rating) > 0");
             })
-            ->when($filter && in_array('popular',$filter),function ($qurey){
-                $qurey->withCount('orders')->orderBy('orders_count', 'desc');
-            })
-            ->when($filter && in_array('open',$filter),function ($qurey){
-                $qurey->orderBy('open', 'desc');
-            })
-            ->when($filter && in_array('nearby',$filter),function ($qurey){
-                $qurey->orderBy('distance');
+            ->when($filter && in_array('currently_open',$filter),function ($qurey){
+                return $qurey->having('open', '>', 0);
             })
             ->orderBy('open', 'desc')
+            ->when($filter && in_array('popular',$filter),function ($qurey){
+                return $qurey->withCount('orders')->orderBy('orders_count', 'desc');
+            })
+            ->when(($filter && in_array('nearby',$filter))   ,function ($qurey){
+                return  $qurey->orderBy('distance');
+            })
+            ->when($filter && in_array('fast_delivery',$filter),function ($qurey){
+                return $qurey->orderBy('min_delivery_time');
+            })
             ->paginate($limit??50, ['*'], 'page', $offset??1);
 
         $paginator->each(function ($store) {
@@ -517,12 +537,12 @@ class StoreLogic
         return json_encode($store_ratings);
     }
 
-    public static function search_stores($name, $zone_id, $category_id= null,$limit = 10, $offset = 1, $type = 'all',$longitude=0,$latitude=0,$filter=null,$rating_count=null)
+    public static function search_stores($name, $zone_id, $category_id= null,$limit = 10, $offset = 1, $type = 'all',$longitude=0,$latitude=0,$filter=null,$rating_count=null,$category_ids=null)
     {
         $key = explode(' ', $name);
-        $paginator = Store::withOpen($longitude??0,$latitude??0)
+        $paginator = Store::WithOpenWithDeliveryTime($longitude??0,$latitude??0)
         ->whereHas('zone.modules', function($query){
-            $query->where('modules.id', config('module.current_module_data')['id']);
+            return $query->where('modules.id', config('module.current_module_data')['id']);
         })
         ->withCount(['items','campaigns'])->with(['discount'=>function($q){
             return $q->validate();
@@ -531,46 +551,35 @@ class StoreLogic
             foreach ($key as $value) {
                 $q->orWhere('name', 'like', "%{$value}%");
             }
-
-            $q->orWhereHas('items.nutritions',function($query)use($key){
-                $query->where(function($q)use($key){
-                    foreach ($key as $value) {
-                        $q->where('nutrition', 'like', "%{$value}%");
-                    };
-                });
-            });
-            $q->orWhereHas('items.allergies',function($query)use($key){
-                $query->where(function($q)use($key){
-                    foreach ($key as $value) {
-                        $q->where('allergy', 'like', "%{$value}%");
-                    };
-                });
-            });
-            $q->orWhereHas('items.generic',function($query)use($key){
-                $query->where(function($q)use($key){
-                    foreach ($key as $value) {
-                        $q->where('generic_name', 'like', "%{$value}%");
-                    };
-                });
-            });
-
-
+            $relationships = [
+                'items.nutritions' => 'nutrition',
+                'items.allergies' => 'allergy',
+                'items.generic' => 'generic_name',
+                'items.ecommerce_item_details.brand' => 'name',
+                'items.pharmacy_item_details.common_condition' => 'name'
+            ];
+            return  $q->applyRelationShipSearch(relationships:$relationships ,searchParameter:$key);
         })
             ->when(config('module.current_module_data'), function($query)use($zone_id){
-                $query->module(config('module.current_module_data')['id']);
+                return   $query->module(config('module.current_module_data')['id']);
                 if(!config('module.current_module_data')['all_zone_service']) {
-                    $query->whereIn('zone_id', json_decode($zone_id, true));
+                    return   $query->whereIn('zone_id', json_decode($zone_id, true));
                 }
             })
             ->when($category_id, function($query)use($category_id){
-                $query->whereHas('items.category', function($q)use($category_id){
+                return $query->whereHas('items.category', function($q)use($category_id){
                     return $q->whereId($category_id)->orWhere('parent_id', $category_id);
+                });
+            })
+            ->when($category_ids && is_array($category_ids), function($query)use($category_ids){
+                return $query->whereHas('items.category', function($q)use($category_ids){
+                    return $q->whereIn('id',$category_ids)->orWhereIn('parent_id', $category_ids);
                 });
             })
             ->active()
             ->when($rating_count, function($query) use ($rating_count){
-                $query->selectSub(function ($query) use ($rating_count){
-                    $query->selectRaw('AVG(reviews.rating)')
+                return $query->selectSub(function ($query) use ($rating_count){
+                    return  $query->selectRaw('AVG(reviews.rating)')
                         ->from('reviews')
                         ->join('items', 'items.id', '=', 'reviews.item_id')
                         ->whereColumn('items.store_id', 'stores.id')
@@ -579,25 +588,34 @@ class StoreLogic
                 }, 'avg_r')->having('avg_r', '>=', $rating_count);
             })
             ->when($filter && in_array('top_rated',$filter),function ($qurey){
-                $qurey->whereNotNull('rating')->whereRaw("LENGTH(rating) > 0");
-            })
-            ->when($filter && in_array('popular',$filter),function ($qurey){
-                $qurey->withCount('orders')->orderBy('orders_count', 'desc');
+                return  $qurey->whereNotNull('rating')->whereRaw("LENGTH(rating) > 0");
             })
             ->when($filter && in_array('discounted',$filter),function ($qurey){
-                $qurey->where(function ($query) {
-                    $query->whereHas('items', function ($q) {
-                        $q->Discounted();
+                return  $qurey->where(function ($query) {
+                    return $query->whereHas('items', function ($q) {
+                        return  $q->Discounted();
                     });
                 });
             })
-            ->when($filter && in_array('open',$filter),function ($qurey){
-                $qurey->orderBy('open', 'desc');
+            ->when($filter && in_array('free_delivery',$filter),function ($qurey){
+                return $qurey->where('free_delivery',1);
             })
-            ->when($filter && in_array('nearby',$filter),function ($qurey){
-                $qurey->orderBy('distance');
+            ->when($filter && in_array('coupon',$filter),function ($qurey){
+                return $qurey->has('activeCoupons');
+            })
+            ->when($filter && in_array('currently_open',$filter),function ($qurey){
+                return $qurey->having('open', '>', 0);
             })
             ->orderBy('open', 'desc')
+            ->when($filter && in_array('popular',$filter),function ($qurey){
+                return $qurey->withCount('orders')->orderBy('orders_count', 'desc');
+            })
+            ->when(($filter && in_array('nearby',$filter))   ,function ($qurey){
+                return  $qurey->orderBy('distance');
+            })
+            ->when($filter && in_array('fast_delivery',$filter),function ($qurey){
+                return $qurey->orderBy('min_delivery_time');
+            })
             ->type($type)->paginate($limit, ['*'], 'page', $offset);
 
 
@@ -869,6 +887,88 @@ class StoreLogic
 
         }
         $paginator = $query->paginate($limit??50, ['*'], 'page', $offset??1);
+
+        return [
+            'total_size' => $paginator->total(),
+            'limit' => $limit??50,
+            'offset' => $offset??1,
+            'stores' => $paginator->items()
+        ];
+    }
+
+    public static function get_top_offer_near_me($zone_id, $limit = 50, $offset = 1, $type = 'all',$longitude=0,$latitude=0)
+    {
+
+        $top_offer_near_me_stores_default_status = BusinessSetting::where('key', 'top_offer_near_me_stores_default_status')->first()?->value ?? 1;
+        $top_offer_near_me_stores_sort_by_general = PriorityList::where('name', 'top_offer_near_me_stores_sort_by_general')->where('type','general')->first()?->value ?? '';
+        $top_offer_near_me_stores_sort_by_unavailable = PriorityList::where('name', 'top_offer_near_me_stores_sort_by_unavailable')->where('type','unavailable')->first()?->value ?? '';
+        $top_offer_near_me_stores_sort_by_temp_closed = PriorityList::where('name', 'top_offer_near_me_stores_sort_by_temp_closed')->where('type','temp_closed')->first()?->value ?? '';
+
+
+
+        $query = Store::withOpen($longitude??0,$latitude??0)
+            ->withCount(['items','campaigns','reviews'])
+            ->with('discount')
+            ->whereHas('discount' , function($q){
+                $q->validate();
+            })
+            ->when(config('module.current_module_data'), function($query)use($zone_id){
+                $query->whereHas('zone.modules', function($query){
+                    $query->where('modules.id', config('module.current_module_data')['id']);
+                })->module(config('module.current_module_data')['id']);
+                if(!config('module.current_module_data')['all_zone_service']) {
+                    $query->whereIn('zone_id', json_decode($zone_id, true));
+                }
+            })
+            ->type($type)->Active();
+
+            if($top_offer_near_me_stores_default_status== 1){
+                $query= $query->orderByDesc('open')->orderby('distance');
+            }else{
+
+                if($top_offer_near_me_stores_sort_by_temp_closed == 'remove'){
+                    $query = $query->where('active', '>', 0);
+                }elseif($top_offer_near_me_stores_sort_by_temp_closed == 'last'){
+                    $query = $query->orderByDesc('active');
+                }
+
+                if($top_offer_near_me_stores_sort_by_unavailable == 'remove'){
+                    $query = $query->having('open', '>', 0);
+                }elseif($top_offer_near_me_stores_sort_by_unavailable == 'last'){
+                    $query = $query->orderBy('open', 'desc');
+                }
+
+                if($top_offer_near_me_stores_sort_by_general == 'rating') {
+                    $query = $query->selectSub(function ($query) {
+                        $query->selectRaw('AVG(reviews.rating)')
+                            ->from('reviews')
+                            ->join('items', 'items.id', '=', 'reviews.item_id')
+                            ->whereColumn('items.store_id', 'stores.id')
+                            ->groupBy('items.store_id');
+                    }, 'avg_rat')->orderBy('avg_rat', 'desc');
+                }elseif($top_offer_near_me_stores_sort_by_general == 'review_count') {
+                    $query = $query->orderByDesc('reviews_count');
+                }elseif($top_offer_near_me_stores_sort_by_general == 'asc_discount') {
+
+
+                    $query = $query->selectSub(function ($query) {
+                        $query->selectRaw('MAX(discounts.discount)')
+                            ->from('discounts')
+                            ->whereColumn('discounts.store_id', 'stores.id');
+                    }, 'discount')
+                    ->orderBy('discount', 'asc');
+
+                }elseif($top_offer_near_me_stores_sort_by_general == 'desc_discount') {
+                    $query = $query->selectSub(function ($query) {
+                        $query->selectRaw('MAX(discounts.discount)')
+                            ->from('discounts')
+                            ->whereColumn('discounts.store_id', 'stores.id');
+                    }, 'discount')
+                    ->orderBy('discount', 'desc');
+                }
+            }
+
+        $paginator= $query->paginate($limit??50, ['*'], 'page', $offset??1);
 
         return [
             'total_size' => $paginator->total(),

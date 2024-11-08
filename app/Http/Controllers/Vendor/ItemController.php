@@ -47,7 +47,7 @@ class ItemController extends Controller
             return back();
         }
         $categories = Category::where(['position' => 0])->module(Helpers::get_store_data()->module_id)->get();
-        $conditions = CommonCondition::all();
+        $conditions = CommonCondition::get(['id','name']);
         $brands = Brand::all();
         $module_data = config('module.'. Helpers::get_store_data()->module->module_type);
         return view('vendor-views.product.index', compact('categories','module_data','conditions','brands'));
@@ -449,7 +449,7 @@ class ItemController extends Controller
         $product_category = json_decode($product->category_ids);
         $categories = Category::where(['parent_id' => 0])->module(Helpers::get_store_data()->module_id)->get();
         $module_data = config('module.'. Helpers::get_store_data()->module->module_type);
-        $conditions = CommonCondition::all();
+        $conditions = CommonCondition::get(['id','name']);
         $brands = Brand::all();
         return view('vendor-views.product.edit', compact('product', 'product_category', 'categories','module_data', 'temp_product','conditions','brands'));
     }
@@ -1406,6 +1406,7 @@ class ItemController extends Controller
 
     public function stock_limit_list(Request $request)
     {
+
         $category_id = $request->query('category_id', 'all');
         $type = $request->query('type', 'all');
         $items = Item::
@@ -1414,7 +1415,15 @@ class ItemController extends Controller
                 return $q->whereId($category_id)->orWhere('parent_id', $category_id);
             });
         })
-        ->type($type)->latest()->paginate(config('default_pagination'));
+        ->type($type);
+        if( Helpers::get_store_data()->storeConfig?->minimum_stock_for_warning > 0){
+            $items= $items->where('stock' ,'<=' , Helpers::get_store_data()->storeConfig->minimum_stock_for_warning );
+        } else{
+            $items= $items->where('stock',0 );
+        }
+
+        $items=  $items->orderby('stock')
+        ->latest()->paginate(config('default_pagination'));
         $category =$category_id !='all'? Category::findOrFail($category_id):null;
         return view('vendor-views.product.stock_limit_list', compact('items', 'category', 'type'));
 
@@ -1425,10 +1434,17 @@ class ItemController extends Controller
         $product = Item::find($request['id']);
 
         return response()->json([
-            'view' => view('vendor-views.product.partials._update_stock', compact('product'))->render()
+            'view' => view('vendor-views.product.partials._get_stock_data', compact('product'))->render()
         ]);
     }
 
+    public function get_stock(Request $request)
+    {
+        $product = Item::withoutGlobalScope(StoreScope::class)->find($request['id']);
+        return response()->json([
+            'view' => view('vendor-views.product.partials._get_stock_data', compact('product'))->render()
+        ]);
+    }
     public function stock_update(Request $request)
     {
         $variations = [];
@@ -1437,8 +1453,8 @@ class ItemController extends Controller
             foreach ($request['type'] as $key => $str) {
                 $item = [];
                 $item['type'] = $str;
-                $item['price'] = abs($request['price_' . str_replace('.', '_', $str)]);
-                $item['stock'] = abs($request['stock_' . str_replace('.', '_', $str)]);
+                $item['price'] = abs($request[ 'price_'.$key.'_'. str_replace('.', '_', $str)]);
+                $item['stock'] = abs($request['stock_'.$key.'_'. str_replace('.', '_', $str)]);
                 array_push($variations, $item);
             }
         }
@@ -1449,7 +1465,7 @@ class ItemController extends Controller
         $product->stock = $stock_count ?? 0;
         $product->variations = json_encode($variations);
         $product->save();
-        Toastr::success(translate("messages.product_updated_successfully"));
+        Toastr::success(translate("messages.Stock_updated_successfully"));
         return back();
 
 

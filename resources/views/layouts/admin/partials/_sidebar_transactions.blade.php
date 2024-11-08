@@ -162,12 +162,12 @@
                     </a>
                 </li>
 
-                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/transactions/report/low-stock-report') ? 'active' : '' }}">
-                    <a class="nav-link " href="{{ route('admin.transactions.report.low-stock-report') }}" title="{{ translate('messages.limited_stock_item') }}">
+                {{-- <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/transactions/report/low-stock-report') ? 'active' : '' }}">
+                    <a class="nav-link " href="{{ route('admin.transactions.report.low-stock-report') }}" title="{{ translate('messages.Stock_Report') }}">
                         <span class="tio-chart-bar-4 nav-icon"></span>
-                        <span class="text-truncate text-capitalize">{{ translate('messages.limited_stock_item') }}</span>
+                        <span class="text-truncate text-capitalize">{{ translate('messages.Stock_Report') }}</span>
                     </a>
-                </li>
+                </li> --}}
 
 
                 <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/transactions/report/order-report') ? 'active' : '' }}">

@@ -53,14 +53,13 @@ class BusinessSettingsController extends Controller
         $store->order_place_to_schedule_interval = $request->order_place_to_schedule_interval;
         $store->delivery_time = $request->minimum_delivery_time .'-'. $request->maximum_delivery_time.' '.$request->delivery_time_type;
         $store->save();
-        if($request->extra_packaging_amount){
-            $conf = StoreConfig::firstOrNew(
-                ['store_id' =>  $store->id]
-            );
-            $conf->extra_packaging_amount = $request->extra_packaging_amount;
-            $conf->extra_packaging_status = $request->extra_packaging_status ?? 0;
-            $conf->save();
-        }
+        $conf = StoreConfig::firstOrNew(
+            ['store_id' =>  $store->id]
+        );
+        $conf->extra_packaging_amount = $request->extra_packaging_amount ?? 0;
+        $conf->extra_packaging_status = $request->extra_packaging_status ?? 0;
+        $conf->minimum_stock_for_warning = $request->minimum_stock_for_warning ?? 0;
+        $conf->save();
         Toastr::success(translate('messages.store_settings_updated'));
         return back();
     }

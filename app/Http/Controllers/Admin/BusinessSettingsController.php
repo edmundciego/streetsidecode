@@ -106,7 +106,7 @@ class BusinessSettingsController extends Controller
 
     public function update_priority(Request $request)
     {
-        $list = ['category_list', 'popular_store', 'recommended_store', 'special_offer', 'popular_item', 'best_reviewed_item', 'item_campaign', 'latest_items', 'all_stores', 'category_sub_category_item', 'product_search', 'basic_medicine', 'common_condition', 'brand', 'brand_item', 'latest_stores'];
+        $list = ['category_list', 'popular_store', 'recommended_store', 'special_offer', 'popular_item', 'best_reviewed_item', 'item_campaign', 'latest_items', 'all_stores', 'category_sub_category_item', 'product_search', 'basic_medicine', 'common_condition', 'brand', 'brand_item', 'latest_stores','top_offer_near_me_stores'];
         foreach ($list as $item) {
             BusinessSetting::updateOrInsert(['key' => $item . '_default_status'], [
                 'value' => $request[$item . '_default_status'] ?? 0
@@ -2603,6 +2603,11 @@ class BusinessSettingsController extends Controller
 
     public function updateSocialLogin($service, Request $request)
     {
+        $login_setup_status = Helpers::get_business_settings($service.'_login_status')??0;
+        if($login_setup_status && ($request['status']==0)){
+            Toastr::warning(translate($service.'_login_status_is_enabled_in_login_setup._First_disable_from_login_setup.'));
+            return redirect()->back();
+        }
         $socialLogin = BusinessSetting::where('key', 'social_login')->first();
         $credential_array = [];
         foreach (json_decode($socialLogin['value'], true) as $key => $data) {
@@ -2638,12 +2643,14 @@ class BusinessSettingsController extends Controller
                 $cred = [
                     'login_medium' => $service,
                     'client_id' => $request['client_id'],
+                    'client_id_app' => $request['client_id_app'],
                     'client_secret' => $request['client_secret'],
                     'status' => $request['status'],
                     'team_id' => $request['team_id'],
                     'key_id' => $request['key_id'],
                     'service_file' => isset($fileName) ? $fileName : $data['service_file'],
-                    'redirect_url' => $request['redirect_url'],
+                    'redirect_url_flutter' => $request['redirect_url_flutter'],
+                    'redirect_url_react' => $request['redirect_url_react'],
                 ];
                 array_push($credential_array, $cred);
             } else {
@@ -2656,6 +2663,114 @@ class BusinessSettingsController extends Controller
 
         Toastr::success(translate('messages.credential_updated', ['service' => $service]));
         return redirect()->back();
+    }
+
+    public function login_settings(){
+        $data = array_column(BusinessSetting::whereIn('key',['manual_login_status','otp_login_status','social_login_status','google_login_status','facebook_login_status','apple_login_status','email_verification_status','phone_verification_status'
+        ])->get(['key','value'])->toArray(), 'value', 'key');
+
+        return view('admin-views.login-setup.login_page',compact('data'));
+    }
+
+    public function login_settings_update(Request $request)
+    {
+        $social_login = [];
+        $social_login_data=Helpers::get_business_settings('social_login') ?? [];
+        foreach ($social_login_data as $social) {
+            $social_login[$social['login_medium']] = (boolean)$social['status'];
+        }
+        $social_login_data=Helpers::get_business_settings('apple_login') ?? [];
+        foreach ($social_login_data as $social) {
+            $social_login[$social['login_medium']] = (boolean)$social['status'];
+        }
+
+        $is_firebase_active=Helpers::get_business_settings('firebase_otp_verification') ?? 0;
+
+        $is_sms_active= Setting::whereJsonContains('live_values->status','1')->where('settings_type', 'sms_config')->exists();
+
+        $is_mail_active= config('mail.status');
+
+        if(!$request['manual_login_status'] && !$request['otp_login_status'] && !$request['social_login_status']){
+            Session::flash('select-one-method', true);
+            return back();
+        }
+
+        if($request['otp_login_status'] && !$is_sms_active && !$is_firebase_active){
+            Session::flash('sms-config', true);
+            return back();
+        }
+
+        if(!$request['manual_login_status'] && !$request['otp_login_status'] && $request['social_login_status']){
+            if(!$request['google_login_status'] && !$request['facebook_login_status']){
+                Session::flash('select-one-method-android', true);
+                return back();
+            }
+        }
+        if( $request['social_login_status'] &&  !$request['google_login_status'] && !$request['facebook_login_status'] && !$request['apple_login_status']){
+            Session::flash('select-one-method-social-login', true);
+            return back();
+        }
+
+        if(($request['social_login_status'] && $request['google_login_status'] && !isset($social_login['google'])) || ($request['social_login_status'] && ($request['google_login_status'] && isset($social_login['google'])) && !$social_login['google'])){
+            Session::flash('setup-google', true);
+            return back();
+        }
+
+        if(($request['social_login_status'] && $request['facebook_login_status'] && !isset($social_login['facebook'])) || ($request['social_login_status'] && ($request['facebook_login_status'] && isset($social_login['facebook'])) && !$social_login['facebook'])){
+            Session::flash('setup-facebook', true);
+            return back();
+        }
+
+        if(($request['social_login_status'] && $request['apple_login_status'] && !isset($social_login['apple'])) || ($request['social_login_status'] && ($request['apple_login_status'] && isset($social_login['apple'])) && !$social_login['apple'])){
+            Session::flash('setup-apple', true);
+            return back();
+        }
+
+        if($request['phone_verification_status'] && !$is_sms_active && !$is_firebase_active){
+            Session::flash('sms-config-verification', true);
+            return back();
+        }
+
+        if($request['email_verification_status'] && !$is_mail_active){
+            Session::flash('mail-config-verification', true);
+            return back();
+        }
+
+
+        BusinessSetting::updateOrInsert(['key' => 'manual_login_status'], [
+            'value' => $request['manual_login_status'] ? 1 : 0
+        ]);
+
+        BusinessSetting::updateOrInsert(['key' => 'otp_login_status'], [
+            'value' => $request['otp_login_status'] ? 1 : 0
+        ]);
+
+        BusinessSetting::updateOrInsert(['key' => 'social_login_status'], [
+            'value' => $request['social_login_status'] ? 1 : 0
+        ]);
+
+        BusinessSetting::updateOrInsert(['key' => 'google_login_status'], [
+            'value' => $request['social_login_status']?($request['google_login_status'] ? 1 : 0):0
+        ]);
+
+        BusinessSetting::updateOrInsert(['key' => 'facebook_login_status'], [
+            'value' => $request['social_login_status']?($request['facebook_login_status'] ? 1 : 0):0
+        ]);
+
+        BusinessSetting::updateOrInsert(['key' => 'apple_login_status'], [
+            'value' => $request['social_login_status']?($request['apple_login_status'] ? 1 : 0):0
+        ]);
+
+        BusinessSetting::updateOrInsert(['key' => 'email_verification_status'], [
+            'value' => $request['email_verification_status'] ? 1 : 0
+        ]);
+
+        BusinessSetting::updateOrInsert(['key' => 'phone_verification_status'], [
+            'value' => $request['phone_verification_status'] ? 1 : 0
+        ]);
+
+        Toastr::success(translate('messages.login_settings_data_updated_successfully'));
+        return back();
     }
 
     //recaptcha
@@ -2685,7 +2800,7 @@ class BusinessSettingsController extends Controller
 
     public function firebase_otp_index(Request $request)
     {
-        $is_sms_active= Setting::where('is_active',1)->where('settings_type', 'sms_config')
+        $is_sms_active= Setting::whereJsonContains('live_values->status','1')->where('settings_type', 'sms_config')
         ->exists();
         $is_mail_active= config('mail.status');
         return view('admin-views.business-settings.firebase-otp-index',compact('is_sms_active','is_mail_active'));
@@ -2693,6 +2808,18 @@ class BusinessSettingsController extends Controller
 
     public function firebase_otp_update(Request $request)
     {
+        $login_setup_status = Helpers::get_business_settings('otp_login_status')??0;
+        $phone_verification_status = Helpers::get_business_settings('phone_verification_status')??0;
+        $is_sms_active= Setting::whereJsonContains('live_values->status','1')->where('settings_type', 'sms_config')
+            ->exists();
+        if(!$is_sms_active && $login_setup_status && ($request['firebase_otp_verification']==0)){
+            Toastr::warning(translate('otp_login_status_is_enabled_in_login_setup._First_disable_from_login_setup.'));
+            return redirect()->back();
+        }
+        if(!$is_sms_active && $phone_verification_status && ($request['firebase_otp_verification']==0)){
+            Toastr::warning(translate('phone_verification_status_is_enabled_in_login_setup._First_disable_from_login_setup.'));
+            return redirect()->back();
+        }
         BusinessSetting::updateOrInsert(['key' => 'firebase_otp_verification'], [
             'value' => $request['firebase_otp_verification'] ?? 0
         ]);
@@ -4710,6 +4837,24 @@ class BusinessSettingsController extends Controller
 
             Toastr::success(translate('messages.earning_section_updated'));
         } elseif ($tab == 'earning-seller-link') {
+
+            if($request->join_seller_react_status !== null ){
+                $join_seller_react_status = DataSetting::where('type', 'react_landing_page')->where('key', 'join_seller_react_status')->first();
+                if ($join_seller_react_status == null) {
+                    $join_seller_react_status = new DataSetting();
+                }
+
+                $join_seller_react_status->key = 'join_seller_react_status';
+                $join_seller_react_status->type = 'react_landing_page';
+                $join_seller_react_status->value = $request->join_seller_react_status  ? 0 : 1 ;
+                $join_seller_react_status->save();
+
+            Toastr::success(translate('messages.Seller_Section_Content_status_updated'));
+            return back();
+            }
+
+
+
             $earning_seller_title = DataSetting::where('type', 'react_landing_page')->where('key', 'earning_seller_title')->first();
             if ($earning_seller_title == null) {
                 $earning_seller_title = new DataSetting();
@@ -4832,7 +4977,21 @@ class BusinessSettingsController extends Controller
             }
             Toastr::success(translate('messages.seller_links_updated'));
         } elseif ($tab == 'earning-dm-link') {
-            // dd($request->all());
+
+            if($request->join_DM_react_status !== null ){
+                $join_DM_react_status = DataSetting::where('type', 'react_landing_page')->where('key', 'join_DM_react_status')->first();
+                if ($join_DM_react_status == null) {
+                    $join_DM_react_status = new DataSetting();
+                }
+
+                $join_DM_react_status->key = 'join_DM_react_status';
+                $join_DM_react_status->type = 'react_landing_page';
+                $join_DM_react_status->value = $request->join_DM_react_status  ? 0 : 1 ;
+                $join_DM_react_status->save();
+
+            Toastr::success(translate('messages.Seller_Section_Content_status_updated'));
+            return back();
+            }
             $earning_dm_title = DataSetting::where('type', 'react_landing_page')->where('key', 'earning_dm_title')->first();
             if ($earning_dm_title == null) {
                 $earning_dm_title = new DataSetting();
@@ -6147,6 +6306,22 @@ class BusinessSettingsController extends Controller
 
             Toastr::success(translate('messages.landing_page_module_updated'));
         } elseif ($tab == 'join-seller') {
+
+            if($request->join_seller_flutter_status !== null ){
+                $join_seller_flutter_status = DataSetting::where('type', 'flutter_landing_page')->where('key', 'join_seller_flutter_status')->first();
+                if ($join_seller_flutter_status == null) {
+                    $join_seller_flutter_status = new DataSetting();
+                }
+
+                $join_seller_flutter_status->key = 'join_seller_flutter_status';
+                $join_seller_flutter_status->type = 'flutter_landing_page';
+                $join_seller_flutter_status->value = $request->join_seller_flutter_status  ? 0 : 1 ;
+                $join_seller_flutter_status->save();
+
+            Toastr::success(translate('messages.join_as_seller_section_status_updated'));
+            return back();
+            }
+
             $join_seller_title = DataSetting::where('type', 'flutter_landing_page')->where('key', 'join_seller_title')->first();
             if ($join_seller_title == null) {
                 $join_seller_title = new DataSetting();
@@ -6269,6 +6444,23 @@ class BusinessSettingsController extends Controller
 
             Toastr::success(translate('messages.join_as_seller_data_updated'));
         } elseif ($tab == 'join-delivery') {
+
+            if($request->join_DM_flutter_status !== null ){
+                $join_DM_flutter_status = DataSetting::where('type', 'flutter_landing_page')->where('key', 'join_DM_flutter_status')->first();
+                if ($join_DM_flutter_status == null) {
+                    $join_DM_flutter_status = new DataSetting();
+                }
+
+                $join_DM_flutter_status->key = 'join_DM_flutter_status';
+                $join_DM_flutter_status->type = 'flutter_landing_page';
+                $join_DM_flutter_status->value = $request->join_DM_flutter_status  ? 0 : 1 ;
+                $join_DM_flutter_status->save();
+
+            Toastr::success(translate('messages.join_as_seller_section_status_updated'));
+            return back();
+            }
+
+
             $join_delivery_man_title = DataSetting::where('type', 'flutter_landing_page')->where('key', 'join_delivery_man_title')->first();
             if ($join_delivery_man_title == null) {
                 $join_delivery_man_title = new DataSetting();

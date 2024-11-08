@@ -486,6 +486,15 @@ $(function () {
     $('.date-range-picker').on('cancel.daterangepicker', function(ev, picker) {
         $(this).val('');
         picker.setStartDate(moment()); // Reset the start date
-        picker.setEndDate(moment()); 
+        picker.setEndDate(moment());
+    });
+
+    $('.date-range-picker').on('show.daterangepicker', function(ev, picker) {
+        let title = $(this).data('title') || 'Select a Date';
+        if (!$('.daterangepicker .calendar-title').length) {
+            $('.daterangepicker').prepend(`<div class=" text-center mb-2 mt-4 calendar-title"> ${title}  </div>`);
+        } else {
+            $('.daterangepicker .calendar-title').text(title);
+        }
     });
 });

@@ -15,35 +15,6 @@
                 @endif
             </tr>
         </thead>
-
-{{--        @foreach ($combinations as $key => $combination)--}}
-{{--            @php--}}
-{{--                $str = '';--}}
-{{--                foreach ($combination as $key => $item){--}}
-{{--                    if($key > 0 ){--}}
-{{--                        $str .= '-'.str_replace(' ', '', $item);--}}
-{{--                    }--}}
-{{--                    else{--}}
-{{--                        $str .= str_replace(' ', '', $item);--}}
-{{--                    }--}}
-{{--                }--}}
-{{--            @endphp--}}
-{{--            @if(strlen($str) > 0)--}}
-{{--                <tr>--}}
-{{--                    <td>--}}
-{{--                        <label class="control-label">{{ $str }}</label>--}}
-{{--                    </td>--}}
-{{--                    <td>--}}
-{{--                        <input type="number" name="price_{{ $str }}" value="{{ $price }}" min="0" step="0.01"--}}
-{{--                               class="form-control" required>--}}
-{{--                    </td>--}}
-{{--                    @if ($stock)--}}
-{{--                        <td><input type="number" name="stock_{{ $str }}" value="1" min="0" step="0.01"--}}
-{{--                               class="form-control" required></td>--}}
-{{--                    @endif--}}
-{{--                </tr>--}}
-{{--            @endif--}}
-{{--        @endforeach--}}
             @foreach ($data as $key => $combination)
                 @if(strlen($combination['name']) > 0)
                     <tr>

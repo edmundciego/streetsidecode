@@ -291,9 +291,9 @@
                             @if ($store_data->module->module_type != 'food')
 
                             <li class="nav-item {{Request::is('store-panel/item/stock-limit-list')?'active':''}}">
-                                <a class="nav-link " href="{{route('vendor.item.stock-limit-list')}}" title="{{translate('messages.stock_limit_list')}}">
+                                <a class="nav-link " href="{{route('vendor.item.stock-limit-list')}}" title="{{translate('messages.Low_stock_list')}}">
                                     <span class="tio-circle nav-indicator-icon"></span>
-                                    <span class="text-truncate">{{translate('messages.stock_limit_list')}}</span>
+                                    <span class="text-truncate">{{translate('messages.Low_stock_list')}}</span>
                                 </a>
                             </li>
                             @endif

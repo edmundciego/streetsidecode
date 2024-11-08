@@ -51,7 +51,7 @@ class ZoneController extends BaseController
 
     public function add(ZoneAddRequest $request): JsonResponse
     {
-        $zoneId = $this->zoneRepo->getAll()->count()+1;
+        $zoneId = $this->zoneRepo->getLatest()?->id + 1;
         $zone = $this->zoneRepo->add(data: $this->zoneService->getAddData(request: $request, zoneId: $zoneId));
 
         $this->translationRepo->addByModel(request: $request, model: $zone, modelPath: 'App\Models\Zone', attribute: 'name');

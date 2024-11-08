@@ -615,3 +615,12 @@ $(document).ready(function(){
 
     });
 })
+$(document).ready(function () {
+    $('form').on('submit', function (event) {
+        const $submitButton = $(this).find('button[type="submit"]');
+        $submitButton.prop('disabled', true);
+        setTimeout(() => {
+        $submitButton.prop('disabled', false);
+        }, 2000);
+    });
+});

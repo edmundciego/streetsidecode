@@ -321,4 +321,24 @@ class StoreController extends Controller
         return response()->json($paginator, 200);
     }
 
+    public function get_top_offer_near_me(Request $request)
+    {
+        if (!$request->hasHeader('zoneId')) {
+            $errors = [];
+            array_push($errors, ['code' => 'zoneId', 'message' => translate('messages.zone_id_required')]);
+            return response()->json([
+                'errors' => $errors
+            ], 403);
+        }
+        $type = $request->query('type', 'all');
+        $zone_id= $request->header('zoneId');
+        $longitude= $request->header('longitude');
+        $latitude= $request->header('latitude');
+        $stores = StoreLogic::get_top_offer_near_me($zone_id, $request['limit'], $request['offset'], $type,$longitude,$latitude);
+        $stores['stores'] = Helpers::store_data_formatting($stores['stores'], true);
+
+
+        return response()->json($stores, 200);
+    }
+
 }

@@ -95,7 +95,7 @@
 
                                     @if (auth('vendor_employee')->id()  != $e['id'])
                                         <div class="btn--container justify-content-center">
-                                            <a class="btn action-btn btn--danger btn-outline-danger" href="javascript:"
+                                            <a class="btn btn-sm btn--danger btn-outline-danger action-btn form-alert" href="javascript:"
                                                data-id="employee-{{$e['id']}}" data-message="{{translate('messages.Want_to_delete_this_method_info')}}" title="{{translate('messages.delete_method')}}"><i class="tio-delete-outlined"></i>
                                             </a>
                                             <form action="{{route('vendor.wallet-method.delete',[$e['id']])}}"

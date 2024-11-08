@@ -144,7 +144,9 @@
                         <a class="btn btn-icon rounded-circle nav-msg-icon"
                            href="{{route('admin.message.list')}}">
                             <img src="{{asset('/public/assets/admin/img/new-img/message-icon.svg')}}" alt="public/img">
-                            @php($message=\App\Models\Conversation::whereUserType('admin')->where('unread_message_count','>','0')->count())
+                            @php($message=\App\Models\Conversation::whereUserType('admin')->whereHas('last_message', function($query) {
+                                $query->whereColumn('conversations.sender_id', 'messages.sender_id');
+                            })->where('unread_message_count', '>', 0)->count())
                             @if($message!=0)
                                 <span class="btn-status btn-status-danger">{{ $message }}</span>
                             @endif

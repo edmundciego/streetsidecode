@@ -8,7 +8,7 @@
 
     $tax_included =0;
     if (count($order->details) > 0) {
-        $campaign_order = $order->details[0]->campaign ? true : false;
+        $campaign_order = isset($order?->details[0]?->item_campaign_id ) ? true : false;
     }
     $max_processing_time = explode('-', $order['store']['delivery_time'])[0];
     ?>
@@ -310,7 +310,7 @@
                                                         <a class="avatar avatar-xl mr-3"
                                                             href="{{ route('vendor.item.view', $detail->item['id']) }}">
                                                             <img class="img-fluid rounded onerror-image"
-                                                            src="{{ $product->image_full_url }}"
+                                                            src="{{ $product->image_full_url  ?? asset('public/assets/admin/img/160x160/img2.jpg') }}"
                                                                  data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
                                                                 alt="Image Description">
                                                         </a>
@@ -421,7 +421,7 @@
                                                     <div class="media media--sm">
                                                         <div class="avatar avatar-xl mr-3">
                                                             <img class="img-fluid onerror-image"
-                                                            src="{{$campaign['image_full_url']}}"
+                                                            src="{{$campaign?->image_full_url ?? asset('public/assets/admin/img/160x160/img2.jpg') }}"
 
                                                                  data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
                                                                 alt="Image Description">

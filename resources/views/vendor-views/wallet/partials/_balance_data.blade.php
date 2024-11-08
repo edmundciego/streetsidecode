@@ -210,7 +210,7 @@
                 </button>
             </div>
 
-            <form action="{{route('vendor.wallet.withdraw-request')}}" method="post">
+            <form id="withdraw_form" action="{{route('vendor.wallet.withdraw-request')}}" method="post">
                 <div class="modal-body">
                     @csrf
                     <div class="">
@@ -232,7 +232,7 @@
                 </div>
                 <div class="modal-footer pt-0 border-0">
                     <button type="button" class="btn btn--reset" data-dismiss="modal">{{translate('messages.cancel')}}</button>
-                    <button type="submit" id="submit_button" class="btn btn--primary">{{translate('messages.Submit')}}</button>
+                    <button type="submit"  id="set_disable" id="submit_button" class="btn btn--primary">{{translate('messages.Submit')}}</button>
                 </div>
             </form>
         </div>

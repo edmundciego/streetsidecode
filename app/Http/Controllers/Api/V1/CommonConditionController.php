@@ -126,4 +126,8 @@ class CommonConditionController extends Controller
         $data['products'] = Helpers::product_data_formatting($data['products'] , true, false, app()->getLocale());
         return response()->json($data, 200);
     }
+    public function getCommonConditionList(){
+        $conditions = CommonCondition::Active()->get(['id','name']);
+        return response()->json($conditions, 200);
+    }
 }

@@ -295,8 +295,8 @@ class Helpers
                 $item['rating_count'] = (int)($item->rating ? array_sum(json_decode($item->rating, true)) : 0);
                 $item['avg_rating'] = (float)($item->avg_rating ? $item->avg_rating : 0);
                 $item['recommended'] =(int) $item->recommended;
-                $item['min_delivery_time'] =  (int) explode('-',$item->store?->delivery_time)[0] ?? 0;
-                $item['max_delivery_time'] =  (int) explode('-',$item->store?->delivery_time)[1] ?? 0;
+                $item['min_delivery_time'] =  (int) explode('-',$item?->store?->delivery_time)[0] ?? 0;
+                $item['max_delivery_time'] =  (int) explode('-',$item?->store?->delivery_time)[1] ?? 0;
                 $item['common_condition_id'] =  (int) $item->pharmacy_item_details?->common_condition_id ?? 0;
                 $item['brand_id'] =  (int) $item->ecommerce_item_details?->brand_id ?? 0;
                 $item['is_basic'] =  (int) $item->pharmacy_item_details?->is_basic ?? 0;
@@ -826,6 +826,7 @@ class Helpers
         } else {
             $data->load('storeConfig');
             $data['is_recommended'] = false;
+            $data['minimum_stock_for_warning'] =   (int) $data?->storeConfig?->minimum_stock_for_warning ?? 0;
             $data['halal_tag_status'] =   (bool) $data?->storeConfig?->halal_tag_status;
             $extra_packaging_data = \App\Models\BusinessSetting::where('key', 'extra_packaging_data')->first()?->value ?? '';
             $extra_packaging_data =json_decode($extra_packaging_data , true);
@@ -989,11 +990,11 @@ class Helpers
             $item['item_details'] = json_decode($item['item_details'], true);
             if ($item['item_id']){
                 $product = \App\Models\Item::where(['id' => $item['item_details']['id']])->first();
-                $item['image_full_url'] = $product->image_full_url;
+                $item['image_full_url'] = $product?->image_full_url;
                 $item['images_full_url'] = $product->images_full_url;
             }else{
                $product = \App\Models\ItemCampaign::where(['id' => $item['item_details']['id']])->first();
-                $item['image_full_url'] = $product->image_full_url;
+                $item['image_full_url'] = $product?->image_full_url;
                 $item['images_full_url'] = [];
             }
             array_push($storage, $item);
@@ -1473,7 +1474,7 @@ class Helpers
 
     public static function get_store_discount($store)
     {
-        if ($store->discount) {
+        if ($store?->discount) {
             if (date('Y-m-d', strtotime($store->discount->start_date)) <= now()->format('Y-m-d') && date('Y-m-d', strtotime($store->discount->end_date)) >= now()->format('Y-m-d') && date('H:i', strtotime($store->discount->start_time)) <= now()->format('H:i') && date('H:i', strtotime($store->discount->end_time)) >= now()->format('H:i')) {
                 return [
                     'discount' => $store->discount->discount,
@@ -1702,7 +1703,7 @@ class Helpers
                         'order_type' => $order->order_type,
                         'image' => '',
                     ];
-                    if($order->zone){
+                    if($order->zone && self::getNotificationStatusData('deliveryman','deliveryman_order_notification','push_notification_status')){
                         if($order->dm_vehicle_id){
 
                             $topic = 'delivery_man_'.$order->zone_id.'_'.$order->dm_vehicle_id;
@@ -1725,7 +1726,7 @@ class Helpers
                     'order_type' => 'parcel_order',
                     'image' => '',
                 ];
-                if($order->zone){
+                if($order->zone && self::getNotificationStatusData('deliveryman','deliveryman_order_notification','push_notification_status')){
                     if($order->dm_vehicle_id){
 
                         $topic = 'delivery_man_'.$order->zone_id.'_'.$order->dm_vehicle_id;
@@ -1783,7 +1784,7 @@ class Helpers
             }
 
             if ($order->order_status == 'confirmed' && $order->order_type != 'take_away' && config('order_confirmation_model') == 'deliveryman' && $order->payment_method == 'cash_on_delivery') {
-                if ($order->store->sub_self_delivery) {
+                if ($order->store->sub_self_delivery && $push_notification_status) {
                     $data = [
                         'title' => translate('Order_Notification'),
                         'description' => translate('messages.new_order_push_description'),
@@ -1827,10 +1828,10 @@ class Helpers
                     'order_type' => $order->order_type,
                     'image' => '',
                 ];
-                if ($order->store->sub_self_delivery) {
+                if ($order->store->sub_self_delivery && $push_notification_status) {
                     self::send_push_notif_to_topic($data, "restaurant_dm_" . $order->store_id, 'order_request',null);
                 } else
-                {if($order->zone){
+                {if($order->zone && self::getNotificationStatusData('deliveryman','deliveryman_order_notification','push_notification_status')){
                     if($order->dm_vehicle_id){
 
                         $topic = 'delivery_man_'.$order->zone_id.'_'.$order->dm_vehicle_id;

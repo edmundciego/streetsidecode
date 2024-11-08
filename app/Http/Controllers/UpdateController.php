@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use App\Models\EmailTemplate;
 use App\CentralLogics\Helpers;
 use App\Models\BusinessSetting;
+use App\Models\Coupon;
 use App\Traits\ActivationClass;
 use Illuminate\Support\Facades\DB;
 use App\Models\NotificationSetting;
@@ -40,7 +41,7 @@ class UpdateController extends Controller
         Helpers::setEnvironmentValue('BUYER_USERNAME', $request['username']);
         Helpers::setEnvironmentValue('PURCHASE_CODE', $request['purchase_key']);
         Helpers::setEnvironmentValue('APP_MODE', 'live');
-        Helpers::setEnvironmentValue('SOFTWARE_VERSION', '2.10');
+        Helpers::setEnvironmentValue('SOFTWARE_VERSION', '2.11');
         Helpers::setEnvironmentValue('REACT_APP_KEY', '45370351');
         Helpers::setEnvironmentValue('APP_NAME', '6amMart' . time());
 
@@ -182,6 +183,7 @@ class UpdateController extends Controller
         Helpers::addNewAdminNotificationSetupDataSetup();
 
         Helpers::insert_business_settings_key('country_picker_status', '1');
+        Helpers::insert_business_settings_key('manual_login_status', '1');
 
         $this->firebase_message_config_file_gen();
 
@@ -195,6 +197,12 @@ class UpdateController extends Controller
             ]);
             $recaptcha->save();
         }
+
+        Coupon::where('coupon_type', 'store_wise')
+        ->whereNull('store_id')
+        ->update([
+            'store_id' => DB::raw("JSON_UNQUOTE(JSON_EXTRACT(data, '$[0]'))")
+        ]);
 
         $data = DataSetting::where('type', 'login_admin')->pluck('value')->first();
         return redirect('/login/'.$data);

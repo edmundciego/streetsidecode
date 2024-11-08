@@ -5,7 +5,7 @@
 @section('content')
     <?php
     $deliverman_tips = 0;
-    $campaign_order = isset($order->details[0]->campaign) ? true : false;
+    $campaign_order = isset($order?->details[0]?->item_campaign_id )  ? true : false;
     $reasons=\App\Models\OrderCancelReason::where('status', 1)->where('user_type' ,'admin' )->get();
     $parcel_order = $order->order_type == 'parcel' ? true : false;
     $tax_included =0;
@@ -152,7 +152,7 @@
                             <div class="btn--container ml-auto align-items-center justify-content-end">
 
                                 @if (  !$parcel_order &&  !$editing && in_array($order->order_status, ['pending', 'confirmed', 'processing', 'accepted']) &&
-                                        isset($order->store) &&
+                                        isset($order->store) && !$campaign_order &&
                                         $order->prescription_order == 0 && count($order?->payments) == 0 && $order?->ref_bonus_amount == 0 && $order?->flash_admin_discount_amount == 0 && ($order->payment_method == 'cash_on_delivery'))
                                     <button class="btn btn-sm btn--danger btn-outline-danger font-regular edit-order" type="button">
                                         <i class="tio-edit"></i> {{ translate('messages.edit') }}
@@ -661,7 +661,7 @@
                                                                         class="avatar-status avatar-lg-status avatar-status-dark"><i
                                                                             class="tio-edit"></i></span>
                                                                     <img class="img-fluid rounded onerror-image"
-                                                                        src="{{ $campaign['image_full_url'] }}"
+                                                                        src="{{ $campaign?->image_full_url ?? asset('public/assets/admin/img/900x400/img1.jpg') }}"
                                                                         data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
                                                                         alt="Image Description">
                                                                 </div>
@@ -669,7 +669,7 @@
                                                                 <a class="avatar avatar-xl mr-3"
                                                                     href="{{ route('admin.campaign.view', ['item', $detail->campaign['id']]) }}">
                                                                     <img class="img-fluid rounded onerror-image"
-                                                                        src="{{ $campaign['image_full_url'] }}"
+                                                                        src="{{ $campaign?->image_full_url ?? asset('public/assets/admin/img/900x400/img1.jpg') }}"
                                                                         data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
                                                                         alt="Image Description">
                                                                 </a>

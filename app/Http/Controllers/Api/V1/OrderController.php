@@ -143,6 +143,7 @@ class OrderController extends Controller
             $user->phone = $request->contact_person_number;
             $user->password = bcrypt($request->password);
             $user->ref_code = Helpers::generate_referer_code($user);
+            $user->login_medium = 'manual';
             $user->save();
 
             try

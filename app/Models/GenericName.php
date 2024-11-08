@@ -15,4 +15,9 @@ class GenericName extends Model
     {
         return $this->belongsToMany(Item::class, 'item_generic_names')->using(ItemGenericName::class);
     }
+
+    public function item_campaigns()
+    {
+        return $this->belongsToMany(ItemCampaign::class, 'item_campaign_generic_names')->using(ItemCampaignGenericName::class);
+    }
 }

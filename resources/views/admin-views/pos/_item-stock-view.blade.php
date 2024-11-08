@@ -17,8 +17,6 @@
         <span class="badge badge-danger position-absolute">{{ translate('messages.Out_of_Stock') }}</span>
         @endif
 
-{{-- {{ dd($stock) }} --}}
-
         <div class="d-flex align-items-center justify-content-center active">
             <img class="img-responsive initial--30 onerror-image"
 
@@ -86,6 +84,35 @@
             <span class="d-block text-dark text-break">
                 {!! $product->description !!}
             </span>
+
+            @if (in_array($product->module->module_type ,['food','grocery']))
+                @if (count($product->nutritions) )
+                    <h4 class="mt-2"> {{ translate('messages.Nutrition_Details') }}</h4>
+                    <span class="d-block text-dark text-break">
+                        @foreach($product->nutritions as $nutrition)
+                        {{$nutrition->nutrition}}{{ !$loop->last ? ',' : '.'}}
+                        @endforeach
+                    </span>
+                @endif
+                @if (count($product->allergies))
+                    <h4 class="mt-2"> {{ translate('messages.Allergie_Ingredients') }}</h4>
+                    <span class="d-block text-dark text-break">
+                        @foreach($product->allergies as $allergy)
+                        {{$allergy->allergy}}{{ !$loop->last ? ',' : '.'}}
+                        @endforeach
+                    </span>
+                @endif
+            @endif
+
+            @if (in_array($product->module->module_type ,['pharmacy']))
+                @if ($product->generic->pluck('generic_name')->first())
+                    <h4 class="mt-2"> {{ translate('generic_name') }}</h4>
+                    <span class="d-block text-dark text-break">
+                        {{ $product->generic->pluck('generic_name')->first() }}
+                    </span>
+                @endif
+            @endif
+
             <form id="add-to-cart-form" class="mb-2">
                 @csrf
                 <input type="hidden" name="id" value="{{ $product->id }}">

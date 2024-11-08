@@ -2,10 +2,10 @@
 
 namespace App\Traits;
 
-use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Foundation\Application;
+use Illuminate\Contracts\Routing\UrlGenerator;
 use InvalidArgumentException;
-use Modules\Gateways\Entities\PaymentRequest;
+use App\Models\PaymentRequest;
 
 trait Payment
 {
@@ -50,7 +50,29 @@ trait Payment
             'mercadopago' => 'payment/mercadopago/pay',
             'bkash' => 'payment/bkash/make-payment',
             'paystack' => 'payment/paystack/pay',
-            'placetoPay' => 'payment/placetoPay/pay',
+            'fatoorah' => 'payment/fatoorah/pay',
+            'xendit' => 'payment/xendit/pay',
+            'amazon_pay' => 'payment/amazon/pay',
+            'iyzi_pay' => 'payment/iyzipay/pay',
+            'hyper_pay' => 'payment/hyperpay/pay',
+            'foloosi' => 'payment/foloosi/pay',
+            'ccavenue' => 'payment/ccavenue/pay',
+            'pvit' => 'payment/pvit/pay',
+            'moncash' => 'payment/moncash/pay',
+            'thawani' => 'payment/thawani/pay',
+            'tap' => 'payment/tap/pay',
+            'viva_wallet' => 'payment/viva/pay',
+            'hubtel' => 'payment/hubtel/pay',
+            'maxicash' => 'payment/maxicash/pay',
+            'esewa' => 'payment/esewa/pay',
+            'swish' => 'payment/swish/pay',
+            'momo' => 'payment/momo/pay',
+            'payfast' => 'payment/payfast/pay',
+            'worldpay' => 'payment/worldpay/pay',
+            'sixcash' => 'payment/sixcash/pay',
+            'phonepe' => 'payment/phonepe/pay',
+            'cashfree' => 'payment/cashfree/pay',
+            'instamojo' => 'payment/instamojo/pay',
         ];
         if (array_key_exists($payment->payment_method, $routes)) {
             return url("{$routes[$payment->payment_method]}/?payment_id={$payment->id}");

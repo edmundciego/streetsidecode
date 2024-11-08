@@ -82,7 +82,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="btn--container justify-content-end">
+                    <div class="btn--container mt-4 justify-content-end">
                         <button type="reset" id="reset_btn" class="btn btn--reset">{{translate('messages.reset')}}</button>
                         <button type="submit" class="btn btn--primary">{{translate('messages.send_again')}}</button>
                     </div>

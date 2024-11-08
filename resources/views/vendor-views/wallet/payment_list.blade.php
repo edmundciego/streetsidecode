@@ -212,5 +212,11 @@ $('.payment-warning').on('click',function (event ){
                     ProgressBar: true
                 });
         });
+$(document).ready(function() {
+    $("#withdraw_form").on("submit", function(event) {
+        $('#set_disable').attr('disabled', true);
+
+    });
+});
     </script>
 @endpush

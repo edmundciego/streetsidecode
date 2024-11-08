@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Allergy;
+use App\Models\GenericName;
+use App\Models\Nutrition;
 use App\Models\Store;
 use App\Models\Campaign;
 use App\Models\Translation;
@@ -264,6 +267,43 @@ class CampaignController extends Controller
 
         $campaign = new ItemCampaign;
 
+        $nutrition_ids = [];
+        if ($request->nutritions != null) {
+            $nutritions = $request->nutritions;
+        }
+        if (isset($nutritions)) {
+            foreach ($nutritions as $key => $value) {
+                $nutrition = Nutrition::firstOrNew(
+                    ['nutrition' => $value]
+                );
+                $nutrition->save();
+                array_push($nutrition_ids, $nutrition->id);
+            }
+        }
+        $allergy_ids = [];
+        if ($request->allergies != null) {
+            $allergies = $request->allergies;
+        }
+        if (isset($allergies)) {
+            foreach ($allergies as $key => $value) {
+                $allergy = Allergy::firstOrNew(
+                    ['allergy' => $value]
+                );
+                $allergy->save();
+                array_push($allergy_ids, $allergy->id);
+            }
+        }
+
+        $generic_ids = [];
+        if ($request->generic_name != null) {
+            $generic_name = GenericName::firstOrNew(
+                ['generic_name' => $request->generic_name]
+            );
+            $generic_name->save();
+            array_push($generic_ids, $generic_name->id);
+        }
+
+
         $category = [];
         if ($request->category_id != null) {
             array_push($category, [
@@ -388,6 +428,11 @@ class CampaignController extends Controller
         $campaign->stock= $request->current_stock;
         $campaign->unit_id = $request->unit;
         $campaign->save();
+        $campaign->nutritions()->sync($nutrition_ids);
+        $campaign->allergies()->sync($allergy_ids);
+        if($campaign->module->module_type == 'pharmacy') {
+            $campaign->generic()->sync($generic_ids);
+        }
 
         $data = [];
         $default_lang = str_replace('_', '-', app()->getLocale());
@@ -474,6 +519,43 @@ class CampaignController extends Controller
         if ($request['price'] <= $dis || $validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)]);
         }
+
+        $nutrition_ids = [];
+        if ($request->nutritions != null) {
+            $nutritions = $request->nutritions;
+        }
+        if (isset($nutritions)) {
+            foreach ($nutritions as $key => $value) {
+                $nutrition = Nutrition::firstOrNew(
+                    ['nutrition' => $value]
+                );
+                $nutrition->save();
+                array_push($nutrition_ids, $nutrition->id);
+            }
+        }
+        $allergy_ids = [];
+        if ($request->allergies != null) {
+            $allergies = $request->allergies;
+        }
+        if (isset($allergies)) {
+            foreach ($allergies as $key => $value) {
+                $allergy = Allergy::firstOrNew(
+                    ['allergy' => $value]
+                );
+                $allergy->save();
+                array_push($allergy_ids, $allergy->id);
+            }
+        }
+
+        $generic_ids = [];
+        if ($request->generic_name != null) {
+            $generic_name = GenericName::firstOrNew(
+                ['generic_name' => $request->generic_name]
+            );
+            $generic_name->save();
+            array_push($generic_ids, $generic_name->id);
+        }
+
 
         $category = [];
         if ($request->category_id != null) {
@@ -594,6 +676,11 @@ class CampaignController extends Controller
         $campaign->maximum_cart_quantity = $request->maximum_cart_quantity;
         $campaign->stock= $request->current_stock;
         $campaign->save();
+        $campaign->nutritions()->sync($nutrition_ids);
+        $campaign->allergies()->sync($allergy_ids);
+        if($campaign->module->module_type == 'pharmacy') {
+            $campaign->generic()->sync($generic_ids);
+        }
         $default_lang = str_replace('_', '-', app()->getLocale());
 
         foreach ($request->lang as $index => $key) {

@@ -16,4 +16,9 @@ class Nutrition extends Model
     {
         return $this->belongsToMany(Item::class)->using('App\Models\ItemNutrition');
     }
+
+    public function item_campaigns()
+    {
+        return $this->belongsToMany(ItemCampaign::class)->using('App\Models\ItemCampaignNutrition');
+    }
 }

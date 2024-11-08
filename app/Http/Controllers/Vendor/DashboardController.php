@@ -45,14 +45,28 @@ class DashboardController extends Controller
         $top_sell = Item::orderBy("order_count", 'desc')
             ->take(6)
             ->get();
-        $most_rated_items = Item::
-        orderBy('rating_count','desc')
+        $most_rated_items = Item::where('avg_rating' ,'>' ,0)
+        ->orderBy('avg_rating','desc')
         ->take(6)
         ->get();
         $data['top_sell'] = $top_sell;
         $data['most_rated_items'] = $most_rated_items;
 
-        return view('vendor-views.dashboard', compact('data', 'earning', 'commission', 'params'));
+        if( Helpers::get_store_data()?->storeConfig?->minimum_stock_for_warning > 0){
+            $items=  Item::where('stock' ,'<=' , Helpers::get_store_data()->storeConfig->minimum_stock_for_warning );
+        } else{
+            $items=  Item::where('stock',0 );
+        }
+
+        $out_of_stock_count=  Helpers::get_store_data()->module->module_type != 'food' ?  $items->orderby('stock')->latest()->count() : null;
+
+            $item = null;
+            if($out_of_stock_count == 1 ){
+                $item= $items->orderby('stock')->latest()->first();
+            }
+
+
+        return view('vendor-views.dashboard', compact('data', 'earning', 'commission', 'params','out_of_stock_count','item'));
     }
 
     public function store_data()

@@ -897,7 +897,7 @@
         $.post('<?php echo e(route('admin.pos.cart_items')); ?>?store_id={{request()?->store_id}}', {_token: '<?php echo e(csrf_token()); ?>'}, function (data) {
             $('#cart').empty().html(data);
         });
-        $.post('<?php echo e(route('admin.pos.single_items')); ?>?store_id={{request()?->store_id}}&&category_id={{request()?->category_id}}&&keyword={{request()?->keyword}}', {_token: '<?php echo e(csrf_token()); ?>'}, function (data) {
+        $.post('<?php echo e(route('admin.pos.single_items')); ?>' + window.location.search, {_token: '<?php echo e(csrf_token()); ?>'}, function(data) {
             $('#single-list').empty().html(data);
         });
     }

@@ -327,7 +327,27 @@ class OrderLogic
                         }
                     }
 
-                    if($order->user_id) CustomerLogic::create_loyalty_point_transaction($order->user_id, $order->id, $order->order_amount, 'order_place');
+                   $create_loyalty_point_transaction= CustomerLogic::create_loyalty_point_transaction($order->user_id, $order->id, $order->order_amount, 'order_place');
+                    if($create_loyalty_point_transaction > 0) {
+                        $notification_data = [
+                            'title' => translate('messages.Congratulation'),
+                            'description' => translate('You_have_received').' '.$create_loyalty_point_transaction.' '.translate('points_as_loyalty_point'),
+                            'order_id' => $order->id,
+                            'image' => '',
+                            'type' => 'loyalty_point',
+                        ];
+
+                        if(Helpers::getNotificationStatusData('customer','customer_loyalty_point_earning','push_notification_status') && $order->customer?->cm_firebase_token){
+                            Helpers::send_push_notif_to_device($order->customer?->cm_firebase_token, $notification_data);
+                            DB::table('user_notifications')->insert([
+                                'data' => json_encode($notification_data),
+                                'user_id' => $order->user_id,
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ]);
+                        }
+
+                    }
                 }
 
 

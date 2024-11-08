@@ -2719,6 +2719,184 @@
                     </div>
                     <br>
 
+                    {{-- Top offer near me (discounted) --}}
+
+                    <div class="row g-3">
+                        <div class="col-lg-6">
+                            <div class="max-w-353px">
+                                <h4 class="mb-2 mt-4">{{ translate('Top_offer_near_me') }} </h4>
+                                <p class="m-0 fs-12">
+                                    {{ translate('The store list arranges stores based on the dicount and closest to the customers location.') }}
+                                </p>
+                            </div>
+                        </div>
+                        @php($top_offer_near_me_stores_default_status = \App\Models\BusinessSetting::where('key', 'top_offer_near_me_stores_default_status')->first())
+                        @php($top_offer_near_me_stores_default_status = $top_offer_near_me_stores_default_status ? $top_offer_near_me_stores_default_status->value : 1)
+                        <div class="col-lg-6">
+                            <div class="__bg-FAFAFA rounded">
+                                <!-- Default Collapsible Card -->
+                                <div class="sorting-card p-20px">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="w-0 flex-grow">
+                                            <h5 class="fs-14 font-semibold">
+                                                {{ translate('Use default sorting list') }}</h5>
+                                            <label class="form-label d-flex align-items-center m-0">
+                                                    <span class="input-label-secondary text--title ml-0 mr-1"
+                                                            data-toggle="tooltip" data-placement="top"
+                                                            data-original-title="">
+                                                        <i class="tio-info-outined"></i>
+                                                    </span>
+                                                <div class="fs-13">
+                                                    {{ translate('This section sorted based on the dicount and closest to the customers location') }}
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <label
+                                                class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
+                                                <input type="radio" name="top_offer_near_me_stores_default_status"
+                                                        value="1" class="toggle-switch-input collapse-div-toggler"
+                                                    {{ $top_offer_near_me_stores_default_status == '1' ? 'checked' : '' }}>
+                                                <span class="toggle-switch-label text">
+                                                        <span class="toggle-switch-indicator"></span>
+                                                    </span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Custom Collapsible Card -->
+                                <div class="sorting-card p-20px">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="w-0 flex-grow">
+                                            <h5 class="fs-14 font-semibold">
+                                                {{ translate('Use custom sorting list') }}</h5>
+                                            <label class="form-label d-flex align-items-center m-0">
+                                                    <span class="input-label-secondary text--title ml-0 mr-1"
+                                                            data-toggle="tooltip" data-placement="top"
+                                                            data-original-title="">
+                                                        <i class="tio-info-outined"></i>
+                                                    </span>
+                                                <div class="fs-13">
+                                                    {{ translate('Set customized condition to show this list') }}
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <label
+                                                class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
+                                                <input type="radio" name="top_offer_near_me_stores_default_status"
+                                                        value="0" class="toggle-switch-input collapse-div-toggler"
+                                                    {{ $top_offer_near_me_stores_default_status == '0' ? 'checked' : '' }}>
+                                                <span class="toggle-switch-label text">
+                                                        <span class="toggle-switch-indicator"></span>
+                                                    </span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="inner-collapse-div">
+                                        <div class="pt-4">
+                                            @php($top_offer_near_me_stores_sort_by_general = \App\Models\PriorityList::where('name', 'top_offer_near_me_stores_sort_by_general')->where('type', 'general')->first())
+                                            @php($top_offer_near_me_stores_sort_by_general = $top_offer_near_me_stores_sort_by_general ? $top_offer_near_me_stores_sort_by_general->value : '')
+                                            <div class="border rounded p-3 d-flex flex-column gap-2 fs-14 mb-10px">
+                                                <label class="form-check form--check">
+                                                    <input class="form-check-input" type="radio"
+                                                            name="top_offer_near_me_stores_sort_by_general" value="review_count"
+                                                        {{ $top_offer_near_me_stores_sort_by_general == 'review_count' ? 'checked' : '' }}>
+                                                    <span class="form-check-label">
+                                                            {{ translate('Sort by reviews count') }}
+                                                        </span>
+                                                </label>
+                                                <label class="form-check form--check">
+                                                    <input class="form-check-input" type="radio"
+                                                            name="top_offer_near_me_stores_sort_by_general" value="rating"
+                                                        {{ $top_offer_near_me_stores_sort_by_general == 'rating' ? 'checked' : '' }}>
+                                                    <span class="form-check-label">
+                                                            {{ translate('Sort by ratings') }}
+                                                        </span>
+                                                </label>
+                                                <label class="form-check form--check">
+                                                    <input class="form-check-input" type="radio"
+                                                        name="top_offer_near_me_stores_sort_by_general" value="asc_discount"
+                                                        {{ $top_offer_near_me_stores_sort_by_general == 'asc_discount' ? 'checked' : '' }}>
+                                                    <span class="form-check-label">
+                                                        {{ translate('Based on the Discount amount - Ascending') }}
+                                                    </span>
+                                                </label>
+                                                <label class="form-check form--check">
+                                                    <input class="form-check-input" type="radio"
+                                                        name="top_offer_near_me_stores_sort_by_general" value="desc_discount"
+                                                        {{ $top_offer_near_me_stores_sort_by_general == 'desc_discount' ? 'checked' : '' }}>
+                                                    <span class="form-check-label">
+                                                        {{ translate('Based on the Discount amount - Descending') }}
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            @php($top_offer_near_me_stores_sort_by_unavailable = \App\Models\PriorityList::where('name', 'top_offer_near_me_stores_sort_by_unavailable')->where('type', 'unavailable')->first())
+                                            @php($top_offer_near_me_stores_sort_by_unavailable = $top_offer_near_me_stores_sort_by_unavailable ? $top_offer_near_me_stores_sort_by_unavailable->value : '')
+                                            <div class="border rounded p-3 d-flex flex-column gap-2 fs-14 mb-10px">
+                                                <label class="form-check form--check">
+                                                    <input class="form-check-input" type="radio"
+                                                            name="top_offer_near_me_stores_sort_by_unavailable" value="last"
+                                                        {{ $top_offer_near_me_stores_sort_by_unavailable == 'last' ? 'checked' : '' }}>
+                                                    <span class="form-check-label">
+                                                            {{ translate('Show currently closed stores in the last') }}
+                                                        </span>
+                                                </label>
+                                                <label class="form-check form--check">
+                                                    <input class="form-check-input" type="radio"
+                                                            name="top_offer_near_me_stores_sort_by_unavailable" value="remove"
+                                                        {{ $top_offer_near_me_stores_sort_by_unavailable == 'remove' ? 'checked' : '' }}>
+                                                    <span class="form-check-label">
+                                                            {{ translate('Remove currently closed stores from the list') }}
+                                                        </span>
+                                                </label>
+                                                <label class="form-check form--check">
+                                                    <input class="form-check-input" type="radio"
+                                                            name="top_offer_near_me_stores_sort_by_unavailable" value="none"
+                                                        {{ $top_offer_near_me_stores_sort_by_unavailable == 'none' ? 'checked' : '' }}>
+                                                    <span class="form-check-label">
+                                                            {{ translate('None') }}
+                                                        </span>
+                                                </label>
+                                            </div>
+                                            @php($top_offer_near_me_stores_sort_by_temp_closed = \App\Models\PriorityList::where('name', 'top_offer_near_me_stores_sort_by_temp_closed')->where('type', 'temp_closed')->first())
+                                            @php($top_offer_near_me_stores_sort_by_temp_closed = $top_offer_near_me_stores_sort_by_temp_closed ? $top_offer_near_me_stores_sort_by_temp_closed->value : '')
+                                            <div class="border rounded p-3 d-flex flex-column gap-2 fs-14 mb-10px">
+                                                <label class="form-check form--check">
+                                                    <input class="form-check-input" type="radio"
+                                                            name="top_offer_near_me_stores_sort_by_temp_closed" value="last"
+                                                        {{ $top_offer_near_me_stores_sort_by_temp_closed == 'last' ? 'checked' : '' }}>
+                                                    <span class="form-check-label">
+                                                            {{ translate('Show temporarily off stores in the last') }}
+                                                        </span>
+                                                </label>
+                                                <label class="form-check form--check">
+                                                    <input class="form-check-input" type="radio"
+                                                            name="top_offer_near_me_stores_sort_by_temp_closed" value="remove"
+                                                        {{ $top_offer_near_me_stores_sort_by_temp_closed == 'remove' ? 'checked' : '' }}>
+                                                    <span class="form-check-label">
+                                                            {{ translate('Remove temporarily off stores from the list') }}
+                                                        </span>
+                                                </label>
+                                                <label class="form-check form--check">
+                                                    <input class="form-check-input" type="radio"
+                                                            name="top_offer_near_me_stores_sort_by_temp_closed" value="none"
+                                                        {{ $top_offer_near_me_stores_sort_by_temp_closed == 'none' ? 'checked' : '' }}>
+                                                    <span class="form-check-label">
+                                                            {{ translate('None') }}
+                                                        </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+
+
+
                     <div class="btn--container justify-content-end position-sticky bottom-0 p-3 bg-white border-top">
                         <button id="reset_btn" type="reset"
                             class="btn btn--reset">{{ translate('Reset') }}</button>

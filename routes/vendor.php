@@ -128,6 +128,7 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             //Mainul
             Route::get('get-variations', 'ItemController@get_variations')->name('get-variations');
             Route::get('stock-limit-list', 'ItemController@stock_limit_list')->name('stock-limit-list');
+            Route::get('get-stock', 'ItemController@get_stock')->name('get_stock');
             Route::post('stock-update', 'ItemController@stock_update')->name('stock-update');
 
             Route::post('food-variation-generate', 'ItemController@food_variation_generator')->name('food-variation-generate');

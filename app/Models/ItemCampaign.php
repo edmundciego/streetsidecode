@@ -54,6 +54,19 @@ class ItemCampaign extends Model
         return $this->morphMany(Translation::class, 'translationable');
     }
 
+    public function allergies()
+    {
+        return $this->belongsToMany(Allergy::class);
+    }
+    public function generic()
+    {
+        return $this->belongsToMany(GenericName::class,'item_campaign_generic_names');
+    }
+    public function nutritions()
+    {
+        return $this->belongsToMany(Nutrition::class);
+    }
+
     public function getTitleAttribute($value){
         if (count($this->translations) > 0) {
             foreach ($this->translations as $translation) {

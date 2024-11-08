@@ -219,8 +219,11 @@ class DeliverymanController extends Controller
         }
         else
         {
-            $orders = $orders->where(function($query){
-                $query->whereIn('order_status', ['confirmed','processing','handover'])->orWhere('order_type','parcel');
+            $orders = $orders->where(function ($query) {
+                return $query->whereIn('order_status', ['confirmed', 'processing', 'handover'])
+                    ->orWhere(function ($subQuery) {
+                        return  $subQuery->where('order_type', 'parcel')->whereIn('order_status', ['confirmed', 'processing', 'handover']);
+                    });
             });
         }
         if(isset($dm->vehicle_id )){

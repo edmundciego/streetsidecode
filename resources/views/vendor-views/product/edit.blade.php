@@ -179,7 +179,7 @@
                                 </div>
                                 <div class="custom-file mt-3">
                                     <input type="file" name="image" id="customFileEg1" class="custom-file-input"
-                                            accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
+                                            accept=".jpg, .png, .jpeg, .webp , .gif, .bmp, .tif, .tiff|image/*">
                                     <label class="custom-file-label" for="customFileEg1">{{translate('messages.choose_file')}}</label>
                                 </div>
                             </div>
@@ -298,8 +298,7 @@
                                                 <i class="tio-info-outined"></i>
                                             </span>
                                         </label>
-                                        <select name="nutritions[]" class="form-control multiple-select2" multiple>
-                                            <option disabled>{{translate('Select Nutrition')}}</option>
+                                        <select name="nutritions[]" class="form-control multiple-select2" data-placeholder="{{ translate('messages.Type your content and press enter') }}" multiple>
                                             @foreach (\App\Models\Nutrition::all() as $nutrition)
                                                 <option value="{{ $nutrition->nutrition }}" {{ $product_nutritions->contains($nutrition->id) ? 'selected' : '' }}>{{ $nutrition->nutrition }}</option>
                                             @endforeach
@@ -314,8 +313,7 @@
                                                 <i class="tio-info-outined"></i>
                                             </span>
                                         </label>
-                                        <select name="allergies[]" class="form-control multiple-select2" multiple>
-                                            <option disabled>{{translate('Select Allegren Ingredients')}}</option>
+                                        <select name="allergies[]" class="form-control multiple-select2" data-placeholder="{{ translate('messages.Type your content and press enter') }}" multiple>
                                             @foreach (\App\Models\Allergy::all() as $allergy)
                                                 <option value="{{ $allergy->allergy }}" {{ $product_allergies->contains($allergy->id) ? 'selected' : '' }}>{{ $allergy->allergy }}</option>
                                             @endforeach
@@ -383,7 +381,7 @@
                                         </span>
                                     </label>
                                     <div class="dropdown suggestion_dropdown">
-                                        <input type="text" class="form-control" name="generic_name" value="{{ isset($temp_product) && $temp_product == 1 ?  \App\Models\GenericName::where('id', json_decode($product?->generic_ids))->first()?->generic_name : $product->generic->pluck('generic_name')->first() }}" autocomplete="off">
+                                        <input type="text" class="form-control" name="generic_name" placeholder="{{ translate('messages.Type your content here') }}" value="{{ isset($temp_product) && $temp_product == 1 ?  \App\Models\GenericName::where('id', json_decode($product?->generic_ids))->first()?->generic_name : $product->generic->pluck('generic_name')->first() }}" autocomplete="off">
                                         @if(count(\App\Models\GenericName::select(['generic_name'])->get())>0)
                                         <div class="dropdown-menu">
                                             @foreach (\App\Models\GenericName::select(['generic_name'])->get() as $generic_name)

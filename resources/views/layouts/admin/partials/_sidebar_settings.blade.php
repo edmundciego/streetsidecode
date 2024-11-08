@@ -289,7 +289,7 @@
                                    title="{{ translate('messages.business_settings') }}">{{ translate('messages.system_management') }}</small>
                             <small class="tio-more-horizontal nav-subtitle-replacer"></small>
                         </li>
-                        <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/third-party*') || Request::is('admin/business-settings/fcm*') || Request::is('admin/business-settings/login-url-setup*') || Request::is('admin/business-settings/offline-payment*') ? 'active' : '' }}">
+                        <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/third-party*') || Request::is('admin/business-settings/fcm*') || Request::is('admin/business-settings/offline-payment*') ? 'active' : '' }}">
                             <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:"
                                title="{{ translate('messages.3rd_party_&_configurations') }}">
                                 <span class="nav-icon tio-account-square-outlined"></span>
@@ -314,13 +314,13 @@
                                             class="text-truncate">{{ translate('messages.firebase_notification') }}</span>
                                     </a>
                                 </li>
-                                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/login-url-setup*') ? 'active' : '' }}">
-                                    <a class="nav-link " href="{{ route('admin.business-settings.login_url_page') }}"
-                                       title="{{ translate('messages.login_url_page') }}">
-                                        <span class="tio-circle nav-indicator-icon"></span>
-                                        <span class="text-truncate">{{ translate('messages.login_url_page') }}</span>
-                                    </a>
-                                </li>
+{{--                                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/login-url-setup*') ? 'active' : '' }}">--}}
+{{--                                    <a class="nav-link " href="{{ route('admin.business-settings.login_url_page') }}"--}}
+{{--                                       title="{{ translate('messages.login_url_page') }}">--}}
+{{--                                        <span class="tio-circle nav-indicator-icon"></span>--}}
+{{--                                        <span class="text-truncate">{{ translate('messages.login_url_page') }}</span>--}}
+{{--                                    </a>--}}
+{{--                                </li>--}}
 
                                 {{-- <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/login_page*') ? 'active' : '' }}">
                                     <a class="nav-link " href="{{ route('admin.business-settings.login_page') }}"
@@ -341,6 +341,14 @@
                                 @endif
                             </ul>
                         </li>
+                        <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/login-settings*') || Request::is('admin/business-settings/login-url-setup*') ? 'active' : '' }}">
+                            <a class="nav-link " href="{{ route('admin.business-settings.login-settings.index') }}"
+                               title="{{ translate('messages.login_setup') }}">
+                                <span class="tio-devices-apple nav-icon"></span>
+                                <span class="text-truncate text-capitalize">{{ translate('messages.login_setup') }}</span>
+                            </a>
+                        </li>
+
                         <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/react*') ? 'active' : '' }}">
                             <a class="nav-link " href="{{ route('admin.business-settings.react-setup') }}"
                                title="{{ translate('messages.react_site') }}">

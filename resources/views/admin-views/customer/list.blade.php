@@ -28,14 +28,14 @@
                             <label class="form-label">{{translate('Order Date')}}</label>
                             <div class="position-relative">
                                 <span class="tio-calendar icon-absolute-on-right"></span>
-                                <input type="text" data-startDate="09/04/2024"  data-endDate="09/24/2024" readonly name="order_date" value="{{ request()->get('order_date')  ?? null }}" class="date-range-picker form-control">
+                                <input type="text" data-title="{{ translate('Select_Order_Date_Range') }}" data-startDate="09/04/2024"  data-endDate="09/24/2024" readonly name="order_date" value="{{ request()->get('order_date')  ?? null }}" class="date-range-picker form-control">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">{{translate('Customer Joining Date')}}</label>
                             <div class="position-relative">
                                 <span class="tio-calendar icon-absolute-on-right"></span>
-                                <input type="text" readonly name="join_date" value="{{ request()->get('join_date') ?? null }}" class="date-range-picker form-control">
+                                <input type="text" data-title="{{ translate('Select_Customer_Joining_Date_Range') }}" readonly name="join_date" value="{{ request()->get('join_date') ?? null }}" class="date-range-picker form-control">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -110,20 +110,6 @@
 
                         <div id="usersExportDropdown"
                             class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
-                            {{-- <span class="dropdown-header">{{ translate('messages.options') }}</span>
-                            <a id="export-copy" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                    src="{{ asset('public/assets/admin') }}/svg/illustrations/copy.svg"
-                                    alt="Image Description">
-                                {{ translate('messages.copy') }}
-                            </a>
-                            <a id="export-print" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                    src="{{ asset('public/assets/admin') }}/svg/illustrations/print.svg"
-                                    alt="Image Description">
-                                {{ translate('messages.print') }}
-                            </a> --}}
-                            {{-- <div class="dropdown-divider"></div> --}}
                             <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
                             <a id="export-excel" class="dropdown-item" href="{{route('admin.customer.export', ['type'=>'excel',request()->getQueryString()])}}">
                                 <img class="avatar avatar-xss avatar-4by3 mr-2"
@@ -139,98 +125,6 @@
                             </a>
                         </div>
                     </div>
-                    <!-- End Unfold -->
-
-                    <!-- Unfold -->
-                    {{-- <div class="hs-unfold">
-                        <a class="js-hs-unfold-invoker btn btn-sm btn-white min-height-40" href="javascript:;"
-                            data-hs-unfold-options='{
-                                    "target": "#showHideDropdown",
-                                    "type": "css-animation"
-                                }'>
-                            <i class="tio-table mr-1"></i> {{ translate('messages.columns') }} <span
-                                class="badge badge-soft-dark rounded-circle ml-1"></span>
-                        </a>
-
-                        <div id="showHideDropdown"
-                            class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-right dropdown-card min--240">
-                            <div class="card card-sm">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <span class="mr-2">{{ translate('messages.name') }}</span>
-
-                                        <!-- Checkbox Switch -->
-                                        <label class="toggle-switch toggle-switch-sm" for="toggleColumn_name">
-                                            <input type="checkbox" class="toggle-switch-input"
-                                                id="toggleColumn_name" checked>
-                                            <span class="toggle-switch-label">
-                                                <span class="toggle-switch-indicator"></span>
-                                            </span>
-                                        </label>
-                                        <!-- End Checkbox Switch -->
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <span class="mr-2">{{ translate('messages.contact_information') }}</span>
-
-                                        <!-- Checkbox Switch -->
-                                        <label class="toggle-switch toggle-switch-sm" for="toggleColumn_email">
-                                            <input type="checkbox" class="toggle-switch-input"
-                                                id="toggleColumn_email" checked>
-                                            <span class="toggle-switch-label">
-                                                <span class="toggle-switch-indicator"></span>
-                                            </span>
-                                        </label>
-                                        <!-- End Checkbox Switch -->
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <span class="mr-2">{{ translate('messages.total_order') }}</span>
-
-                                        <!-- Checkbox Switch -->
-                                        <label class="toggle-switch toggle-switch-sm"
-                                            for="toggleColumn_total_order">
-                                            <input type="checkbox" class="toggle-switch-input"
-                                                id="toggleColumn_total_order" checked>
-                                            <span class="toggle-switch-label">
-                                                <span class="toggle-switch-indicator"></span>
-                                            </span>
-                                        </label>
-                                        <!-- End Checkbox Switch -->
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <span class="mr-2">{{ translate('messages.active/Inactive') }}</span>
-
-                                        <!-- Checkbox Switch -->
-                                        <label class="toggle-switch toggle-switch-sm" for="toggleColumn_status">
-                                            <input type="checkbox" class="toggle-switch-input"
-                                                id="toggleColumn_status" checked>
-                                            <span class="toggle-switch-label">
-                                                <span class="toggle-switch-indicator"></span>
-                                            </span>
-                                        </label>
-                                        <!-- End Checkbox Switch -->
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="mr-2">{{ translate('messages.actions') }}</span>
-
-                                        <!-- Checkbox Switch -->
-                                        <label class="toggle-switch toggle-switch-sm" for="toggleColumn_actions">
-                                            <input type="checkbox" class="toggle-switch-input"
-                                                id="toggleColumn_actions" checked>
-                                            <span class="toggle-switch-label">
-                                                <span class="toggle-switch-indicator"></span>
-                                            </span>
-                                        </label>
-                                        <!-- End Checkbox Switch -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div> --}}
-                    <!-- End Unfold -->
                 </div>
                 <!-- End Row -->
             </div>
@@ -284,7 +178,7 @@
                                         <div class="d-flex align-items-center gap-2">
                                             <img class="rounded aspect-1-1 object-cover" width="40" data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}" src="{{ $customer->image_full_url }}" alt="Image Description">
                                             <a href="{{ route('admin.users.customer.view', [$customer['id']]) }}" class="text--hover">
-                                                {{ $customer['f_name'] . ' ' . $customer['l_name'] }}
+                                                {{ $customer['f_name'] ?  $customer['f_name'] . ' ' . $customer['l_name'] : translate('messages.Incomplete_Profile') }}
                                             </a>
                                         </div>
                                     </td>

@@ -66,15 +66,6 @@ class VendorLoginController extends Controller
             if (auth('vendor_employee')->attempt($data)) {
                 $token = $this->genarate_token($request['email']);
                 $vendor = VendorEmployee::where(['email' => $request['email']])->first();
-                // if($vendor->store->status == 0)
-                // {
-                //     return response()->json([
-                //         'errors' => [
-                //             ['code' => 'auth-002', 'message' => translate('messages.Your_account_is_suspended')]
-                //         ]
-                //     ], 403);
-                // }
-
                 $storeSubscriptionCheck=  $this->storeSubscriptionCheck($vendor?->store,$vendor,$token);
                 if(data_get($storeSubscriptionCheck,'type') != null){
                     return response()->json(data_get($storeSubscriptionCheck,'data'), data_get($storeSubscriptionCheck,'code'));
@@ -123,8 +114,6 @@ class VendorLoginController extends Controller
         $validator = Validator::make($request->all(), [
             'f_name' => 'required|max:100',
             'l_name' => 'nullable|max:100',
-            // 'name' => 'required|max:191',
-            // 'address' => 'required|max:1000',
             'latitude' => 'required',
             'longitude' => 'required',
             'email' => 'required|unique:vendors',
@@ -207,6 +196,21 @@ class VendorLoginController extends Controller
         Translation::insert($data);
 
 
+        try{
+            $admin= Admin::where('role_id', 1)->first();
+            $mail_status = Helpers::get_mail_status('registration_mail_status_store');
+            if(config('mail.status') && $mail_status == '1' &&  Helpers::getNotificationStatusData('store','store_registration','mail_status')){
+                Mail::to($request['email'])->send(new \App\Mail\VendorSelfRegistration('pending', $vendor->f_name.' '.$vendor->l_name));
+            }
+            $mail_status = Helpers::get_mail_status('store_registration_mail_status_admin');
+            if(config('mail.status') && $mail_status == '1' &&  Helpers::getNotificationStatusData('admin','store_self_registration','mail_status')){
+                Mail::to($admin['email'])->send(new \App\Mail\StoreRegistration('pending', $vendor->f_name.' '.$vendor->l_name));
+            }
+        }catch(\Exception $ex){
+            info($ex->getMessage());
+        }
+
+
         if (Helpers::subscription_check()) {
                 if ($request->business_plan == 'subscription' && $request->package_id != null ) {
                     $store->package_id = $request->package_id;
@@ -217,7 +221,6 @@ class VendorLoginController extends Controller
                         'package_id'=> $store->package_id,
                         'type'=> 'subscription',
                         'message'=>translate('messages.application_placed_successfully')],200);
-
                 }
                 elseif($request->business_plan == 'commission' ){
                     $store->store_business_model = 'commission';
@@ -242,20 +245,6 @@ class VendorLoginController extends Controller
                     'message'=>translate('messages.application_placed_successfully')],200);
             }
 
-        try{
-            $admin= Admin::where('role_id', 1)->first();
-            $mail_status = Helpers::get_mail_status('registration_mail_status_store');
-            if(config('mail.status') && $mail_status == '1' &&  Helpers::getNotificationStatusData('store','store_registration','mail_status')){
-                Mail::to($request['email'])->send(new \App\Mail\VendorSelfRegistration('pending', $vendor->f_name.' '.$vendor->l_name));
-            }
-            $mail_status = Helpers::get_mail_status('store_registration_mail_status_admin');
-            if(config('mail.status') && $mail_status == '1' &&  Helpers::getNotificationStatusData('admin','store_self_registration','mail_status')){
-                Mail::to($admin['email'])->send(new \App\Mail\StoreRegistration('pending', $vendor->f_name.' '.$vendor->l_name));
-            }
-        }catch(\Exception $ex){
-            info($ex->getMessage());
-        }
-
         return response()->json([
             'store_id'=> $store->id,
             'message'=>translate('messages.application_placed_successfully')],200);
@@ -266,64 +255,56 @@ class VendorLoginController extends Controller
 
 
     private function storeSubscriptionCheck($store, $vendor,$token){
-
-
-        if($store?->store_business_model == 'subscription' && $store->store_sub_trans && $store->store_sub_trans->transaction_status == 0){
-            return [ 'type' => 'pending_payment',
-                        'code' => 200,
-                        'data'=> ['pending_payment' => ['id' =>$store->store_sub_trans->id ]
-                        ]
-                ];
-        }
-
-        if( $store?->store_business_model == 'none')
-        {
-            return [ 'type' => 'subscribed',
-            'code' => 200,
-            'data'=> [
-                'subscribed' => ['store_id' => $store?->id, 'package_id' => $store?->package_id  , 'type' => 'new_join']
-                ]
-            ];
-        }
-
-
-        if($store->status == 0 && $vendor->status == 0)
-        {
-
-            return [ 'type' => 'errors',
-            'code' => 403,
-            'data'=> [
-                'errors' => [
-                    ['code' => 'auth-002', 'message' => translate('messages.Your_registration_is_not_approved_yet._You_can_login_once_admin_approved_the_request')]
+        if ($store?->store_business_model == 'none') {
+            $vendor->auth_token = $token;
+            $vendor?->save();
+            return [
+                'type' => 'subscribed',
+                'code' => 200,
+                'data' => [
+                    'subscribed' => [
+                        'store_id' => $store?->id,
+                        'token' => $token,
+                        'package_id' => $store?->package_id,
+                        'zone_wise_topic' => $store?->zone?->store_wise_topic,
+                        'type' => 'new_join'
                     ]
                 ]
             ];
+        }
 
-
-
-        } elseif($store->status == 0 && $vendor->status == 1){
-
-            return [ 'type' => 'errors',
-            'code' => 403,
-            'data'=> [
-                'errors' => [
-                    ['code' => 'auth-002', 'message' => translate('messages.Your_account_is_suspended')]
+        if ($store->status == 0 && $vendor->status == 0) {
+            return [
+                'type' => 'errors',
+                'code' => 403,
+                'data' => [
+                    'errors' => [
+                        ['code' => 'auth-002', 'message' => translate('messages.Your_registration_is_not_approved_yet._You_can_login_once_admin_approved_the_request')]
                     ]
                 ]
             ];
-
+        } elseif ($store->status == 0 && $vendor->status == 1 && in_array($store?->store_business_model ,['subscription' ,'commission']) ) {
+            return [
+                'type' => 'errors',
+                'code' => 403,
+                'data' => [
+                    'errors' => [
+                        ['code' => 'auth-002', 'message' => translate('messages.Your_account_is_suspended')]
+                    ]
+                ]
+            ];
         }
 
-
-        if ( $store?->store_business_model == 'subscription' ) {
+        if ($store?->store_business_model == 'subscription') {
             $store_sub = $store?->store_sub;
             if (isset($store_sub)) {
-                if ($store_sub?->mobile_app == 0 ) {
-                    return [ 'type' => 'errors',
-                    'code' => 401,
-                    'data'=> [
-                        'errors' => [
-                            ['code' => 'no_mobile_app', 'message' => translate('messages.Your Subscription Plan is not Active for Mobile App')]
+                if ($store_sub?->mobile_app == 0) {
+                    return [
+                        'type' => 'errors',
+                        'code' => 401,
+                        'data' => [
+                            'errors' => [
+                                ['code' => 'no_mobile_app', 'message' => translate('messages.Your Subscription Plan is not Active for Mobile App')]
                             ]
                         ]
                     ];
@@ -331,49 +312,27 @@ class VendorLoginController extends Controller
             }
         }
 
+        if ($store?->store_business_model == 'unsubscribed' && isset($store?->store_sub_update_application)) {
+            return null;
+        }
 
-        if( $store?->store_business_model == 'unsubscribed' && isset($store?->store_sub_update_application)){
+        if ($store?->store_business_model == 'unsubscribed' && !isset($store?->store_sub_update_application)) {
             $vendor->auth_token = $token;
             $vendor?->save();
-                    if($store?->store_sub_update_application?->max_product== 'unlimited' ){
-                        $max_product_uploads= -1;
-                    }
-                    else{
-                        $max_product_uploads= $store?->store_sub_update_application?->max_product - $store?->foods()?->count();
-                        if($max_product_uploads > 0){
-                            $max_product_uploads ?? 0;
-                        }elseif($max_product_uploads < 0) {
-                            $max_product_uploads = 0;
-                        }
-                    }
-
-                $data['subscription_other_data'] =  [
-                    'total_bill'=>  (float) SubscriptionTransaction::where('store_id', $store->id)->where('package_id', $store?->store_sub_update_application?->package?->id)->sum('paid_amount'),
-                    'max_product_uploads' => (int) $max_product_uploads,
-                    ];
-
-            return response()->json(['token' => $token, 'zone_wise_topic'=> $store?->zone?->store_wise_topic,
-            'subscription' => $store?->store_sub_update_application,
-            'subscription_other_data' => $data['subscription_other_data'],
-            'balance' =>(float)($vendor?->wallet?->balance ?? 0),
-            'store_id' =>(int) $store?->id,
-            'package' => $store?->store_sub_update_application?->package
-            ], 205);
-        }
-
-        if($store?->store_business_model == 'unsubscribed' && !isset($store?->store_sub_update_application)){
-
-            return [ 'type' => 'subscribed',
-            'code' => 200,
-            'data'=> [
-                'subscribed' => [
-                    'store_id' => $store?->id, 'type' => 'new_join']
+            return [
+                'type' => 'subscribed',
+                'code' => 200,
+                'data' => [
+                    'subscribed' => [
+                        'store_id' => $store?->id,
+                        'token' => $token,
+                        'zone_wise_topic' => $store?->zone?->store_wise_topic,
+                        'type' => 'new_join'
+                    ]
                 ]
             ];
-
         }
- return null ;
+        return null ;
     }
-
 
 }

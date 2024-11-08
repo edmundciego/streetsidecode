@@ -271,9 +271,6 @@ $val= (string) ($cash_in_hand_overflow_store_amount - (($cash_in_hand_overflow_s
                 <div class="modal-content">
                     <div class="modal-body p-0">
                         <div class="trial-ended-modal-wrapper">
-                            {{-- <button type="button" class="trial-ended-close-btn text-md-white" data-dismiss="modal">
-                                <i class="tio-clear-circle"></i>
-                            </button> --}}
                             <div class="trial-ended-modal-content align-self-center">
                                 <h3 class="title">{{ translate('Your_Free_Trial_Has_Been_Ended') }}</h3>
                                 <p class="mb-4">
@@ -308,9 +305,6 @@ $val= (string) ($cash_in_hand_overflow_store_amount - (($cash_in_hand_overflow_s
                 <div class="right">
                     <a href="{{route('vendor.subscriptionackage.subscriberDetail' ,['open_plans' => true])}}" class="btn btn-light">{{ translate('Choose_Subscription_Plan') }} <i class="tio-arrow-forward"></i></a>
                 </div>
-                {{-- <button type="button" class="trial-close">
-                    <i class="tio-clear-circle"></i>
-                </button> --}}
             </div>
         </div>
         @elseif ( Session::get('subscription_cancel_close_btn') !== true &&  $store_data?->store_sub  && $store_data?->store_sub?->is_canceled == 1)
@@ -386,10 +380,6 @@ $val= (string) ($cash_in_hand_overflow_store_amount - (($cash_in_hand_overflow_s
 
                     <a href="{{route('vendor.subscriptionackage.subscriberDetail' ,['open_plans' => true])}}" class="btn btn-light">{{ translate('Change/Renew Subscription_Plan') }} <i class="tio-arrow-forward"></i></a>
                 </div>
-{{--
-                <button type="button" class="trial-close">
-                    <i class="tio-clear-circle"></i>
-                </button> --}}
             </div>
         </div>
 

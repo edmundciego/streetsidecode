@@ -726,7 +726,8 @@ class POSController extends Controller
             'l_name' => $request['l_name'],
             'email' => $request['email'],
             'phone' => $request['phone'],
-            'password' => bcrypt('password')
+            'password' => bcrypt('password'),
+            'is_from_pos' => 1
         ]);
         try {
             if (config('mail.status') && $request->email && Helpers::get_mail_status('pos_registration_mail_status_user') == '1' && Helpers::getNotificationStatusData('customer','customer_pos_registration','mail_status')) {

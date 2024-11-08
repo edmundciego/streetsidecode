@@ -865,7 +865,8 @@ class ReportController extends Controller
         }));
         $key = isset($request['search']) ? explode(' ', $request['search']) : [];
 
-        $items = Item::withoutGlobalScope(StoreScope::class)->with(['store', 'store.zone'])->whereHas('store.module', function ($query) use ($stock_modules) {
+        $items = Item::withoutGlobalScope(StoreScope::class)
+        ->with(['store', 'store.zone'])->whereHas('store.module', function ($query) use ($stock_modules) {
             $query->where('module_type', Config::get('module.current_module_type'));
         })
             ->when($request->query('module_id', null), function ($query) use ($request) {
@@ -883,6 +884,9 @@ class ReportController extends Controller
                         $q->orWhere('name', 'like', "%{$value}%");
                     }
                 });
+            })
+            ->whereHas('store.StoreConfig', function ($query) {
+                $query->whereColumn('items.stock', '<=', 'store_configs.minimum_stock_for_warning')->orwhere('items.stock', 0);
             })
             ->orderBy('stock')
             ->paginate(config('default_pagination'))->withQueryString();
@@ -920,14 +924,12 @@ class ReportController extends Controller
                     }
                 });
             })
+            ->whereHas('store.StoreConfig', function ($query) {
+                $query->whereColumn('items.stock', '<=', 'store_configs.minimum_stock_for_warning')->orwhere('items.stock', 0);
+            })
             ->orderBy('stock')
             ->get();
 
-        // if ($request->type == 'excel') {
-        //     return (new FastExcel(Helpers::export_stock_wise_report($items)))->download('StockReport.xlsx');
-        // } elseif ($request->type == 'csv') {
-        //     return (new FastExcel(Helpers::export_stock_wise_report($items)))->download('StockReport.csv');
-        // }
         $data = [
             'items'=>$items,
             'search'=>$request->search??null,
@@ -3133,6 +3135,9 @@ class ReportController extends Controller
                     }
                 });
             })
+            ->whereHas('store.StoreConfig', function ($query) {
+                $query->whereColumn('items.stock', '<=', 'store_configs.minimum_stock_for_warning')->orwhere('items.stock', 0);
+            })
             ->orderBy('stock')
             ->paginate(config('default_pagination'))->withQueryString();
 
@@ -3169,6 +3174,9 @@ class ReportController extends Controller
                         $q->orWhere('name', 'like', "%{$value}%");
                     }
                 });
+            })
+            ->whereHas('store.StoreConfig', function ($query) {
+                $query->whereColumn('items.stock', '<=', 'store_configs.minimum_stock_for_warning')->orwhere('items.stock', 0);
             })
             ->orderBy('stock')
             ->get();

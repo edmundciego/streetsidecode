@@ -163,6 +163,17 @@ class VendorController extends Controller
                     ];
                 }
 
+
+                if( $st?->storeConfig?->minimum_stock_for_warning > 0){
+                    $items=  $st?->items()->where('stock' ,'<=' , $st?->storeConfig?->minimum_stock_for_warning );
+                } else{
+                    $items=  $st?->items()->where('stock',0 );
+                }
+
+                $out_of_stock_count=  $st?->module->module_type != 'food' ?  $items->orderby('stock')->latest()->count() : 0;
+                $vendor['out_of_stock_count'] = (int) $out_of_stock_count;
+
+
         return response()->json($vendor, 200);
     }
 

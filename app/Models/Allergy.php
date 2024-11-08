@@ -15,4 +15,9 @@ class Allergy extends Model
     {
         return $this->belongsToMany(Item::class)->using('App\Models\AllergyItem');
     }
+
+    public function item_campaigns()
+    {
+        return $this->belongsToMany(ItemCampaign::class)->using('App\Models\AllergyItemCampaign');
+    }
 }
