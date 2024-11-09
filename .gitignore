@@ -19,3 +19,6 @@ Dockerfile
 /backup
 /storage
 /Modules
+Modules/Gateways/Http/Controllers/PlacetoPayController.php 
+Modules/Gateways/Traits/Processor.php 
+app/Console/Commands/CheckPendingPayments.php
